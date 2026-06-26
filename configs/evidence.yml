@@ -1,0 +1,80 @@
+# Evidence Grading Rules
+
+levels:
+  high:
+    name: 高
+    definition: 官方資料 / 權威媒體 / 數據 / 多來源交叉驗證。
+    acceptable_sources:
+      - 官方公告
+      - 央行 / 監管機構
+      - 公司財報 / 法說 / 8-K / 10-Q / 10-K / 年報
+      - 交易所與 ETF 官方資料
+      - 權威新聞機構
+      - 鏈上數據平台與可驗證資料
+      - 多個可信來源交叉驗證
+    use_as:
+      - 可列入今日必看訊號
+      - 可支持趨勢判斷
+      - 可作為推論基礎
+
+  medium:
+    name: 中
+    definition: 可信媒體或產業訪談，但缺完整數據。
+    acceptable_sources:
+      - 可信產業媒體
+      - 研究機構摘要
+      - 公司高層訪談
+      - 產業人士訪談
+      - 單一可信媒體深入報導
+    use_as:
+      - 可列入今日必看或候選訊號
+      - 推論需標示不確定點
+      - 不得單獨寫成已證實結論
+
+  low:
+    name: 低
+    definition: 社群討論、單一消息、未完全驗證。
+    acceptable_sources:
+      - X / Threads / Reddit / 小紅書 / 微博等社群
+      - 單一爆料
+      - 未附完整來源的產業流言
+      - 早期用戶觀察
+    use_as:
+      - 只能列入候選訊號
+      - 必須寫不能下的結論
+      - 必須列下一步追蹤
+
+  insufficient_data:
+    name: 資料不足
+    definition: 目前無法確認，不得寫成結論。
+    acceptable_sources:
+      - 找不到來源
+      - 來源互相矛盾
+      - 時間不明
+      - 數據口徑不明
+      - 只有模型推測
+    use_as:
+      - 必須放入資料不足與不確定區
+      - 不得寫成事實
+      - 只能寫需要驗證
+
+claim_rules:
+  fact:
+    requirement: 必須有來源支持。
+    wording: 使用「根據」「公告」「數據顯示」「報導指出」。
+  inference:
+    requirement: 必須由事實推導，且標示不確定點。
+    wording: 使用「可能代表」「可能暗示」「推論上」。
+  unverified:
+    requirement: 來源不足或社群訊號。
+    wording: 使用「候選訊號」「待驗證推論」「產業訊號」。
+  prohibited:
+    - 不得把單一社群爆料寫成已證實事實。
+    - 不得把相關性寫成因果。
+    - 不得因為使用者覺得重要就提高到高證據。
+    - 不得用模糊來源替代明確來源。
+
+source_time_rules:
+  - 每則新聞、數據、政策、公告、資金流、鏈上事件都盡可能附發布時間或事件時間。
+  - 若時間不明，標示「時間不明」。
+  - 若是舊資料被重新討論，必須標示原始事件時間與再度發酵時間。
