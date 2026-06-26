@@ -143,16 +143,61 @@ radars:
   - id: retail_consumer_social_fashion
     name: 零售、消費、社群媒體、流行與服飾
     required: true
+    search_model: 大領域 → 子領域 → 關聯領域 → 具體案例；必須從零售整體出發，掃描線上、線下與整合層如何共同構成未來零售，不得只用百貨、服飾、品牌等單一關鍵字。
     scope:
       - offline retail
       - online retail
       - department stores
       - shopping malls
       - street retail
+      - high street retail
+      - street-level retail
+      - 路面店
+      - 街邊店
+      - 商圈店
+      - flagship stores
+      - DTC physical stores
+      - pop-up stores
+      - community stores
+      - outlet
+      - retail real estate
+      - store rent
+      - vacancy rate
+      - tenant mix
+      - mall leasing
+      - 百貨招商
+      - 城市商圈
+      - 交通建設
+      - 觀光客流
       - e-commerce
-      - OMO
+      - brand official website
+      - marketplace
       - social commerce
       - live commerce
+      - content commerce
+      - app commerce
+      - LINE / private domain
+      - Retail Media Network
+      - OMO
+      - omnichannel
+      - click and collect / BOPIS
+      - ship from store
+      - return in store
+      - online-to-offline conversion
+      - offline-to-online repurchase
+      - shared inventory
+      - OMS
+      - CDP
+      - CRM
+      - membership
+      - loyalty app
+      - LBS
+      - foot traffic analytics
+      - smart mall
+      - AI shopping assistant
+      - AI personal shopper
+      - clienteling
+      - personalization
       - Threads
       - Instagram
       - TikTok
@@ -170,17 +215,56 @@ radars:
       - trust erosion
       - authenticity signals
       - content-to-commerce funnels
-      - membership
-      - CRM
       - product planning
       - materials
       - fashion categories
       - store experience
+      - experiential retail
+      - food and beverage in malls
+      - entertainment retail
+      - IP pop-up
+      - exhibition retail
+    sub_radars:
+      online_channels:
+        - 官網 / DTC
+        - 電商平台
+        - 社群商務
+        - 直播與內容電商
+        - APP / LINE / 私域
+        - Retail Media
+      offline_channels:
+        - 百貨 / 購物中心
+        - 街邊店 / 商圈店
+        - 旗艦店 / 概念店
+        - 快閃店
+        - 社區型店
+        - Outlet
+        - 展會 / 市集
+      integration_layer:
+        - OMO / Omni-channel
+        - CDP / CRM / 會員資料整合
+        - LBS / 人流資料
+        - 庫存共享 / OMS / 門市出貨
+        - 線上下單門市取貨
+        - 線下試穿線上購買
+        - 線上內容導流線下體驗
+        - 線下體驗回流線上回購
+        - AI 導購 / Personal Shopper / Clienteling
+    required_questions:
+      - 今日線上通路發展是否改變顧客發現、比較、購買或回購路徑？
+      - 今日線下通路發展是否改變百貨、購物中心、街邊店、旗艦店、快閃店或社區店的角色？
+      - 今日是否出現線上與線下整合的新訊號，例如 OMO、CDP、LBS、庫存共享、BOPIS、門市出貨、AI 導購或會員資料整合？
+      - 不同通路是否正在分工、互補、導流、轉換或承接？
+      - 對服飾零售、品牌進櫃、街邊展店、門市營運、庫存補貨、會員經營與商業化機會有何影響？
     output_mapping:
       - 零售轉換
+      - 通路分工
+      - 線上線下整合
       - 商品企劃
       - 會員經營
       - 門市體驗
+      - 百貨 / 商場型態
+      - 街邊店 / 商圈型態
       - 社群信任
 
   - id: true_segmentation_vs_fake_segmentation
