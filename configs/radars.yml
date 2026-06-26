@@ -1,0 +1,235 @@
+# Daily Market Radar - Radar Configuration
+# 狀態值：major_signal / weak_signal / no_major_change / insufficient_data
+# 證據值：high / medium / low / insufficient_data
+
+radars:
+  - id: global_markets_geopolitics
+    name: 全球市場與國際局勢
+    required: true
+    scope:
+      - 股票
+      - 債券
+      - 利率
+      - 美元
+      - 黃金
+      - 原油
+      - 商品
+      - 地緣政治
+      - 政策
+      - 供應鏈
+    output_requirements:
+      - 變化
+      - 證據
+      - 市場反應
+      - 可能原因
+      - 台灣關聯
+      - 不確定點
+      - 下一步看什麼
+
+  - id: global_capital_flows
+    name: 全球資金流
+    required: true
+    scope:
+      - ETF
+      - 基金
+      - 外資
+      - 債券
+      - 美元流動性
+      - 避險資金
+      - 期權
+      - 波動率
+      - 商品資金
+      - 加密資金流
+      - 穩定幣
+      - 交易所流入流出
+    output_requirements:
+      - 有訊號
+      - 無重大變化
+      - 資料不足
+
+  - id: crypto_blockchain
+    name: 區塊鏈 / 加密貨幣
+    required: true
+    scope:
+      - BTC
+      - ETH
+      - SOL
+      - 總市值
+      - BTC dominance
+      - ETF / fund flows
+      - stablecoin supply
+      - exchange inflow / outflow
+      - DeFi
+      - RWA
+      - Perp DEX
+      - L1 / L2
+      - Solana ecosystem
+      - Monad
+      - Base
+      - Sui
+      - Hyperliquid
+      - AI Crypto
+      - Restaking
+      - DePIN
+      - Meme / attention market
+      - Tokenized stocks / pre-IPO
+      - OpenAI / SpaceX / Anthropic pre-IPO products
+      - Privacy coins / ZK privacy
+      - Zcash
+      - Monero
+      - Railgun
+      - Aztec
+      - Firo
+      - Security / hacks
+      - Token unlocks
+      - OI / funding / liquidation
+      - Regulation
+    output_requirements:
+      - 重大訊號
+      - 候選訊號
+      - 無重大變化
+      - 資料不足
+
+  - id: ai_models_agents_enterprise
+    name: AI 模型、Agent 與企業應用
+    required: true
+    scope:
+      - 模型
+      - Agent
+      - SaaS
+      - 企業導入
+      - 客服
+      - BI / 營運系統
+      - 自動化
+      - Cloud AI
+      - 硬體供應鏈
+      - 台灣關聯
+
+  - id: ai_workflow_replacement
+    name: AI 工作流替代
+    required: true
+    hard_check: true
+    scope:
+      - 技術突破
+      - 產業流程壓縮
+      - 平台政策
+      - 就業證據
+      - 商業閉環
+      - 法律反彈
+    escalation_rule: 若同時出現「技術突破 + 產業流程替代 + 平台政策 + 就業證據」，必須列入必看訊號或候選訊號，不得只當作模型發布新聞。
+
+  - id: tech_overheating_indicators
+    name: 科技發展過熱指標
+    required: true
+    scope:
+      - 模型能力
+      - 企業 ROI
+      - AI 收入
+      - 毛利
+      - 推理成本
+      - Cloud AI CapEx
+      - GPU / HBM / 電力
+      - NVIDIA 訂單
+      - 資料中心債務
+      - 私募估值
+      - 裁員 / 招聘
+      - 股價反應
+    output_requirements:
+      - 支持過熱的證據
+      - 反駁過熱的證據
+      - 目前判斷
+      - 下一步驗證點
+
+  - id: retail_consumer_social_fashion
+    name: 零售、消費、社群媒體、流行與服飾
+    required: true
+    scope:
+      - offline retail
+      - online retail
+      - department stores
+      - shopping malls
+      - street retail
+      - e-commerce
+      - OMO
+      - social commerce
+      - live commerce
+      - Threads
+      - Instagram
+      - TikTok
+      - YouTube Shorts
+      - 小紅書
+      - Facebook
+      - creator economy
+      - KOL / KOC
+      - UGC
+      - brand community
+      - social search
+      - platform algorithm
+      - creator monetization
+      - AI-generated content saturation
+      - trust erosion
+      - authenticity signals
+      - content-to-commerce funnels
+      - membership
+      - CRM
+      - product planning
+      - materials
+      - fashion categories
+      - store experience
+    output_mapping:
+      - 零售轉換
+      - 商品企劃
+      - 會員經營
+      - 門市體驗
+      - 社群信任
+
+  - id: true_segmentation_vs_fake_segmentation
+    name: 真分眾 vs 假分眾
+    required: true
+    scope:
+      - 客群
+      - 商品
+      - 供應鏈
+      - 社群互動
+      - UGC
+      - 門市回饋
+      - 退貨 / 評價
+      - 會員復購
+    output_requirements:
+      - 今日訊號
+      - 偏真分眾 / 偏假分眾 / 混合
+      - 可驗證方法
+
+  - id: labor_consumption_pressure
+    name: 勞動與消費結構壓力
+    required: true
+    scope:
+      - 青年就業
+      - 初階白領
+      - 外包平台收入
+      - 薪資 vs 物價
+      - 信用卡 / 分期 / 消費貸
+      - 低價零售份額
+      - 中價品牌壓力
+      - 高端消費
+      - AI 替代職能
+      - 新職位出現
+    cross_rule: 若 AI 新聞涉及工作替代，必須同時放入此區，不得只放在 AI 區。
+
+  - id: taiwan_mapping
+    name: 台灣關聯與產業映射
+    required: true
+    scope:
+      - 台灣半導體
+      - 台灣出口
+      - 台灣零售品牌
+      - 台灣內容產業
+      - 台灣企業導入 AI
+      - 台灣個人學習與工具化
+    questions:
+      - 對台灣半導體有沒有影響？
+      - 對台灣出口有沒有影響？
+      - 對台灣零售品牌有沒有影響？
+      - 對台灣內容產業有沒有影響？
+      - 對台灣企業導入 AI 有沒有影響？
+      - 對台灣個人學習與工具化有沒有影響？
