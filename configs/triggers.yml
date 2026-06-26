@@ -1,0 +1,85 @@
+# Cross-domain Triggers
+# 每日除了類別雷達之外，必須用這些觸發器重新掃描新聞與資料。
+
+triggers:
+  - id: workflow_replacement
+    name: 工作流替代
+    question: AI 或新技術是否開始取代某產業完整流程？
+    examples:
+      - 影視製作流程被 AI 影片工具壓縮
+      - 客服流程由 AI agent 接管
+      - BI / 營運報表由自然語言 agent 自動產出
+    required_checks:
+      - 技術突破
+      - 產業流程壓縮
+      - 就業證據
+      - 成本壓縮
+      - 平台政策
+      - 法律反彈
+
+  - id: platform_policy_change
+    name: 平台政策變化
+    question: 補貼、分潤、流量、API、審核、佣金是否改變？
+    examples:
+      - Creator monetization policy
+      - E-commerce commission change
+      - API pricing / access change
+      - App store / short video platform review policy
+
+  - id: employment_skill_change
+    name: 就業 / 職能變化
+    question: 是否有裁員、招聘下降、新職位、薪資變化、工作量下降？
+    examples:
+      - 初階白領職缺下降
+      - 影片後製、設計、客服、內容職能需求下降
+      - AI operator / agent manager 等新職位出現
+
+  - id: cost_structure_change
+    name: 成本結構變化
+    question: 是否有原本高成本流程被壓縮 50% 以上？
+    examples:
+      - 廣告素材製作成本下降
+      - 短劇 / 影視製作成本下降
+      - 軟體開發 MVP 成本下降
+      - 客服與營運流程成本下降
+
+  - id: commercial_loop_formation
+    name: 商業閉環形成
+    question: 是否形成工具 + 平台 + 分發 + 收費 / 廣告 / 金流的閉環？
+    examples:
+      - AI 工具產生內容，平台分發，廣告或交易變現
+      - Agent 代操搜尋、推薦、下單、付款
+      - Tokenized assets + exchange + liquidity + secondary trading
+
+  - id: supply_chain_bottleneck
+    name: 供應鏈瓶頸
+    question: 算力、晶片、能源、物流、材料是否變成限制？
+    examples:
+      - GPU / HBM 短缺
+      - 資料中心電力限制
+      - 海運與物流延誤
+      - 特定材料價格異常
+
+  - id: consumer_behavior_shift
+    name: 消費行為轉移
+    question: 搜尋、購買、內容、社群互動是否轉移？
+    examples:
+      - social search 取代傳統搜尋
+      - live commerce 流量轉移
+      - 消費者轉向低價平台
+      - AI 內容造成信任折損
+
+  - id: regulation_legal_backlash
+    name: 監管 / 法律反彈
+    question: 版權、隱私、金融、勞動、平台治理是否出現反制？
+    examples:
+      - AI 版權訴訟
+      - 金融監管收緊
+      - 平台演算法透明度要求
+      - 勞動替代引發政策反彈
+
+escalation_rules:
+  - 若同一事件命中 3 個以上觸發器，至少列為「候選訊號」。
+  - 若同一事件命中 4 個以上觸發器，且證據強度中以上，必須列入「今日必看訊號」。
+  - 若事件同時涉及 AI 工作流替代、平台政策、就業證據，必須進入硬檢查。
+  - 若事件涉及台灣半導體、出口、零售、內容產業或企業導入 AI，必須同步進入台灣映射。
