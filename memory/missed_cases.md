@@ -4,6 +4,69 @@
 
 ---
 
+## 0. 每日播報記憶瘦身規則
+
+### 單一規格來源
+
+每日市場播報的完整規格，以 GitHub repo 為準：
+
+```text
+repo: o00362002/daily-market-radar
+```
+
+每日執行前必讀：
+
+```text
+SYSTEM_PROMPT.md
+configs/
+memory/
+templates/
+reports/
+```
+
+### 對話記憶只保留入口，不承載細節
+
+未來不應再依賴對話記憶保存每日播報的完整雷達、搜尋清單、輸出格式與漏抓案例。
+
+對話記憶只需保留：
+
+```text
+每日市場播報規格在 GitHub repo：o00362002/daily-market-radar。
+執行前要讀：SYSTEM_PROMPT.md、configs/、memory/、templates/、reports/。
+```
+
+其餘細節以 repo 文件為準。
+
+### 舊記憶處理原則
+
+若對話記憶、舊規則、舊 prompt 與本 repo 內容衝突：
+
+1. 優先使用 repo 內容。
+2. 不要憑記憶補齊已移到 repo 的細節。
+3. 若 repo 無相關規則，才使用對話上下文或詢問使用者。
+4. 若使用者提出新漏抓事件，優先更新本檔，而不是只記在聊天中。
+
+### 更新入口
+
+之後若使用者說：
+
+```text
+幫我更新每日播報規格
+```
+
+應先判斷要更新哪個檔案：
+
+- 雷達範圍：`configs/radars.yml`
+- 跨領域觸發器：`configs/triggers.yml`
+- 證據分級：`configs/evidence.yml`
+- 多語言搜尋策略：`configs/source_strategy.md`
+- 漏抓案例：`memory/missed_cases.md`
+- 長期追蹤：`memory/watchlist.md`
+- 報告格式：`templates/daily_report_template.md`
+- 執行流程：`workflows/execution_checklist.md`
+
+---
+
 ## 硬檢查案例 001：Seedance 2.0 / AI 影片工具 / 中國短劇與影視產業替代
 
 - 狀態：硬檢查中
@@ -60,4 +123,4 @@
 我想追蹤：___。
 ```
 
-收到新回饋後，必須把它整理成新的硬檢查案例。
+收到新回饋後，必須把它整理成新的硬檢查案例，並優先更新本檔，而不是只存在對話記憶。
