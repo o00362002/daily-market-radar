@@ -110,6 +110,103 @@ reports/
 
 ---
 
+## 硬檢查案例 002：2026-06-25 每日播報內容偏少與雷達展開不足
+
+- 狀態：硬檢查中
+- 使用者指出時間：2026-06-25
+- 漏抓事件：2026/06/25 原始播報看起來內容偏少，後續確認不是「今天沒內容」，而是 AI Commerce、加密潛力生態、社群需求上游、RWA 即時數據、台灣本地商圈等雷達沒有完整展開。
+- 使用者認為重要原因：每日市場情報不是新聞摘要，而是領域雷達系統。若只抓到幾則顯眼新聞，會錯過早期弱訊號、平台入口變化與結構轉移。
+- 應屬雷達：
+  - AI 模型、Agent 與企業應用
+  - AI 工作流替代
+  - 零售、消費、社群媒體、流行與服飾
+  - 區塊鏈 / 加密貨幣
+  - 全球資金流
+  - 台灣關聯與產業映射
+- 可能漏抓原因：
+  - 直接進入報告生成，未先跑覆蓋矩陣。
+  - 只用固定主流來源，未做新來源探索與升降權。
+  - 加密只寫 BTC / ETH / SOL、RWA、隱私幣，未掃描完整潛力生態。
+  - 零售社群只當附屬段落，未升級為需求上游雷達。
+  - AI Commerce 只寫成 AI referral 小訊號，未串成「AI 對話入口 + 商品資料 + marketplace 控制權 + conversion API」。
+- 每日硬搜尋關鍵字：
+  - ChatGPT ads Amazon product feed conversion API
+  - AI referral retail conversion Adobe
+  - AI commerce product feed agentic checkout
+  - RWA.xyz tokenized stocks stablecoin holders turnover
+  - Perp DEX volume RWA perps tokenized equities
+  - prediction markets Kalshi Polymarket volume
+  - social media drives store visits retail Gen Z
+  - AI generated influencer disclosure retail ads EU AI Act
+  - 台灣 百貨 商圈 展店 撤櫃 來客
+  - Threads Instagram TikTok 小紅書 社群 導購 門市
+- 必須檢查：
+  - 是否先輸出今日覆蓋矩陣？
+  - 是否標示「已掃描」「未完整」「已查無重大更新」「有內容但展開不足」？
+  - AI Commerce 是否包含 Ads / Product Feed / Conversion API / AI referral / Marketplace 控制權？
+  - 加密是否固定輸出 12 類潛力生態熱力圖？
+  - 零售段是否從「消費 → 通路 → 商圈 → 品牌 → 商品 → 門市 → 社群 → 會員」大到小拆解？
+  - 每個主領域是否分國際與台灣？
+  - 後段是否集中整理生產力便車、AI 泡沫、AI Commerce、加密潛力、社群需求上游、來源探索、Loops 修正等雷達總表？
+- 證據標準：
+  - 單一社群討論：低證據，列候選訊號。
+  - 官方公告 / 原始數據 / 權威媒體：高證據。
+  - 產業媒體或研究機構資料：中證據，需標示不確定點。
+- 下次驗證指標：
+  - AI referral conversion / revenue per visit
+  - ChatGPT Ads / Google AI Mode / Agentic checkout 更新
+  - RWA AUM / holders / turnover / secondary liquidity
+  - Stablecoin supply / payment volume
+  - Perp DEX volume / OI / fees
+  - 社群到店提及、UGC 真實性、AI 內容揭露規則
+  - 台灣百貨 / 商圈 / 街邊店 / 展撤櫃訊號
+
+---
+
+## 硬檢查案例 003：AI Product Quality / ChatGPT 回覆重複使用者問題
+
+- 狀態：候選硬檢查中
+- 使用者指出時間：2026-06-25
+- 漏抓事件：使用者在多個對話窗、智慧高 / Thinking 模式下遇到 ChatGPT 重複使用者問題而沒有回答；切換即時 / Instant 後較正常，但異常不是每句都發生。
+- 使用者認為重要原因：AI 產品品質與 regression 會直接影響 AI 工具可用性、企業導入信任、工作流可靠性，應作為 AI 生態雷達的一部分，而不是只看功能發布。
+- 應屬雷達：
+  - AI 模型、Agent 與企業應用
+  - AI 工作流替代
+  - 科技發展過熱指標
+  - 台灣企業導入 AI
+  - 個人工具化學習
+- 可能漏抓原因：
+  - 只追官方功能發布，不追產品品質、社群 bug 回報與 rollout regression。
+  - 沒有區分 Thinking / Instant、App / Web、長對話 / 新對話、工具開啟 / 工具關閉的差異。
+  - 官方 Status 未公告時，未把社群大量回報列為候選訊號。
+- 每日硬搜尋關鍵字：
+  - ChatGPT repeats user message instead of answering
+  - ChatGPT repeating prompt bug Thinking model
+  - GPT-5.5 Thinking regression repeated response
+  - ChatGPT app regression duplicate responses
+  - OpenAI Community repeating itself bug
+  - Reddit ChatGPT repeats my question
+  - ChatGPT status regression response assembly streaming bug
+- 必須檢查：
+  - 官方 Status 是否有事件？
+  - OpenAI Release Notes 是否有模型 / App rollout？
+  - OpenAI Community 是否出現同類 bug 回報？
+  - Reddit / X / Hacker News 是否有使用者集中回報？
+  - 是否特別集中在 Thinking 模式、特定 App、特定模型或長上下文？
+  - 是否影響工具呼叫、搜尋、MCP、記憶、回覆組裝？
+- 證據標準：
+  - 官方 Status / Release Notes：高證據。
+  - OpenAI Community 多案例 + 官方人員回覆：中到高證據。
+  - Reddit / X 零星案例：低證據，只能列候選。
+- 下次驗證指標：
+  - 同類回報數量
+  - 模型 / App 版本
+  - 是否跨帳號、跨裝置、跨對話
+  - 是否可重現
+  - 官方是否公告或修復
+
+---
+
 ## 使用者回饋新增格式
 
 ```text
