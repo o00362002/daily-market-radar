@@ -207,6 +207,61 @@ reports/
 
 ---
 
+## 硬檢查案例 004：零售全域搜尋模型 / 線上線下整合 / 百貨街邊電商共同構成零售
+
+- 狀態：硬檢查中
+- 使用者指出時間：2026-06-26
+- 漏抓事件：每日市場情報的零售段落若只新增「百貨／購物中心」或「街邊門市」子段落，仍可能漏掉真正的零售結構變化；使用者希望修正的是搜尋模型本身，從零售整體出發，追蹤線上、線下與兩者整合如何共同構成未來零售。
+- 使用者認為重要原因：零售是大領域，百貨、街邊店、電商、社群、會員、LBS、OMO、Retail Media、CDP/CRM、AI 導購、庫存共享、商圈與城市場域彼此高度相關。若只用單一關鍵字或單點段落，會漏掉通路型態、商業模式、資料整合與消費旅程的早期變化。
+- 應屬雷達：
+  - 零售、消費、社群媒體、流行與服飾
+  - 真分眾 vs 假分眾
+  - AI 模型、Agent 與企業應用（AI 導購、Personal Shopper、智慧商場）
+  - 勞動與消費結構壓力（門市職能、店員服務、實體通路壓力）
+  - 台灣關聯與產業映射（台灣百貨、街邊店、商圈、服飾品牌）
+- 可能漏抓原因：
+  - 只搜尋「零售新聞」「百貨新聞」「服飾品牌」，未用大領域 → 子領域 → 關聯領域 → 具體案例的雷達搜尋。
+  - 百貨、街邊店、電商、社群、會員與庫存被分開看，沒有判斷通路分工與整合。
+  - 只看品牌新聞，未掃商業地產、租金空置率、Retail Media、LBS、智慧商場、百貨 APP、CDP、OMO、商圈人流與城市更新。
+  - 只看線下或線上單點，未追蹤線上內容導流線下體驗、線下體驗回流線上回購、BOPIS、門市出貨、退換貨整合與庫存共享。
+- 每日硬搜尋關鍵字：
+  - retail transformation omnichannel online offline integration
+  - future of retail online offline integration
+  - omnichannel retail CDP CRM LBS AI shopping assistant
+  - department store future smart mall retail media loyalty app
+  - shopping mall innovation foot traffic analytics tenant mix
+  - high street retail street-level retail flagship store DTC physical store
+  - retail real estate vacancy rent foot traffic shopping street
+  - social commerce drives store visits retail
+  - BOPIS ship from store return in store apparel retail
+  - 台灣 百貨 數位轉型 OMO 會員 APP CDP
+  - 台灣 購物中心 智慧商場 人流 LBS
+  - 台灣 街邊店 商圈 店租 空置率 展店 撤店
+  - 台灣 Retail Media 百貨 會員資料 廣告
+  - 台灣 服飾品牌 線上線下整合 門市 官網 LINE
+- 必須檢查：
+  - 是否先從「零售整體」掃描，而不是只搜百貨、服飾或品牌？
+  - 今日線上通路是否有變化：官網、電商平台、社群商務、直播、內容電商、APP、LINE、Retail Media？
+  - 今日線下通路是否有變化：百貨、購物中心、街邊店、旗艦店、快閃店、社區店、Outlet、展會 / 市集？
+  - 今日整合層是否有變化：OMO、Omni-channel、CDP/CRM、會員資料、LBS、BOPIS、門市出貨、退換貨整合、庫存共享、AI 導購、Personal Shopper？
+  - 是否判斷不同通路如何分工、互補、導流、轉換與承接？
+  - 是否比較對服飾零售、品牌進櫃、街邊展店、門市營運、庫存補貨、會員經營與商業化機會的影響？
+  - 若無重大訊號，是否標示已掃描但無重大變化，而不是省略？
+- 證據標準：
+  - 官方公告、財報、百貨 / 商場公開資料、租賃數據、APP / CDP / OMO 導入案例：高證據。
+  - 產業媒體、研究機構、商業地產報告、百貨主管訪談：中證據。
+  - 社群討論、單一品牌觀察、未驗證商圈傳聞：低證據，列候選訊號。
+- 下次驗證指標：
+  - 百貨 / 商場營收、人流、餐飲占比、租戶組合、空置率、租金
+  - 百貨 APP / 會員數 / 活躍率 / 票券使用 / 推播轉換
+  - Retail Media 版位、品牌投放、廣告收入、第一方資料應用
+  - LBS / 人流分析是否串到活動歸因、樓層轉換、招商或會員分眾
+  - 街邊店展店 / 撤店 / 旗艦店 / 快閃店 / 社區型店訊號
+  - 線上內容、社群、直播是否導流到實體門市或百貨場域
+  - 門市是否成為體驗點、履約點、會員服務點或回購節點
+
+---
+
 ## 使用者回饋新增格式
 
 ```text
