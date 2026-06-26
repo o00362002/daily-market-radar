@@ -46,6 +46,7 @@
 |---|---|---|
 | 2026-06-07 | `reports/2026/2026-06-07.md` | 含原始推播、V2.1 重做版、AI Agent／生產力便車／潛力鏈生態修正、零售品牌／商圈／百貨補洞 |
 | 2026-06-08 | `reports/2026/2026-06-08.md` | 含當日推播、Strategy／STRC 漏抓反思、結構性漏抓檢查、最終推播規則整合 |
+| 2026-06-26 | `reports/2026/2026-06-26.md` | 含 Seedance 2.0／AI 影片短劇產業替代漏抓回測，以及零售全域搜尋模型更新：線上 × 線下 × 整合層、百貨／購物中心、街邊店、OMO、CDP、LBS、Retail Media、AI 導購 |
 
 ## 建議檔案命名
 
@@ -63,8 +64,4 @@ reports/2026/2026-06-26.md
 
 ## 使用方式
 
-每日產出前，對 AI 說：
-
-```text
-請先讀取 GitHub repo `o00362002/daily-market-radar` 的 SYSTEM_PROMPT、configs、memory、templates 與近期 reports，再依照規格搜尋最新資訊，產出今日每日市場情報報告。
-```
+產出每日報告前，需先讀取本 repo 的核心規格、configs、memory、templates 與近期 reports。
