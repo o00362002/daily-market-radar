@@ -115,3 +115,72 @@
 - 內容只是看起來分眾，還是真的能回到商品、社群互動、復購與門市回饋？
 - 平台演算法是否改變內容分發與商業轉換？
 - AI 內容是否造成信任折損？
+
+---
+
+## 6. AI Commerce / MCP / Agentic Decision Interface
+
+每日固定掃描：
+
+- ChatGPT Ads
+- OpenAI product feeds / conversion API / advertiser API
+- Google AI Mode / Shopping Graph / agentic checkout
+- Amazon / marketplace AI Ads 與商品資料牆
+- AI referral traffic / conversion / revenue per visit
+- MCP / Connector / Commerce API / Product Feed
+- AI-readable product page
+- AI-actionable inventory / price / checkout / return flow
+- AI-measurable attribution / assisted conversion
+
+判斷重點：
+
+- AI 是否從搜尋替代，進一步變成目的型決策入口？
+- 平台是否掌握對話脈絡、商品資料、轉換歸因與結帳流程？
+- 商家是否需要從 SEO 升級為 AI-readable / Agent-ready？
+- 社群、網站、marketplace 與 AI 是否形成新消費路徑：社群種草 → AI 決策 → 平台/品牌交易 → UGC 回流？
+- 台灣品牌是否有商品資料結構化、庫存資料、門市現貨與會員資料可被 AI 安全使用？
+
+---
+
+## 7. AI Product Quality / Regression Radar
+
+每日固定掃描：
+
+- OpenAI Status
+- OpenAI Release Notes
+- OpenAI Community bug reports
+- ChatGPT App 官方 X / 社群公告
+- Reddit / X / Hacker News 使用者回報
+- Thinking vs Instant 模式品質差異
+- Tool use / MCP / Memory / Search / Streaming / Response assembly 問題
+- Claude / Gemini / Perplexity 等競品是否有類似 regression
+
+判斷重點：
+
+- 是否只是單一使用者偶發，還是跨帳號、跨裝置、跨模型的產品品質回歸？
+- 是否與模型 rollout、App 更新、routing、工具層或 response assembly 有關？
+- 是否影響企業導入 AI 的可靠性、營運工作流與使用者信任？
+- 官方是否承認、修復或發布 workaround？
+
+---
+
+## 8. 每日播報架構與品質控管
+
+每日固定檢查：
+
+- 報告最上方是否有日期、追蹤週期、序號與系統資料讀取狀態？
+- 是否先輸出今日雷達覆蓋矩陣？
+- 每個主領域是否拆成國際發展與台灣關聯？
+- 每個領域是否從大範圍到小範圍、上層到下層拆解？
+- 零售段是否依序拆：消費結構 → 通路結構 → 商圈變化 → 品牌策略 → 商品品類 → 門市體驗 → 社群內容 → 會員回購？
+- 加密段是否固定加入 12 類潛力生態熱力圖？
+- AI 段是否包含 Infrastructure、Commerce、Learning / Self-improvement、Professional Workflow、Agents / Loops、Labor Impact、Governance、Content Trust？
+- 後段是否集中輸出雷達總表，而不是把雷達碎片散落各段？
+- 是否明確區分：已查無重大更新、未完整、有內容但展開不足、資料不足？
+- 是否更新來源升權 / 降權 / 新來源候選？
+
+判斷重點：
+
+- 今日內容少，是因為真的無重大訊號，還是搜尋與展開不足？
+- 使用者上次指出的漏抓是否已被硬檢查抓到？
+- 報告是否仍退回新聞摘要器，而不是雷達覆蓋與證據分級系統？
