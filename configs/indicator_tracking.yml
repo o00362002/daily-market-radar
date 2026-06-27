@@ -1,0 +1,139 @@
+# Mandatory Daily Indicator Tracking
+# 本檔定義每日市場情報必須固定輸出的指標追蹤表。
+# 目的：避免報告只寫新聞與事件，卻漏掉跨日可回測的量化/半量化指標。
+
+indicator_tracking:
+  required: true
+  output_position: "放在今日雷達覆蓋表之後、今日必看訊號之前；若篇幅不足，至少輸出濃縮版並標示未完整。"
+  rule: "每一大桶至少列出指標、目前狀態、方向、異常訊號、資料來源/時間、下一步驗證；即使查無資料也要標示資料缺口，不得省略。"
+
+  crypto_blockchain:
+    name: 區塊鏈 / 加密貨幣固定指標
+    required_indicators:
+      - BTC price / BTC dominance
+      - ETH price / ETH ETF flows
+      - SOL price / Solana ecosystem activity
+      - Total crypto market cap
+      - Stablecoin supply
+      - Stablecoin exchange inflow / outflow
+      - DeFi TVL
+      - Protocol Fees / Revenue
+      - DEX Volume
+      - Perp DEX Volume
+      - Open Interest / Funding Rate / Liquidations
+      - RWA AUM / holders / turnover / secondary liquidity
+      - Tokenized stocks / pre-IPO product volume
+      - AI agents x crypto / x402 / agent payments
+      - Privacy coins / ZK privacy price-volume-news
+      - Token unlocks
+      - Security / hacks / exploits
+      - L1 / L2 ecosystem heatmap: Solana, Monad, Base, Sui, Hyperliquid, TON, Aptos, Sei, Berachain, Near, Injective, Avalanche, BNB Chain
+    output_fields:
+      - 指標
+      - 目前狀態
+      - 24h/7d 方向
+      - 是否異常
+      - 解讀
+      - 來源與時間
+      - 下次觀察門檻
+
+  ai_product_and_infrastructure:
+    name: AI 模型 / Agent / 產品用量經濟 / 基建固定指標
+    required_indicators:
+      - OpenAI / Anthropic / Google / Meta major release notes
+      - AI agent enterprise adoption
+      - Codex / Claude Code / Cursor / Copilot usage limits
+      - Token / credit / quota / pricing / overage / promo / gift / transfer signals
+      - AI product quality / status / regression reports
+      - Cloud AI CapEx
+      - GPU / HBM / power / data center bottlenecks
+      - Inference cost / model gross margin
+      - Enterprise AI ROI / budget cuts / expansion
+      - AI coding agent usage / developer migration
+      - Security / governance / MCP / connector risk
+      - AI workflow replacement: customer service, BI, operations, content, software development
+    output_fields:
+      - 指標
+      - 今日狀態
+      - 證據等級
+      - 官方確認狀態
+      - 可能影響
+      - 來源與時間
+      - 下一步驗證
+
+  retail_consumer_social:
+    name: 零售 / 消費 / 社群 / 服飾固定指標
+    required_indicators:
+      - Department store / mall sales / foot traffic / tenant mix
+      - Street retail / high street / vacancy / rent
+      - Online retail / marketplace / DTC / app commerce
+      - OMO / CDP / CRM / loyalty / LINE private domain
+      - Retail Media Network / ad products / first-party data
+      - AI shopping assistant / AI-readable product data / agentic checkout
+      - Social commerce / live commerce / content commerce
+      - Threads / Instagram / TikTok / YouTube Shorts / Xiaohongshu platform changes
+      - Creator monetization / KOL / KOC / UGC / brand community
+      - Fashion inventory / discount / mid-price pressure / low-price rotation
+      - Taiwan department stores / malls / street retail / brand openings and closures
+    output_fields:
+      - 指標
+      - 今日狀態
+      - 國際訊號
+      - 台灣訊號
+      - 零售影響
+      - 來源與時間
+      - 下一步觀察
+
+  labor_consumption_pressure:
+    name: 勞動與消費壓力固定指標
+    required_indicators:
+      - Youth unemployment
+      - Entry-level white-collar jobs
+      - AI replacement / hiring decline / new AI roles
+      - Wage vs inflation
+      - Consumer confidence
+      - Credit card revolving / installment / delinquency
+      - BNPL / consumer credit stress
+      - Low-price retail share
+      - Mid-price brand pressure
+      - Outsourcing / freelance task pricing
+      - Taiwan labor / consumption pressure signals
+    output_fields:
+      - 指標
+      - 目前狀態
+      - 方向
+      - 異常訊號
+      - 台灣對應
+      - 來源與時間
+      - 下一步觀察
+
+  global_markets_capital_flows:
+    name: 全球市場與資金流固定指標
+    required_indicators:
+      - S&P 500 / Nasdaq / SOX / major Asia indices
+      - US 10Y / 2Y yields
+      - DXY / major FX / TWD
+      - Gold / oil / copper
+      - VIX / volatility / options positioning
+      - ETF / fund flows
+      - Foreign investor flows in Taiwan / Asia
+      - Fed / ECB / BOJ / PBOC policy signals
+      - Geopolitics / supply chain risk
+      - Semiconductor / AI supply chain market reaction
+    output_fields:
+      - 指標
+      - 目前狀態
+      - 方向
+      - 市場反應
+      - 台灣關聯
+      - 來源與時間
+      - 下一步觀察
+
+quality_gate:
+  before_final_answer:
+    - 是否輸出固定指標追蹤總表？
+    - 是否每一桶至少有「狀態 / 方向 / 異常 / 來源 / 下一步」？
+    - 是否把資料缺口標出，而不是省略？
+    - 是否區分「查無重大更新」與「未完整查證」？
+    - 是否將社群討論放入候選訊號並附原始連結與未證實標記？
+    - 是否把上次漏抓事件回測到固定指標中？
