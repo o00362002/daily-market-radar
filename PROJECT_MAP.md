@@ -102,7 +102,27 @@
 
 ---
 
-## 5. 回答品質檢查 Loop
+## 5. 規則更新同步檢查
+
+任何規則更新都不能只改單一檔案。更新前後必須檢查下列同步關係：
+
+| 更新類型 | 必須同步檢查 |
+|---|---|
+| 新增或刪除雷達分類 | `SYSTEM_PROMPT.md`、`configs/radars.yml`、`templates/daily_report_template.md`、`README.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+| 新增跨領域觸發器 | `SYSTEM_PROMPT.md`、`configs/triggers.yml`、`templates/daily_report_template.md`、`CURRENT_DECISIONS.md` |
+| 修改證據分級 | `SYSTEM_PROMPT.md`、`configs/evidence.yml`、`templates/`、`CURRENT_DECISIONS.md` |
+| 新增固定指標 | `SYSTEM_PROMPT.md`、`configs/indicator_tracking.yml`、`templates/daily_report_template.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+| 新增科技發展追蹤規則 | `SYSTEM_PROMPT.md`、`configs/technology_development.yml`、`templates/final_synthesis_template.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+| 使用者指出漏抓 | `memory/missed_cases.md`、`memory/watchlist.md`、必要時更新 `configs/`、`templates/`、`CURRENT_DECISIONS.md` |
+| 報告格式調整 | `templates/`、`SYSTEM_PROMPT.md`、`README.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+| 歷史報告新增 | `reports/YYYY/YYYY-MM-DD.md`、`reports/INDEX.md`、必要時更新 `CURRENT_STATE.md` |
+| 舊規格停用 | `archive/` 或原檔標註、`CURRENT_DECISIONS.md`、必要時更新 `CURRENT_STATE.md` |
+
+若同步檢查後決定不修改某個相關檔案，必須在 `CURRENT_DECISIONS.md` 記錄「不修改原因」。
+
+---
+
+## 6. 回答品質檢查 Loop
 
 每次產出每日播報或回覆專案問題後，需做以下檢查：
 
@@ -116,20 +136,23 @@
 8. 是否有來源、時間、證據分級與不確定性標示？
 9. 是否有跨日去重與漏抓回測？
 10. 是否有下一次如何降低資料缺口的調整建議？
+11. 若有規則更新，是否完成同步修改檢查？
 
 ---
 
-## 6. 版本優先順序
+## 7. 版本優先順序
 
 回答時優先順序如下：
 
-1. `CURRENT_DECISIONS.md` 的最新決策
-2. `CURRENT_STATE.md` 的目前狀態
-3. `SYSTEM_PROMPT.md` 的核心規格
-4. `configs/` 的結構化設定
-5. `memory/` 的漏抓與觀察清單
-6. `templates/` 的輸出格式
-7. `reports/` 的歷史案例
-8. `archive/` 的歷史參考
+1. 使用者在當前對話的明確指示
+2. `SYSTEM_PROMPT.md` 的核心規格
+3. `CURRENT_DECISIONS.md` 的最新決策
+4. `CURRENT_STATE.md` 的目前狀態
+5. `configs/` 的結構化設定
+6. `memory/` 的漏抓與觀察清單
+7. `templates/` 的輸出格式
+8. `reports/` 的歷史案例
+9. `archive/` 的歷史參考
+10. 舊對話記憶
 
-若不同檔案衝突，應先標示衝突，再以較新的 `CURRENT_DECISIONS.md` 與 `CURRENT_STATE.md` 為準。
+若不同檔案衝突，應先標示衝突，再以較高優先級來源為準。若 repo 與舊記憶衝突，以 repo 為準。
