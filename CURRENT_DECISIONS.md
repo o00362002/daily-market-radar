@@ -106,16 +106,19 @@ AI 段落必須檢查實際應用，包括：
 
 | 更新類型 | 至少同步檢查 |
 |---|---|
-| 核心任務 / 核心原則變更 | `SYSTEM_PROMPT.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
-| 新增雷達桶 | `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`configs/radars.yml`、`templates/` |
-| 新增跨領域觸發器 | `SYSTEM_PROMPT.md`、`configs/triggers.yml`、`CURRENT_DECISIONS.md` |
-| 新增固定指標 | `configs/indicator_tracking.yml`、`templates/daily_report_template.md`、`CURRENT_STATE.md` |
-| 新增科技發展路徑 | `configs/technology_development.yml`、`PROJECT_MAP.md`、`templates/final_synthesis_template.md` |
-| 新增漏抓案例 | `memory/missed_cases.md`、`CURRENT_DECISIONS.md`，必要時同步 `configs/` 與 `templates/` |
-| 新增 watchlist | `memory/watchlist.md`、必要時同步 `configs/` |
-| 報告格式變更 | `templates/`、`SYSTEM_PROMPT.md`、`CURRENT_DECISIONS.md` |
-| 新增每日報告 | `reports/YYYY/YYYY-MM-DD.md`、`reports/INDEX.md` |
-| 舊規格停用 | `CURRENT_DECISIONS.md`、必要時移入或標註 `archive/` |
+| 核心任務 / 核心原則變更 | `SYSTEM_PROMPT.md`、`README.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+| 新增雷達桶 | `SYSTEM_PROMPT.md`、`README.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`configs/radars.yml`、`templates/daily_report_template.md`、本檔 |
+| 新增跨領域觸發器 | `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`configs/triggers.yml`、`templates/daily_report_template.md`、本檔 |
+| 新增固定指標 | `SYSTEM_PROMPT.md`、`CURRENT_STATE.md`、`configs/indicator_tracking.yml`、`templates/daily_report_template.md`、本檔 |
+| 新增科技發展路徑 | `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`configs/technology_development.yml`、`templates/final_synthesis_template.md`、本檔 |
+| 新增漏抓案例 | `memory/missed_cases.md`、`memory/watchlist.md`、必要時同步 `configs/`、`templates/`、本檔 |
+| 新增 watchlist | `memory/watchlist.md`、必要時同步 `configs/`、本檔 |
+| 報告格式變更 | `templates/`、`SYSTEM_PROMPT.md`、`README.md`、`CURRENT_STATE.md`、本檔 |
+| 新增每日報告 | `reports/YYYY/YYYY-MM-DD.md`、`reports/INDEX.md`、必要時更新 `CURRENT_STATE.md` |
+| 舊規格停用 | `CURRENT_DECISIONS.md`、必要時移入或標註 `archive/`、必要時更新 `CURRENT_STATE.md` |
+| 入口層或讀取順序變更 | `README.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md` |
+
+若同步檢查後決定不修改某個相關檔案，必須在本檔的「本次架構調整紀錄」或新增決策紀錄中寫明原因。
 
 ---
 
@@ -133,6 +136,7 @@ AI 段落必須檢查實際應用，包括：
 8. 沒有來源、時間、證據等級就下結論。
 9. 沒有跨日去重就重複播報同一事件。
 10. 使用者指出漏抓後，沒有進入 `memory/missed_cases.md` 或硬檢查清單。
+11. 規則更新時只改單一檔案，沒有同步檢查入口檔、設定檔、模板與記憶檔。
 
 ---
 
@@ -142,21 +146,45 @@ AI 段落必須檢查實際應用，包括：
 
 1. 這是報告產出、規格調整、漏抓檢討、模板調整，還是系統架構調整？
 2. 是否需要讀 `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md`？
-3. 是否涉及 `configs/`、`memory/`、`templates/`、`reports/` 的同步修改？
+3. 是否涉及 `configs/`、`memory/`、`templates/`、`reports/`、`README.md` 的同步修改？
 4. 是否可能與舊記憶或舊報告衝突？
 5. 是否需要標示無法完整讀取或資料不足？
 6. 是否有只做單點回答，而沒有回到整體雷達架構？
+7. 若這次有改規則，是否已記錄同步修改或不修改原因？
 
 ---
 
 ## 6. 本次架構調整紀錄
 
-2026-06-27：新增入口層檔案，目標是讓 GitHub 不只是文件倉庫，而是每日播報系統的可讀取專案大腦。
+### 2026-06-27｜入口層補強與同步規則明確化
 
-新增：
+已確認並整理：
 
 - `PROJECT_MAP.md`
 - `CURRENT_STATE.md`
 - `CURRENT_DECISIONS.md`
 
-本次調整不改原本內容，不重寫既有規格，只新增導航、目前狀態、近期決策與規則同步檢查機制。
+本次調整目的：讓 GitHub 不只是文件倉庫，而是每日播報系統的可讀取專案大腦。
+
+本次實際修改：
+
+- 更新 `PROJECT_MAP.md`：加入規則更新同步檢查、版本優先順序、規格更新時的檔案連動。
+- 更新 `CURRENT_DECISIONS.md`：補強同步修改矩陣，明確加入 `README.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md` 與本檔的連動。
+
+本次未修改：
+
+- `SYSTEM_PROMPT.md`：原因是本次未改每日播報核心任務、雷達內容或輸出格式。
+- `configs/`：原因是本次未新增或刪除雷達、觸發器、證據分級、固定指標或科技發展路徑。
+- `memory/`：原因是本次不是新增漏抓案例或 watchlist。
+- `templates/`：原因是本次未改報告正文格式或最終彙總格式。
+- `README.md`：原因是 README 已包含核心定位與每日執行順序，本次只補強入口層內部同步規則。
+
+---
+
+## 7. 下次規格更新最小流程
+
+1. 先判斷更新類型。
+2. 依本檔第 3 節找出最低同步檢查檔案。
+3. 逐一判斷是否需要修改。
+4. 修改後在本檔新增決策紀錄。
+5. 若某個應檢查檔案不修改，記錄不修改原因。
