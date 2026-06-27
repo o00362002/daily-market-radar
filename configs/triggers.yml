@@ -25,6 +25,8 @@ triggers:
       - E-commerce commission change
       - API pricing / access change
       - App store / short video platform review policy
+      - AI product usage limit / quota / rate limit change
+      - Token / credit / promo code / gift code / transfer rule change
 
   - id: employment_skill_change
     name: 就業 / 職能變化
@@ -42,6 +44,7 @@ triggers:
       - 短劇 / 影視製作成本下降
       - 軟體開發 MVP 成本下降
       - 客服與營運流程成本下降
+      - Coding agent token cost / overage cost / free credit subsidy changes development economics
 
   - id: commercial_loop_formation
     name: 商業閉環形成
@@ -50,6 +53,7 @@ triggers:
       - AI 工具產生內容，平台分發，廣告或交易變現
       - Agent 代操搜尋、推薦、下單、付款
       - Tokenized assets + exchange + liquidity + secondary trading
+      - AI coding product uses token / credit economy to drive user acquisition, retention, gifting, promotion, or enterprise adoption
 
   - id: supply_chain_bottleneck
     name: 供應鏈瓶頸
@@ -59,6 +63,7 @@ triggers:
       - 資料中心電力限制
       - 海運與物流延誤
       - 特定材料價格異常
+      - AI agent usage cap caused by inference cost, GPU capacity, or token burn rate
 
   - id: consumer_behavior_shift
     name: 消費行為轉移
@@ -68,6 +73,7 @@ triggers:
       - live commerce 流量轉移
       - 消費者轉向低價平台
       - AI 內容造成信任折損
+      - Developers or creators change tool choice because token / credit / quota economics change
 
   - id: regulation_legal_backlash
     name: 監管 / 法律反彈
@@ -77,9 +83,27 @@ triggers:
       - 金融監管收緊
       - 平台演算法透明度要求
       - 勞動替代引發政策反彈
+      - AI product token / account / credit abuse, stolen token, fraud, or transferable-credit risk
+
+  - id: ai_product_economics
+    name: AI 產品用量經濟
+    question: AI 產品是否出現 token、credit、quota、usage limit、pricing、promo code、gift / transfer、free trial、enterprise subsidy 或 overage cost 變化？
+    examples:
+      - Codex token / credit promo code
+      - Codex / Claude Code usage limits
+      - OpenAI / Anthropic enterprise free trial
+      - AI coding agent overage pricing
+      - tokenmaxxing / AI agent token burn
+      - transferable credits / gifted tokens / promo campaigns
+    required_checks:
+      - 官方公告 / Help Center / Release Notes / Status
+      - 權威媒體或公司主管公開說法
+      - 社群截圖或使用者回報是否只是低證據
+      - 是否影響用戶遷移、工具選擇、企業導入或成本結構
 
 escalation_rules:
   - 若同一事件命中 3 個以上觸發器，至少列為「候選訊號」。
   - 若同一事件命中 4 個以上觸發器，且證據強度中以上，必須列入「今日必看訊號」。
   - 若事件同時涉及 AI 工作流替代、平台政策、就業證據，必須進入硬檢查。
   - 若事件涉及台灣半導體、出口、零售、內容產業或企業導入 AI，必須同步進入台灣映射。
+  - 若事件涉及 AI 產品 token、credit、quota、pricing、promo code、gift / transfer、usage limit 或 overage cost，即使不是模型能力新聞，也必須至少列入候選訊號或資料不足區。
