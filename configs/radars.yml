@@ -104,6 +104,18 @@ radars:
       - Cloud AI
       - 硬體供應鏈
       - 台灣關聯
+      - AI 產品用量經濟
+      - Token / credit / quota / usage limit
+      - Gift / transfer / promo code / free credits
+      - Pricing / overage / rate limit
+      - Codex / Claude Code / Cursor / Copilot 商業化與配額
+      - Enterprise promotion / trial / subsidy
+      - Product quality / rollout regression
+    required_questions:
+      - 今日 AI 模型或 Agent 是否有能力、平台、工具層或企業導入變化？
+      - 今日 AI 產品是否有 token、credit、quota、usage limit、pricing、promo code、gift / transfer、enterprise trial、free credits 或補貼政策變化？
+      - 今日是否出現 AI 產品品質、bug、security、usage cap、成本暴增或用戶遷移訊號？
+      - 若官方未確認但媒體或社群出現訊號，是否列為候選並標示證據等級？
 
   - id: ai_workflow_replacement
     name: AI 工作流替代
@@ -134,6 +146,11 @@ radars:
       - 私募估值
       - 裁員 / 招聘
       - 股價反應
+      - AI subscription sustainability
+      - Token usage / output tokens / overage cost
+      - Free credit / subsidy / promo campaign
+      - Usage limits / throttling / quota cuts
+      - Coding agent token burn rate
     output_requirements:
       - 支持過熱的證據
       - 反駁過熱的證據
@@ -258,14 +275,11 @@ radars:
       - 對服飾零售、品牌進櫃、街邊展店、門市營運、庫存補貨、會員經營與商業化機會有何影響？
     output_mapping:
       - 零售轉換
-      - 通路分工
-      - 線上線下整合
-      - 商品企劃
-      - 會員經營
-      - 門市體驗
-      - 百貨 / 商場型態
-      - 街邊店 / 商圈型態
-      - 社群信任
+      - 門市角色
+      - 會員資料
+      - 商品與庫存
+      - 社群導流
+      - 台灣商圈
 
   - id: true_segmentation_vs_fake_segmentation
     name: 真分眾 vs 假分眾
@@ -274,46 +288,47 @@ radars:
       - 客群
       - 商品
       - 供應鏈
-      - 社群互動
-      - UGC
-      - 門市回饋
+      - 社群
+      - 門市
       - 退貨 / 評價
-      - 會員復購
+      - 競爭力
     output_requirements:
-      - 今日訊號
-      - 偏真分眾 / 偏假分眾 / 混合
+      - 真分眾證據
+      - 假分眾證據
+      - 混合狀態
       - 可驗證方法
 
   - id: labor_consumption_pressure
     name: 勞動與消費結構壓力
     required: true
     scope:
-      - 青年就業
+      - 青年失業
       - 初階白領
-      - 外包平台收入
-      - 薪資 vs 物價
+      - 薪資
+      - 物價
       - 信用卡 / 分期 / 消費貸
-      - 低價零售份額
-      - 中價品牌壓力
-      - 高端消費
-      - AI 替代職能
-      - 新職位出現
-    cross_rule: 若 AI 新聞涉及工作替代，必須同時放入此區，不得只放在 AI 區。
+      - 低價零售
+      - 中價品牌
+      - AI 勞動替代
+      - 消費信心
+    cross_rule: 若 AI 新聞涉及工作替代，必須同步放入此雷達，不得只放 AI 區。
 
   - id: taiwan_mapping
-    name: 台灣關聯與產業映射
+    name: 台灣本地訊號總表與跨領域缺口
     required: true
     scope:
-      - 台灣半導體
-      - 台灣出口
-      - 台灣零售品牌
-      - 台灣內容產業
-      - 台灣企業導入 AI
-      - 台灣個人學習與工具化
-    questions:
-      - 對台灣半導體有沒有影響？
-      - 對台灣出口有沒有影響？
-      - 對台灣零售品牌有沒有影響？
-      - 對台灣內容產業有沒有影響？
-      - 對台灣企業導入 AI 有沒有影響？
-      - 對台灣個人學習與工具化有沒有影響？
+      - 半導體
+      - 出口
+      - 匯率
+      - 金管會 / 央行
+      - 台灣零售
+      - 百貨 / 商圈
+      - 服飾品牌
+      - AI 企業導入
+      - 加密監管
+      - 勞動與消費
+    output_requirements:
+      - 本地訊號
+      - 產業關聯
+      - 資料缺口
+      - 下一步查證
