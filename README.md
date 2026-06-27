@@ -2,7 +2,7 @@
 
 這個專案是「全球每日市場情報雷達系統」的版本控管中心，不是單純存放新聞摘要。
 
-每日播報在執行前，應先讀取本 repo 的規格、雷達清單、固定指標追蹤、科技發展雷達、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
+每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
 
 ## 核心定位
 
@@ -23,21 +23,40 @@
   - 舊版 / 新版播報補漏比對
   - 全指標總和彙總結果
 
+## AI Project OS 入口層
+
+本 repo 已採用 `Reference-Implementation-of-AI-Project-Operating-System` 的核心入口層：
+
+```text
+SYSTEM_PROMPT.md
+PROJECT_MAP.md
+HIGH_LEVEL_INDEX.md
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+README.md
+```
+
+其中 `HIGH_LEVEL_INDEX.md` 是高階脈絡索引，用來避免單點回答、漏掉固定雷達或引用舊規則。
+
 ## 每日執行順序
 
 1. 讀取 `SYSTEM_PROMPT.md`
-2. 讀取 `configs/radars.yml`
-3. 讀取 `configs/triggers.yml`
-4. 讀取 `configs/evidence.yml`
-5. 讀取 `configs/source_strategy.md`
-6. 讀取 `configs/indicator_tracking.yml`
-7. 讀取 `configs/technology_development.yml`
-8. 讀取 `memory/missed_cases.md`
-9. 讀取 `memory/watchlist.md`
-10. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
-11. 使用 `templates/daily_report_template.md` 產出每日報告
-12. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
-13. 報告最後更新 `推播後回測與模型調整面板`
+2. 讀取 `PROJECT_MAP.md`
+3. 讀取 `HIGH_LEVEL_INDEX.md`
+4. 讀取 `CURRENT_STATE.md`
+5. 讀取 `CURRENT_DECISIONS.md`
+6. 讀取 `configs/radars.yml`
+7. 讀取 `configs/triggers.yml`
+8. 讀取 `configs/evidence.yml`
+9. 讀取 `configs/source_strategy.md`
+10. 讀取 `configs/indicator_tracking.yml`
+11. 讀取 `configs/technology_development.yml`
+12. 讀取 `memory/missed_cases.md`
+13. 讀取 `memory/watchlist.md`
+14. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
+15. 使用 `templates/daily_report_template.md` 產出每日報告
+16. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
+17. 報告最後更新 `推播後回測與模型調整面板`
 
 ## 重要規則
 
@@ -59,9 +78,12 @@
 
 | 檔案 | 作用 |
 |---|---|
+| `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
 | `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
 | `configs/technology_development.yml` | 定義科技發展與突破雷達。科技發展是獨立主雷達，包含 AI 驅動突破與非 AI 的單獨科技突破 |
 | `templates/final_synthesis_template.md` | 定義報告最後的舊版/新版比對、全指標總和彙總、科技發展路徑判斷 |
+| `AI_PROJECT_OS_ADOPTION_PLAN.md` | 本 repo 採用 AI Project OS 的升級規劃 |
+| `research/README.md` | 方法論研究與公開參考的保存規範 |
 
 ## 報告索引
 
@@ -93,4 +115,4 @@ reports/2026/2026-06-26.md
 
 ## 使用方式
 
-產出每日報告前，需先讀取本 repo 的核心規格、configs、memory、templates 與近期 reports。
+產出每日報告前，需先讀取本 repo 的入口層、configs、memory、templates 與近期 reports。
