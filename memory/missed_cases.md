@@ -258,7 +258,68 @@ reports/
   - LBS / 人流分析是否串到活動歸因、樓層轉換、招商或會員分眾
   - 街邊店展店 / 撤店 / 旗艦店 / 快閃店 / 社區型店訊號
   - 線上內容、社群、直播是否導流到實體門市或百貨場域
-  - 門市是否成為體驗點、履約點、會員服務點或回購節點
+
+---
+
+## 硬檢查案例 005：Codex token / credit / gift / promo code / AI 產品用量經濟漏抓
+
+- 狀態：硬檢查中
+- 使用者指出時間：2026-06-27
+- 漏抓事件：今日新版 GitHub 規格播報未抓到 Codex token / credit / 可贈送或促銷類訊號；舊版長 prompt 對 token 使用量、AI coding agent 成本、AI budget、usage limits 與 OpenAI / Anthropic 競爭促銷較敏感。
+- 使用者認為重要原因：這不是單純小功能，而是 AI agent 商業化與使用成本結構訊號。Token / credit / quota / promo / gift / transfer 會影響使用者遷移、工具黏著、企業導入、成本負擔與「AI agent 是否能普及」。
+- 目前已驗證搜尋 loop：
+  - 官方 OpenAI 網站與 Help Center 搜尋未找到明確「Codex token 可轉贈 / gift transfer」公告。
+  - 一般網路搜尋可抓到 Business Insider 2026-06-04 報導 OpenAI Codex 廣告隱藏小遊戲，玩家可取得 free AI tokens / credits，且曾出現 $1,000 tokens、promo codes 用完等訊號。
+  - 一般網路搜尋也可抓到 Codex 使用成長、用量成本、Claude Code / Codex 競爭與免費使用促銷相關訊號。
+- 應屬雷達：
+  - AI 模型、Agent 與企業應用
+  - 科技發展過熱指標
+  - AI 產品用量經濟
+  - AI 工作流替代（若影響開發成本與工具使用）
+  - 全球資金流 / AI 投資回報（若涉及補貼與成本不可持續）
+  - 台灣關聯與產業映射（個人開發者、企業導入、AI 工具成本）
+- 可能漏抓原因：
+  - 新版 repo 把 AI 雷達重點放在模型、Agent、企業導入與工作流替代，沒有把「產品用量經濟」獨立成硬檢查。
+  - 官方來源優先規則太強，若官方沒有公告，媒體 / 社群的促銷與 promo code 訊號容易被刪掉，而不是列為低到中證據候選。
+  - 舊版長 prompt 有 token usage、AI budget cuts、usage limits、cloud CapEx、inference cost 等字眼，新版 repo 雖有科技過熱指標，但沒有把 token / credit / quota / overage / gift / promo 放入固定搜尋關鍵字。
+  - Codex token / credits 類事件可能被分類成「促銷活動」而非市場情報，導致權重過低。
+- 每日硬搜尋關鍵字：
+  - OpenAI Codex token credit promo code
+  - OpenAI Codex tokens gift transfer share quota
+  - Codex usage limit credits overage pricing
+  - ChatGPT Codex token promo Time to Fly
+  - AI coding agent token usage cost limits
+  - Claude Code limits OpenAI Codex free credits
+  - AI agent pricing usage caps credits
+  - OpenAI Codex business free usage enterprise promotion
+  - OpenAI API credits promo code gift tokens
+  - tokenmaxxing Codex Claude Code
+  - Codex token 額度 贈送 轉贈
+  - Codex 使用限制 token 額度
+  - OpenAI Codex 促銷 credits token
+  - ChatGPT Codex token 兌換碼
+  - Codex token 额度 赠送 转赠
+  - OpenAI Codex credits 促销码
+  - AI 编程 Agent token 成本 限额
+- 必須檢查：
+  - 官方 OpenAI / Help Center / Release Notes / Status 是否有 token / credit / usage limit / gift / transfer / promo / pricing 更新？
+  - 權威媒體是否報導 Codex credits、promo code、free tokens、enterprise promotion 或 usage limits？
+  - Anthropic / Claude Code 是否同步調整 usage limits、pricing、free credits 或 enterprise offer？
+  - 是否只是一次性活動，還是代表 AI agent 產品開始用 token / credit 經濟做獲客與留存？
+  - 是否影響開發者成本、工具選擇、企業導入與 AI coding agent 普及速度？
+  - 若官方未確認，是否仍列為候選訊號並標示「官方未確認」？
+- 證據標準：
+  - OpenAI 官方公告 / Help Center / Release Notes：高證據。
+  - 權威媒體報導 + 可查公開活動頁：中證據。
+  - 社群截圖、KOL、單一使用者說法：低證據，只能列候選或資料不足。
+  - 官方查無資料但媒體有報導：中低證據，必須標示官方未確認。
+- 下次驗證指標：
+  - Codex token / credit / usage limit / promo code 官方頁面
+  - ChatGPT / Codex pricing 或 plan 頁面
+  - Claude Code / Cursor / Copilot usage limit 變化
+  - 開發者社群對 token 成本、overage、quota 的討論量
+  - AI coding agent 使用量、WAU、企業導入、用量補貼
+  - 是否出現可轉贈、gift code、team sharing、quota pooling 或 enterprise credit pool
 
 ---
 
