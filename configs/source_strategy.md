@@ -21,7 +21,7 @@
 每日搜尋必須從大範圍到小範圍：
 
 ```text
-宏觀總體 → 資金流 → 產業 → 平台政策 → 供應鏈 → 公司/產品 → 社群/用戶行為 → 小型候選訊號
+宏觀總體 → 資金流 → 產業 → 平台政策 → 供應鏈 → 公司/產品 → 產品用量經濟 → 社群/用戶行為 → 小型候選訊號
 ```
 
 避免一開始只搜熱門新聞，導致早期弱訊號漏掉。
@@ -77,6 +77,58 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - AI 视频 影视 短剧 失业
 - AI 生成视频 产业链 变化
 - Seedance 2.0 短剧 影视 失业
+
+### AI 產品用量經濟 / Token / Credit / 配額機制
+
+此類訊號必須每天至少做一次弱訊號掃描，避免把 AI 產品商業化、用量限制、token 成本、credit 促銷、gift / transfer / promo code、usage cap、rate limit、overage pricing 誤判成小功能。
+
+英文：
+- OpenAI Codex token credit promo code
+- OpenAI Codex tokens gift transfer share quota
+- Codex usage limit credits overage pricing
+- ChatGPT Codex token promo Time to Fly
+- AI coding agent token usage cost limits
+- Claude Code limits OpenAI Codex free credits
+- AI agent pricing usage caps credits
+- OpenAI Codex business free usage enterprise promotion
+- OpenAI API credits promo code gift tokens
+- tokenmaxxing Codex Claude Code
+
+繁中：
+- Codex token 額度 贈送 轉贈
+- Codex 使用限制 token 額度
+- OpenAI Codex 促銷 credits token
+- ChatGPT Codex token 兌換碼
+- AI coding agent 用量 成本 限制
+- Claude Code Codex token 額度 比較
+
+簡中：
+- Codex token 额度 赠送 转赠
+- OpenAI Codex credits 促销码
+- Codex 使用限制 token 成本
+- AI 编程 Agent token 成本 限额
+- Claude Code Codex 额度 免费 使用
+
+必須區分：
+- 官方已發布功能：高證據。
+- 權威媒體報導促銷 / 活動 / promo code：中證據。
+- 社群截圖、KOL 或未驗證說法：低證據，列候選或資料不足。
+- 若官方搜尋查無資料，但社群 / 媒體有討論，必須寫「官方未確認，低到中證據」。
+
+### AI 產品品質 / Rollout Regression
+
+英文：
+- ChatGPT release notes Codex updates usage limits
+- OpenAI status Codex outage latency regression
+- ChatGPT app bug repeated answers Thinking model
+- OpenAI Community Codex bug usage limit
+- Codex security vulnerability token leak
+
+繁中 / 簡中：
+- ChatGPT 錯誤 回覆重複
+- Codex 異常 token 被盜
+- OpenAI Codex bug 使用限制
+- ChatGPT Thinking 模式 異常
 
 ### 加密潛力市場
 
@@ -135,6 +187,7 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - 若只有社群訊號，降級為低證據。
 - 若不同來源互相矛盾，放入資料不足與不確定區。
 - 若來源時間過舊但被重新討論，必須分開標示原事件時間與再發酵時間。
+- OpenAI / Anthropic / Google / Microsoft 等 AI 產品功能與 pricing 類訊號，必須優先查官方公告、Help Center、Status、Release Notes；若官方未見但媒體或社群有訊號，不得刪除，應列候選並標示官方未確認。
 
 ## 6. 來源擴充規則
 
@@ -144,5 +197,6 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - 是否有舊來源開始失真或農場化？
 - 是否有特定語言來源比英文更早出現訊號？
 - 是否需要新增硬搜尋關鍵字？
+- 是否有新的 AI 產品商業化指標來源，例如 pricing page、usage limit page、promo campaign、enterprise offer、credit / token / coupon / gift code 機制、社群使用量回報？
 
 來源策略必須持續變動，不得固定成死表。
