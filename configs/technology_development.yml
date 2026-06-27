@@ -1,0 +1,62 @@
+# Technology Development Radar
+# 本檔把狹義 AI 新聞擴大成「科技發展與突破」雷達。
+# 目的：不要只追模型發布，而要追蹤 AI / 運算 / 科學 / 生物 / 物理 / 材料 / 能源 / 機器人等技術如何互相連動，形成未來科技路徑。
+
+technology_development:
+  required: true
+  principle: "AI 不是單獨新聞分類，而是可能驅動各科技領域突破的通用技術層。每日報告必須判斷 AI 與其他科技領域的連動，而不是只看 AI 公司或 AI 模型發布。"
+
+  scope:
+    - AI models / agents / multimodal systems
+    - Scientific AI / AI for science
+    - computational biology / protein design / drug discovery
+    - physics / materials science / chemistry / climate science
+    - robotics / humanoid robots / embodied AI
+    - semiconductor / compute / chips / HBM / photonics
+    - energy / nuclear / grid / data center power
+    - quantum computing / quantum sensing / statistical physics
+    - synthetic biology / genomics / medical technology
+    - space technology / satellite / defense tech
+    - manufacturing automation / industrial AI
+    - cybersecurity / identity / governance
+    - scientific awards / Nobel / major academic breakthroughs
+    - research papers / lab-to-industry translation
+
+  required_questions:
+    - 今日 AI 或運算技術是否推動了其他科技領域突破，而不只是 AI 產品更新？
+    - 是否出現「AI + 生物 / 物理 / 化學 / 材料 / 能源 / 機器人 / 半導體」的跨領域突破？
+    - 是否有重大科學獎項、論文、臨床、產業化、監管、商業化事件顯示科技路徑改變？
+    - 這個突破影響的是什麼能力：發現速度、設計能力、模擬能力、實驗成本、自動化、商業化、基礎設施需求？
+    - 哪些指標會連動：算力需求、GPU / HBM、實驗週期、研發成本、專利、投資、臨床進度、產品上市、人才需求？
+    - 這個事件對台灣可能影響什麼：半導體、伺服器、醫療科技、生技、製造、零售工具化、教育與職能？
+
+  examples:
+    - case: "2024 Nobel Prize in Physics"
+      interpretation: "John Hopfield and Geoffrey Hinton 因奠定 artificial neural networks 的 foundational discoveries 獲獎，這不是單純 AI 新聞，而是物理、統計力學與機器學習交會形成科技底層能力。"
+    - case: "2024 Nobel Prize in Chemistry"
+      interpretation: "David Baker、Demis Hassabis、John Jumper 因 computational protein design 與 protein structure prediction 獲獎，代表 AI / computational methods 推動蛋白質設計、藥物研發、生物材料與生命科學突破。"
+
+  output_requirements:
+    - 每日 AI 段需改為「AI 與科技發展突破」，不可只列 AI 公司新聞。
+    - 每則科技突破至少標示：技術本質、影響領域、突破指標、商業化路徑、連動指標、台灣映射、證據等級。
+    - 若是重大科學獎項或論文，需說明它影響的是哪一條未來科技路徑，而不是只寫得獎或發布。
+    - 若事件尚未商業化，列為候選訊號或科技路徑訊號，不得寫成已經產業落地。
+
+  linked_indicators:
+    - research paper volume / citations / benchmark improvement
+    - funding / grants / venture investment
+    - lab-to-product timeline
+    - patent / licensing / partnership
+    - clinical trial / regulatory progress
+    - compute demand / GPU / HBM / cloud spending
+    - experimental cost reduction
+    - R&D cycle compression
+    - new job roles / skill demand
+    - public sector / defense / national strategy
+    - Taiwan semiconductor / biotech / manufacturing / education relevance
+
+  quality_gate:
+    - 今天 AI 段是否至少檢查一個 AI 以外的科技領域連動？
+    - 今天是否把科技突破連到可觀測指標，而不是只寫新聞？
+    - 今天是否說明「這會讓未來科技怎麼發展」？
+    - 今天是否把台灣可能受影響的產業或職能列出？
