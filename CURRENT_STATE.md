@@ -1,6 +1,6 @@
 # Daily Market Radar｜CURRENT_STATE
 
-本檔記錄每日播報系統的目前有效狀態。它是入口狀態檔，不取代 `SYSTEM_PROMPT.md` 與 `configs/`。
+本檔記錄每日播報系統的目前有效狀態。它是入口狀態檔，不取代 `SYSTEM_PROMPT.md`、`HIGH_LEVEL_INDEX.md` 與 `configs/`。
 
 最後整理日期：2026-06-27
 
@@ -22,12 +22,13 @@
 
 1. `SYSTEM_PROMPT.md`
 2. `PROJECT_MAP.md`
-3. `CURRENT_STATE.md`
-4. `CURRENT_DECISIONS.md`
-5. `configs/`
-6. `memory/`
-7. `templates/`
-8. `reports/`
+3. `HIGH_LEVEL_INDEX.md`
+4. `CURRENT_STATE.md`
+5. `CURRENT_DECISIONS.md`
+6. `configs/`
+7. `memory/`
+8. `templates/`
+9. `reports/`
 
 ---
 
@@ -107,20 +108,22 @@
 
 1. `SYSTEM_PROMPT.md`：是否影響核心指令、每日必讀檔、輸出規格、硬性規則。
 2. `PROJECT_MAP.md`：是否影響專案地圖、資料夾職責、讀取順序、模組分類。
-3. `CURRENT_STATE.md`：是否影響目前有效版本、目前狀態、每日必掃雷達、三桶硬檢查。
-4. `CURRENT_DECISIONS.md`：是否需要新增最近決策、廢止舊規則、記錄不可再犯錯誤。
-5. `configs/`：是否需要新增或調整雷達、觸發器、證據分級、來源策略、固定指標、科技發展路徑。
-6. `templates/`：是否需要調整每日報告格式、最終彙總格式、回測面板格式。
-7. `memory/`：是否需要新增漏抓案例、watchlist、硬檢查清單。
-8. `reports/INDEX.md`：若新增報告或重要回測，是否需要更新索引。
-9. `reports/`：是否需要讓新報告呈現更新後規格。
-10. `archive/`：若有舊規格停用，是否需要移入或標註歷史參考。
+3. `HIGH_LEVEL_INDEX.md`：是否影響高階脈絡、核心雷達、易漏面向與不可誤判事項。
+4. `CURRENT_STATE.md`：是否影響目前有效版本、目前狀態、每日必掃雷達、三桶硬檢查。
+5. `CURRENT_DECISIONS.md`：是否需要新增最近決策、廢止舊規則、記錄不可再犯錯誤。
+6. `configs/`：是否需要新增或調整雷達、觸發器、證據分級、來源策略、固定指標、科技發展路徑。
+7. `templates/`：是否需要調整每日報告格式、最終彙總格式、回測面板格式。
+8. `memory/`：是否需要新增漏抓案例、watchlist、硬檢查清單。
+9. `reports/INDEX.md`：若新增報告或重要回測，是否需要更新索引。
+10. `reports/`：是否需要讓新報告呈現更新後規格。
+11. `research/`：若是方法論研究或公開參考，是否先放入研究層再決定是否採納。
+12. `archive/`：若有舊規格停用，是否需要移入或標註歷史參考。
 
 同步判斷原則：
 
-- 若是「核心規則」變更，至少同步 `SYSTEM_PROMPT.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md`。
-- 若是「新增雷達或搜尋桶」，至少同步 `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`CURRENT_STATE.md`、`configs/`、`templates/`。
-- 若是「使用者指出漏抓」，至少同步 `memory/missed_cases.md`、`CURRENT_DECISIONS.md`，必要時同步 `configs/` 與 `templates/`。
+- 若是「核心規則」變更，至少同步 `SYSTEM_PROMPT.md`、`HIGH_LEVEL_INDEX.md`、`CURRENT_STATE.md`、`CURRENT_DECISIONS.md`。
+- 若是「新增雷達或搜尋桶」，至少同步 `SYSTEM_PROMPT.md`、`PROJECT_MAP.md`、`HIGH_LEVEL_INDEX.md`、`CURRENT_STATE.md`、`configs/`、`templates/`。
+- 若是「使用者指出漏抓」，至少同步 `memory/missed_cases.md`、`CURRENT_DECISIONS.md`，必要時同步 `HIGH_LEVEL_INDEX.md`、`configs/` 與 `templates/`。
 - 若是「輸出格式」變更，至少同步 `templates/`、`SYSTEM_PROMPT.md`、`CURRENT_DECISIONS.md`。
 - 若是「每日報告產出」，至少同步 `reports/YYYY/YYYY-MM-DD.md` 與 `reports/INDEX.md`。
 
@@ -138,7 +141,6 @@
 - 固定指標追蹤
 - 科技發展路徑
 - 台灣映射
-- 歷史報告查詢
-- 系統架構調整
+- AI Project OS 結構調整
 
-再依 `PROJECT_MAP.md` 的讀取順序建立上下文。
+若涉及全局脈絡，需先參考 `HIGH_LEVEL_INDEX.md`。
