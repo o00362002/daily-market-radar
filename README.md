@@ -36,9 +36,22 @@ HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 README.md
+ADOPTION_LEVELS.md
 ```
 
 其中 `HIGH_LEVEL_INDEX.md` 是高階脈絡索引，用來避免單點回答、漏掉固定雷達或引用舊規則。
+
+## Adoption Level
+
+本 repo 目前指定為：
+
+```text
+Repo Level 2：Long-term AI Project
+```
+
+原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告與回測，不預設升級為 Agent / Product System。
+
+若未來新增 radar module、搜尋 retry module 或回測 module，應使用 Module Level 判斷，不直接把整個 repo 升成 Level 3。
 
 ## 每日執行順序
 
@@ -47,20 +60,21 @@ README.md
 3. 讀取 `HIGH_LEVEL_INDEX.md`
 4. 讀取 `CURRENT_STATE.md`
 5. 讀取 `CURRENT_DECISIONS.md`
-6. 讀取 `configs/radars.yml`
-7. 讀取 `configs/triggers.yml`
-8. 讀取 `configs/evidence.yml`
-9. 讀取 `configs/source_strategy.md`
-10. 讀取 `configs/indicator_tracking.yml`
-11. 讀取 `configs/technology_development.yml`
-12. 讀取 `configs/edge_case_discovery.yml`
-13. 讀取 `configs/search_retry_protocol.yml`
-14. 讀取 `memory/missed_cases.md`
-15. 讀取 `memory/watchlist.md`
-16. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
-17. 使用 `templates/daily_report_template.md` 產出每日報告
-18. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
-19. 報告最後更新 `推播後回測與模型調整面板`
+6. 讀取 `ADOPTION_LEVELS.md`
+7. 讀取 `configs/radars.yml`
+8. 讀取 `configs/triggers.yml`
+9. 讀取 `configs/evidence.yml`
+10. 讀取 `configs/source_strategy.md`
+11. 讀取 `configs/indicator_tracking.yml`
+12. 讀取 `configs/technology_development.yml`
+13. 讀取 `configs/edge_case_discovery.yml`
+14. 讀取 `configs/search_retry_protocol.yml`
+15. 讀取 `memory/missed_cases.md`
+16. 讀取 `memory/watchlist.md`
+17. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
+18. 使用 `templates/daily_report_template.md` 產出每日報告
+19. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
+20. 報告最後更新 `推播後回測與模型調整面板`
 
 ## 重要規則
 
@@ -85,6 +99,7 @@ README.md
 | 檔案 | 作用 |
 |---|---|
 | `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
+| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2，以及未來 module 的分級規則 |
 | `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
 | `configs/technology_development.yml` | 定義科技發展與突破雷達。科技發展是獨立主雷達，包含 AI 驅動突破與非 AI 的單獨科技突破 |
 | `configs/edge_case_discovery.yml` | 定義每日必掃全球特殊應用、非主流案例、地方試點、早期商業模式與社群弱訊號 |
@@ -118,9 +133,5 @@ reports/YYYY/YYYY-MM-DD.md
 例如：
 
 ```text
-reports/2026/2026-06-26.md
+reports/2026/2026-06-27.md
 ```
-
-## 使用方式
-
-產出每日報告前，需先讀取本 repo 的入口層、configs、memory、templates 與近期 reports。
