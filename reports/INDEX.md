@@ -11,6 +11,7 @@
 | 2026-06-08 | [`reports/2026/2026-06-08.md`](2026/2026-06-08.md) | 含當日推播、Strategy／STRC 漏抓反思、結構性漏抓檢查、最終推播規則整合 |
 | 2026-06-26 | [`reports/2026/2026-06-26.md`](2026/2026-06-26.md) | 含 Seedance 2.0／AI 影片短劇產業替代漏抓回測，以及零售全域搜尋模型更新 |
 | 2026-06-27 | [`reports/2026/2026-06-27.md`](2026/2026-06-27.md) | 新版「雷達覆蓋與證據分級」播報；含全球市場 AI 成本通膨、加密 ETF／Stablecoin／Perp DEX、企業 Agent 工作流、618 消費疲乏、氣候商品企劃、四大指標整合趨勢判斷 |
+| 2026-06-28 | [`reports/2026/2026-06-28.md`](2026/2026-06-28.md) | 整合原始新版播報與新規則測試播報；含 edge case discovery、search retry protocol 回測，補入 Workstream、clinical workflow agent、RFID material sensing、retail AI accessibility、Georgia GELT、Life Biosciences reverse-aging trial 等非主流候選 |
 
 ## 檔案命名規則
 
