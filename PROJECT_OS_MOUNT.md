@@ -1,6 +1,14 @@
 # PROJECT_OS_MOUNT｜daily-market-radar
 
-Framework source: `o00362002/Human-AI-Collaboration-Brain`
+Adopted architecture: `Human-AI Collaboration Brain`
+
+Architecture repo: `o00362002/Human-AI-Collaboration-Brain`
+
+Architecture role: `project architecture method / documentation pattern / AI collaboration rules`
+
+Runtime dependency: `none`
+
+Parent repo: `none`
 
 Mount mode: `thin`
 
@@ -8,21 +16,39 @@ Designated Level: `Level 2 runtime-lite`
 
 Role: `recurring intelligence workflow / daily report system`
 
-Source of truth: `daily-market-radar`
+Content source of truth: `daily-market-radar`
 
 ---
 
-## 1. 定位
+## 1. Relationship
 
-本檔記錄此 repo 如何掛載 Human-AI Collaboration Brain 的架構規則。
-
-此 repo 只掛載必要的執行介面與維護規則，不複製母架構完整細節。
+This repo is independent. `Human-AI Collaboration Brain` is only the adopted architecture method and AI collaboration pattern. It is not a parent repo, runtime dependency, or content source of truth.
 
 ---
 
-## 2. 同步規則
+## 2. Repo Role
 
-重大變更時同步檢查：
+```text
+recurring intelligence workflow / daily report system
+```
+
+---
+
+## 3. Task Level and Routing
+
+Task level and minimal read rules are maintained in:
+
+```text
+CONTEXT_ROUTING.md
+```
+
+Human maintainers may adjust routing rules inside this repo without changing the architecture repo.
+
+---
+
+## 4. Sync Rule
+
+When changing repo structure, level, task routing, module, workflow, tool, provider, or data contract, check:
 
 ```text
 README.md
@@ -32,4 +58,5 @@ CURRENT_STATE.md
 CURRENT_DECISIONS.md
 ADOPTION_LEVELS.md
 PROJECT_OS_MOUNT.md
+CONTEXT_ROUTING.md
 ```

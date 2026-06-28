@@ -1,18 +1,18 @@
 # daily-market-radar｜ADOPTION_LEVELS
 
-本檔定義 `daily-market-radar` 採用 Human-AI Collaboration Brain 架構的深度。
+This file defines how `daily-market-radar` adopts the Human-AI Collaboration Brain architecture.
 
 ---
 
 ## 1. Repo Level
 
-目前指定：
+Current level:
 
 ```text
 Level 2 runtime-lite
 ```
 
-原因：
+Reason:
 
 ```text
 具備固定 workflow、configs、memory、templates、reports 與 loop checklist，但不需要升級成 Agent Product System。
@@ -20,23 +20,44 @@ Level 2 runtime-lite
 
 ---
 
-## 2. Thin Mount
-
-本 repo 採 thin mount，不完整複製母架構。
+## 2. Architecture Relationship
 
 ```text
-Framework source: o00362002/Human-AI-Collaboration-Brain
-Source of truth: daily-market-radar
+Adopted architecture: Human-AI Collaboration Brain
+Architecture repo: o00362002/Human-AI-Collaboration-Brain
+Runtime dependency: none
+Parent repo: none
+Content source of truth: daily-market-radar
+```
+
+This repo is independent. The architecture repo provides method and structure, not project content.
+
+---
+
+## 3. Task Levels
+
+Task levels are maintained in `CONTEXT_ROUTING.md`.
+
+```text
+T0 quick understanding
+T1 status check
+T2 module work
+T3 architecture / tool / rule change
+T4 execution / runtime / artifact
 ```
 
 ---
 
-## 3. Module Level 原則
+## 4. Module Level Rule
 
-Module 不應完整複製 root 入口層。Module 應繼承 root 規則，並用局部文件記錄任務、狀態、決策與依賴。
+Modules should inherit root rules and record local tasks, state, decisions, and dependencies.
 
-建議 module / area：
+Suggested module / area:
 
 ```text
-configs / memory / templates / reports / radar rules / search retry / post-report review
+每日報告：SYSTEM_PROMPT.md, configs/, memory/, templates/, reports/
+雷達設定：configs/
+漏抓與 watchlist：memory/
+歷史報告：reports/
+輸出格式：templates/
 ```
