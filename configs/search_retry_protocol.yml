@@ -1,0 +1,59 @@
+# Daily Search Retry Protocol
+# 本檔定義每日搜尋找不到資料時的換方法規則。
+# 目的：避免某一領域因第一輪搜尋沒有結果，就被寫成「無資料」或被省略。
+
+search_retry_protocol:
+  required: true
+  principle: "找不到資料不是結束，而是啟動換搜尋方法。每日報告若某個必掃雷達沒有抓到重大訊號或特殊候選，必須至少執行 3 種 retry，再標示資料不足。"
+
+  retry_when:
+    - 某雷達只抓到主流大眾新聞，沒有特殊應用或早期弱訊號。
+    - 某雷達沒有資料或只有低品質農場內容。
+    - 某雷達的結果過度集中在英文主流媒體。
+    - 某雷達只出現大公司新聞，沒有小公司、地方、研究、社群、開發者或試點案例。
+    - 使用者指出漏抓後，下一次同類搜尋仍未出現。
+
+  minimum_retry_count: 3
+
+  retry_methods:
+    change_keywords:
+      description: "換關鍵字層級。從新聞詞改成應用詞、案例詞、試點詞、問題詞、職能詞、商業模式詞。"
+      examples:
+        - from: "AI retail news"
+          to:
+            - "AI retail pilot case study"
+            - "AI shopping assistant small brand experiment"
+            - "store operations AI workflow case"
+        - from: "RWA latest"
+          to:
+            - "RWA pilot small issuer"
+            - "tokenized invoice real world asset case"
+            - "RWA secondary liquidity holders turnover"
+    change_language:
+      description: "換語言搜尋。英文無資料時，補繁中、簡中、日文、韓文、歐洲語系或事件所在地語言。"
+      examples:
+        - "AI Agent 実証実験 小売"
+        - "소매 AI 에이전트 사례"
+        - "IA commerce détail expérimentation"
+    change_source_type:
+      description: "換來源類型。主流媒體無資料時，改查官方公告、地方政府、startup blog、研究實驗室、GitHub、Hacker News、Product Hunt、Threads、Reddit、產業協會。"
+    change_level:
+      description: "換層級。從大公司 / 大趨勢改查小公司、地方試點、單一門市、單一城市、單一產品、單一開發者工具。"
+    change_time_window:
+      description: "換時間窗。今天無資料時，回補 7 天 / 30 天事件簇，但必須標示原事件時間與再發酵時間。"
+    search_negative_space:
+      description: "搜尋反向或失敗案例。若找不到成功案例，查 failure、rollback、abuse、lawsuit、pricing backlash、users complain、job loss、fraud。"
+    search_metrics_instead_of_news:
+      description: "改查指標資料而不是新聞，包括 TVL、fees、DAU、foot traffic、job postings、pricing page、release notes、GitHub stars、usage limits。"
+
+  output_requirement:
+    if_still_no_result:
+      - 必須寫明已嘗試哪些 retry 方法。
+      - 必須區分「真的無重大更新」與「搜尋仍不完整」。
+      - 必須提出下一次要換的資料源或關鍵字。
+
+  quality_gate:
+    - 每個無資料雷達是否至少 retry 3 種方式？
+    - 是否有換語言、換來源、換關鍵字或換層級？
+    - 是否把 retry 過程寫進資料缺口或回測面板？
+    - 是否避免直接用「無資料」結束？
