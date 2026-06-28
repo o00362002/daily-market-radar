@@ -8,6 +8,12 @@
 
 `daily-market-radar` 是一套「全球每日市場情報雷達系統」，不是新聞摘要器，而是用雷達覆蓋、固定指標、證據分級、漏抓回測與台灣映射來產出每日情報。
 
+目前採用：
+
+```text
+Repo Level 2：Long-term AI Project
+```
+
 ---
 
 ## 2. 核心目標
@@ -17,6 +23,7 @@
 - 保留弱訊號與候選訊號，但標示證據等級。
 - 對使用者的零售、AI 工具化、加密觀察與職能發展提供可行動提醒。
 - 透過漏抓回測與同步規則持續改善。
+- 維持 Level 2，不預設升級為 Agent / Product System。
 
 ---
 
@@ -44,6 +51,7 @@
 - 科技發展與突破是獨立主雷達，不可併入 AI 公司新聞。
 - 每個主領域都需要台灣對應檢查。
 - 無資料也要標示資料缺口與下次降低缺口的方法。
+- 若未來拆出 radar module 或回測 module，應先用 Module Level 管理，不直接升整個 repo 到 Level 3。
 
 ---
 
@@ -56,6 +64,7 @@
 - 科技突破只寫 AI，不檢查非 AI 科技突破。
 - 台灣映射只放最後一段，沒有逐領域檢查。
 - 使用舊報告重複播報，沒有跨日去重。
+- 誤把 Level 2 情報系統提前升級成 Level 3 Agent 系統。
 
 ---
 
@@ -66,6 +75,7 @@
 - 不得假裝已讀取 repo 檔案。
 - 不得把 `archive/` 或舊報告當成最新規則。
 - 不得忽略 `CURRENT_DECISIONS.md` 的最新硬檢查。
+- 不得忽略 `ADOPTION_LEVELS.md` 的 Level 2 定位。
 
 ---
 
@@ -75,8 +85,10 @@
 |---|---|
 | 最高規格 | `SYSTEM_PROMPT.md` |
 | 專案導航 | `PROJECT_MAP.md` |
+| 高階索引 | `HIGH_LEVEL_INDEX.md` |
 | 目前狀態 | `CURRENT_STATE.md` |
 | 最新決策 | `CURRENT_DECISIONS.md` |
+| Adoption Level | `ADOPTION_LEVELS.md` |
 | 雷達與觸發器 | `configs/` |
 | 漏抓與觀察清單 | `memory/` |
 | 報告模板 | `templates/` |
