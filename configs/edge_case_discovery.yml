@@ -1,0 +1,104 @@
+# Global Edge Case Discovery Radar
+# 本檔定義每日必掃的「全球特殊應用 / 邊緣案例 / 非主流事件」雷達。
+# 目的：避免每日報告只剩大眾新聞與主流媒體事件，固定抓取各領域在世界各地正在冒出的特別應用、早期實驗、奇特商業模式、地方性案例與弱訊號。
+
+edge_case_discovery:
+  required: true
+  principle: "每日報告不能只輸出主流新聞。每個核心領域都必須至少搜尋一次全球特殊應用、非主流案例、地方實驗、早期商業模式、社群爆料、研究原型、開發者工具、監管沙盒、產業小案例。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
+
+  output_position: "今日候選訊號之前或之內；若篇幅不足，至少輸出 5 則濃縮候選。"
+  minimum_daily_output:
+    - 至少 5 則全球特殊應用 / 邊緣案例候選。
+    - 至少涵蓋 3 個不同領域。
+    - 每則必須標示來源類型、地區、證據等級、為什麼可能重要、不能下的結論、下一步驗證。
+
+  domains:
+    ai_agents_and_workflow:
+      required: true
+      search_angles:
+        - weird AI agent use cases
+        - AI agent real-world deployment small business
+        - AI workflow automation case study local company
+        - AI agent Slack Gmail Notion GitHub retail operations
+        - AI agent failure security abuse edge case
+        - AI 工具 實際應用 案例 小公司
+        - AI Agent 企業 導入 案例 失敗
+        - AI代理 实际应用 小企业 工作流
+    technology_development:
+      required: true
+      search_angles:
+        - unusual technology breakthrough startup lab pilot
+        - biotech materials energy robotics quantum breakthrough pilot
+        - science breakthrough commercial pilot
+        - new material battery robotics sensor startup trial
+        - 非 AI 科技突破 生物 材料 能源 機器人 半導體
+        - 科技 突破 試點 新材料 醫療 能源 機器人
+    crypto_blockchain:
+      required: true
+      search_angles:
+        - crypto real world payment pilot local government
+        - stablecoin remittance pilot merchant adoption
+        - RWA tokenization pilot small issuer
+        - DePIN real-world deployment city infrastructure
+        - AI agent crypto payment experiment
+        - 加密 支付 試點 商家 穩定幣 匯款
+        - RWA 代幣化 試點 小型 發行
+    retail_consumer_social:
+      required: true
+      search_angles:
+        - retail innovation small brand case study
+        - store technology pilot AI shopping assistant RFID smart fitting room
+        - social commerce unusual campaign local market
+        - fashion retail climate adaptive product case
+        - 百貨 商場 創新 案例 小品牌 快閃
+        - 服飾 零售 特別 案例 氣候 商品 社群 導購
+    labor_consumption_pressure:
+      required: true
+      search_angles:
+        - AI changed job role small company case
+        - Gen Z consumption shift local retail case
+        - white collar automation early signal
+        - freelancer pricing AI impact case
+        - AI 改變 工作 角色 案例 接案 價格
+        - 消費 降級 地方 零售 案例 年輕人
+
+  source_types:
+    - niche industry media
+    - startup blogs
+    - official pilot announcements
+    - local government / city innovation pages
+    - academic lab news
+    - GitHub / developer changelogs
+    - Product Hunt / Hacker News / Reddit / Threads / X
+    - trade association reports
+    - regional language sources
+    - conference demo / expo announcements
+
+  scoring:
+    novelty:
+      description: "是否不是主流新聞，是否有新應用、新場景、新商業模式。"
+    practical_relevance:
+      description: "是否能映射到使用者關心的零售、AI Agent、加密、科技發展、職能變化。"
+    evidence_strength:
+      description: "官方 / 多來源 / 產業媒體 / 社群單點。"
+    trend_potential:
+      description: "是否可能從小案例擴散成新敘事、新工具或新市場。"
+
+  output_template:
+    fields:
+      - 候選事件
+      - 地區 / 領域
+      - 來源類型
+      - 為什麼特別
+      - 為什麼可能重要
+      - 證據等級
+      - 不能下的結論
+      - 台灣 / 使用者映射
+      - 下一步驗證
+
+  quality_gate:
+    - 今天是否至少輸出 5 則非主流 / 特殊應用候選？
+    - 是否涵蓋至少 3 個不同領域？
+    - 是否避免把低證據候選誤寫成事實？
+    - 是否保留原始來源或可回查線索？
+    - 是否說明為什麼這不是普通大眾新聞？
