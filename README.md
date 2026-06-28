@@ -2,13 +2,14 @@
 
 這個專案是「全球每日市場情報雷達系統」的版本控管中心，不是單純存放新聞摘要。
 
-每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
+每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、特殊應用雷達、搜尋 retry 規則、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
 
 ## 核心定位
 
 - 不是新聞摘要器。
 - 不是只挑幾則主觀重要新聞的編輯。
-- 是一套「雷達覆蓋 + 固定指標追蹤 + 證據分級 + 科技發展路徑 + 回測補漏」的每日市場情報系統。
+- 不是只整理主流媒體已經大量報導的大眾新聞。
+- 是一套「雷達覆蓋 + 固定指標追蹤 + 全球特殊應用搜尋 + 搜尋 retry + 證據分級 + 科技發展路徑 + 回測補漏」的每日市場情報系統。
 - 目標是同時捕捉：
   - 全球大趨勢
   - 資金與政策變化
@@ -18,6 +19,7 @@
   - 科技發展與突破：這是獨立主雷達，包含 AI 驅動突破，也包含非 AI 的單獨科技突破，例如生物、物理、化學、材料、能源、機器人、半導體、醫療、製造、太空、量子等
   - 加密與鏈上資金流
   - 零售、品牌、消費、社群、流行與服飾訊號
+  - 全球特殊應用、非主流案例、地方試點、早期商業模式、研究原型、開發者工具與社群弱訊號
   - 早期弱訊號與候選訊號
   - 台灣產業映射
   - 舊版 / 新版播報補漏比對
@@ -51,12 +53,14 @@ README.md
 9. 讀取 `configs/source_strategy.md`
 10. 讀取 `configs/indicator_tracking.yml`
 11. 讀取 `configs/technology_development.yml`
-12. 讀取 `memory/missed_cases.md`
-13. 讀取 `memory/watchlist.md`
-14. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
-15. 使用 `templates/daily_report_template.md` 產出每日報告
-16. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
-17. 報告最後更新 `推播後回測與模型調整面板`
+12. 讀取 `configs/edge_case_discovery.yml`
+13. 讀取 `configs/search_retry_protocol.yml`
+14. 讀取 `memory/missed_cases.md`
+15. 讀取 `memory/watchlist.md`
+16. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
+17. 使用 `templates/daily_report_template.md` 產出每日報告
+18. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
+19. 報告最後更新 `推播後回測與模型調整面板`
 
 ## 重要規則
 
@@ -72,7 +76,9 @@ README.md
 - 零售段落固定升級為「零售、品牌、消費趨勢、社群媒體、流行與服飾發展」。
 - 每日必須輸出固定指標追蹤總表；即使資料不足，也要標示資料缺口，不得省略。
 - 每日必須輸出「科技發展與突破」段落，並分成「AI 驅動突破」與「非 AI / 單獨科技突破」。不能只寫 AI 公司或模型新聞。
-- 報告最後必須輸出舊版/新版補漏比對、全指標總和彙總、科技發展路徑判斷與今日最終一句話。
+- 每日必須輸出至少 5 則全球特殊應用 / 邊緣案例候選，且至少涵蓋 3 個不同領域。
+- 若某雷達只抓到主流新聞或無資料，必須依 `configs/search_retry_protocol.yml` 至少換 3 種搜尋方法後，才可標示資料不足。
+- 報告最後必須輸出舊版/新版補漏比對、全指標總和彙總、科技發展路徑判斷、搜尋 retry 狀態與今日最終一句話。
 
 ## 新增核心規格檔
 
@@ -81,6 +87,8 @@ README.md
 | `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
 | `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
 | `configs/technology_development.yml` | 定義科技發展與突破雷達。科技發展是獨立主雷達，包含 AI 驅動突破與非 AI 的單獨科技突破 |
+| `configs/edge_case_discovery.yml` | 定義每日必掃全球特殊應用、非主流案例、地方試點、早期商業模式與社群弱訊號 |
+| `configs/search_retry_protocol.yml` | 定義找不到資料時的每日換搜尋方法規則，至少 retry 3 種方式 |
 | `templates/final_synthesis_template.md` | 定義報告最後的舊版/新版比對、全指標總和彙總、科技發展路徑判斷 |
 | `AI_PROJECT_OS_ADOPTION_PLAN.md` | 本 repo 採用 AI Project OS 的升級規劃 |
 | `research/README.md` | 方法論研究與公開參考的保存規範 |
