@@ -25,9 +25,22 @@
   - 舊版 / 新版播報補漏比對
   - 全指標總和彙總結果
 
+## Human-AI Collaboration Brain 掛載定位
+
+本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 thin mount。
+
+```text
+Designated Level: Level 2 runtime-lite
+Role: recurring intelligence workflow / daily report system
+Source of truth: daily-market-radar
+Framework source: o00362002/Human-AI-Collaboration-Brain
+```
+
+Level 2 runtime-lite 代表本 repo 有固定 workflow、configs、memory、templates、reports 與 loop 檢查，但不預設升級為 Level 3A 或 Level 3B。
+
 ## AI Project OS 入口層
 
-本 repo 已採用 `Reference-Implementation-of-AI-Project-Operating-System` 的核心入口層：
+本 repo 已採用 AI Project OS 的核心入口層：
 
 ```text
 SYSTEM_PROMPT.md
@@ -46,12 +59,12 @@ ADOPTION_LEVELS.md
 本 repo 目前指定為：
 
 ```text
-Repo Level 2：Long-term AI Project
+Repo Level 2 runtime-lite：Recurring Report Workflow
 ```
 
-原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告與回測，不預設升級為 Agent / Product System。
+原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告、回測與推播後修正。它需要輕量流程化，但不需要完整 Agent Product Runtime。
 
-若未來新增 radar module、搜尋 retry module 或回測 module，應使用 Module Level 判斷，不直接把整個 repo 升成 Level 3。
+若未來新增 radar module、搜尋 retry module 或回測 module，應使用 Module Level 判斷，不直接把整個 repo 升成 Level 3A / 3B。
 
 ## 每日執行順序
 
@@ -99,9 +112,9 @@ Repo Level 2：Long-term AI Project
 | 檔案 | 作用 |
 |---|---|
 | `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
-| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2，以及未來 module 的分級規則 |
+| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2 runtime-lite，以及未來 module 的分級規則 |
 | `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
-| `configs/technology_development.yml` | 定義科技發展與突破雷達。科技發展是獨立主雷達，包含 AI 驅動突破與非 AI 的單獨科技突破 |
+| `configs/technology_development.yml` | 定義科技發展與突破雷達 |
 | `configs/edge_case_discovery.yml` | 定義每日必掃全球特殊應用、非主流案例、地方試點、早期商業模式與社群弱訊號 |
 | `configs/search_retry_protocol.yml` | 定義找不到資料時的每日換搜尋方法規則，至少 retry 3 種方式 |
 | `templates/final_synthesis_template.md` | 定義報告最後的舊版/新版比對、全指標總和彙總、科技發展路徑判斷 |
@@ -109,16 +122,6 @@ Repo Level 2：Long-term AI Project
 | `research/README.md` | 方法論研究與公開參考的保存規範 |
 
 ## 報告索引
-
-| 日期 | 檔案 | 本次整理內容 |
-|---|---|---|
-| 2026-05-30 | `reports/2026/2026-05-30.md` | 跨日去重更新版；含 BTC ETF 連續 9 日流出、台灣 GDP 上修、穩定幣微降、OpenAI pre-IPO 去重處理、社群商務與消費壓力事件簇 |
-| 2026-05-31 | `reports/2026/2026-05-31.md` | 含 AI 基建、台灣 GDP、Fed／ECB 利率風險、加密 ETF 流出、pre-IPO perp、社群 AI 假內容與潛力鏈生態動向 |
-| 2026-06-01 | `reports/2026/2026-06-01.md` | 新版完整架構播報；含 OpenAI pre-IPO 去重、零售品牌完整雷達、潛力鏈生態動向、台灣 GDP vs 消費信心、AI 晶片出口管制 |
-| 2026-06-07 | `reports/2026/2026-06-07.md` | 含原始推播、V2.1 重做版、AI Agent／生產力便車／潛力鏈生態修正、零售品牌／商圈／百貨補洞 |
-| 2026-06-08 | `reports/2026/2026-06-08.md` | 含當日推播、Strategy／STRC 漏抓反思、結構性漏抓檢查、最終推播規則整合 |
-| 2026-06-26 | `reports/2026/2026-06-26.md` | 含 Seedance 2.0／AI 影片短劇產業替代漏抓回測，以及零售全域搜尋模型更新：線上 × 線下 × 整合層、百貨／購物中心、街邊店、OMO、CDP、LBS、Retail Media、AI 導購 |
-| 2026-06-27 | `reports/2026/2026-06-27.md` | 新版「雷達覆蓋與證據分級」播報；含全球市場 AI 成本通膨、加密 ETF／Stablecoin／Perp DEX、企業 Agent 工作流、618 消費疲乏、氣候商品企劃、四大指標整合趨勢判斷 |
 
 完整索引詳見：`reports/INDEX.md`
 
