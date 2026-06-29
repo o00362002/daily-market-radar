@@ -1,0 +1,18 @@
+name: mount-check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mount-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run mount integrity check
+        run: bash check_mount_integrity.sh
