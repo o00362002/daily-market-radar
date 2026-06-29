@@ -1,24 +1,57 @@
-# Daily Market Radar｜Agent Definition Map
+# Daily Market Radar｜AGENT_DEFINITION_MAP
 
 本檔定義 `daily-market-radar` 中誰被視為 Agent、哪些只是 Workflow / Skill / Tool / Loop。
 
-本 repo 目前不是正式 Agent runtime，而是每日市場情報雷達系統的規格與報告作業中心。
+本 repo 目前不是正式 Agent runtime，而是 Level 2 Runtime-Lite 的每日市場情報雷達系統。
+
+Agent map 用來讓執行順序可讀、可檢查、可掛載，不代表升級成 Level 3B。
 
 ---
 
-## Agent 判斷公式
+## 1. Agent 判斷公式
 
 ```text
 完整情報任務目標 → Agent
 固定情報流程 → Workflow
 可重複判斷能力 → Skill
-搜尋、讀取、匯總操作 → Tool
+搜尋、讀取、檢查、格式化操作 → Tool
 檢查、去重、回測、人工審核 → Loop
 ```
 
 ---
 
-## Agents
+## 2. Primary Agent
+
+### radar_report_agent
+
+| 欄位 | 內容 |
+|---|---|
+| name | `radar_report_agent` |
+| purpose | 產出每日市場雷達報告，並確保搜尋、主張風險、覆蓋率、格式與回測紀錄可檢查 |
+| workflow | `workflows/daily_radar_workflow.md` |
+| skills | `signal_search_skill`, `claim_risk_check_skill`, `coverage_check_skill`, `report_formatting_skill` |
+| tools | `signal_search_tool`, `claim_risk_checker`, `coverage_checker`, `report_formatter` |
+| loops | `missed_case_backtest_loop` |
+| outputs | `reports/YYYY/YYYY-MM-DD.md`, `reports/backtests/` when needed |
+| failure_mode | 若工具鏈任一必要步驟未完成，只能標記 `partial change` |
+
+---
+
+## 3. Required execution order
+
+```text
+1. signal_search_tool
+2. claim_risk_checker
+3. coverage_checker
+4. report_formatter
+5. missed_case_backtest_loop, if missed case / adjustment evidence exists
+```
+
+Do not run `report_formatter` before `claim_risk_checker` and `coverage_checker` are complete.
+
+---
+
+## 4. Supporting Radar Agents
 
 | Agent | 定位 | 為什麼是 Agent |
 |---|---|---|
@@ -33,7 +66,7 @@
 
 ---
 
-## Non-Agent List
+## 5. Non-Agent List
 
 | 名稱 | 目前身份 | 原因 |
 |---|---|---|
@@ -46,16 +79,23 @@
 
 ---
 
-## Upgrade Candidates
+## 6. Execution evidence
 
-| Candidate | 目前身份 | 升級條件 |
-|---|---|---|
-| Edge Case Discovery Agent | Workflow candidate | 若全球特殊應用搜尋成為獨立雷達與回測閉環，可升級 |
-| Source Quality Agent | Loop candidate | 若來源可信度評估獨立管理，可升級 |
-| Indicator Tracking Agent | Workflow candidate | 若固定指標自動化與異常偵測成熟，可升級 |
+Every completed report should be able to answer:
+
+```text
+Read set:
+Signals searched:
+signal_search_tool complete? yes / no
+claim_risk_checker complete? yes / no
+coverage_checker complete? yes / no
+report_formatter complete? yes / no
+Backtest / adjustment needed? yes / no
+Status: complete / partial change / No downstream sync required
+```
 
 ---
 
-## Boundary Rule
+## 7. Boundary Rule
 
 不要把每個雷達指標都升級成 Agent。Agent 應負責完整情報目標，指標、搜尋語、模板與報告欄位應維持 Skill / Tool / Config / Loop。
