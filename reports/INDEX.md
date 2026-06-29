@@ -13,6 +13,7 @@
 | 2026-06-27 | [`reports/2026/2026-06-27.md`](2026/2026-06-27.md) | 新版「雷達覆蓋與證據分級」播報；含全球市場 AI 成本通膨、加密 ETF／Stablecoin／Perp DEX、企業 Agent 工作流、618 消費疲乏、氣候商品企劃、四大指標整合趨勢判斷 |
 | 2026-06-28 | [`reports/2026/2026-06-28.md`](2026/2026-06-28.md) | 整合原始新版播報與新規則測試播報；含 edge case discovery、search retry protocol 回測，補入 Workstream、clinical workflow agent、RFID material sensing、retail AI accessibility、Georgia GELT、Life Biosciences reverse-aging trial 等非主流候選 |
 | 2026-06-29 | [`reports/2026/2026-06-29.md`](2026/2026-06-29.md) | 新版 daily-market-radar 重新播報；標示硬閘門未完整、含 AI agent payments、x402、AI fraud retail、韓國 AI / 晶片 mega-project、AI data center 電力瓶頸；同步新增台灣來源規則：商業周刊與 HBR 哈佛商業評論 |
+| 2026-06-29 | [`reports/2026/2026-06-29-gemini-backtest.md`](2026/2026-06-29-gemini-backtest.md) | Gemini 執行版本回測；保留 IBM sub-1nm、Alphabet 入 Dow、Russell rebalancing、space-based data centers、fashion DPP、mRNA cancer vaccine 等可回補訊號；降級 WEF 2026 十大新興技術、CATL personal token factory、EO 14409、未驗證 Trendalytics 數字等高風險內容 |
 
 ## 檔案命名規則
 
