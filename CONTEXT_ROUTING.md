@@ -1,8 +1,10 @@
-# CONTEXT_ROUTING｜daily-market-radar
+# daily-market-radar｜CONTEXT_ROUTING
+
+本檔定義每日市場情報執行時的脈絡讀取順序、讀取深度與 fallback 規則。
+
+---
 
 ## 1. Architecture Adoption
-
-This repo is independent. It adopts `Human-AI Collaboration Brain` as an architecture method and AI collaboration pattern.
 
 ```text
 Adopted architecture: Human-AI Collaboration Brain
@@ -11,74 +13,104 @@ Architecture role: project architecture method / documentation pattern / AI coll
 Runtime dependency: none
 Parent repo: none
 Content source of truth: daily-market-radar
-Repo Level: Level 2 runtime-lite
+Repo Level: Level 2 Runtime-Lite Brain
+Mount mode: thin mount + Execution Edge
 ```
 
-架構問題可參考 `Human-AI-Collaboration-Brain`；專案內容問題以本 repo 為準。
+架構問題可參考 `Human-AI-Collaboration-Brain`；專案內容、每日雷達、搜尋規格與報告輸出以本 repo 為準。
 
 ---
 
-## 2. Default Minimal Read
+## 2. Source of Truth Priority
+
+若文件互相衝突，依以下順序判斷：
 
 ```text
-PROJECT_OS_MOUNT.md
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-ADOPTION_LEVELS.md
-CONTEXT_ROUTING.md
+1. SYSTEM_PROMPT.md
+2. RUNBOOK.md
+3. CHECKLIST.md
+4. configs/*.yml / configs/*.md
+5. memory/*.md
+6. templates/*.md
+7. reports/INDEX.md + recent reports/YYYY/YYYY-MM-DD.md
+8. README.md / PROJECT_MAP.md / HIGH_LEVEL_INDEX.md / CURRENT_STATE.md / CURRENT_DECISIONS.md
 ```
 
----
-
-## 3. Task Routing
-
-| Task Type | Task Level | Read First | Read If Needed | Do Not Read By Default |
-|---|---:|---|---|---|
-| quick_answer | T0 | README.md, PROJECT_OS_MOUNT.md | HIGH_LEVEL_INDEX.md | archive/ |
-| status_check | T1 | CURRENT_STATE.md, ADOPTION_LEVELS.md | PROJECT_MAP.md | archive/ |
-| decision_trace | T2 | CURRENT_DECISIONS.md, ADOPTION_LEVELS.md | reports/, research/ | full modules |
-| architecture_change | T3 | PROJECT_MAP.md, CURRENT_STATE.md, CURRENT_DECISIONS.md, ADOPTION_LEVELS.md | adopted architecture specs | archive/ |
-| module_work | T2 | PROJECT_MAP.md, CURRENT_STATE.md | target module docs | unrelated modules |
-| tool_or_provider | T3 | ADOPTION_LEVELS.md, tools/, data_contracts/ | related module docs | unrelated reports |
-| runtime_execution | T4 | workflow / agent / loop docs | templates / approval / reports | archive/ |
+README 與入口層負責導航；每日實際執行以 RUNBOOK / CHECKLIST / configs 為硬規則。
 
 ---
 
-## 4. Module Routing
+## 3. Required Context Loading
+
+每日報告開始前必須讀取：
 
 ```text
-每日報告：SYSTEM_PROMPT.md, configs/, memory/, templates/, reports/
-雷達設定：configs/
-漏抓與 watchlist：memory/
-歷史報告：reports/
-輸出格式：templates/
-```
-
----
-
-## 5. Escalation Rule
-
-```text
-資訊不足 → 加讀 CURRENT_DECISIONS.md
-涉及架構 → 加讀 PROJECT_MAP.md / ADOPTION_LEVELS.md
-涉及 module → 只讀目標 module
-涉及工具 → 加讀 tools / data_contracts
-涉及執行 → 加讀 workflow / loop / approval
-仍不足 → 明確說明缺口，不要自行假設
-```
-
----
-
-## 6. Human Maintenance Rule
-
-人類可以調整任務類型、任務等級、讀取清單與升級規則。調整後需同步檢查：
-
-```text
+SYSTEM_PROMPT.md
+README.md
 PROJECT_MAP.md
 HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 ADOPTION_LEVELS.md
-PROJECT_OS_MOUNT.md
+CONTEXT_ROUTING.md
+RUNBOOK.md
+CHECKLIST.md
+configs/radars.yml
+configs/triggers.yml
+configs/evidence.yml
+configs/source_strategy.md
+configs/indicator_tracking.yml
+configs/technology_development.yml
+configs/edge_case_discovery.yml
+configs/search_retry_protocol.yml
+memory/missed_cases.md
+memory/watchlist.md
+reports/INDEX.md
+templates/daily_report_template.md
+templates/final_synthesis_template.md
+workflows/daily_report_runbook.md
+loops/daily_report_quality_loop.yml
+skill_specs/*.skill.md
 ```
+
+---
+
+## 4. Reports Loading Rule
+
+歷史報告正確路徑為：
+
+```text
+reports/YYYY/YYYY-MM-DD.md
+```
+
+讀取順序：
+
+```text
+1. 先讀 reports/INDEX.md
+2. 依 INDEX 讀最近 3–7 份 reports/YYYY/YYYY-MM-DD.md
+3. 若 INDEX 無法讀取，嘗試直接讀本週與上週日期路徑
+4. 若仍失敗，才標示「近期 reports 無法讀取，歷史回測可能不完整」
+```
+
+不得直接嘗試 `reports/YYYY-MM-DD.md` 後就判定歷史資料不存在。
+
+---
+
+## 5. Context Scope
+
+每日報告只需讀取近期 reports，不需讀取全部歷史報告。除非使用者要求回測特定事件，才擴大讀取範圍。
+
+---
+
+## 6. Failure Disclosure
+
+若任何必讀檔案無法讀取，必須在報告最上方列出：
+
+```text
+已讀取：...
+無法讀取：...
+影響：...
+補救：使用哪個 fallback 規則
+```
+
+不得寫成籠統的「部分資料無法讀取」後不說明原因。
