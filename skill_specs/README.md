@@ -2,17 +2,51 @@
 
 Skill 是每日市場情報工作流中可重複使用的判斷能力。
 
+---
+
+## Required Daily Radar Skills
+
+```text
+signal_search_skill
+claim_risk_check_skill
+coverage_check_skill
+report_formatting_skill
+```
+
+These skills support the required tool chain:
+
+```text
+signal_search_tool
+→ claim_risk_checker
+→ coverage_checker
+→ report_formatter
+```
+
+---
+
 ## Search Skills
 
+- `signal_search_skill`：把 radar configs / watchlist / missed cases 轉成搜尋目標
 - `query_expansion.skill`：同義詞、跨語言、區域詞擴展
 - `source_triage.skill`：官方、媒體、研究、社群來源初篩
 - `edge_signal_detection.skill`：弱訊號與早期案例辨識
 
+---
+
 ## Evidence Skills
 
+- `claim_risk_check_skill`：檢查主張風險、來源、日期與推論邊界
 - `evidence_grading.skill`：高 / 中 / 低 / 資料不足分級
 - `causality_check.skill`：區分事實、推論、候選訊號
 - `cross_source_validation.skill`：交叉驗證
+
+---
+
+## Coverage Skills
+
+- `coverage_check_skill`：檢查固定雷達桶、watchlist 與漏抓案例覆蓋
+
+---
 
 ## Radar Skills
 
@@ -22,8 +56,11 @@ Skill 是每日市場情報工作流中可重複使用的判斷能力。
 - `technology_breakthrough_classification.skill`：AI / 非 AI 科技突破分類
 - `taiwan_relevance_mapping.skill`：台灣產業關聯、缺口與行動提醒
 
+---
+
 ## Report Skills
 
+- `report_formatting_skill`：將已檢查內容轉成最終報告格式
 - `cross_day_dedup.skill`：跨日去重
 - `gap_explanation.skill`：資料缺口說明
 - `final_synthesis.skill`：整合今日趨勢與下一步觀察
