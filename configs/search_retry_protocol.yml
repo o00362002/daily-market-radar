@@ -1,59 +1,78 @@
 # Daily Search Retry Protocol
 # 本檔定義每日搜尋找不到資料時的換方法規則。
-# 目的：避免某一領域因第一輪搜尋沒有結果，就被寫成「無資料」或被省略。
+# 目的：避免某一領域因第一輪搜尋沒有結果，就被寫成「無資料」或被省略；也避免用主流大眾新聞硬補小眾候選訊號。
 
 search_retry_protocol:
   required: true
-  principle: "找不到資料不是結束，而是啟動換搜尋方法。每日報告若某個必掃雷達沒有抓到重大訊號或特殊候選，必須至少執行 3 種 retry，再標示資料不足。"
+  principle: "找不到資料不是結束，而是啟動換搜尋方法。每日報告若某個必掃雷達沒有抓到重大訊號或小眾潛力候選，必須至少執行 3 種 retry，再標示資料不足或無合格候選更新。不得用主流大眾新聞、重複新聞或低品質農場文硬補。"
 
   retry_when:
-    - 某雷達只抓到主流大眾新聞，沒有特殊應用或早期弱訊號。
+    - 某雷達只抓到主流大眾新聞，沒有特殊應用、早期弱訊號或小眾潛力候選。
+    - 某核心領域未達到 3 則小眾潛力候選訊號。
     - 某雷達沒有資料或只有低品質農場內容。
     - 某雷達的結果過度集中在英文主流媒體。
     - 某雷達只出現大公司新聞，沒有小公司、地方、研究、社群、開發者或試點案例。
+    - 搜尋結果與最近 7 日 reports 重複，且沒有新增官方公告、數據、資金流、監管、企業導入、就業證據或台灣映射。
     - 使用者指出漏抓後，下一次同類搜尋仍未出現。
 
   minimum_retry_count: 3
 
   retry_methods:
     change_keywords:
-      description: "換關鍵字層級。從新聞詞改成應用詞、案例詞、試點詞、問題詞、職能詞、商業模式詞。"
+      description: "換關鍵字層級。從新聞詞改成應用詞、案例詞、試點詞、問題詞、職能詞、商業模式詞、失敗詞、反面成本詞。"
       examples:
         - from: "AI retail news"
           to:
             - "AI retail pilot case study"
             - "AI shopping assistant small brand experiment"
             - "store operations AI workflow case"
+            - "AI retail fraud return abuse synthetic identity"
         - from: "RWA latest"
           to:
             - "RWA pilot small issuer"
             - "tokenized invoice real world asset case"
             - "RWA secondary liquidity holders turnover"
+            - "RWA failed pilot liquidity problem"
+        - from: "retail sales news"
+          to:
+            - "local mall tenant mix change small brand"
+            - "street retail vacancy local market"
+            - "fashion inventory discount small retailer case"
     change_language:
       description: "換語言搜尋。英文無資料時，補繁中、簡中、日文、韓文、歐洲語系或事件所在地語言。"
       examples:
         - "AI Agent 実証実験 小売"
         - "소매 AI 에이전트 사례"
         - "IA commerce détail expérimentation"
+        - "AI代理 小企业 工作流 案例"
+        - "百貨 商圈 小品牌 快閃 案例"
     change_source_type:
-      description: "換來源類型。主流媒體無資料時，改查官方公告、地方政府、startup blog、研究實驗室、GitHub、Hacker News、Product Hunt、Threads、Reddit、產業協會。"
+      description: "換來源類型。主流媒體無資料時，改查官方公告、地方政府、startup blog、研究實驗室、GitHub、Hacker News、Product Hunt、Threads、Reddit、產業協會、交易所公告、監管沙盒、地方媒體。"
     change_level:
-      description: "換層級。從大公司 / 大趨勢改查小公司、地方試點、單一門市、單一城市、單一產品、單一開發者工具。"
+      description: "換層級。從大公司 / 大趨勢改查小公司、地方試點、單一門市、單一城市、單一產品、單一開發者工具、單一研究原型、單一監管沙盒。"
     change_time_window:
-      description: "換時間窗。今天無資料時，回補 7 天 / 30 天事件簇，但必須標示原事件時間與再發酵時間。"
+      description: "換時間窗。今天無資料時，回補 7 天 / 30 天事件簇，但必須標示原事件時間、再發酵時間與最近 7 日 reports 是否已播過。"
     search_negative_space:
-      description: "搜尋反向或失敗案例。若找不到成功案例，查 failure、rollback、abuse、lawsuit、pricing backlash、users complain、job loss、fraud。"
+      description: "搜尋反向或失敗案例。若找不到成功案例，查 failure、rollback、abuse、lawsuit、pricing backlash、users complain、job loss、fraud、return abuse、accessibility gap、security risk。"
     search_metrics_instead_of_news:
-      description: "改查指標資料而不是新聞，包括 TVL、fees、DAU、foot traffic、job postings、pricing page、release notes、GitHub stars、usage limits。"
+      description: "改查指標資料而不是新聞，包括 TVL、fees、DAU、foot traffic、job postings、pricing page、release notes、GitHub stars、usage limits、retail vacancy、mall leasing、tokenized asset turnover、stablecoin supply。"
+    check_history_reports:
+      description: "檢查最近 7 日 reports。若事件已播過且無新增資料，不得重播；必須寫『歷史已播，今日無新增更新』。"
 
   output_requirement:
     if_still_no_result:
       - 必須寫明已嘗試哪些 retry 方法。
-      - 必須區分「真的無重大更新」與「搜尋仍不完整」。
+      - 必須區分「真的無重大更新」、「無合格小眾候選更新」與「搜尋仍不完整」。
       - 必須提出下一次要換的資料源或關鍵字。
+      - 不得為了湊滿 3 則而放入主流大眾新聞或低品質來源。
+    if_duplicate_with_history:
+      - 必須標示「歷史已播，今日無新增更新」。
+      - 只有新增官方公告、新數據、新資金流 / 價格 / 交易量、新監管動作、新企業導入、新就業 / 裁員 / 招聘證據、新台灣映射、或候選訊號升級 / 降級，才可重新列入。
 
   quality_gate:
-    - 每個無資料雷達是否至少 retry 3 種方式？
+    - 每個無資料或候選不足的雷達是否至少 retry 3 種方式？
     - 是否有換語言、換來源、換關鍵字或換層級？
-    - 是否把 retry 過程寫進資料缺口或回測面板？
+    - 是否檢查最近 7 日 reports 並排除無新增資料的重複內容？
+    - 是否把 retry 過程寫進資料缺口、無更新說明或回測面板？
     - 是否避免直接用「無資料」結束？
+    - 是否避免用主流大眾新聞硬補小眾潛力候選？
