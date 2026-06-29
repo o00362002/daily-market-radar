@@ -1,14 +1,35 @@
 # AGENTS.md
 
-Thin-mount entry for agents.
+Agent-first entry for AI agents, Codex, Claude Code, and other repo-working executors.
 
-This file is not the source of truth. It is the execution entry for `daily-market-radar`.
+This file is a Projection adapter and Execution Edge entry point for `daily-market-radar`.
+
+It is not the source of truth.
 
 Level: Level 2 Runtime-Lite Brain.
 
 ---
 
-## v1.18 Mount Contract
+## 1. Entry Boundary
+
+```text
+AGENTS.md = Agent-first execution entry
+SYSTEM_PROMPT.md = local instruction policy / daily radar quality policy
+PROJECT_MAP.md = project navigation projection
+HIGH_LEVEL_INDEX.md = high-level projection index
+CURRENT_STATE.md = current reality
+CURRENT_DECISIONS.md = accepted decisions
+DEPENDENCY_MAP.md = dependency map
+brain.manifest.yaml = thin mount manifest
+```
+
+Agent / Codex / Claude Code execution must start here.
+
+`SYSTEM_PROMPT.md` may define daily radar quality standards and report rules, but it is not the Agent-first entry and does not replace this file.
+
+---
+
+## 2. v1.18 Mount Contract
 
 Mother brain:
 
@@ -28,36 +49,50 @@ specs/execution_edge_module_model.md
 specs/programmable_control_layer.md
 ```
 
-Execution path:
+Core rule:
 
 ```text
-Entry
-→ Dependency
-→ Role Boundary
-→ Plan
-→ Execution
-→ Post-Action Check / Backtest
-→ Reality / Sync
-```
-
-Role boundary:
-
-```text
-Brain never executes.
-Agent executes but cannot approve itself.
-Workflow orders forward execution only.
-Skill judges.
-Tool operates without judgement.
-Loop rejects, retries, backtests, and proposes improvement.
-Programmable Control enforces only what code can check.
-Human final review is required for non-mechanizable decisions.
-Decision Gate promotes evidence into system change.
-Memory stores only confirmed state and decisions.
+Level controls structure depth.
+Execution Contract is universal.
+Role Boundary Contract is universal.
+Adoption Layer is not Execution Edge.
 ```
 
 ---
 
-## Convergence Mount Rules
+## 3. Read First
+
+Agent execution must read in this order:
+
+```text
+1. AGENTS.md
+2. SYSTEM_PROMPT.md
+3. PROJECT_MAP.md
+4. HIGH_LEVEL_INDEX.md
+5. CURRENT_STATE.md
+6. CURRENT_DECISIONS.md
+7. README.md
+8. DEPENDENCY_MAP.md
+9. brain.manifest.yaml
+```
+
+Then read task-specific files in:
+
+```text
+configs/
+memory/
+templates/
+workflows/
+loops/
+reports/
+evals/
+```
+
+If required files cannot be read, mark the work as `partial change`; do not pretend the read happened.
+
+---
+
+## 4. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -96,51 +131,40 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## Parent framework rules
+## 5. Role Boundary Gate
+
+Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
 ```text
-Human-AI-Collaboration-Brain/rules/universal_execution_contract.md
-Human-AI-Collaboration-Brain/rules/role_boundary_contract.md
-Human-AI-Collaboration-Brain/specs/programmable_control_layer.md
-Human-AI-Collaboration-Brain/rules/high_level_index_update_policy.md
-Human-AI-Collaboration-Brain/rules/optional_adapter_applicability_check.md
+Brain never executes.
+Agent executes but cannot approve itself.
+Workflow orders forward execution only.
+Skill judges.
+Tool operates without judgement.
+Loop rejects, retries, backtests, and proposes improvement.
+Programmable Control enforces only what code can check.
+Human final review is required for non-mechanizable decisions.
+Decision Gate promotes evidence into system change.
+Memory stores only confirmed state and decisions.
 ```
 
-Core rule:
+---
 
-```text
-Level controls structure depth.
-Execution Contract is universal.
-Role Boundary Contract is universal.
-Adoption Layer is not Execution Edge.
-```
-
-Read first:
-
-1. SYSTEM_PROMPT.md
-2. PROJECT_MAP.md
-3. HIGH_LEVEL_INDEX.md
-4. CURRENT_STATE.md
-5. CURRENT_DECISIONS.md
-6. README.md
-7. DEPENDENCY_MAP.md
-8. brain.manifest.yaml
-
-Then read task-specific files in configs, memory, templates, workflows, loops, and recent reports.
-
-Level 2 execution path:
+## 6. Level 2 Execution Path
 
 ```text
 Entry Gate: read the required entry files above
 Dependency Gate: check impacted configs, memory, templates, workflows, loops, and reports
-Role Boundary Gate: classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory
+Role Boundary Gate: classify the task boundary
 Plan Gate: state intended report / config / workflow change
 Execution Gate: follow the relevant workflow, checklist, template, or loop
 Post-Action Check / Backtest Gate: check radar coverage, missed cases, evidence, and growth control when applicable
 Reality / Sync Gate: compare planned vs actual result before declaring complete
 ```
 
-Completion check:
+---
+
+## 7. Completion Check
 
 - radar coverage
 - fixed indicators
