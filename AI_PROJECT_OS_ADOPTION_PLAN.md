@@ -1,3 +1,32 @@
+# FROZEN HISTORY｜Daily Market Radar｜AI Project OS Adoption Plan
+
+Frozen status: historical reference only.
+
+This file preserves the old AI Project OS adoption planning context. It is no longer a current routing entry, source of truth, or active architecture rule.
+
+Current mount architecture:
+
+```text
+Mother brain: o00362002/Human-AI-Collaboration-Brain
+Current child entry: brain.manifest.yaml + AGENTS.md
+Current rules: v1.18 convergence mount contract
+```
+
+Do not use this file to override:
+
+```text
+brain.manifest.yaml
+AGENTS.md
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+PROJECT_MAP.md
+HIGH_LEVEL_INDEX.md
+```
+
+---
+
+# Historical Content
+
 # Daily Market Radar｜AI Project OS Adoption Plan
 
 本檔規劃 `daily-market-radar` 如何套用 `Reference-Implementation-of-AI-Project-Operating-System`。
@@ -37,41 +66,3 @@ archive/
 | Research | 尚未獨立 | 可新增 |
 
 ---
-
-## 3. 下一階段建議
-
-1. 將 `HIGH_LEVEL_INDEX.md` 納入所有入口讀取順序。
-2. 新增 `research/`，保存方法論研究與公開參考。
-3. 規則採納後，再同步到 `SYSTEM_PROMPT.md`、`configs/`、`templates/`、`CURRENT_DECISIONS.md`。
-4. 可考慮新增 `loops/`，把回測與漏抓檢查標準化。
-
----
-
-## 4. 建議結構
-
-```text
-daily-market-radar/
-├─ SYSTEM_PROMPT.md
-├─ PROJECT_MAP.md
-├─ HIGH_LEVEL_INDEX.md
-├─ CURRENT_STATE.md
-├─ CURRENT_DECISIONS.md
-├─ README.md
-├─ configs/
-├─ memory/
-├─ templates/
-├─ reports/
-├─ research/
-├─ loops/
-└─ archive/
-```
-
----
-
-## 5. 保留原則
-
-- `reports/` 是歷史報告與回測依據。
-- `configs/` 是結構化規則來源。
-- `templates/` 是輸出格式來源。
-- `memory/` 是漏抓與觀察清單。
-- `HIGH_LEVEL_INDEX.md` 只做高階索引，不放完整細節。
