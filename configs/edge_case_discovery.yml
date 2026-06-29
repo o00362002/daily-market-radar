@@ -4,7 +4,7 @@
 
 edge_case_discovery:
   required: true
-  principle: "每日報告不能只輸出主流新聞。候選訊號必須優先抓小眾、非主流、早期、地方試點、小公司、研究原型、開發者工具、特殊商業模式、監管沙盒、失敗案例、反面成本或社群弱訊號。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
+  principle: "每日報告不能只輸出主流新聞。大型重要新聞與小眾潛力候選訊號是兩個不同層級，兩者都必須輸出，不可互相替代。候選訊號必須優先抓小眾、非主流、早期、地方試點、小公司、研究原型、開發者工具、特殊商業模式、監管沙盒、失敗案例、反面成本或社群弱訊號。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
 
   candidate_signal_definition:
     name: "小眾潛力候選訊號"
@@ -18,30 +18,69 @@ edge_case_discovery:
       - 單純大公司公告，除非能拆出非主流應用、產品用量經濟、實際導入、風險或弱訊號
       - 已在最近 7 日 reports 重複播過且沒有新增資料的事件
       - 為了湊數而放入低品質農場文或無法回查來源
+      - 用大型重要新聞假裝已完成小眾候選訊號
 
-  output_position: "今日候選訊號之前或之內；必須有獨立段落：今日小眾潛力候選訊號。"
+  output_position: "大型重要新聞段落之後，今日候選訊號之前或之內；必須有獨立段落：今日小眾潛力候選訊號。"
 
   minimum_daily_output:
-    rule: "每個核心領域至少輸出 3 則小眾潛力候選訊號；若某領域今日真的沒有合格候選，必須寫『無合格候選更新』並列出已嘗試的 retry 方法，不得用大眾新聞硬補。"
+    rule: "每日正式播報必須同時滿足兩個最低量：每個核心領域至少 5 則大型重要新聞，且每個核心領域至少 3 則小眾潛力候選訊號。6 個核心領域合計每日最低 30 則大型重要新聞 + 18 則小眾潛力候選訊號。此為正式播報硬閘門，只可多不可少。"
+    large_important_news:
+      required: true
+      name: "大型重要新聞 / 主流重大訊號"
+      minimum_per_core_domain: 5
+      required_core_domain_count: 6
+      required_total_minimum: 30
+      cannot_be_replaced_by_candidates: true
+      description: "大型重要新聞用來覆蓋主流市場、政策、公司、資金流、產業與重大事件；小眾候選用來補早期弱訊號與非主流案例。兩者不可互相替代。"
+    niche_candidates:
+      required: true
+      name: "小眾潛力候選訊號"
+      minimum_per_core_domain: 3
+      required_core_domain_count: 6
+      required_total_minimum: 18
+      cannot_be_replaced_by_large_news: true
+      description: "小眾候選必須偏早期、非主流、地方試點、小公司、研究原型、開發者工具、特殊商業模式、監管沙盒、社群弱訊號、失敗案例或反面成本。"
+    hard_gate:
+      official_report_pass_condition: "6 個核心領域皆各自達到 5 則大型重要新聞 + 3 則小眾潛力候選訊號，或每個不足欄位皆已逐領域列出至少 3 種 retry 方法、retry 結果、仍不足原因與下一步補查來源。"
+      if_not_met:
+        report_status: "不完整 / 未通過每日訊號硬閘門"
+        required_wording: "每日訊號硬閘門未通過：本報告未達每核心領域 5 則大型重要新聞 + 3 則小眾潛力候選訊號，或未逐領域完成 retry。本報告不可視為符合新版 daily-market-radar 完整規格。"
+      prohibited_wording:
+        - "小眾候選未達標" # 不可單獨使用，因為太模糊
+        - "今日無資料" # 不可在未 retry 前使用
+        - "濃縮版達標" # 濃縮不等於通過硬閘門
+        - "大型新聞已涵蓋小眾候選" # 大型新聞不可替代小眾候選
+        - "小眾候選已涵蓋大型新聞" # 小眾候選不可替代大型新聞
     core_domains:
       - id: ai_agents_workflow
         name: AI 模型 / Agent / 工作流替代
+        minimum_large_news: 5
         minimum_candidates: 3
       - id: crypto_rwa_agent_payments
         name: 區塊鏈 / 加密 / RWA / Agent payments
+        minimum_large_news: 5
         minimum_candidates: 3
       - id: retail_consumer_social_fashion
         name: 零售 / 消費 / 社群 / 服飾
+        minimum_large_news: 5
         minimum_candidates: 3
       - id: global_markets_capital_geopolitics
         name: 全球市場 / 資金流 / 地緣政治
+        minimum_large_news: 5
         minimum_candidates: 3
       - id: technology_development
         name: 科技發展 / 機器人 / 生技 / 能源 / 半導體
+        minimum_large_news: 5
         minimum_candidates: 3
       - id: labor_consumption_taiwan
         name: 勞動 / 消費壓力 / 台灣本地訊號
+        minimum_large_news: 5
         minimum_candidates: 3
+    per_large_news_requirements:
+      - 每則大型重要新聞必須附可回查來源與發布 / 事件時間
+      - 每則必須標示所屬核心領域、事件、事實、證據、影響、台灣映射、下一步觀察
+      - 若同一事件跨領域，必須標示受影響雷達，但不得重複灌水計數；同一事件原則上只能作為一個核心領域的主要計數
+      - 已在最近 7 日 reports 播過且無新增資料者不得重播，只能標示歷史已播今日無新增更新
     per_candidate_requirements:
       - 每則必須附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索
       - 每則必須標示來源類型、地區、領域、證據等級、為什麼小眾、為什麼可能重要、不能下的結論、台灣 / 使用者映射、下一步驗證
@@ -50,7 +89,7 @@ edge_case_discovery:
   historical_deduplication:
     required: true
     lookback_days: 7
-    rule: "輸出候選訊號前必須檢查最近 7 日 reports。若事件已在歷史報告出現，今日不得重播原始內容。只有出現新官方公告、新數據、新資金流 / 價格 / 交易量、新監管動作、新企業導入、新就業 / 裁員 / 招聘證據、新台灣映射、或候選訊號升級 / 降級時，才可重新列入。"
+    rule: "輸出大型重要新聞與小眾候選訊號前都必須檢查最近 7 日 reports。若事件已在歷史報告出現，今日不得重播原始內容。只有出現新官方公告、新數據、新資金流 / 價格 / 交易量、新監管動作、新企業導入、新就業 / 裁員 / 招聘證據、新台灣映射、或候選訊號升級 / 降級時，才可重新列入。"
     output_when_duplicate_no_update: "歷史已播，今日無新增更新。"
 
   domains:
@@ -141,7 +180,18 @@ edge_case_discovery:
       description: "最近 7 日 reports 是否已播過；若已播過，是否有實質新增資料。"
 
   output_template:
-    fields:
+    large_news_fields:
+      - 大型重要新聞
+      - 核心領域
+      - 來源類型
+      - 報導 / 原始來源
+      - 發布 / 事件時間
+      - 為什麼重要
+      - 證據等級
+      - 歷史報告去重狀態
+      - 台灣 / 使用者映射
+      - 下一步觀察
+    candidate_fields:
       - 候選事件
       - 地區 / 領域
       - 來源類型
@@ -155,10 +205,14 @@ edge_case_discovery:
       - 下一步驗證
 
   quality_gate:
+    - 今天是否每個核心領域至少輸出 5 則大型重要新聞？
     - 今天是否每個核心領域至少輸出 3 則小眾潛力候選訊號？
-    - 若某領域未滿 3 則，是否明確寫「無合格候選更新」並列出 retry 方法？
-    - 是否避免把主流大眾新聞當成候選訊號？
-    - 每則候選是否附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索？
+    - 合計是否至少 30 則大型重要新聞 + 18 則小眾潛力候選訊號？
+    - 若任一領域大型重要新聞未滿 5 則，是否明確寫出 retry 方法、結果、仍不足原因與下一步補查？
+    - 若任一領域小眾候選未滿 3 則，是否明確寫出 retry 方法、結果、仍不足原因與下一步補查？
+    - 是否避免把主流大眾新聞當成小眾候選訊號？
+    - 是否避免用小眾候選替代大型重要新聞？
+    - 每則大型重要新聞與候選是否附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索？
     - 是否檢查最近 7 日 reports 並排除無新增資料的重複內容？
     - 是否避免把低證據候選誤寫成事實？
-    - 是否說明為什麼這不是普通大眾新聞？
+    - 是否說明為什麼候選不是普通大眾新聞？
