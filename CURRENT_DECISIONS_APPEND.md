@@ -1,3 +1,27 @@
+# FROZEN HISTORY｜daily-market-radar｜CURRENT_DECISIONS_APPEND
+
+Frozen status: historical decision note only.
+
+This file preserves an old decision append note. It is no longer a current routing entry, source of truth, or active decision file.
+
+Current decision source:
+
+```text
+CURRENT_DECISIONS.md
+```
+
+Current mount architecture:
+
+```text
+Mother brain: o00362002/Human-AI-Collaboration-Brain
+Current child entry: brain.manifest.yaml + AGENTS.md
+Current rules: v1.18 convergence mount contract
+```
+
+---
+
+# Historical Content
+
 ## 2026-06-28：採用 Post-Change Sync Protocol 作為修改後連動檢查規則
 
 ### Decision
