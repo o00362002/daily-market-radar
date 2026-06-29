@@ -4,43 +4,64 @@
 
 每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、特殊應用雷達、搜尋 retry 規則、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
 
-## 核心定位
+---
+
+## 1. 核心定位
 
 - 不是新聞摘要器。
 - 不是只挑幾則主觀重要新聞的編輯。
 - 不是只整理主流媒體已經大量報導的大眾新聞。
 - 是一套「雷達覆蓋 + 固定指標追蹤 + 全球特殊應用搜尋 + 搜尋 retry + 證據分級 + 科技發展路徑 + 回測補漏」的每日市場情報系統。
-- 目標是同時捕捉：
-  - 全球大趨勢
-  - 資金與政策變化
-  - 產業結構變化
-  - AI 工作流替代
-  - AI 產品用量經濟：token / credit / quota / pricing / promo / gift / transfer
-  - 科技發展與突破：這是獨立主雷達，包含 AI 驅動突破，也包含非 AI 的單獨科技突破，例如生物、物理、化學、材料、能源、機器人、半導體、醫療、製造、太空、量子等
-  - 加密與鏈上資金流
-  - 零售、品牌、消費、社群、流行與服飾訊號
-  - 全球特殊應用、非主流案例、地方試點、早期商業模式、研究原型、開發者工具與社群弱訊號
-  - 早期弱訊號與候選訊號
-  - 台灣產業映射
-  - 舊版 / 新版播報補漏比對
-  - 全指標總和彙總結果
 
-## Human-AI Collaboration Brain 掛載定位
-
-本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 thin mount。
+目標是同時捕捉：
 
 ```text
-Designated Level: Level 2 runtime-lite
-Role: recurring intelligence workflow / daily report system
-Source of truth: daily-market-radar
-Framework source: o00362002/Human-AI-Collaboration-Brain
+全球大趨勢
+資金與政策變化
+產業結構變化
+AI 工作流替代
+AI 產品用量經濟
+科技發展與突破
+加密與鏈上資金流
+零售、品牌、消費、社群、流行與服飾訊號
+全球特殊應用、非主流案例、地方試點、早期商業模式、研究原型、開發者工具與社群弱訊號
+台灣產業映射
+舊版 / 新版播報補漏比對
+全指標總和彙總結果
 ```
 
-Level 2 runtime-lite 代表本 repo 有固定 workflow、configs、memory、templates、reports 與 loop 檢查，但不預設升級為 Level 3A 或 Level 3B。
+---
 
-## AI Project OS 入口層
+## 2. Human-AI Collaboration Brain 掛載定位
 
-本 repo 已採用 AI Project OS 的核心入口層：
+本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 active thin mount。
+
+```text
+Level: Level 2 Runtime-Lite Brain
+Role: recurring intelligence workflow / daily report system
+Mother version: v1.18-draft
+Mount mode: active thin mount
+```
+
+Source of truth：
+
+```text
+brain.manifest.yaml
+AGENTS.md
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+PROJECT_MAP.md
+HIGH_LEVEL_INDEX.md
+DEPENDENCY_MAP.md
+```
+
+Projection files create no canonical rules. Frozen history is not current state.
+
+---
+
+## 3. 執行入口
+
+AI 或協作者進入本 repo 時，先讀：
 
 ```text
 SYSTEM_PROMPT.md
@@ -49,47 +70,58 @@ HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 README.md
-ADOPTION_LEVELS.md
+AGENTS.md
+brain.manifest.yaml
+DEPENDENCY_MAP.md
 ```
 
-其中 `HIGH_LEVEL_INDEX.md` 是高階脈絡索引，用來避免單點回答、漏掉固定雷達或引用舊規則。
-
-## Adoption Level
-
-本 repo 目前指定為：
+再依任務讀取：
 
 ```text
-Repo Level 2 runtime-lite：Recurring Report Workflow
+configs/
+memory/
+templates/
+reports/
+workflows/
+evals/
 ```
 
-原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告、回測與推播後修正。它需要輕量流程化，但不需要完整 Agent Product Runtime。
+---
 
-若未來新增 radar module、搜尋 retry module 或回測 module，應使用 Module Level 判斷，不直接把整個 repo 升成 Level 3A / 3B。
+## 4. Frozen History
 
-## 每日執行順序
+以下舊過渡檔只保留歷史脈絡，不再作為 current routing / source of truth / active rule：
 
-1. 讀取 `SYSTEM_PROMPT.md`
-2. 讀取 `PROJECT_MAP.md`
-3. 讀取 `HIGH_LEVEL_INDEX.md`
-4. 讀取 `CURRENT_STATE.md`
-5. 讀取 `CURRENT_DECISIONS.md`
-6. 讀取 `ADOPTION_LEVELS.md`
-7. 讀取 `configs/radars.yml`
-8. 讀取 `configs/triggers.yml`
-9. 讀取 `configs/evidence.yml`
-10. 讀取 `configs/source_strategy.md`
-11. 讀取 `configs/indicator_tracking.yml`
-12. 讀取 `configs/technology_development.yml`
-13. 讀取 `configs/edge_case_discovery.yml`
-14. 讀取 `configs/search_retry_protocol.yml`
-15. 讀取 `memory/missed_cases.md`
-16. 讀取 `memory/watchlist.md`
-17. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
-18. 使用 `templates/daily_report_template.md` 產出每日報告
-19. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
-20. 報告最後更新 `推播後回測與模型調整面板`
+```text
+AI_PROJECT_OS_ADOPTION_PLAN.md
+AI_AGENT_MODEL_ADOPTION_PLAN.md
+POST_CHANGE_SYNC_ADOPTION.md
+README_AGENT_MODEL_NOTE.md
+CURRENT_DECISIONS_APPEND.md
+```
 
-## 重要規則
+---
+
+## 5. 每日執行順序
+
+1. 讀取入口檔。
+2. 讀取 `configs/radars.yml`。
+3. 讀取 `configs/triggers.yml`。
+4. 讀取 `configs/evidence.yml`。
+5. 讀取 `configs/source_strategy.md`。
+6. 讀取 `configs/indicator_tracking.yml`。
+7. 讀取 `configs/technology_development.yml`。
+8. 讀取 `configs/edge_case_discovery.yml`。
+9. 讀取 `configs/search_retry_protocol.yml`。
+10. 讀取 `memory/missed_cases.md` 與 `memory/watchlist.md`。
+11. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓。
+12. 使用 `templates/daily_report_template.md` 產出每日報告。
+13. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版 / 新版比對、科技發展路徑判斷。
+14. 報告最後更新推播後回測與模型調整面板。
+
+---
+
+## 6. 重要規則
 
 - 若資料不足，必須寫「資料不足」。
 - 若因果未確認，只能寫「產業訊號」或「待驗證推論」。
@@ -98,43 +130,32 @@ Repo Level 2 runtime-lite：Recurring Report Workflow
 - 使用者指出的漏抓事件，必須進入 `memory/missed_cases.md` 的硬檢查清單。
 - 跨領域事件必須標示受影響的所有雷達。
 - 同一週內已播報事件需跨日去重；無新資訊不重播。
-- OpenAI / Pre-IPO / Presale 類內容不得每日重複播報，除非有 volume、funding、OI、保證金、監管或交易所跟進。
-- 區塊鏈段落固定包含「潛力鏈生態動向」。
-- 零售段落固定升級為「零售、品牌、消費趨勢、社群媒體、流行與服飾發展」。
 - 每日必須輸出固定指標追蹤總表；即使資料不足，也要標示資料缺口，不得省略。
-- 每日必須輸出「科技發展與突破」段落，並分成「AI 驅動突破」與「非 AI / 單獨科技突破」。不能只寫 AI 公司或模型新聞。
+- 每日必須輸出「科技發展與突破」段落，並分成「AI 驅動突破」與「非 AI / 單獨科技突破」。
 - 每日必須輸出至少 5 則全球特殊應用 / 邊緣案例候選，且至少涵蓋 3 個不同領域。
 - 若某雷達只抓到主流新聞或無資料，必須依 `configs/search_retry_protocol.yml` 至少換 3 種搜尋方法後，才可標示資料不足。
-- 報告最後必須輸出舊版/新版補漏比對、全指標總和彙總、科技發展路徑判斷、搜尋 retry 狀態與今日最終一句話。
+- 報告最後必須輸出舊版 / 新版補漏比對、全指標總和彙總、科技發展路徑判斷、搜尋 retry 狀態與今日最終一句話。
 
-## 新增核心規格檔
+---
 
-| 檔案 | 作用 |
-|---|---|
-| `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
-| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2 runtime-lite，以及未來 module 的分級規則 |
-| `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
-| `configs/technology_development.yml` | 定義科技發展與突破雷達 |
-| `configs/edge_case_discovery.yml` | 定義每日必掃全球特殊應用、非主流案例、地方試點、早期商業模式與社群弱訊號 |
-| `configs/search_retry_protocol.yml` | 定義找不到資料時的每日換搜尋方法規則，至少 retry 3 種方式 |
-| `templates/final_synthesis_template.md` | 定義報告最後的舊版/新版比對、全指標總和彙總、科技發展路徑判斷 |
-| `AI_PROJECT_OS_ADOPTION_PLAN.md` | 本 repo 採用 AI Project OS 的升級規劃 |
-| `research/README.md` | 方法論研究與公開參考的保存規範 |
+## 7. Backtest / Growth Control
 
-## 報告索引
+Backtest 不只檢查報告成果，也檢查專案是否需要：
+
+```text
+keep / revise / delete / archive / add / promote / demote
+```
+
+新增規則、模板、workflow 或報告欄位前，先檢查能否用凍結歷史、指回 Core、降權 Projection 或刪減重複段落解決。
+
+---
+
+## 8. 報告索引
 
 完整索引詳見：`reports/INDEX.md`
-
-## 建議檔案命名
 
 每日報告建議放在：
 
 ```text
 reports/YYYY/YYYY-MM-DD.md
-```
-
-例如：
-
-```text
-reports/2026/2026-06-27.md
 ```
