@@ -6,10 +6,12 @@ This file is not the source of truth. It is the execution entry for `daily-marke
 
 Level: Level 2 Runtime-Lite Brain.
 
-Parent framework rule:
+Parent framework rules:
 
 ```text
 Human-AI-Collaboration-Brain/rules/universal_execution_contract.md
+Human-AI-Collaboration-Brain/rules/high_level_index_update_policy.md
+Human-AI-Collaboration-Brain/rules/optional_adapter_applicability_check.md
 ```
 
 Core rule:
@@ -49,6 +51,8 @@ Completion check:
 - backtest or adjustment note
 - plan vs actual action check
 - sync status
+- HIGH_LEVEL_INDEX.md update need
+- optional adapter need
 
 Required completion report:
 
@@ -59,8 +63,11 @@ Actual action:
 Files changed:
 Reality check:
 Sync check:
+HIGH_LEVEL_INDEX.md update needed? yes / no
+Optional adapters checked? yes / no
+Auto Sync / Auto PR active or requested? yes / no
 Status: complete / partial change / No downstream sync required
 Next required action:
 ```
 
-If required source checks, workflow steps, sync, or reality check are incomplete, mark the work as `partial change`.
+If required source checks, workflow steps, sync, index check, optional adapter check, or reality check are incomplete, mark the work as `partial change`.
