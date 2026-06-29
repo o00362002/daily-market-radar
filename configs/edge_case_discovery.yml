@@ -1,16 +1,57 @@
 # Global Edge Case Discovery Radar
-# 本檔定義每日必掃的「全球特殊應用 / 邊緣案例 / 非主流事件」雷達。
-# 目的：避免每日報告只剩大眾新聞與主流媒體事件，固定抓取各領域在世界各地正在冒出的特別應用、早期實驗、奇特商業模式、地方性案例與弱訊號。
+# 本檔定義每日必掃的「全球特殊應用 / 邊緣案例 / 非主流事件 / 小眾潛力候選訊號」雷達。
+# 目的：避免每日報告只剩大眾新聞與主流媒體事件，固定抓取各領域在世界各地正在冒出的特別應用、早期實驗、奇特商業模式、地方性案例、研究原型、開發者工具與弱訊號。
 
 edge_case_discovery:
   required: true
-  principle: "每日報告不能只輸出主流新聞。每個核心領域都必須至少搜尋一次全球特殊應用、非主流案例、地方實驗、早期商業模式、社群爆料、研究原型、開發者工具、監管沙盒、產業小案例。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
+  principle: "每日報告不能只輸出主流新聞。候選訊號必須優先抓小眾、非主流、早期、地方試點、小公司、研究原型、開發者工具、特殊商業模式、監管沙盒、失敗案例、反面成本或社群弱訊號。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
 
-  output_position: "今日候選訊號之前或之內；若篇幅不足，至少輸出 5 則濃縮候選。"
+  candidate_signal_definition:
+    name: "小眾潛力候選訊號"
+    must_be:
+      - 非主流大眾新聞摘要
+      - 早期弱訊號或尚未被市場完全定價的案例
+      - 小公司 / 地方試點 / 單一城市 / 單一門市 / 單一產品 / 開發者工具 / 研究原型 / 特殊商業模式 / 監管沙盒 / 社群弱訊號 / 失敗與反面成本
+      - 對趨勢、產業結構、使用者關心領域或台灣映射有潛在啟發
+    must_not_be:
+      - 已被主流媒體大量報導且沒有新角度的新聞
+      - 單純大公司公告，除非能拆出非主流應用、產品用量經濟、實際導入、風險或弱訊號
+      - 已在最近 7 日 reports 重複播過且沒有新增資料的事件
+      - 為了湊數而放入低品質農場文或無法回查來源
+
+  output_position: "今日候選訊號之前或之內；必須有獨立段落：今日小眾潛力候選訊號。"
+
   minimum_daily_output:
-    - 至少 5 則全球特殊應用 / 邊緣案例候選。
-    - 至少涵蓋 3 個不同領域。
-    - 每則必須標示來源類型、地區、證據等級、為什麼可能重要、不能下的結論、下一步驗證。
+    rule: "每個核心領域至少輸出 3 則小眾潛力候選訊號；若某領域今日真的沒有合格候選，必須寫『無合格候選更新』並列出已嘗試的 retry 方法，不得用大眾新聞硬補。"
+    core_domains:
+      - id: ai_agents_workflow
+        name: AI 模型 / Agent / 工作流替代
+        minimum_candidates: 3
+      - id: crypto_rwa_agent_payments
+        name: 區塊鏈 / 加密 / RWA / Agent payments
+        minimum_candidates: 3
+      - id: retail_consumer_social_fashion
+        name: 零售 / 消費 / 社群 / 服飾
+        minimum_candidates: 3
+      - id: global_markets_capital_geopolitics
+        name: 全球市場 / 資金流 / 地緣政治
+        minimum_candidates: 3
+      - id: technology_development
+        name: 科技發展 / 機器人 / 生技 / 能源 / 半導體
+        minimum_candidates: 3
+      - id: labor_consumption_taiwan
+        name: 勞動 / 消費壓力 / 台灣本地訊號
+        minimum_candidates: 3
+    per_candidate_requirements:
+      - 每則必須附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索
+      - 每則必須標示來源類型、地區、領域、證據等級、為什麼小眾、為什麼可能重要、不能下的結論、台灣 / 使用者映射、下一步驗證
+      - 每則必須標示歷史報告去重狀態：新訊號 / 歷史已播但有新增資料 / 歷史已播且無更新
+
+  historical_deduplication:
+    required: true
+    lookback_days: 7
+    rule: "輸出候選訊號前必須檢查最近 7 日 reports。若事件已在歷史報告出現，今日不得重播原始內容。只有出現新官方公告、新數據、新資金流 / 價格 / 交易量、新監管動作、新企業導入、新就業 / 裁員 / 招聘證據、新台灣映射、或候選訊號升級 / 降級時，才可重新列入。"
+    output_when_duplicate_no_update: "歷史已播，今日無新增更新。"
 
   domains:
     ai_agents_and_workflow:
@@ -61,6 +102,15 @@ edge_case_discovery:
         - freelancer pricing AI impact case
         - AI 改變 工作 角色 案例 接案 價格
         - 消費 降級 地方 零售 案例 年輕人
+    global_markets_capital_geopolitics:
+      required: true
+      search_angles:
+        - niche market structure signal local exchange pilot
+        - unusual capital flow small market stress signal
+        - supply chain local bottleneck early signal
+        - regional policy pilot market impact
+        - 小型市場 資金流 異常 訊號
+        - 地方政策 供應鏈 試點 市場影響
 
   source_types:
     - niche industry media
@@ -73,32 +123,42 @@ edge_case_discovery:
     - trade association reports
     - regional language sources
     - conference demo / expo announcements
+    - regulatory sandbox announcements
+    - local market data / local media
 
   scoring:
     novelty:
       description: "是否不是主流新聞，是否有新應用、新場景、新商業模式。"
     practical_relevance:
-      description: "是否能映射到使用者關心的零售、AI Agent、加密、科技發展、職能變化。"
+      description: "是否能映射到使用者關心的零售、AI Agent、加密、科技發展、職能變化、台灣本地訊號。"
     evidence_strength:
       description: "官方 / 多來源 / 產業媒體 / 社群單點。"
     trend_potential:
       description: "是否可能從小案例擴散成新敘事、新工具或新市場。"
+    non_mainstream_score:
+      description: "是否避開已被大量報導的大眾新聞，或是否提供不同於主流新聞的早期細節。"
+    deduplication_status:
+      description: "最近 7 日 reports 是否已播過；若已播過，是否有實質新增資料。"
 
   output_template:
     fields:
       - 候選事件
       - 地區 / 領域
       - 來源類型
-      - 為什麼特別
+      - 報導 / 原始來源
+      - 為什麼小眾
       - 為什麼可能重要
       - 證據等級
+      - 歷史報告去重狀態
       - 不能下的結論
       - 台灣 / 使用者映射
       - 下一步驗證
 
   quality_gate:
-    - 今天是否至少輸出 5 則非主流 / 特殊應用候選？
-    - 是否涵蓋至少 3 個不同領域？
+    - 今天是否每個核心領域至少輸出 3 則小眾潛力候選訊號？
+    - 若某領域未滿 3 則，是否明確寫「無合格候選更新」並列出 retry 方法？
+    - 是否避免把主流大眾新聞當成候選訊號？
+    - 每則候選是否附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索？
+    - 是否檢查最近 7 日 reports 並排除無新增資料的重複內容？
     - 是否避免把低證據候選誤寫成事實？
-    - 是否保留原始來源或可回查線索？
     - 是否說明為什麼這不是普通大眾新聞？
