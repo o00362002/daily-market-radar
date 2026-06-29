@@ -2,14 +2,14 @@
 
 這個專案是「全球每日市場情報雷達系統」的版本控管中心，不是單純存放新聞摘要。
 
-每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、特殊應用雷達、搜尋 retry 規則、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
+每日播報在執行前，必須先依 `CONTEXT_ROUTING.md`、`RUNBOOK.md`、`CHECKLIST.md`、`workflows/daily_report_runbook.md` 與 `loops/daily_report_quality_loop.yml` 執行。若硬性檢查未通過，不得輸出完整每日報告，只能輸出 partial 並揭露缺口。
 
 ## 核心定位
 
 - 不是新聞摘要器。
 - 不是只挑幾則主觀重要新聞的編輯。
 - 不是只整理主流媒體已經大量報導的大眾新聞。
-- 是一套「雷達覆蓋 + 固定指標追蹤 + 全球特殊應用搜尋 + 搜尋 retry + 證據分級 + 科技發展路徑 + 回測補漏」的每日市場情報系統。
+- 是一套「雷達覆蓋 + 固定指標追蹤 + 全球特殊應用搜尋 + 搜尋 retry + 證據分級 + 科技發展路徑 + 回測補漏 + Execution Edge 硬檢查」的每日市場情報系統。
 - 目標是同時捕捉：
   - 全球大趨勢
   - 資金與政策變化
@@ -27,16 +27,17 @@
 
 ## Human-AI Collaboration Brain 掛載定位
 
-本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 thin mount。
+本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 thin mount，並補強 Execution Edge。
 
 ```text
-Designated Level: Level 2 runtime-lite
+Designated Level: Level 2 Runtime-Lite Brain
 Role: recurring intelligence workflow / daily report system
 Source of truth: daily-market-radar
 Framework source: o00362002/Human-AI-Collaboration-Brain
+Mount mode: thin mount + Execution Edge
 ```
 
-Level 2 runtime-lite 代表本 repo 有固定 workflow、configs、memory、templates、reports 與 loop 檢查，但不預設升級為 Level 3A 或 Level 3B。
+Level 2 Runtime-Lite Brain 代表本 repo 有固定 workflow、configs、memory、templates、reports、runbook、checklist 與 loop 檢查，但不預設升級為 Level 3A 或 Level 3B。
 
 ## AI Project OS 入口層
 
@@ -50,6 +51,9 @@ CURRENT_STATE.md
 CURRENT_DECISIONS.md
 README.md
 ADOPTION_LEVELS.md
+CONTEXT_ROUTING.md
+RUNBOOK.md
+CHECKLIST.md
 ```
 
 其中 `HIGH_LEVEL_INDEX.md` 是高階脈絡索引，用來避免單點回答、漏掉固定雷達或引用舊規則。
@@ -59,35 +63,41 @@ ADOPTION_LEVELS.md
 本 repo 目前指定為：
 
 ```text
-Repo Level 2 runtime-lite：Recurring Report Workflow
+Repo Level 2 Runtime-Lite Brain：Recurring Report Workflow
 ```
 
-原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告、回測與推播後修正。它需要輕量流程化，但不需要完整 Agent Product Runtime。
+原因：本 repo 是長期維護的每日市場情報系統，重點是穩定入口層、固定雷達、記憶、模板、報告、回測與推播後修正。它需要輕量流程化與硬性 checklist，但不需要完整 Agent Product Runtime。
 
-若未來新增 radar module、搜尋 retry module 或回測 module，應使用 Module Level 判斷，不直接把整個 repo 升成 Level 3A / 3B。
+若未來新增多 agent、多資料流、正式 pipeline、run workspace、approval log 或 persistent run records，才重新評估 Level 3A / 3B。
 
 ## 每日執行順序
 
+0. 讀取 `CONTEXT_ROUTING.md`、`RUNBOOK.md`、`CHECKLIST.md`
 1. 讀取 `SYSTEM_PROMPT.md`
-2. 讀取 `PROJECT_MAP.md`
-3. 讀取 `HIGH_LEVEL_INDEX.md`
-4. 讀取 `CURRENT_STATE.md`
-5. 讀取 `CURRENT_DECISIONS.md`
-6. 讀取 `ADOPTION_LEVELS.md`
-7. 讀取 `configs/radars.yml`
-8. 讀取 `configs/triggers.yml`
-9. 讀取 `configs/evidence.yml`
-10. 讀取 `configs/source_strategy.md`
-11. 讀取 `configs/indicator_tracking.yml`
-12. 讀取 `configs/technology_development.yml`
-13. 讀取 `configs/edge_case_discovery.yml`
-14. 讀取 `configs/search_retry_protocol.yml`
-15. 讀取 `memory/missed_cases.md`
-16. 讀取 `memory/watchlist.md`
-17. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓
-18. 使用 `templates/daily_report_template.md` 產出每日報告
-19. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
-20. 報告最後更新 `推播後回測與模型調整面板`
+2. 讀取 `README.md`
+3. 讀取 `PROJECT_MAP.md`
+4. 讀取 `HIGH_LEVEL_INDEX.md`
+5. 讀取 `CURRENT_STATE.md`
+6. 讀取 `CURRENT_DECISIONS.md`
+7. 讀取 `ADOPTION_LEVELS.md`
+8. 讀取 `configs/radars.yml`
+9. 讀取 `configs/triggers.yml`
+10. 讀取 `configs/evidence.yml`
+11. 讀取 `configs/source_strategy.md`
+12. 讀取 `configs/indicator_tracking.yml`
+13. 讀取 `configs/technology_development.yml`
+14. 讀取 `configs/edge_case_discovery.yml`
+15. 讀取 `configs/search_retry_protocol.yml`
+16. 讀取 `memory/missed_cases.md`
+17. 讀取 `memory/watchlist.md`
+18. 讀取 `reports/INDEX.md`
+19. 依 `reports/YYYY/YYYY-MM-DD.md` 讀取近期歷史報告，避免跨日重複與漏抓
+20. 讀取 `workflows/daily_report_runbook.md`
+21. 讀取 `loops/daily_report_quality_loop.yml`
+22. 讀取 `skill_specs/*.skill.md`
+23. 使用 `templates/daily_report_template.md` 產出每日報告
+24. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版/新版比對、科技發展路徑判斷
+25. 報告最後更新 `推播後回測與模型調整面板`
 
 ## 重要規則
 
@@ -106,17 +116,24 @@ Repo Level 2 runtime-lite：Recurring Report Workflow
 - 每日必須輸出至少 5 則全球特殊應用 / 邊緣案例候選，且至少涵蓋 3 個不同領域。
 - 若某雷達只抓到主流新聞或無資料，必須依 `configs/search_retry_protocol.yml` 至少換 3 種搜尋方法後，才可標示資料不足。
 - 報告最後必須輸出舊版/新版補漏比對、全指標總和彙總、科技發展路徑判斷、搜尋 retry 狀態與今日最終一句話。
+- `loops/daily_report_quality_loop.yml` 任一硬性項目 fail 時，不得標示為完整報告。
 
 ## 新增核心規格檔
 
 | 檔案 | 作用 |
 |---|---|
 | `HIGH_LEVEL_INDEX.md` | 高階脈絡索引，避免單點回答與固定雷達遺漏 |
-| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2 runtime-lite，以及未來 module 的分級規則 |
+| `ADOPTION_LEVELS.md` | 定義本 repo 維持 Level 2 Runtime-Lite Brain，以及未來 module 的分級規則 |
+| `CONTEXT_ROUTING.md` | 定義每日執行讀取順序、source of truth、reports fallback 與失敗揭露 |
+| `RUNBOOK.md` | 定義每日報告硬性執行流程 |
+| `CHECKLIST.md` | 定義輸出前 pass/fail 檢查表 |
 | `configs/indicator_tracking.yml` | 定義每日必填固定指標追蹤表，包含全球市場、加密、AI、零售、勞動與消費壓力 |
 | `configs/technology_development.yml` | 定義科技發展與突破雷達 |
 | `configs/edge_case_discovery.yml` | 定義每日必掃全球特殊應用、非主流案例、地方試點、早期商業模式與社群弱訊號 |
 | `configs/search_retry_protocol.yml` | 定義找不到資料時的每日換搜尋方法規則，至少 retry 3 種方式 |
+| `workflows/daily_report_runbook.md` | 將每日報告拆成可執行 workflow |
+| `loops/daily_report_quality_loop.yml` | 定義輸出前硬性 loop 檢查 |
+| `skill_specs/*.skill.md` | 將讀取、歷史報告、edge case、retry、final gate 拆成可呼叫 skill |
 | `templates/final_synthesis_template.md` | 定義報告最後的舊版/新版比對、全指標總和彙總、科技發展路徑判斷 |
 | `AI_PROJECT_OS_ADOPTION_PLAN.md` | 本 repo 採用 AI Project OS 的升級規劃 |
 | `research/README.md` | 方法論研究與公開參考的保存規範 |
