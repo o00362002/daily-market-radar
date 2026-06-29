@@ -11,12 +11,33 @@ mount:
   role: execution_interface
   real_test_case: true
   test_domain: daily-market-radar
+  status: active_thin_mount
 
 contracts:
   entry_contract: AGENTS.md
   execution_contract: rules/post_change_sync_protocol.md
   role_boundary_contract: inherited_from_mother
   folder_structure_guide: inherited_from_mother
+  adoption_layer: inherited_from_mother
+  schema_coverage_policy: inherited_from_mother
+  convergence_mode: inherited_from_mother
+
+file_governance:
+  core_files_define_current_state: true
+  projection_files_create_no_canonical_rules: true
+  evidence_files_do_not_become_memory_without_approval: true
+  archive_and_frozen_history_not_current_state: true
+
+backtest_growth_control:
+  required_when_project_grows: true
+  review_actions:
+    - keep
+    - revise
+    - delete
+    - archive
+    - add
+    - promote
+    - demote
 
 execution_edge:
   execution_module_model: enabled_lightweight
@@ -39,6 +60,7 @@ checks:
 sync_policy:
   high_level_index_check: required
   optional_adapter_check: required
+  frozen_history_check: required
   auto_sync_auto_pr: not_active_check_only
 
 boundary:
@@ -46,3 +68,4 @@ boundary:
   agent_cannot_approve_itself: true
   tool_without_judgement: true
   loop_handles_retry_and_backtest: true
+  adoption_not_execution_edge: true
