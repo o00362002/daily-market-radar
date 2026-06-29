@@ -8,6 +8,14 @@ level: Level 2
 mount:
   mode: thin
   role: execution_interface
+  real_test_case: true
+  test_domain: daily-market-radar
 
 contract: AGENTS.md
+execution_check: EXECUTION_CHECK.md
 reality_check: bash check_mount_integrity.sh
+
+sync_policy:
+  high_level_index_check: required
+  optional_adapter_check: required
+  auto_sync_auto_pr: not_active_check_only
