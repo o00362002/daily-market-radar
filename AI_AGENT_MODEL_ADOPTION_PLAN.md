@@ -1,3 +1,32 @@
+# FROZEN HISTORY｜Daily Market Radar｜Agent Model Adoption Plan
+
+Frozen status: historical reference only.
+
+This file preserves the old Agent Model adoption planning context. It is no longer a current routing entry, source of truth, or active architecture rule.
+
+Current mount architecture:
+
+```text
+Mother brain: o00362002/Human-AI-Collaboration-Brain
+Current child entry: brain.manifest.yaml + AGENTS.md
+Current rules: v1.18 convergence mount contract
+```
+
+Do not use this file to override:
+
+```text
+brain.manifest.yaml
+AGENTS.md
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+PROJECT_MAP.md
+HIGH_LEVEL_INDEX.md
+```
+
+---
+
+# Historical Content
+
 # Daily Market Radar｜Agent Model Adoption Plan
 
 本檔說明 `daily-market-radar` 如何套用 Agent / Workflow / Skill / Tool / Loop 模型。
@@ -38,10 +67,3 @@ Radar Agents
 - 每日報告仍需證據分級、來源、跨日去重與漏抓回測。
 
 ---
-
-## 4. 下一步
-
-1. 將 `AGENT_DEFINITION_MAP.md` 加入 README 與 PROJECT_MAP。
-2. 將固定雷達逐步整理成 Agent spec。
-3. 將漏抓回測整理成正式 loop。
-4. 將常用搜尋策略整理成 reusable skills。
