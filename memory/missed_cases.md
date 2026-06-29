@@ -323,6 +323,64 @@ reports/
 
 ---
 
+## 硬檢查案例 006：候選訊號過度大眾化 / 小眾潛力訊號被主流新聞吃掉
+
+- 狀態：硬檢查中
+- 使用者指出時間：2026-06-29
+- 漏抓事件：每日播報中的「今日候選訊號」內容太大眾，未符合使用者想看的小眾潛力訊號。候選訊號應該補主流雷達盲區，而不是重述已被大量報導的新聞。
+- 使用者認為重要原因：每日市場情報的價值不只是知道大新聞，而是要從全球完整雷達中抓出尚未被篩選、尚未被市場完全定價、尚未成為主流共識的小眾訊號。這些訊號可能來自小公司、地方試點、研究原型、開發者工具、產業邊緣案例、特殊商業模式、失敗案例、反面成本或社群弱訊號。
+- 應屬雷達：
+  - 全球特殊應用 / 邊緣案例 / 非主流事件
+  - AI 模型、Agent 與企業應用
+  - 區塊鏈 / 加密貨幣
+  - 零售、消費、社群媒體、流行與服飾
+  - 全球市場與資金流
+  - 科技發展與突破
+  - 勞動與消費結構壓力
+  - 台灣本地訊號總表與跨領域缺口
+- 可能漏抓原因：
+  - 候選訊號只要求「至少 5 則」，沒有要求每個核心領域都要輸出。
+  - 候選訊號沒有明確排除主流大眾新聞。
+  - 搜尋結果若只抓到大媒體事件，沒有啟動小眾來源 retry。
+  - 沒有先檢查近 7 日 reports，導致歷史已播內容重複出現。
+  - 報告模板仍把候選訊號寫成一般表格，沒有強制每核心領域 3 則。
+- 每日硬搜尋關鍵字 / 搜尋方向：
+  - weird AI agent use cases small business
+  - AI workflow automation local company case study
+  - RWA tokenization pilot small issuer
+  - x402 agent payments merchant pilot
+  - retail innovation small brand case study
+  - store technology pilot AI shopping assistant RFID smart fitting room
+  - unusual technology breakthrough startup lab pilot
+  - humanoid robot narrow deployment pilot failure
+  - local mall tenant mix change small brand
+  - Taiwan retail mall street vacancy brand opening closing signal
+  - 小公司 AI Agent 實際應用 案例
+  - RWA 小型 發行 試點 流動性
+  - 百貨 商場 小品牌 快閃 特殊案例
+  - 台灣 百貨 商圈 展店 撤櫃 小眾訊號
+- 必須檢查：
+  - 每個核心領域是否至少輸出 3 則小眾潛力候選訊號？
+  - 每則是否附報導、官方來源、產業來源、研究來源、社群原始來源或可回查線索？
+  - 每則是否說明「為什麼小眾」而不是普通大眾新聞？
+  - 若某領域未滿 3 則，是否明確寫「無合格候選更新」並列出 retry 方法？
+  - 是否檢查最近 7 日 reports，排除歷史已播且無新增資料的內容？
+  - 若歷史已播，是否只有在出現新官方公告、新數據、新資金流、新監管、新企業導入、新就業證據、新台灣映射或升降級時才重播？
+  - 是否維持大到小、上到下：上層結構 → 中層變化 → 具體事件 → 小眾候選 → 指標驗證 → 台灣 / 使用者映射？
+- 證據標準：
+  - 官方公告、研究來源、公司案例、地方政府 / 監管沙盒公告、可查資料庫：中到高證據。
+  - 可信產業媒體、地方媒體、startup blog、GitHub / developer changelog：中證據。
+  - 社群討論、單一爆料、使用者回報：低證據，只能列候選，不得寫成事實。
+  - 主流大眾新聞若無新增角度：不得列入小眾潛力候選。
+- 下次驗證指標：
+  - 每核心領域候選數量是否達 3 則
+  - 候選訊號中小公司 / 地方試點 / 研究原型 / 開發者來源比例
+  - 歷史已播但無新增更新的重複率
+  - 無合格候選更新是否有 retry 紀錄
+  - 候選訊號是否能映射到使用者關心的 AI Agent、零售、加密、科技發展、台灣本地訊號
+
+---
+
 ## 使用者回饋新增格式
 
 ```text
