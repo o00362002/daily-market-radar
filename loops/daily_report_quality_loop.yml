@@ -1,0 +1,66 @@
+# Daily Report Quality Loop
+
+loop_id: daily_report_quality_loop
+required: true
+purpose: >
+  Prevent daily-market-radar from falling back into a news-summary-only report.
+  The loop checks context loading, historical reports, edge cases, retry status,
+  indicator tracking, Taiwan mapping, and final synthesis before output.
+
+max_iterations: 2
+
+checks:
+  context_loading:
+    required: true
+    pass_condition: "Required context files loaded or failures explicitly disclosed with fallback."
+    fail_action: "Mark report as partial and list missing files."
+
+  reports_history:
+    required: true
+    pass_condition: "reports/INDEX.md loaded and recent reports/YYYY/YYYY-MM-DD.md attempted."
+    fail_action: "Do not claim historical backtest is complete. Explain path tried and fallback."
+
+  indicator_tracking:
+    required: true
+    pass_condition: "Fixed indicator tracking table exists with status, direction, anomaly, source/time, next verification."
+    fail_action: "Add missing indicator table or mark partial."
+
+  edge_case_discovery:
+    required: true
+    pass_condition: "At least 5 edge cases across at least 3 domains."
+    fail_action: "Run edge_case_discovery skill again. If still insufficient, mark partial and explain missing domains."
+
+  search_retry:
+    required: true
+    pass_condition: "Every no-data or mainstream-only radar records at least 3 retry methods."
+    fail_action: "Run search_retry skill again or mark partial with retry gaps."
+
+  potential_frameworks:
+    required: true
+    pass_condition: "Report includes 3–5 potential frameworks / emerging narratives with stage, evidence, gap, Taiwan/user mapping."
+    fail_action: "Add potential framework section or mark partial."
+
+  taiwan_mapping:
+    required: true
+    pass_condition: "Every major domain has Taiwan signal, Taiwan relevance, or Taiwan data gap."
+    fail_action: "Add Taiwan mapping per domain."
+
+  evidence_boundary:
+    required: true
+    pass_condition: "Facts, inference, uncertainty, and cannot-conclude statements are separated."
+    fail_action: "Downgrade unsupported claims to candidate / insufficient evidence."
+
+  final_synthesis:
+    required: true
+    pass_condition: "Includes post-report review, model adjustment, missed-case backtest, and final one-sentence judgment."
+    fail_action: "Add final synthesis section."
+
+completion_states:
+  complete: "All required checks pass."
+  partial: "One or more required checks fail but are disclosed."
+  invalid: "Required checks fail and are not disclosed."
+
+output_requirement:
+  - "Show a condensed pass/fail table in the report or post-report review panel."
+  - "If partial, state exactly which checks failed and why."
+  - "Never claim complete if edge cases, retry, recent reports, or indicator tracking are missing."
