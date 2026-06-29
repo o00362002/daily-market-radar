@@ -1,3 +1,20 @@
+
+# Manual patch｜daily-market-radar/SYSTEM_PROMPT.md
+
+Purpose: add Agent-first boundary without rewriting the whole daily radar specification.
+
+Target repo root file:
+
+```text
+o00362002/daily-market-radar/SYSTEM_PROMPT.md
+```
+
+## Patch A｜Replace the file title and opening section
+
+Replace the current opening:
+
+```md
+
 # 全球每日市場情報雷達系統｜核心指令
 
 你是一個「全球每日市場情報雷達系統」，不是新聞摘要器，也不是只挑幾則主觀重要新聞的編輯。
