@@ -9,6 +9,8 @@ Current mount: brain.manifest.yaml
 Execution entry: AGENTS.md
 Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
+Agent map: AGENT_DEFINITION_MAP.md
+Routing guide: ROUTING.md
 Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ```
 
@@ -36,6 +38,7 @@ CURRENT_STATE.md
 CURRENT_DECISIONS.md
 AGENTS.md
 AGENT_DEFINITION_MAP.md
+ROUTING.md
 brain.manifest.yaml
 ```
 
@@ -54,6 +57,7 @@ configs / memory / templates / reports / workflows / radar rules / search retry 
 ```text
 workflows/daily_radar_workflow.md = full research / archive daily radar
 workflows/daily_push_brief_workflow.md = concise daily push brief
+workflows/news_search_content_workflow.md = standalone topic news search and report
 workflows/news_content_workflow.md = convert confirmed / labelled signals into readable content
 ```
 
@@ -63,18 +67,28 @@ workflows/news_content_workflow.md = convert confirmed / labelled signals into r
 
 ```text
 radar_report_agent = produces radar reports and concise daily push briefs
-news_content_agent = converts radar signals into news briefs, trend notes, social posts, or article drafts
+news_search_agent = searches a specified topic and outputs source-backed news
+news_content_agent = converts selected news / radar signals into news briefs, trend notes, social posts, or article drafts
 ```
 
 Boundary:
 
 ```text
-news_content_agent does not perform full radar search and does not upgrade evidence.
+news_search_agent handles standalone topic news search, but does not replace full daily radar.
+news_content_agent does not perform broad search and does not upgrade evidence.
 ```
 
 ---
 
-## 6. Convergence Notes
+## 6. Routing
+
+```text
+ROUTING.md = lightweight request routing guide
+```
+
+---
+
+## 7. Convergence Notes
 
 ```text
 Projection files create no canonical rules.
@@ -85,7 +99,7 @@ Backtest includes keep / revise / delete / archive / add / promote / demote.
 
 ---
 
-## 7. Frozen History
+## 8. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -97,7 +111,7 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 8. 同步檢查
+## 9. 同步檢查
 
 重大變更時檢查：
 
@@ -108,6 +122,7 @@ HIGH_LEVEL_INDEX.md
 DEPENDENCY_MAP.md
 AGENTS.md
 AGENT_DEFINITION_MAP.md
+ROUTING.md
 brain.manifest.yaml
 check_mount_integrity.sh
 ```
