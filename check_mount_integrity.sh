@@ -78,6 +78,26 @@ case "$LEVEL" in
     ;;
 esac
 
+# Daily output-mode chains and gates live in DEPENDENCY_MAP.md.
+has DEPENDENCY_MAP.md && pass "DEPENDENCY_MAP.md exists" || fail "DEPENDENCY_MAP.md missing"
+has AGENT_DEFINITION_MAP.md && pass "AGENT_DEFINITION_MAP.md exists" || fail "AGENT_DEFINITION_MAP.md missing"
+has workflows/daily_radar_workflow.md && pass "daily_radar_workflow.md exists" || fail "daily_radar_workflow.md missing"
+has workflows/daily_push_brief_workflow.md && pass "daily_push_brief_workflow.md exists" || fail "daily_push_brief_workflow.md missing"
+has templates/daily_report_template.md && pass "daily_report_template.md exists" || fail "daily_report_template.md missing"
+has templates/daily_push_brief_template.md && pass "daily_push_brief_template.md exists" || fail "daily_push_brief_template.md missing"
+[ ! -f workflows/daily_execution_gate.md ] && pass "no separate daily_execution_gate.md" || fail "remove separate daily_execution_gate.md"
+
+if has DEPENDENCY_MAP.md; then
+  refs DEPENDENCY_MAP.md 'Full Daily Radar Gate' && pass "DEPENDENCY_MAP has full gate" || fail "DEPENDENCY_MAP missing full gate"
+  refs DEPENDENCY_MAP.md 'Daily Push Brief Gate' && pass "DEPENDENCY_MAP has brief gate" || fail "DEPENDENCY_MAP missing brief gate"
+  refs DEPENDENCY_MAP.md 'AGENT_RADAR_REPORT' && pass "DEPENDENCY_MAP maps AGENT_RADAR_REPORT" || fail "DEPENDENCY_MAP missing AGENT_RADAR_REPORT"
+  refs DEPENDENCY_MAP.md 'AGENT_DAILY_PUSH_BRIEF' && pass "DEPENDENCY_MAP maps AGENT_DAILY_PUSH_BRIEF" || fail "DEPENDENCY_MAP missing AGENT_DAILY_PUSH_BRIEF"
+fi
+
+if has AGENT_DEFINITION_MAP.md; then
+  refs AGENT_DEFINITION_MAP.md 'DEPENDENCY_MAP\.md / Daily Push Brief Gate' && pass "AGENT map points brief gate to DEPENDENCY_MAP" || fail "AGENT map missing brief gate pointer"
+fi
+
 echo "Result: FAIL=$FAIL WARN=$WARN"
 if [ "$FAIL" -gt 0 ]; then echo "partial change required"; exit 1; fi
 echo "complete"; exit 0
