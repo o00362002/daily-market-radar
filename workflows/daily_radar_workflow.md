@@ -1,8 +1,10 @@
 # Daily Radar Workflow
 
-Purpose: define the minimum daily execution path.
+Purpose: define the full formal daily market radar execution path.
 
-This workflow is owned by `radar_report_agent` in `AGENT_DEFINITION_MAP.md`.
+Owner: `AGENT_RADAR_REPORT` in `AGENT_DEFINITION_MAP.md`.
+
+General daily news requests should use `workflows/daily_push_brief_workflow.md` unless the user explicitly asks for a full, formal, or archive report.
 
 ---
 
@@ -15,31 +17,33 @@ daily_radar_workflow
 ## trigger
 
 ```text
-daily report request
-scheduled daily radar run
-manual market radar generation
+explicit full daily radar report request
+scheduled full daily radar run
+manual full market radar generation
+formal archive report request
+5+3 hard-gate report request
+48-signal report request
+archive output request
 ```
 
----
-
-## maintenance principle
-
-Keep this workflow as the process skeleton.
-
-Detailed rules should stay in:
+## non_trigger
 
 ```text
-AGENTS.md = agent entry
-SYSTEM_PROMPT.md = thin quality policy
-configs/ = radar parameters, retry, source and evidence rules
-tools/ = tool behavior
-skill_specs/ = reusable judgement capabilities
-templates/ = output shape
-memory/ = watchlist and missed cases
-reports/ = history and evidence
+每日播報
+每日新聞
+今天的每日新聞
+播報今天的每日新聞
+今日市場雷達
+今天市場雷達
+今天新聞
+每日推播
+morning brief
+daily news
+daily push
+quick daily market brief
 ```
 
-Do not turn this workflow into another long prompt.
+Non-trigger phrases route to `AGENT_DAILY_PUSH_BRIEF` unless the user explicitly asks for formal, complete, or archival output.
 
 ---
 
@@ -47,53 +51,13 @@ Do not turn this workflow into another long prompt.
 
 ```text
 1. Entry read
-   - AGENTS.md
-   - SYSTEM_PROMPT.md
-   - PROJECT_MAP.md
-   - HIGH_LEVEL_INDEX.md
-   - CURRENT_STATE.md
-   - CURRENT_DECISIONS.md
-   - README.md
-   - DEPENDENCY_MAP.md
-   - brain.manifest.yaml
-
-2. Load radar context
-   - configs/
-   - memory/watchlist.md
-   - memory/missed_cases.md
-   - recent reports
-   - active templates
-
-3. Run signal_search_tool
-   - find candidate signals
-   - record source, date, bucket, source type, and inclusion reason
-   - if no useful signal is found, switch method using configs/search_retry_protocol.yml
-   - mark gaps only after retry or documented access limitation
-
-4. Run claim_risk_checker
-   - check factual claims, numbers, dates, source quality, and AI inference
-   - treat news as an information source, not a professional audit report
-   - tag / downgrade / soften / rewrite first
-   - remove only high-risk unsupported claims that would mislead if kept
-
-5. Run coverage_checker
-   - check required buckets, watchlist items, missed-case items, and duplicates
-   - mark missing buckets and retry needs
-
-6. Run report_formatter
-   - use active template
-   - include sources, dates, coverage notes, retry trace, gaps, and claim risk labels
-   - produce `reports/YYYY/YYYY-MM-DD.md`
-
-7. Run missed_case_backtest_loop when needed
-   - if missed case, repeated gap, or rule adjustment evidence exists
-   - save evidence to `reports/backtests/`
-
-8. Completion check
-   - plan vs actual
-   - sync status
-   - backtest / adjustment needed? yes / no
-   - status
+2. Load full radar context
+3. Search candidate signals with retry
+4. Check source, date, and claim risk
+5. Check coverage and duplicates
+6. Format with the full daily report template
+7. Run missed-case backtest loop when needed
+8. Complete final status check
 ```
 
 ---
@@ -114,7 +78,7 @@ report_formatter
 ```text
 source / date check
 search retry check before gap
-claim risk label / rewrite check
+claim risk check
 coverage check
 gap note check
 cross-day duplicate check
@@ -134,29 +98,16 @@ reports/backtests/ when needed
 
 ## completion_rule
 
-The report can be marked `complete` only when:
-
-```text
-signal_search_tool complete
-claim_risk_checker complete
-coverage_checker complete
-report_formatter complete
-backtest / adjustment need checked
-sync impact checked
-```
+The report can be marked `complete` only when the required tools and checks are complete.
 
 If any required tool or check is skipped, mark:
 
 ```text
-partial change
+partial full report
 ```
 
 ---
 
 ## practical interpretation
 
-A daily radar report is allowed to include low-evidence or single-source items as candidate signals when clearly labelled.
-
-The workflow should block only misleading certainty, hidden gaps, missing retry, or high-risk unsupported claims.
-
-Do not downgrade the whole report just because some signals are ordinary news rather than official data.
+This workflow is for formal research and archive output. The default daily user-facing output is the push brief workflow.
