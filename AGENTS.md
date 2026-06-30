@@ -20,6 +20,7 @@ HIGH_LEVEL_INDEX.md = high-level projection index
 CURRENT_STATE.md = current reality
 CURRENT_DECISIONS.md = accepted decisions
 DEPENDENCY_MAP.md = dependency map
+AGENT_DEFINITION_MAP.md = agent definition + task routing + workflow/template selection
 brain.manifest.yaml = thin mount manifest
 ```
 
@@ -66,25 +67,34 @@ Agent execution must read in this order:
 
 ```text
 1. AGENTS.md
-2. SYSTEM_PROMPT.md
-3. PROJECT_MAP.md
-4. HIGH_LEVEL_INDEX.md
-5. CURRENT_STATE.md
-6. CURRENT_DECISIONS.md
-7. README.md
-8. DEPENDENCY_MAP.md
-9. brain.manifest.yaml
+
+2. Project understanding layer
+   - PROJECT_MAP.md
+   - HIGH_LEVEL_INDEX.md
+   - CURRENT_STATE.md
+   - CURRENT_DECISIONS.md
+   - README.md
+   - DEPENDENCY_MAP.md
+   - brain.manifest.yaml
+
+3. Agent / task selection layer
+   - AGENT_DEFINITION_MAP.md
+
+4. Local policy layer
+   - SYSTEM_PROMPT.md
 ```
 
-Then read task-specific files in:
+Then choose the task route from `AGENT_DEFINITION_MAP.md`.
+
+Then read task-specific files only as needed:
 
 ```text
+workflows/
+templates/
 configs/
 memory/
-templates/
-workflows/
-loops/
 reports/
+loops/
 evals/
 ```
 
@@ -92,7 +102,25 @@ If required files cannot be read, mark the work as `partial change`; do not pret
 
 ---
 
-## 4. Convergence Mount Rules
+## 4. Execution Flow
+
+```text
+AGENTS.md
+→ Project understanding layer
+→ AGENT_DEFINITION_MAP.md
+→ choose Agent / Workflow / Template
+→ read task-specific configs / memory / reports / templates
+→ execute
+→ completion check
+```
+
+Do not select a workflow only from the user sentence before understanding the current project state and decisions.
+
+Memory is task-specific execution context. It should be read after the task route is selected, unless the task itself is to inspect or modify memory.
+
+---
+
+## 5. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -131,7 +159,7 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## 5. Role Boundary Gate
+## 6. Role Boundary Gate
 
 Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
@@ -150,10 +178,11 @@ Memory stores only confirmed state and decisions.
 
 ---
 
-## 6. Level 2 Execution Path
+## 7. Level 2 Execution Path
 
 ```text
-Entry Gate: read the required entry files above
+Entry Gate: read AGENTS.md and project understanding layer
+Agent Selection Gate: read AGENT_DEFINITION_MAP.md and choose Agent / Workflow / Template
 Dependency Gate: check impacted configs, memory, templates, workflows, loops, and reports
 Role Boundary Gate: classify the task boundary
 Plan Gate: state intended report / config / workflow change
@@ -164,7 +193,7 @@ Reality / Sync Gate: compare planned vs actual result before declaring complete
 
 ---
 
-## 7. Completion Check
+## 8. Completion Check
 
 - radar coverage
 - fixed indicators
