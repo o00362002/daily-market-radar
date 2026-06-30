@@ -70,12 +70,12 @@ Each route must follow the active output-mode chain in `DEPENDENCY_MAP.md`.
 AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
 → templates/daily_report_template.md
-→ workflows/daily_execution_gate.md / Full Daily Radar Gate
+→ DEPENDENCY_MAP.md / Full Daily Radar Gate
 
 AGENT_DAILY_PUSH_BRIEF
 → workflows/daily_push_brief_workflow.md
 → templates/daily_push_brief_template.md
-→ workflows/daily_execution_gate.md / Daily Push Brief Gate
+→ DEPENDENCY_MAP.md / Daily Push Brief Gate
 ```
 
 Route, workflow, template, and gate must match. If they do not match, mark the output as:
@@ -83,6 +83,8 @@ Route, workflow, template, and gate must match. If they do not match, mark the o
 ```text
 依賴鏈不一致：partial / blocked
 ```
+
+Do not use a separate active daily execution-gate file for route completion rules. Daily output completion gates live in `DEPENDENCY_MAP.md`.
 
 ---
 
