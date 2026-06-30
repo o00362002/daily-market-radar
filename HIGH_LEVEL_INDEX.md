@@ -43,7 +43,8 @@ configs / memory / templates / reports / workflows / radar rules / search retry 
 ```text
 Full Daily Radar = full research / archive output, uses workflows/daily_radar_workflow.md and templates/daily_report_template.md
 Daily Push Brief = concise daily user-facing output, uses workflows/daily_push_brief_workflow.md and templates/daily_push_brief_template.md
-News Content Output = converts selected radar signals into content, uses workflows/news_content_workflow.md and templates/news_content_template.md
+News Search Output = standalone topic news search, uses workflows/news_search_content_workflow.md and templates/news_search_content_template.md
+News Content Output = converts selected news / radar signals into content, uses workflows/news_content_workflow.md and templates/news_content_template.md
 ```
 
 ---
@@ -52,20 +53,31 @@ News Content Output = converts selected radar signals into content, uses workflo
 
 ```text
 radar_report_agent
+news_search_agent
 news_content_agent
 ```
 
 Boundary:
 
 ```text
-radar_report_agent searches and grades signals.
+radar_report_agent searches and grades cross-domain daily radar signals.
+news_search_agent searches and grades one specified news topic.
 news_content_agent writes content from already graded / labelled signals.
 news_content_agent must not upgrade evidence or replace radar search.
 ```
 
 ---
 
-## 6. Convergence Notes
+## 6. Routing
+
+```text
+Task routing lives inside AGENT_DEFINITION_MAP.md.
+No standalone ROUTING.md is active.
+```
+
+---
+
+## 7. Convergence Notes
 
 ```text
 Projection files create no canonical rules.
@@ -76,7 +88,7 @@ Schema coverage must not be overstated.
 
 ---
 
-## 7. Frozen History
+## 8. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -88,7 +100,7 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 8. 回答時必須避免
+## 9. 回答時必須避免
 
 ```text
 不要把 repo Level 與 module Level 混在一起
@@ -97,5 +109,6 @@ CURRENT_DECISIONS_APPEND.md
 不要把 frozen history 當成 current state
 不要把 Projection 當成 source of truth
 不要把 Daily Push Brief 寫成完整 48-signal formal report
+不要把 news_search_agent 的指定主題新聞寫成完整每日市場雷達
 不要把 news_content_agent 的內容稿寫成已驗證情報判斷
 ```
