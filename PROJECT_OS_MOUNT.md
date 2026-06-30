@@ -10,8 +10,10 @@ It is a Projection file, not the mother Brain source of truth.
 
 ```text
 Mother brain: o00362002/Human-AI-Collaboration-Brain
-Mother version: v1.18-draft
+Mother version: v1.19-draft
+Mother architecture: compact_five_layer
 Mount mode: active thin mount
+Layer depth: level_scaled
 Designated Level: Level 2 Runtime-Lite Brain
 Role: recurring intelligence workflow / daily report system
 ```
@@ -37,7 +39,22 @@ o00362002/Human-AI-Collaboration-Brain
 
 ---
 
-## 3. Inherited Contracts
+## 3. Inherited Architecture
+
+This repo inherits the mother Brain compact five-layer architecture and vocabulary.
+Each layer is implemented locally according to this repo's Level and actual complexity.
+
+```text
+1. Brain Core / Charter
+2. Interface & Integration Layer
+3. Memory Layer
+4. Context Routing Layer
+5. Execution Edge
+```
+
+---
+
+## 4. Inherited Contracts
 
 ```text
 BRAIN_ARCHITECTURE.md
@@ -51,7 +68,7 @@ specs/programmable_control_layer.md
 
 ---
 
-## 4. Convergence Rules
+## 5. Convergence Rules
 
 ```text
 Projection files create no canonical rules.
@@ -59,12 +76,12 @@ Evidence does not become Memory without approval.
 Frozen history is preserved but removed from active routing.
 Backtest includes keep / revise / delete / archive / add / promote / demote.
 Schema coverage must not be overstated.
-Adoption Layer is not Execution Edge.
+Adoption Gate belongs under Interface & Integration Layer.
 ```
 
 ---
 
-## 5. Frozen History
+## 6. Frozen History
 
 The following files are historical reference only:
 
@@ -80,7 +97,7 @@ Do not use frozen history to override current mount, state, decisions, or entry 
 
 ---
 
-## 6. Sync Rule
+## 7. Sync Rule
 
 When changing repo structure, level, routing, workflow, tool, provider, radar scope, template, report, or evidence process, check:
 
@@ -103,4 +120,5 @@ Role boundary check
 Frozen history / growth control check
 Reality check
 Sync check
+Backtest record check
 ```
