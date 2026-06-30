@@ -30,7 +30,40 @@ Agent / Codex / Claude Code execution must start here.
 
 ---
 
-## 2. v1.18 Mount Contract
+## 2. Mount Read Rule
+
+This repo is mounted under:
+
+```text
+o00362002/Human-AI-Collaboration-Brain
+```
+
+Before local execution, identify the mount context:
+
+```text
+mother repo
+child repo
+child Level
+mount mode
+inherited contracts
+```
+
+Do not read the entire mother Brain by default.
+
+Use the task type to decide read depth:
+
+| Task type | Required read depth |
+|---|---|
+| Daily report / normal local work | Local project understanding layer + task-specific files. |
+| Workflow / skill / tool / loop change | Also check mother execution and role-boundary contracts when needed. |
+| Schema / checker / sync / completion-status change | Also check mother schema and programmable-control contracts when needed. |
+| Architecture / Level / mount change | Read mother Core + child Core and require human review. |
+
+If mother contract files are required but cannot be read, mark the work as `partial change`.
+
+---
+
+## 3. v1.18 Mount Contract
 
 Mother brain:
 
@@ -61,7 +94,7 @@ Adoption Layer is not Execution Edge.
 
 ---
 
-## 3. Read First
+## 4. Read First
 
 Agent execution must read in this order:
 
@@ -102,7 +135,7 @@ If required files cannot be read, mark the work as `partial change`; do not pret
 
 ---
 
-## 4. Execution Flow
+## 5. Execution Flow
 
 ```text
 AGENTS.md
@@ -120,7 +153,7 @@ Memory is task-specific execution context. It should be read after the task rout
 
 ---
 
-## 5. Convergence Mount Rules
+## 6. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -159,7 +192,7 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## 6. Role Boundary Gate
+## 7. Role Boundary Gate
 
 Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
@@ -178,7 +211,7 @@ Memory stores only confirmed state and decisions.
 
 ---
 
-## 7. Level 2 Execution Path
+## 8. Level 2 Execution Path
 
 ```text
 Entry Gate: read AGENTS.md and project understanding layer
@@ -193,7 +226,7 @@ Reality / Sync Gate: compare planned vs actual result before declaring complete
 
 ---
 
-## 8. Completion Check
+## 9. Completion Check
 
 - radar coverage
 - fixed indicators
@@ -218,7 +251,6 @@ Files changed:
 Role boundary check:
 Frozen history / growth control check:
 Reality check:
-Sync check:
 HIGH_LEVEL_INDEX.md update needed? yes / no
 Optional adapters checked? yes / no
 Auto Sync / Auto PR active or requested? yes / no
