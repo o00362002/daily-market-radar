@@ -9,8 +9,7 @@ Current mount: brain.manifest.yaml
 Execution entry: AGENTS.md
 Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
-Agent map: AGENT_DEFINITION_MAP.md
-Routing guide: ROUTING.md
+Agent map and task routing: AGENT_DEFINITION_MAP.md
 Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ```
 
@@ -38,7 +37,6 @@ CURRENT_STATE.md
 CURRENT_DECISIONS.md
 AGENTS.md
 AGENT_DEFINITION_MAP.md
-ROUTING.md
 brain.manifest.yaml
 ```
 
@@ -83,7 +81,8 @@ news_content_agent does not perform broad search and does not upgrade evidence.
 ## 6. Routing
 
 ```text
-ROUTING.md = lightweight request routing guide
+Task routing lives inside AGENT_DEFINITION_MAP.md.
+No standalone ROUTING.md is active.
 ```
 
 ---
@@ -122,7 +121,6 @@ HIGH_LEVEL_INDEX.md
 DEPENDENCY_MAP.md
 AGENTS.md
 AGENT_DEFINITION_MAP.md
-ROUTING.md
 brain.manifest.yaml
 check_mount_integrity.sh
 ```
