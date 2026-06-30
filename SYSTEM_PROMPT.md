@@ -52,7 +52,40 @@ missed-case and backtest status
 
 ---
 
-## 2. Non-negotiable quality gates
+## 2. Output modes and quality gates
+
+There are two active daily output modes.
+
+```text
+Full Daily Radar = full research / formal archive report
+Daily Push Brief = concise user-facing daily push / chat brief
+```
+
+The 5+3 hard gate applies only to:
+
+```text
+AGENT_RADAR_REPORT
+Full Daily Radar
+formal archive report
+reports/YYYY/YYYY-MM-DD.md
+```
+
+The 5+3 hard gate must not be used to mark `AGENT_DAILY_PUSH_BRIEF` as failed.
+
+For Daily Push Brief, use:
+
+```text
+workflows/daily_push_brief_workflow.md
+templates/daily_push_brief_template.md
+workflows/daily_execution_gate.md / Daily Push Brief Gate
+```
+
+A Daily Push Brief must write:
+
+```text
+輸出模式：每日推播精簡版。
+完整 48 則正式閘門：未嘗試 / 未通過 / 另需分段研究版。
+```
 
 A formal daily report must check the following unless explicitly marked as partial:
 
@@ -69,7 +102,7 @@ technology development and breakthrough check
 post-report backtest / model adjustment panel
 ```
 
-If these checks are not completed, the report must say:
+If formal checks are not completed, the report must say:
 
 ```text
 每日訊號硬閘門未通過：本報告未完整完成核心領域大型重要新聞、小眾候選訊號、retry、去重或回測檢查，不可視為完整正式播報。
@@ -81,7 +114,7 @@ If these checks are not completed, the report must say:
 
 Agent execution must follow the read order in `AGENTS.md`.
 
-Minimum task read set for producing a daily radar report:
+Minimum task read set for producing a Full Daily Radar report:
 
 ```text
 AGENTS.md
@@ -93,6 +126,8 @@ CURRENT_DECISIONS.md
 README.md
 DEPENDENCY_MAP.md
 brain.manifest.yaml
+AGENT_DEFINITION_MAP.md
+workflows/daily_execution_gate.md
 workflows/daily_radar_workflow.md
 configs/radars.yml
 configs/triggers.yml
@@ -109,6 +144,32 @@ templates/final_synthesis_template.md
 recent reports/
 ```
 
+Minimum task read set for producing a Daily Push Brief:
+
+```text
+AGENTS.md
+SYSTEM_PROMPT.md
+PROJECT_MAP.md
+HIGH_LEVEL_INDEX.md
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+README.md
+DEPENDENCY_MAP.md
+brain.manifest.yaml
+AGENT_DEFINITION_MAP.md
+workflows/daily_execution_gate.md
+workflows/daily_push_brief_workflow.md
+configs/radars.yml
+configs/triggers.yml
+configs/evidence.yml
+configs/source_strategy.md
+configs/search_retry_protocol.yml
+memory/missed_cases.md
+memory/watchlist.md
+templates/daily_push_brief_template.md
+recent reports/ when available for basic de-duplication
+```
+
 If required files cannot be read, mark the output as partial and state the missing files.
 
 ---
@@ -118,7 +179,9 @@ If required files cannot be read, mark the output as partial and state the missi
 Detailed rules should live outside this prompt:
 
 ```text
-workflows/daily_radar_workflow.md = execution flow
+workflows/daily_execution_gate.md = mode-aware execution gate
+workflows/daily_radar_workflow.md = full daily radar execution flow
+workflows/daily_push_brief_workflow.md = concise daily push brief execution flow
 configs/radars.yml = radar categories
 configs/triggers.yml = cross-domain triggers
 configs/evidence.yml = evidence standards
@@ -129,7 +192,8 @@ configs/edge_case_discovery.yml = niche / edge-case discovery
 configs/search_retry_protocol.yml = retry logic
 memory/missed_cases.md = hard missed-case checks
 memory/watchlist.md = ongoing watchlist
-templates/daily_report_template.md = report format
+templates/daily_report_template.md = full report format
+templates/daily_push_brief_template.md = concise brief format
 templates/final_synthesis_template.md = final synthesis format
 reports/ = history and backtest evidence
 ```
@@ -183,7 +247,11 @@ Frozen history is restorable but does not drive active routing.
 Before declaring a daily radar run complete, report:
 
 ```text
+Selected route
 Read set
+Dependency chain
+Output mode
+Gate used
 Radar coverage
 Major signals status
 Niche candidate status
