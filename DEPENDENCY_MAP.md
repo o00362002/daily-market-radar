@@ -13,7 +13,7 @@ Current mount: brain.manifest.yaml
 Execution entry: AGENTS.md
 Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
-Agent map: AGENT_DEFINITION_MAP.md
+Agent map and task routing: AGENT_DEFINITION_MAP.md
 ```
 
 ---
@@ -28,6 +28,7 @@ Agent map: AGENT_DEFINITION_MAP.md
 | Output | templates/, reports/, content/ |
 | Full workflow | workflows/daily_radar_workflow.md |
 | Concise push workflow | workflows/daily_push_brief_workflow.md |
+| News search workflow | workflows/news_search_content_workflow.md |
 | Content workflow | workflows/news_content_workflow.md |
 | Backtest | reports/backtests/, evals/cold_read_eval.md |
 | Mount check | check_mount_integrity.sh |
@@ -39,12 +40,22 @@ Agent map: AGENT_DEFINITION_MAP.md
 ```text
 Full Daily Radar → templates/daily_report_template.md
 Daily Push Brief → templates/daily_push_brief_template.md
+News Search Output → templates/news_search_content_template.md
 News Content Output → templates/news_content_template.md
 ```
 
 ---
 
-## 4. Frozen dependencies
+## 4. Routing
+
+```text
+Task routing lives inside AGENT_DEFINITION_MAP.md.
+No standalone ROUTING.md is active.
+```
+
+---
+
+## 5. Frozen dependencies
 
 These files are frozen history and should not drive active routing:
 
@@ -58,7 +69,7 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 5. Sync rule
+## 6. Sync rule
 
 When radar scope, report format, retry rules, missed-case handling, template, report, workflow, or agent map changes, check:
 
@@ -75,7 +86,7 @@ check_mount_integrity.sh
 
 ---
 
-## 6. Level
+## 7. Level
 
 ```text
 Level 2：Runtime-Lite Brain
