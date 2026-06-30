@@ -22,6 +22,7 @@ CURRENT_DECISIONS.md = accepted decisions
 DEPENDENCY_MAP.md = dependency map
 AGENT_DEFINITION_MAP.md = agent definition + task routing + workflow/template selection
 brain.manifest.yaml = thin mount manifest
+loops/simple_feedback_flow.md = simple feedback flow for user corrections
 ```
 
 Agent / Codex / Claude Code execution must start here.
@@ -55,6 +56,7 @@ Use the task type to decide read depth:
 | Task type | Required read depth |
 |---|---|
 | Daily report / normal local work | Local project understanding layer + task-specific files. |
+| User feedback / correction | Use `loops/simple_feedback_flow.md` first. |
 | Workflow / skill / tool / loop change | Also check mother execution and role-boundary contracts when needed. |
 | Schema / checker / sync / completion-status change | Also check mother schema and programmable-control contracts when needed. |
 | Architecture / Level / mount change | Read mother Core + child Core and require human review. |
@@ -119,6 +121,12 @@ Agent execution must read in this order:
 
 Then choose the task route from `AGENT_DEFINITION_MAP.md`.
 
+For user feedback, correction, or post-run adjustment, read:
+
+```text
+loops/simple_feedback_flow.md
+```
+
 Then read task-specific files only as needed:
 
 ```text
@@ -153,7 +161,27 @@ Memory is task-specific execution context. It should be read after the task rout
 
 ---
 
-## 6. Convergence Mount Rules
+## 6. Simple Feedback Flow
+
+For user feedback after an AI / agent / Codex run, use:
+
+```text
+loops/simple_feedback_flow.md
+```
+
+Default behavior:
+
+```text
+Classify feedback type → decide adjustment complexity → propose the smallest local fix → ask one confirmation only when needed.
+```
+
+Do not ask by default whether the feedback should become a rule, update `HIGH_LEVEL_INDEX.md`, or become a Core decision.
+
+Only escalate when the simple feedback flow says escalation is required.
+
+---
+
+## 7. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -192,7 +220,7 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## 7. Role Boundary Gate
+## 8. Role Boundary Gate
 
 Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
@@ -211,7 +239,7 @@ Memory stores only confirmed state and decisions.
 
 ---
 
-## 8. Level 2 Execution Path
+## 9. Level 2 Execution Path
 
 ```text
 Entry Gate: read AGENTS.md and project understanding layer
@@ -226,13 +254,13 @@ Reality / Sync Gate: compare planned vs actual result before declaring complete
 
 ---
 
-## 9. Completion Check
+## 10. Completion Check
 
 - radar coverage
 - fixed indicators
 - source retry status
 - missed-case check
-- backtest or adjustment note
+- simple feedback / backtest or adjustment note
 - growth control check when project scope expands
 - frozen history check when old adoption / plan files are touched
 - role boundary check
