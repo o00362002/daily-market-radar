@@ -1,9 +1,9 @@
 # Daily Push Brief Workflow
 
-Purpose: define a lightweight daily push version for chat / automation output when a full 48-signal formal report is too large for reliable single-pass execution.
+Purpose: define the default lightweight daily push version for chat / automation output when a full 48-signal formal report is not explicitly requested.
 
 This workflow does **not** replace the full `daily_radar_workflow.md`.
-It creates a stable concise output mode.
+It creates the default concise output mode.
 
 ---
 
@@ -16,15 +16,32 @@ daily_push_brief_workflow
 ## owner
 
 ```text
-radar_report_agent
+AGENT_DAILY_PUSH_BRIEF
 ```
 
 ## trigger
 
 ```text
+每日播報
+每日新聞
+今天的每日新聞
+播報今天的每日新聞
+每日推播
+今日市場雷達
+今天市場雷達
+今天新聞
+先看今天重點
+讀 repo 播報今天
+不靠記憶讀 repo 播報今天
 quick daily market brief
 scheduled daily push
 manual concise radar request
+morning brief
+daily news
+daily push
+concise brief
+簡版
+輕量版
 ```
 
 ---
@@ -32,8 +49,8 @@ manual concise radar request
 ## mode boundary
 
 ```text
-Daily Push Brief = concise user-facing radar output.
-Full Daily Radar = full research / archive output.
+Daily Push Brief = default concise user-facing radar output.
+Full Daily Radar = opt-in full research / archive output.
 ```
 
 Daily Push Brief may be marked `complete` only for the concise mode. It must not claim to satisfy the full 48-signal formal gate unless it actually does.
