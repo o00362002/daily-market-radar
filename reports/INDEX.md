@@ -17,6 +17,7 @@
 | 2026-06-30 | [`reports/2026/2026-06-30-cold-start-partial.md`](2026/2026-06-30-cold-start-partial.md) | ChatGPT cold-start partial 播報；不使用對話記憶，依 repo 入口與即時搜尋產出；標示搜尋未完整、歷史去重未完整、未達完整 5+3，補高風險 claim 檢查表 |
 | 2026-06-30 | [`reports/backtests/2026-06-30-model-report-comparison.md`](backtests/2026-06-30-model-report-comparison.md) | Grok / Gemini / Claude / ChatGPT cold-start 模型播報回測與 2026-06-29 第一篇 vs 2026-06-30 cold-start 成果比較；定位為模型回測與歸檔，不是正式日報 |
 | 2026-06-30 | [`reports/backtests/2026-06-30-agent-routing-refactor.md`](backtests/2026-06-30-agent-routing-refactor.md) | Agent Routing Runtime Refactor 回測；整理每日推播精簡版、news_search_agent、news_content_agent、ROUTING.md 移除、AGENTS.md flow 修正，以及 Project Understanding before Task Routing 原則 |
+| 2026-06-30 | [`reports/backtests/2026-06-30-grok-free-fast-routing-test.md`](backtests/2026-06-30-grok-free-fast-routing-test.md) | Grok 免費快速版 Daily Push Brief 路由測試；確認 route / structure smoke test 可運作，但內容仍屬 skeleton / partial concise brief，不可視為精簡版 complete |
 
 ## 檔案命名規則
 
