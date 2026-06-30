@@ -53,6 +53,7 @@ CURRENT_DECISIONS.md
 PROJECT_MAP.md
 HIGH_LEVEL_INDEX.md
 DEPENDENCY_MAP.md
+AGENT_DEFINITION_MAP.md
 ```
 
 Projection files create no canonical rules. Frozen history is not current state.
@@ -73,6 +74,7 @@ README.md
 AGENTS.md
 brain.manifest.yaml
 DEPENDENCY_MAP.md
+AGENT_DEFINITION_MAP.md
 ```
 
 再依任務讀取：
@@ -102,26 +104,47 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 5. 每日執行順序
+## 5. Output mode routing
 
-1. 讀取入口檔。
-2. 讀取 `configs/radars.yml`。
-3. 讀取 `configs/triggers.yml`。
-4. 讀取 `configs/evidence.yml`。
-5. 讀取 `configs/source_strategy.md`。
-6. 讀取 `configs/indicator_tracking.yml`。
-7. 讀取 `configs/technology_development.yml`。
-8. 讀取 `configs/edge_case_discovery.yml`。
-9. 讀取 `configs/search_retry_protocol.yml`。
-10. 讀取 `memory/missed_cases.md` 與 `memory/watchlist.md`。
-11. 讀取近期 `reports/` 內的歷史報告，避免跨日重複與漏抓。
-12. 使用 `templates/daily_report_template.md` 產出每日報告。
-13. 使用 `templates/final_synthesis_template.md` 產出最後總和彙總、舊版 / 新版比對、科技發展路徑判斷。
-14. 報告最後更新推播後回測與模型調整面板。
+每日播報預設走輕量版。
+
+一般說法如「每日播報」、「每日新聞」、「今天的每日新聞」、「播報今天的每日新聞」、「今日市場雷達」、「今天新聞」、「daily news」、「morning brief」、「daily push」，都路由到：
+
+```text
+AGENT_DAILY_PUSH_BRIEF
+→ workflows/daily_push_brief_workflow.md
+→ templates/daily_push_brief_template.md
+```
+
+只有使用者明確要求「正式版」、「完整版」、「完整正式版」、「Full Daily Radar」、「full report」、「complete report」、「archival report」、「48-signal report」、「5+3」、「完整硬閘門」、「歸檔版」、「產出 reports/YYYY/YYYY-MM-DD.md」時，才路由到：
+
+```text
+AGENT_RADAR_REPORT
+→ workflows/daily_radar_workflow.md
+→ templates/daily_report_template.md
+```
+
+若語意不明，預設選 `AGENT_DAILY_PUSH_BRIEF`，並標示：
+
+```text
+輸出模式：每日推播精簡版。
+完整 48 則正式閘門：未嘗試 / 另需分段研究版。
+```
 
 ---
 
-## 6. 重要規則
+## 6. 每日執行順序
+
+1. 讀取入口檔。
+2. 依 `AGENT_DEFINITION_MAP.md` 選擇 route。
+3. 一般每日播報使用 `workflows/daily_push_brief_workflow.md`。
+4. 明確正式版才使用 `workflows/daily_radar_workflow.md`。
+5. 讀取 `configs/`、`memory/`、近期 `reports/` 與 active template。
+6. 產出時必須標示輸出模式、資料缺口、是否建議升級正式版、今日最終一句話。
+
+---
+
+## 7. 重要規則
 
 - 若資料不足，必須寫「資料不足」。
 - 若因果未確認，只能寫「產業訊號」或「待驗證推論」。
@@ -130,15 +153,13 @@ CURRENT_DECISIONS_APPEND.md
 - 使用者指出的漏抓事件，必須進入 `memory/missed_cases.md` 的硬檢查清單。
 - 跨領域事件必須標示受影響的所有雷達。
 - 同一週內已播報事件需跨日去重；無新資訊不重播。
-- 每日必須輸出固定指標追蹤總表；即使資料不足，也要標示資料缺口，不得省略。
-- 每日必須輸出「科技發展與突破」段落，並分成「AI 驅動突破」與「非 AI / 單獨科技突破」。
-- 每日必須輸出至少 5 則全球特殊應用 / 邊緣案例候選，且至少涵蓋 3 個不同領域。
-- 若某雷達只抓到主流新聞或無資料，必須依 `configs/search_retry_protocol.yml` 至少換 3 種搜尋方法後，才可標示資料不足。
-- 報告最後必須輸出舊版 / 新版補漏比對、全指標總和彙總、科技發展路徑判斷、搜尋 retry 狀態與今日最終一句話。
+- 每日推播精簡版必須輸出固定指標濃縮表與六領域覆蓋矩陣。
+- 每日推播精簡版不需要完整 48 則正式閘門；正式版才需要完整硬閘門。
+- 報告最後必須輸出資料缺口、是否建議升級正式版、今日最終一句話。
 
 ---
 
-## 7. Backtest / Growth Control
+## 8. Backtest / Growth Control
 
 Backtest 不只檢查報告成果，也檢查專案是否需要：
 
@@ -150,12 +171,14 @@ keep / revise / delete / archive / add / promote / demote
 
 ---
 
-## 8. 報告索引
+## 9. 報告索引
 
 完整索引詳見：`reports/INDEX.md`
 
-每日報告建議放在：
+正式版每日報告建議放在：
 
 ```text
 reports/YYYY/YYYY-MM-DD.md
 ```
+
+每日推播精簡版若未要求歸檔，不需要寫入 `reports/`。
