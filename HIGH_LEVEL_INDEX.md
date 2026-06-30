@@ -9,6 +9,7 @@ brain.manifest.yaml
 AGENTS.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
+AGENT_DEFINITION_MAP.md
 ```
 
 ---
@@ -32,12 +33,39 @@ recurring intelligence workflow / daily report system
 ## 3. 核心模組
 
 ```text
-configs / memory / templates / reports / radar rules / search retry / post-report review
+configs / memory / templates / reports / workflows / radar rules / search retry / post-report review
 ```
 
 ---
 
-## 4. Convergence Notes
+## 4. Active Output Modes
+
+```text
+Full Daily Radar = full research / archive output, uses workflows/daily_radar_workflow.md and templates/daily_report_template.md
+Daily Push Brief = concise daily user-facing output, uses workflows/daily_push_brief_workflow.md and templates/daily_push_brief_template.md
+News Content Output = converts selected radar signals into content, uses workflows/news_content_workflow.md and templates/news_content_template.md
+```
+
+---
+
+## 5. Active Agents
+
+```text
+radar_report_agent
+news_content_agent
+```
+
+Boundary:
+
+```text
+radar_report_agent searches and grades signals.
+news_content_agent writes content from already graded / labelled signals.
+news_content_agent must not upgrade evidence or replace radar search.
+```
+
+---
+
+## 6. Convergence Notes
 
 ```text
 Projection files create no canonical rules.
@@ -48,7 +76,7 @@ Schema coverage must not be overstated.
 
 ---
 
-## 5. Frozen History
+## 7. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -60,7 +88,7 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 6. 回答時必須避免
+## 8. 回答時必須避免
 
 ```text
 不要把 repo Level 與 module Level 混在一起
@@ -68,4 +96,6 @@ CURRENT_DECISIONS_APPEND.md
 不要把尚未產品化的內容寫成已完成
 不要把 frozen history 當成 current state
 不要把 Projection 當成 source of truth
+不要把 Daily Push Brief 寫成完整 48-signal formal report
+不要把 news_content_agent 的內容稿寫成已驗證情報判斷
 ```
