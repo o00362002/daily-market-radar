@@ -30,7 +30,7 @@ Agent / Codex / Claude Code execution must start here.
 
 ---
 
-## 2. Mount Read Rule
+## 2. BRAIN_ARCHITECTURE
 
 This repo is mounted under:
 
@@ -38,7 +38,7 @@ This repo is mounted under:
 o00362002/Human-AI-Collaboration-Brain
 ```
 
-Before local execution, identify the mount context:
+Before local execution, use the mother Brain architecture to identify:
 
 ```text
 mother repo
