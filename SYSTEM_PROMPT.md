@@ -11,7 +11,7 @@ PROJECT_MAP.md = project navigation projection
 HIGH_LEVEL_INDEX.md = high-level projection index
 CURRENT_STATE.md = current reality
 CURRENT_DECISIONS.md = accepted decisions
-DEPENDENCY_MAP.md = dependency map
+DEPENDENCY_MAP.md = dependency map and daily completion-gate source
 brain.manifest.yaml = thin mount manifest
 workflows/ = execution flow
 configs/ = radar parameters and search rules
@@ -61,6 +61,12 @@ Full Daily Radar = full research / formal archive report
 Daily Push Brief = concise user-facing daily push / chat brief
 ```
 
+Daily output-mode chains and completion gates live in:
+
+```text
+DEPENDENCY_MAP.md
+```
+
 The 5+3 hard gate applies only to:
 
 ```text
@@ -77,7 +83,7 @@ For Daily Push Brief, use:
 ```text
 workflows/daily_push_brief_workflow.md
 templates/daily_push_brief_template.md
-workflows/daily_execution_gate.md / Daily Push Brief Gate
+DEPENDENCY_MAP.md / Daily Push Brief Gate
 ```
 
 A Daily Push Brief must write:
@@ -127,7 +133,6 @@ README.md
 DEPENDENCY_MAP.md
 brain.manifest.yaml
 AGENT_DEFINITION_MAP.md
-workflows/daily_execution_gate.md
 workflows/daily_radar_workflow.md
 configs/radars.yml
 configs/triggers.yml
@@ -157,7 +162,6 @@ README.md
 DEPENDENCY_MAP.md
 brain.manifest.yaml
 AGENT_DEFINITION_MAP.md
-workflows/daily_execution_gate.md
 workflows/daily_push_brief_workflow.md
 configs/radars.yml
 configs/triggers.yml
@@ -179,7 +183,7 @@ If required files cannot be read, mark the output as partial and state the missi
 Detailed rules should live outside this prompt:
 
 ```text
-workflows/daily_execution_gate.md = mode-aware execution gate
+DEPENDENCY_MAP.md = active output-mode chains and daily completion gates
 workflows/daily_radar_workflow.md = full daily radar execution flow
 workflows/daily_push_brief_workflow.md = concise daily push brief execution flow
 configs/radars.yml = radar categories
@@ -251,7 +255,7 @@ Selected route
 Read set
 Dependency chain
 Output mode
-Gate used
+Gate used from DEPENDENCY_MAP.md
 Radar coverage
 Major signals status
 Niche candidate status
