@@ -35,6 +35,7 @@ HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 AGENTS.md
+AGENT_DEFINITION_MAP.md
 brain.manifest.yaml
 ```
 
@@ -43,12 +44,37 @@ brain.manifest.yaml
 ## 3. 核心模組
 
 ```text
-configs / memory / templates / reports / radar rules / search retry / post-report review
+configs / memory / templates / reports / workflows / radar rules / search retry / post-report review
 ```
 
 ---
 
-## 4. Convergence Notes
+## 4. Active Workflows
+
+```text
+workflows/daily_radar_workflow.md = full research / archive daily radar
+workflows/daily_push_brief_workflow.md = concise daily push brief
+workflows/news_content_workflow.md = convert confirmed / labelled signals into readable content
+```
+
+---
+
+## 5. Active Agents
+
+```text
+radar_report_agent = produces radar reports and concise daily push briefs
+news_content_agent = converts radar signals into news briefs, trend notes, social posts, or article drafts
+```
+
+Boundary:
+
+```text
+news_content_agent does not perform full radar search and does not upgrade evidence.
+```
+
+---
+
+## 6. Convergence Notes
 
 ```text
 Projection files create no canonical rules.
@@ -59,7 +85,7 @@ Backtest includes keep / revise / delete / archive / add / promote / demote.
 
 ---
 
-## 5. Frozen History
+## 7. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -71,7 +97,7 @@ CURRENT_DECISIONS_APPEND.md
 
 ---
 
-## 6. 同步檢查
+## 8. 同步檢查
 
 重大變更時檢查：
 
@@ -81,6 +107,7 @@ CURRENT_DECISIONS.md
 HIGH_LEVEL_INDEX.md
 DEPENDENCY_MAP.md
 AGENTS.md
+AGENT_DEFINITION_MAP.md
 brain.manifest.yaml
 check_mount_integrity.sh
 ```
