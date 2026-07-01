@@ -193,7 +193,31 @@ Only escalate when the simple feedback flow says escalation is required.
 
 ---
 
-## 7. Convergence Mount Rules
+## 7. Post-Execution Rule
+
+After any task that changes files, routes, tools, state, decisions, workflows, reports, or evidence, the agent must perform a lightweight post-execution check.
+
+Required check:
+
+```text
+1. What changed?
+2. Which route / agent / workflow was used?
+3. Which files were read or changed?
+4. Did checker / validation pass?
+5. Is there evidence?
+6. Is there a failure attribution?
+7. Is dependency / sync impact local only, child repo level, or mother Brain level?
+8. Is a Memory Patch Candidate needed?
+```
+
+If the change affects local project memory, dependency gates, module routes, or reusable workflow behavior, record it through the local backtest / decision process before treating it as durable.
+
+Do not promote evidence into memory automatically.
+Do not push child repo implementation details into the mother Brain unless they affect cross-repo governance.
+
+---
+
+## 8. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -232,7 +256,7 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## 8. Role Boundary Gate
+## 9. Role Boundary Gate
 
 Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
@@ -251,7 +275,7 @@ Memory stores only confirmed state and decisions.
 
 ---
 
-## 9. Level 2 Execution Path
+## 10. Level 2 Execution Path
 
 ```text
 Entry Gate: read AGENTS.md and project understanding layer
@@ -266,7 +290,7 @@ Reality / Sync Gate: compare planned vs actual result before declaring complete
 
 ---
 
-## 10. Completion Check
+## 11. Completion Check
 
 - radar coverage
 - fixed indicators

@@ -201,6 +201,34 @@ Daily Push Brief must write:
 Do not use the Full Daily Radar 5+3 gate to mark Daily Push Brief as failed.
 If any Daily Push Brief structural requirement is missing, mark `partial concise brief`.
 
+### 5.3 Post-Execution Backtest-to-Memory Gate
+
+A change is complete only when the following are checked:
+
+```text
+Post-Execution Record captured: yes / no / not needed
+Evidence captured: yes / no / not enough evidence
+Failure Attribution classified: yes / no / not applicable
+Dependency / Sync Impact checked: local / child repo / mother Brain / none / unknown
+Memory Patch Candidate status: none / observe / local child memory / mother Brain candidate / human decision required
+Checker result: pass / fail / not run / not available
+Completion status: complete / partial change / no downstream sync required
+```
+
+For this Level 2 radar repo, the gate is required when evidence affects daily output quality, missed signals, source gaps, routing gaps, market radar corrections, or reusable report behavior. Memory Patch Candidate is normally `observe` unless the signal is repeated or structural.
+
+If evidence is missing, status must be:
+
+```text
+partial change
+```
+
+If mother Brain sync is suspected but not checked, status must be:
+
+```text
+partial change
+```
+
 ---
 
 ## 6. Coverage Matrix rules

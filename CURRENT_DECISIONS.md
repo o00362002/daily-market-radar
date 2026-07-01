@@ -1,6 +1,50 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-06-29
+最後更新：2026-07-01
+
+---
+
+## 2026-07-01：Adopt mother Brain Post-Execution Backtest-to-Memory Flow
+
+This child repo follows the mother Brain post-execution governance flow.
+
+Canonical mother Brain references:
+
+```text
+Human-AI-Collaboration-Brain/MEMORY_UPDATE_POLICY.md
+Human-AI-Collaboration-Brain/loops/backtest_improvement_loop.md
+Human-AI-Collaboration-Brain/templates/BACKTEST_CHECK_TEMPLATE.md
+Human-AI-Collaboration-Brain/CHILD_REPO_MOUNTS.md
+```
+
+Local flow:
+
+```text
+Execution Loop
+→ Post-Execution Record
+→ Backtest Evidence Loop
+→ Failure Attribution
+→ Dependency / Sync Impact Check
+→ Memory Patch Candidate
+→ Local Project Brain Update or Mother Brain sync candidate
+→ Human / Decision Gate when required
+```
+
+Rules:
+
+```text
+Evidence is not durable memory by default.
+Local evidence should stay in this repo, normally under reports/backtests/ or the repo's equivalent evidence path.
+Local radar learnings should stay local unless they affect cross-repo governance, source-of-truth boundary, reusable governance rule, or mother Brain memory policy.
+Memory Patch Candidate must not be merged into durable source of truth without review.
+```
+
+Multi-agent / model-brain rule:
+
+```text
+Agents do not share hidden reasoning.
+Agents coordinate through externalized state, local decisions, dependency maps, backtest evidence, and Memory Patch Candidates.
+```
 
 ---
 

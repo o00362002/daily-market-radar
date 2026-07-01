@@ -106,6 +106,28 @@ Do not use a separate active daily execution-gate file for route completion rule
 
 ---
 
+## Multi-agent handoff rule
+
+Agents do not share hidden reasoning.
+
+Agents hand off through externalized repo state:
+
+```text
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+AGENT_DEFINITION_MAP.md
+DEPENDENCY_MAP.md
+reports/backtests/
+Post-Execution Record
+Memory Patch Candidate
+```
+
+Select exactly one primary route before execution.
+
+After execution, use the Post-Execution Backtest-to-Memory Gate when the task affects files, state, decisions, routes, evidence, dependency gates, radar corrections, or reusable workflow behavior.
+
+---
+
 ## Boundary
 
 Agent owns a complete task goal. Workflow orders steps. Skill judges. Tool operates. Loop reviews and improves.

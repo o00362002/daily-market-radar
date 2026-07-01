@@ -52,6 +52,7 @@ execution_edge:
   execution_module_model: enabled_lightweight
   programmable_control_layer: enabled_lightweight
   backtest_capability: enabled_when_evidence_exists
+  post_execution_backtest_to_memory: inherited_from_mother
 
 execution_gates:
   - entry
