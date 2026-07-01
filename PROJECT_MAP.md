@@ -20,8 +20,10 @@ Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ```text
 Level: Level 2 Runtime-Lite Brain
 Role: recurring intelligence workflow / daily report system
-Mother version: v1.18-draft
+Mother version: v1.19-draft
+Mother architecture: compact_five_layer
 Mount mode: active thin mount
+Layer depth: level_scaled
 ```
 
 ---
@@ -94,6 +96,7 @@ Projection files create no canonical rules.
 Evidence does not become Memory without approval.
 Frozen history is preserved but removed from active routing.
 Backtest includes keep / revise / delete / archive / add / promote / demote.
+Adoption Gate belongs under Interface & Integration Layer.
 ```
 
 ---
@@ -118,9 +121,8 @@ CURRENT_DECISIONS_APPEND.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 HIGH_LEVEL_INDEX.md
-DEPENDENCY_MAP.md
+PROJECT_MAP.md
 AGENTS.md
-AGENT_DEFINITION_MAP.md
 brain.manifest.yaml
 check_mount_integrity.sh
 ```
