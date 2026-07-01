@@ -90,7 +90,7 @@ Task routing lives inside AGENT_DEFINITION_MAP.md.
 No standalone ROUTING.md is active.
 ```
 
-If user asks for today’s brief, daily news, daily push, concise output, or lightweight report, route to:
+If user asks for today’s brief, daily news, daily push, concise output, lightweight report, or daily market radar without explicitly asking for a formal archive report, route to:
 
 ```text
 AGENT_DAILY_PUSH_BRIEF
@@ -146,8 +146,24 @@ Applies only to:
 ```text
 AGENT_DAILY_PUSH_BRIEF
 Daily Push Brief
-concise user-facing daily push
+structured concise user-facing daily push
 chat daily news brief
+```
+
+Daily Push Brief is a structured concise radar, not a free-form summary.
+
+```text
+Brief means:
+- shorter wording per item
+- fewer items than Full Daily Radar
+- full template structure preserved
+
+Brief does NOT mean:
+- removing required sections
+- reducing domain structure
+- merging Taiwan mapping into one generic paragraph
+- replacing news with synthesis
+- treating indicator status or conclusions as news
 ```
 
 Completion requirements:
@@ -155,23 +171,29 @@ Completion requirements:
 ```text
 已讀取必要入口檔，或明確揭露缺失
 6 大核心領域皆有覆蓋
-每一核心領域包含 2–3 則大型訊號
-每一核心領域包含 1 則小眾 / 潛力候選
-每一核心領域包含台灣映射
-Retail Focus Block 存在
+每一核心領域包含 exactly 3 則大型訊號
+每一核心領域包含 exactly 1 則小眾 / 潛力候選
+每一核心領域包含 1–2 則台灣映射
+每則新聞 / 訊號包含 evidence trace
+Retail Focus Block 五項固定檢查存在
 Data Gaps and Retry Notes 存在
+Final Indicator Status and News Synthesis Panel 存在且放在最後
 Post-brief Review 存在
+指標狀態與結論不得計入 3+1 新聞數量
+指標狀態與結論必須回指上方新聞 ID
 ```
 
 Daily Push Brief must write:
 
 ```text
 輸出模式：每日推播精簡版。
-精簡版狀態：complete / partial concise brief。
+精簡版狀態：complete concise brief / partial concise brief。
 完整 48 則正式閘門：未嘗試 / 未通過 / 另需分段研究版。
+結構閘門狀態：通過 / 未通過。
 ```
 
 Do not use the Full Daily Radar 5+3 gate to mark Daily Push Brief as failed.
+If any Daily Push Brief structural requirement is missing, mark `partial concise brief`.
 
 ---
 
@@ -190,14 +212,14 @@ Do not use the Full Daily Radar 5+3 gate to mark Daily Push Brief as failed.
 
 ### Daily Push Brief
 
-| 核心領域 | 大型訊號數 | 小眾候選數 | 台灣映射 | 精簡版狀態 | 漏抓風險 |
-|---|---:|---:|---|---|---|
-| AI 模型 / Agent / 工作流替代 | 2–3 | 1 | required |  |  |
-| 區塊鏈 / 加密 / RWA / Agent payments | 2–3 | 1 | required |  |  |
-| 零售 / 消費 / 社群 / 服飾 | 2–3 | 1 | required |  |  |
-| 全球市場 / 資金流 / 地緣政治 | 2–3 | 1 | required |  |  |
-| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | 2–3 | 1 | required |  |  |
-| 勞動 / 消費壓力 / 台灣本地訊號 | 2–3 | 1 | required |  |  |
+| 核心領域 | 大型訊號數 | 小眾候選數 | 台灣映射數 | Evidence Trace | 精簡版狀態 | 漏抓風險 |
+|---|---:|---:|---:|---|---|---|
+| AI 模型 / Agent / 工作流替代 | 3 | 1 | 1–2 | required |  |  |
+| 區塊鏈 / 加密 / RWA / Agent payments | 3 | 1 | 1–2 | required |  |  |
+| 零售 / 消費 / 社群 / 服飾 | 3 | 1 | 1–2 | required |  |  |
+| 全球市場 / 資金流 / 地緣政治 | 3 | 1 | 1–2 | required |  |  |
+| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | 3 | 1 | 1–2 | required |  |  |
+| 勞動 / 消費壓力 / 台灣本地訊號 | 3 | 1 | 1–2 | required |  |  |
 
 ---
 
@@ -236,7 +258,29 @@ External model outputs are scouts, not judges:
 
 ---
 
-## 8. Frozen dependencies
+## 8. News vs Indicator / Synthesis Rule
+
+Daily Push Brief must keep news, indicators, and synthesis separate.
+
+```text
+News / signal = source-backed event, data change, company action, policy change, product release, market move, or verifiable observation.
+Indicator status = derived state based on one or more news items or fixed metrics.
+Synthesis = model or analyst conclusion based on multiple news items.
+```
+
+Rules:
+
+```text
+1. Indicator status and synthesis must be placed in the final panel.
+2. Indicator status and synthesis must not count toward the 3+1 domain quota.
+3. Every indicator status and synthesis statement must reference supporting news IDs.
+4. If supporting news IDs are missing, mark it as candidate inference or data gap.
+5. Do not write a summary sentence in a news slot.
+```
+
+---
+
+## 9. Frozen dependencies
 
 These files are frozen history and should not drive active routing:
 
@@ -251,7 +295,7 @@ archive/
 
 ---
 
-## 9. Sync rule
+## 10. Sync rule
 
 When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, or completion gate changes, check:
 
@@ -284,7 +328,7 @@ No separate active daily execution gate file should be introduced. If a separate
 
 ---
 
-## 10. Level
+## 11. Level
 
 ```text
 Level 2：Runtime-Lite Brain
