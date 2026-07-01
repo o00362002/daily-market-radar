@@ -217,7 +217,45 @@ Do not push child repo implementation details into the mother Brain unless they 
 
 ---
 
-## 8. Convergence Mount Rules
+## 8. Mandatory Memory Trigger Check
+
+Before declaring a task complete, run this check if any of the following changed:
+
+```text
+source-of-truth file
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+DEPENDENCY_MAP.md
+AGENT_DEFINITION_MAP.md
+brain.manifest.yaml
+workflow / template / report mode
+child repo mount status
+cross-repo sync state
+memory policy
+backtest / evidence rule
+radar scope / source gap / missed-signal rule
+```
+
+Required output:
+
+```text
+Memory update triggered: yes / no
+Trigger type: user boundary correction / source-of-truth changed / child repo sync changed / dependency-route changed / post-execution evidence changed / repeated backtest finding / none
+Memory Patch Candidate: none / observe / local child / mother Brain / human decision required
+Target files:
+Review required: yes / no
+Completion status: complete / partial
+```
+
+If this trigger check is required but not performed, status must be:
+
+```text
+partial change
+```
+
+---
+
+## 9. Convergence Mount Rules
 
 This child repo inherits the mother Brain convergence rules.
 
@@ -256,7 +294,7 @@ Do not describe this repo as fully code-enforced unless the specific invariant h
 
 ---
 
-## 9. Role Boundary Gate
+## 10. Role Boundary Gate
 
 Before execution, classify whether the task is Agent / Workflow / Skill / Tool / Loop / Human / Decision Gate / Memory.
 
@@ -275,7 +313,7 @@ Memory stores only confirmed state and decisions.
 
 ---
 
-## 10. Level 2 Execution Path
+## 11. Level 2 Execution Path
 
 ```text
 Entry Gate: read AGENTS.md and project understanding layer
@@ -285,12 +323,13 @@ Role Boundary Gate: classify the task boundary
 Plan Gate: state intended report / config / workflow change
 Execution Gate: follow the relevant workflow, checklist, template, or loop
 Post-Action Check / Backtest Gate: check radar coverage, missed cases, evidence, and growth control when applicable
+Memory Trigger Check Gate: check whether local or mother Brain memory update is triggered
 Reality / Sync Gate: compare planned vs actual result before declaring complete
 ```
 
 ---
 
-## 11. Completion Check
+## 12. Completion Check
 
 - radar coverage
 - fixed indicators
@@ -302,6 +341,7 @@ Reality / Sync Gate: compare planned vs actual result before declaring complete
 - role boundary check
 - plan vs actual action check
 - sync status
+- Memory Trigger Check
 - HIGH_LEVEL_INDEX.md update need
 - optional adapter need
 
@@ -315,6 +355,8 @@ Files changed:
 Role boundary check:
 Frozen history / growth control check:
 Reality check:
+Sync check:
+Memory Trigger Check:
 HIGH_LEVEL_INDEX.md update needed? yes / no
 Optional adapters checked? yes / no
 Auto Sync / Auto PR active or requested? yes / no
@@ -322,4 +364,4 @@ Status: complete / partial change / No downstream sync required
 Next required action:
 ```
 
-If required source checks, workflow steps, role boundary check, frozen history check, sync, index check, optional adapter check, or reality check are incomplete, mark the work as `partial change`.
+If required source checks, memory trigger check, workflow steps, role boundary check, frozen history check, sync, index check, optional adapter check, or reality check are incomplete, mark the work as `partial change`.
