@@ -3,6 +3,12 @@
 Daily Push Brief is a structured concise radar, not a free-form summary.
 
 ```text
+Daily Push Brief 不代表可刪減結構。
+Brief 只代表單則內容字數較短。
+所有章節、欄位、證據追溯、台灣映射、指標狀態仍必須完整保留。
+```
+
+```text
 Brief means:
 - shorter wording per item
 - fewer items than Full Daily Radar
