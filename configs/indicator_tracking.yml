@@ -1,11 +1,14 @@
 # Mandatory Daily Indicator Tracking
-# 本檔定義每日市場情報必須固定輸出的指標追蹤表。
-# 目的：避免報告只寫新聞與事件，卻漏掉跨日可回測的量化/半量化指標。
+# 本檔定義每日市場情報必須固定輸出的指標追蹤。
+# 目的：避免報告只寫新聞與事件，卻漏掉跨日可回測的量化/半量化狀態。
+# Daily Push Brief 中，指標追蹤採濃縮版並統一放在最後面板，不打斷新聞主體。
 
 indicator_tracking:
   required: true
-  output_position: "放在今日雷達覆蓋表之後、今日必看訊號之前；若篇幅不足，至少輸出濃縮版並標示未完整。"
-  rule: "每一大桶至少列出指標、目前狀態、方向、異常訊號、資料來源/時間、下一步驗證；即使查無資料也要標示資料缺口，不得省略。"
+  output_position:
+    full_daily_radar: "放在今日雷達覆蓋表之後、今日必看訊號之前。"
+    daily_push_brief: "放在報告最後的 Final Indicator Status and News Synthesis Panel。"
+  rule: "Daily Push Brief 中，固定指標只輸出濃縮狀態，不逐段展開；每一桶至少列出指標領域、今日狀態、方向、支撐新聞 ID、資料缺口。指標與結論不得計入每領域 3+1 新聞數量。"
 
   crypto_blockchain:
     name: 區塊鏈 / 加密貨幣固定指標
@@ -129,11 +132,19 @@ indicator_tracking:
       - 來源與時間
       - 下一步觀察
 
-quality_gate:
-  before_final_answer:
-    - 是否輸出固定指標追蹤總表？
-    - 是否每一桶至少有「狀態 / 方向 / 異常 / 來源 / 下一步」？
-    - 是否把資料缺口標出，而不是省略？
-    - 是否區分「查無重大更新」與「未完整查證」？
-    - 是否將社群討論放入候選訊號並附原始連結與未證實標記？
-    - 是否把上次漏抓事件回測到固定指標中？
+  daily_push_brief_final_panel_fields:
+    - 指標領域
+    - 今日狀態
+    - 方向
+    - 支撐新聞 ID
+    - 資料缺口
+
+  quality_gate:
+    before_final_answer:
+      - 是否在最後輸出 Final Indicator Status and News Synthesis Panel？
+      - 是否每一桶至少有「今日狀態 / 方向 / 支撐新聞 ID / 資料缺口」？
+      - 是否把資料缺口標出，而不是省略？
+      - 是否區分「查無重大更新」與「未完整查證」？
+      - 是否將社群討論放入候選訊號並附原始連結與未證實標記？
+      - 是否把上次漏抓事件回測到固定指標中？
+      - 是否確認指標與結論未計入每領域 3+1 新聞數量？
