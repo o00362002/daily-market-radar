@@ -229,6 +229,42 @@ If mother Brain sync is suspected but not checked, status must be:
 partial change
 ```
 
+### 5.4 Mandatory Memory Trigger Check Gate
+
+A task must run Memory Trigger Check before completion when any of the following changed:
+
+```text
+source-of-truth file
+CURRENT_STATE.md
+CURRENT_DECISIONS.md
+DEPENDENCY_MAP.md
+AGENT_DEFINITION_MAP.md
+brain.manifest.yaml
+workflow / template / report mode
+child repo mount status
+cross-repo sync state
+memory policy
+backtest / evidence rule
+radar scope / source gap / missed-signal rule
+```
+
+Required output:
+
+```text
+Memory update triggered: yes / no
+Trigger type: user boundary correction / source-of-truth changed / child repo sync changed / dependency-route changed / post-execution evidence changed / repeated backtest finding / none
+Memory Patch Candidate: none / observe / local child / mother Brain / human decision required
+Target files:
+Review required: yes / no
+Completion status: complete / partial
+```
+
+If this gate is triggered but not performed, status must be:
+
+```text
+partial change
+```
+
 ---
 
 ## 6. Coverage Matrix rules
@@ -331,7 +367,7 @@ archive/
 
 ## 10. Sync rule
 
-When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, or completion gate changes, check:
+When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, or Memory Trigger Check gate changes, check:
 
 ```text
 PROJECT_MAP.md
