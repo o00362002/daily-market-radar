@@ -5,6 +5,12 @@ Purpose: define the default structured concise daily push version for chat / aut
 This workflow does **not** replace the full `daily_radar_workflow.md`.
 It creates the default concise output mode, but concise means shorter wording per item, not reduced structure.
 
+```text
+Daily Push Brief 不代表可刪減結構。
+Brief 只代表單則內容字數較短。
+所有章節、欄位、證據追溯、台灣映射、指標狀態仍必須完整保留。
+```
+
 ---
 
 ## name
