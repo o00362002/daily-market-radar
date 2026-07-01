@@ -49,20 +49,21 @@ has brain.manifest.yaml && pass "brain.manifest.yaml exists" || fail "brain.mani
 
 if has brain.manifest.yaml; then
   refs brain.manifest.yaml 'mother_repo:[[:space:]]*o00362002/Human-AI-Collaboration-Brain' && pass "mother repo set" || fail "mother repo missing"
-  refs brain.manifest.yaml 'mother_version:[[:space:]]*v1\.18-draft' && pass "mother version v1.18-draft" || fail "mother version missing"
+  refs brain.manifest.yaml 'mother_version:[[:space:]]*v1\.19-draft' && pass "mother version v1.19-draft" || fail "mother version missing"
+  refs brain.manifest.yaml 'mother_architecture:[[:space:]]*compact_five_layer|architecture_layers:' && pass "compact five-layer mount present" || warn "compact five-layer mount not yet recorded"
   refs brain.manifest.yaml 'convergence_mode:[[:space:]]*inherited_from_mother' && pass "convergence mode inherited" || fail "convergence mode missing"
   refs brain.manifest.yaml 'schema_coverage_policy:[[:space:]]*inherited_from_mother' && pass "schema coverage policy inherited" || fail "schema coverage policy missing"
   refs brain.manifest.yaml 'file_governance:' && pass "file governance present" || fail "file governance missing"
   refs brain.manifest.yaml 'backtest_growth_control:' && pass "backtest growth control present" || fail "backtest growth control missing"
   refs brain.manifest.yaml 'frozen_history_check:[[:space:]]*required' && pass "frozen history check required" || fail "frozen history check missing"
-  refs brain.manifest.yaml 'adoption_not_execution_edge:[[:space:]]*true' && pass "adoption boundary protected" || fail "adoption boundary missing"
+  refs brain.manifest.yaml 'adoption_gate_under_interface:[[:space:]]*true' && pass "adoption boundary protected" || fail "adoption boundary missing"
 fi
 
 if has AGENTS.md; then
   refs AGENTS.md 'Convergence Mount Rules' && pass "AGENTS convergence rules present" || fail "AGENTS missing convergence rules"
   refs AGENTS.md 'Frozen history / growth control check' && pass "AGENTS requires frozen history / growth control check" || fail "AGENTS missing frozen history / growth control check"
   refs AGENTS.md 'Class A = schema-backed enforcement' && pass "AGENTS has schema coverage classes" || fail "AGENTS missing schema coverage classes"
-  refs AGENTS.md 'Adoption Layer is not Execution Edge' && pass "AGENTS protects Adoption" || fail "AGENTS missing Adoption protection"
+  refs AGENTS.md 'Adoption Gate belongs under Interface & Integration Layer' && pass "AGENTS protects Adoption" || fail "AGENTS missing Adoption protection"
 fi
 
 case "$LEVEL" in

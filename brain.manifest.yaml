@@ -3,12 +3,21 @@
 schema: brain-manifest/v1
 manifest_kind: child
 mother_repo: o00362002/Human-AI-Collaboration-Brain
-mother_version: v1.18-draft
+mother_version: v1.19-draft
+mother_architecture: compact_five_layer
 level: Level 2
+
+architecture_layers:
+  - Brain Core / Charter
+  - Interface & Integration Layer
+  - Memory Layer
+  - Context Routing Layer
+  - Execution Edge
 
 mount:
   mode: thin
   role: execution_interface
+  layer_depth: level_scaled
   real_test_case: true
   test_domain: daily-market-radar
   status: active_thin_mount
@@ -18,7 +27,7 @@ contracts:
   execution_contract: rules/post_change_sync_protocol.md
   role_boundary_contract: inherited_from_mother
   folder_structure_guide: inherited_from_mother
-  adoption_layer: inherited_from_mother
+  adoption_gate: inherited_from_mother
   schema_coverage_policy: inherited_from_mother
   convergence_mode: inherited_from_mother
 
@@ -64,8 +73,9 @@ sync_policy:
   auto_sync_auto_pr: not_active_check_only
 
 boundary:
+  inherits_compact_five_layer: true
   brain_never_executes: true
   agent_cannot_approve_itself: true
   tool_without_judgement: true
   loop_handles_retry_and_backtest: true
-  adoption_not_execution_edge: true
+  adoption_gate_under_interface: true

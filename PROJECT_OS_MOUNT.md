@@ -121,4 +121,5 @@ Frozen history / growth control check
 Reality check
 Sync check
 Backtest record check
+Backtest record check
 ```

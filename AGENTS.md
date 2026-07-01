@@ -39,6 +39,17 @@ This repo is mounted under:
 o00362002/Human-AI-Collaboration-Brain
 ```
 
+This child repo inherits the mother Brain compact five-layer architecture and vocabulary.
+Each layer is implemented locally according to this repo's Level and actual complexity.
+
+```text
+1. Brain Core / Charter
+2. Interface & Integration Layer
+3. Memory Layer
+4. Context Routing Layer
+5. Execution Edge
+```
+
 Before local execution, use the mother Brain architecture to identify:
 
 ```text
@@ -65,7 +76,7 @@ If mother contract files are required but cannot be read, mark the work as `part
 
 ---
 
-## 3. v1.18 Mount Contract
+## 3. v1.19 Compact Mount Contract
 
 Mother brain:
 
@@ -88,10 +99,11 @@ specs/programmable_control_layer.md
 Core rule:
 
 ```text
-Level controls structure depth.
+Level controls local layer depth.
 Execution Contract is universal.
 Role Boundary Contract is universal.
-Adoption Layer is not Execution Edge.
+Interface exposes access, not authority.
+Adoption Gate belongs under Interface & Integration Layer.
 ```
 
 ---
