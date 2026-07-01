@@ -39,8 +39,10 @@ AI 產品用量經濟
 ```text
 Level: Level 2 Runtime-Lite Brain
 Role: recurring intelligence workflow / daily report system
-Mother version: v1.18-draft
+Mother version: v1.19-draft
+Mother architecture: compact_five_layer
 Mount mode: active thin mount
+Layer depth: level_scaled
 ```
 
 Source of truth：
@@ -87,98 +89,3 @@ reports/
 workflows/
 evals/
 ```
-
----
-
-## 4. Frozen History
-
-以下舊過渡檔只保留歷史脈絡，不再作為 current routing / source of truth / active rule：
-
-```text
-AI_PROJECT_OS_ADOPTION_PLAN.md
-AI_AGENT_MODEL_ADOPTION_PLAN.md
-POST_CHANGE_SYNC_ADOPTION.md
-README_AGENT_MODEL_NOTE.md
-CURRENT_DECISIONS_APPEND.md
-```
-
----
-
-## 5. Output mode routing
-
-每日播報預設走輕量版。
-
-一般說法如「每日播報」、「每日新聞」、「今天的每日新聞」、「播報今天的每日新聞」、「今日市場雷達」、「今天新聞」、「daily news」、「morning brief」、「daily push」，都路由到：
-
-```text
-AGENT_DAILY_PUSH_BRIEF
-→ workflows/daily_push_brief_workflow.md
-→ templates/daily_push_brief_template.md
-```
-
-只有使用者明確要求「正式版」、「完整版」、「完整正式版」、「Full Daily Radar」、「full report」、「complete report」、「archival report」、「48-signal report」、「5+3」、「完整硬閘門」、「歸檔版」、「產出 reports/YYYY/YYYY-MM-DD.md」時，才路由到：
-
-```text
-AGENT_RADAR_REPORT
-→ workflows/daily_radar_workflow.md
-→ templates/daily_report_template.md
-```
-
-若語意不明，預設選 `AGENT_DAILY_PUSH_BRIEF`，並標示：
-
-```text
-輸出模式：每日推播精簡版。
-完整 48 則正式閘門：未嘗試 / 另需分段研究版。
-```
-
----
-
-## 6. 每日執行順序
-
-1. 讀取入口檔。
-2. 依 `AGENT_DEFINITION_MAP.md` 選擇 route。
-3. 一般每日播報使用 `workflows/daily_push_brief_workflow.md`。
-4. 明確正式版才使用 `workflows/daily_radar_workflow.md`。
-5. 讀取 `configs/`、`memory/`、近期 `reports/` 與 active template。
-6. 產出時必須標示輸出模式、資料缺口、是否建議升級正式版、今日最終一句話。
-
----
-
-## 7. 重要規則
-
-- 若資料不足，必須寫「資料不足」。
-- 若因果未確認，只能寫「產業訊號」或「待驗證推論」。
-- 候選訊號不得因證據不足被刪除。
-- 社群討論可列為潛力候選，但必須標示未證實、證據等級、原始連結、官方確認狀態或反向證據。
-- 使用者指出的漏抓事件，必須進入 `memory/missed_cases.md` 的硬檢查清單。
-- 跨領域事件必須標示受影響的所有雷達。
-- 同一週內已播報事件需跨日去重；無新資訊不重播。
-- 每日推播精簡版必須輸出固定指標濃縮表與六領域覆蓋矩陣。
-- 每日推播精簡版不需要完整 48 則正式閘門；正式版才需要完整硬閘門。
-- 報告最後必須輸出資料缺口、是否建議升級正式版、今日最終一句話。
-
----
-
-## 8. Backtest / Growth Control
-
-Backtest 不只檢查報告成果，也檢查專案是否需要：
-
-```text
-keep / revise / delete / archive / add / promote / demote
-```
-
-新增規則、模板、workflow 或報告欄位前，先檢查能否用凍結歷史、指回 Core、降權 Projection 或刪減重複段落解決。
-
----
-
-## 9. 報告索引
-
-完整索引詳見：`reports/INDEX.md`
-
-正式版每日報告建議放在：
-
-```text
-reports/YYYY/YYYY-MM-DD.md
-```
-
-每日推播精簡版若未要求歸檔，不需要寫入 `reports/`。
