@@ -1,6 +1,6 @@
 # daily-market-radar｜CURRENT_STATE
 
-最後更新：2026-06-29
+最後更新：2026-07-01
 
 ---
 
@@ -43,8 +43,10 @@ Agent / Codex / Claude Code 執行任務時，第一入口是 `AGENTS.md`。
 
 ```text
 Mother brain: o00362002/Human-AI-Collaboration-Brain
-Mother version: v1.18-draft
+Mother version: v1.19-draft
+Mother architecture: compact_five_layer
 Mount mode: active thin mount
+Layer depth: level_scaled
 ```
 
 ```text
@@ -53,7 +55,7 @@ schema_coverage_policy: inherited_from_mother
 file_governance: active
 backtest_growth_control: active
 frozen_history_check: required
-adoption_not_execution_edge: true
+adoption_gate_under_interface: true
 ```
 
 ---
@@ -82,33 +84,4 @@ AI_AGENT_MODEL_ADOPTION_PLAN.md
 POST_CHANGE_SYNC_ADOPTION.md
 README_AGENT_MODEL_NOTE.md
 CURRENT_DECISIONS_APPEND.md
-```
-
----
-
-## 7. 同步檢查
-
-重大變更時檢查：
-
-```text
-README.md
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-ADOPTION_LEVELS.md
-PROJECT_OS_MOUNT.md
-brain.manifest.yaml
-AGENTS.md
-SYSTEM_PROMPT.md
-check_mount_integrity.sh
-```
-
-所有修改後需補：
-
-```text
-Role boundary check
-Frozen history / growth control check
-Reality check
-Sync check
 ```
