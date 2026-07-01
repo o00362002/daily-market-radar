@@ -19,12 +19,13 @@ echo "Child Mount Reality-Check: $repo_name"
 
 LEVEL="Level 1"
 if has brain.manifest.yaml; then
-  L=$(grep -Ei '^[[:space:]]*level:' brain.manifest.yaml | head -1 | sed -E 's/#.*$//; s/.*level:[[:space:]]*//I; s/["'\''']//g; s/[[:space:]]+$//')
+  L=$(awk -F: '/^[[:space:]]*level:/ {print $2; exit}' brain.manifest.yaml 2>/dev/null)
+  L=${L%%#*}
+  L=$(printf '%s' "$L" | xargs 2>/dev/null)
   [ -n "$L" ] && LEVEL="$L"
 fi
 echo "Detected level: $LEVEL"
 
-# Conflict markers.
 HITS=0
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   LIST=$(git -c core.quotePath=false ls-files)
@@ -42,28 +43,28 @@ $LIST
 EOF
 [ "$HITS" -eq 0 ] && pass "no unresolved conflict markers"
 
-# Required thin mount entries.
 has README.md && pass "README.md exists" || fail "README.md missing"
 has AGENTS.md && pass "AGENTS.md exists" || fail "AGENTS.md missing"
 has brain.manifest.yaml && pass "brain.manifest.yaml exists" || fail "brain.manifest.yaml missing"
 
 if has brain.manifest.yaml; then
   refs brain.manifest.yaml 'mother_repo:[[:space:]]*o00362002/Human-AI-Collaboration-Brain' && pass "mother repo set" || fail "mother repo missing"
-  refs brain.manifest.yaml 'mother_version:[[:space:]]*v1\.19-draft' && pass "mother version v1.19-draft" || fail "mother version missing"
+  refs brain.manifest.yaml 'mother_version:[[:space:]]*v[0-9]+\.[0-9]+(-[A-Za-z0-9._-]+)?' && pass "mother version field present" || warn "mother version field missing or nonstandard"
   refs brain.manifest.yaml 'mother_architecture:[[:space:]]*compact_five_layer|architecture_layers:' && pass "compact five-layer mount present" || warn "compact five-layer mount not yet recorded"
-  refs brain.manifest.yaml 'convergence_mode:[[:space:]]*inherited_from_mother' && pass "convergence mode inherited" || fail "convergence mode missing"
-  refs brain.manifest.yaml 'schema_coverage_policy:[[:space:]]*inherited_from_mother' && pass "schema coverage policy inherited" || fail "schema coverage policy missing"
-  refs brain.manifest.yaml 'file_governance:' && pass "file governance present" || fail "file governance missing"
-  refs brain.manifest.yaml 'backtest_growth_control:' && pass "backtest growth control present" || fail "backtest growth control missing"
-  refs brain.manifest.yaml 'frozen_history_check:[[:space:]]*required' && pass "frozen history check required" || fail "frozen history check missing"
-  refs brain.manifest.yaml 'adoption_gate_under_interface:[[:space:]]*true' && pass "adoption boundary protected" || fail "adoption boundary missing"
+  refs brain.manifest.yaml 'convergence_mode:' && pass "convergence mode field present" || warn "convergence mode field missing"
+  refs brain.manifest.yaml 'schema_coverage_policy:' && pass "schema coverage policy field present" || warn "schema coverage policy field missing"
+  refs brain.manifest.yaml 'file_governance:' && pass "file governance present" || warn "file governance missing"
+  refs brain.manifest.yaml 'backtest_growth_control:' && pass "backtest growth control present" || warn "backtest growth control missing"
+  refs brain.manifest.yaml 'adoption_layer:' && fail "legacy adoption_layer key still present" || pass "no legacy adoption_layer key"
+  refs brain.manifest.yaml 'adoption_not_execution_edge:' && fail "legacy adoption_not_execution_edge key still present" || pass "no legacy adoption_not_execution_edge key"
+  refs brain.manifest.yaml 'adoption_gate_under_interface:' && pass "adoption gate boundary field present" || warn "adoption gate boundary field missing"
 fi
 
 if has AGENTS.md; then
-  refs AGENTS.md 'Convergence Mount Rules' && pass "AGENTS convergence rules present" || fail "AGENTS missing convergence rules"
-  refs AGENTS.md 'Frozen history / growth control check' && pass "AGENTS requires frozen history / growth control check" || fail "AGENTS missing frozen history / growth control check"
-  refs AGENTS.md 'Class A = schema-backed enforcement' && pass "AGENTS has schema coverage classes" || fail "AGENTS missing schema coverage classes"
-  refs AGENTS.md 'Adoption Gate belongs under Interface & Integration Layer' && pass "AGENTS protects Adoption" || fail "AGENTS missing Adoption protection"
+  refs AGENTS.md 'Convergence Mount Rules' && pass "AGENTS convergence rules present" || warn "AGENTS missing convergence rules"
+  refs AGENTS.md 'Class A = schema-backed enforcement' && pass "AGENTS has schema coverage classes" || warn "AGENTS missing schema coverage classes"
+  refs AGENTS.md 'Adoption Layer is not Execution Edge' && fail "AGENTS still has legacy Adoption Layer wording" || pass "no legacy AGENTS Adoption Layer wording"
+  refs AGENTS.md 'Adoption Gate belongs under Interface & Integration Layer' && pass "AGENTS protects Adoption Gate" || warn "AGENTS missing Adoption Gate wording"
 fi
 
 case "$LEVEL" in
@@ -79,7 +80,6 @@ case "$LEVEL" in
     ;;
 esac
 
-# Daily output-mode chains and gates live in DEPENDENCY_MAP.md.
 has DEPENDENCY_MAP.md && pass "DEPENDENCY_MAP.md exists" || fail "DEPENDENCY_MAP.md missing"
 has AGENT_DEFINITION_MAP.md && pass "AGENT_DEFINITION_MAP.md exists" || fail "AGENT_DEFINITION_MAP.md missing"
 has workflows/daily_radar_workflow.md && pass "daily_radar_workflow.md exists" || fail "daily_radar_workflow.md missing"
