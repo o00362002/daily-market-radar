@@ -4,6 +4,19 @@ Route map for `daily-market-radar`.
 
 Select exactly one primary `AGENT_` route before execution.
 
+All routes that output news, search results, or content must apply:
+
+```text
+configs/news_freshness_and_taiwan_news.yml
+```
+
+This rule prevents two recurring failures:
+
+```text
+1. Repeating historical concepts as if they are new daily news.
+2. Replacing Taiwan news with generic Taiwan implications.
+```
+
 ---
 
 ## AGENT_ routes
@@ -15,7 +28,7 @@ Select exactly one primary `AGENT_` route before execution.
 | `AGENT_NEWS_SEARCH` | specific topic news search |
 | `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
 | `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
-| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, or watchlist change |
+| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, or watchlist change |
 
 ---
 
@@ -87,22 +100,48 @@ Each route must follow the active output-mode chain in `DEPENDENCY_MAP.md`.
 ```text
 AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
-→ templates/daily_report_template.md
+→ templates/daily_report_template.md or templates/daily_report_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
 
 AGENT_DAILY_PUSH_BRIEF
 → workflows/daily_push_brief_workflow.md
 → templates/daily_push_brief_template.md
+→ configs/news_freshness_and_taiwan_news.yml
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
+
+AGENT_NEWS_SEARCH
+→ workflows/news_search_content_workflow.md
+→ templates/news_search_content_template.md or templates/news_search_content_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
+
+AGENT_NEWS_CONTENT
+→ workflows/news_content_workflow.md
+→ templates/news_content_template.md or templates/news_content_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
 ```
 
-Route, workflow, template, and gate must match. If they do not match, mark the output as:
+Route, workflow, template, config, and gate must match. If they do not match, mark the output as:
 
 ```text
 依賴鏈不一致：partial / blocked
 ```
 
 Do not use a separate active daily execution-gate file for route completion rules. Daily output completion gates live in `DEPENDENCY_MAP.md`.
+
+---
+
+## News freshness and Taiwan news boundary
+
+For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, `AGENT_NEWS_SEARCH`, and `AGENT_NEWS_CONTENT`:
+
+```text
+- Every news item must include 今日新增點.
+- Every news item must mark whether it repeats a historical theme.
+- Repeated themes need new data / company action / policy / market reaction / chain metric / Taiwan news to count as current news.
+- Taiwan news must be source-backed Taiwan event / data / company action / policy / market news.
+- Taiwan implication is model inference and must not be counted as Taiwan news.
+```
 
 ---
 
