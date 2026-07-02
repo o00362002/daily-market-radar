@@ -2,8 +2,6 @@
 
 Thin-mount dependency map for the Daily Market Radar repo.
 
-This file is not a copy of the mother Brain.
-
 This file is the active source for:
 
 ```text
@@ -26,51 +24,39 @@ Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
 Agent map and task routing: AGENT_DEFINITION_MAP.md
 Dependency and completion gates: DEPENDENCY_MAP.md
+Freshness and Taiwan news rules: configs/news_freshness_and_taiwan_news.yml
 ```
 
 ---
 
-## 2. Core dependencies
-
-| Area | Files |
-|---|---|
-| Entry | README.md, SYSTEM_PROMPT.md, PROJECT_MAP.md, HIGH_LEVEL_INDEX.md, CURRENT_STATE.md, CURRENT_DECISIONS.md, AGENTS.md, AGENT_DEFINITION_MAP.md, brain.manifest.yaml |
-| Radar rules | configs/ |
-| Memory | memory/ |
-| Output | templates/, reports/, content/ |
-| Full workflow | workflows/daily_radar_workflow.md |
-| Concise push workflow | workflows/daily_push_brief_workflow.md |
-| News search workflow | workflows/news_search_content_workflow.md |
-| Content workflow | workflows/news_content_workflow.md |
-| Backtest | reports/backtests/, evals/cold_read_eval.md |
-| Mount check | check_mount_integrity.sh |
-
----
-
-## 3. Active output modes and dependency chains
+## 2. Active output modes and dependency chains
 
 ```text
 Full Daily Radar
 → AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
-→ templates/daily_report_template.md
+→ templates/daily_report_template.md or templates/daily_report_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
 
 Daily Push Brief
 → AGENT_DAILY_PUSH_BRIEF
 → workflows/daily_push_brief_workflow.md
 → templates/daily_push_brief_template.md
+→ configs/news_freshness_and_taiwan_news.yml
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
 
 News Search Output
 → AGENT_NEWS_SEARCH
 → workflows/news_search_content_workflow.md
-→ templates/news_search_content_template.md
+→ templates/news_search_content_template.md or templates/news_search_content_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
 
 News Content Output
 → AGENT_NEWS_CONTENT
 → workflows/news_content_workflow.md
-→ templates/news_content_template.md
+→ templates/news_content_template.md or templates/news_content_template_v2.md
+→ configs/news_freshness_and_taiwan_news.yml
 ```
 
 Route, workflow, template, and gate must form one consistent dependency chain.
@@ -83,7 +69,7 @@ If they disagree, mark the output:
 
 ---
 
-## 4. Routing
+## 3. Routing
 
 ```text
 Task routing lives inside AGENT_DEFINITION_MAP.md.
@@ -100,9 +86,79 @@ Only route to `AGENT_RADAR_REPORT` when the user explicitly asks for a full form
 
 ---
 
-## 5. Mode-specific completion gates
+## 4. Shared Freshness and Taiwan News Gate
 
-### 5.1 Full Daily Radar Gate
+Applies to:
+
+```text
+Daily Push Brief
+Full Daily Radar
+News Search Output
+News Content Output
+```
+
+Mandatory rule file:
+
+```text
+configs/news_freshness_and_taiwan_news.yml
+```
+
+Core rules:
+
+```text
+1. 每日情報必須優先提供今日新增資訊。
+2. 不得用昨日或歷史已播概念重複填滿新聞欄位。
+3. 若重複歷史主題，必須有新數據、新公司動作、新政策、新市場反應、新鏈上數據或新台灣新聞，否則不得列入大型訊號。
+4. 台灣段必須優先放台灣新聞，不是模型推論的台灣映射。
+5. 台灣影響、台灣推論、台灣產業關聯只能放在結論 / synthesis / final panel，不得取代台灣新聞。
+```
+
+Every news item must include:
+
+```text
+ID
+事件 / news item
+今日新增點
+來源 / 時間
+證據等級
+是否重複歷史主題
+不確定點 / 下一步
+```
+
+Taiwan news means:
+
+```text
+台灣官方資料 / 政策 / 統計
+台灣公司公告 / 財報 / 法說 / 重大動作
+台灣媒體報導的本地產業事件
+台灣百貨 / 商場 / 品牌 / 通路 / 展店 / 撤櫃 / 商圈新聞
+台灣市場數據 / 匯率 / 勞動 / 消費 / 信用資料
+國際新聞明確包含台灣公司、台灣供應鏈、台灣市場或台灣政策
+```
+
+Not Taiwan news:
+
+```text
+國際新聞可能影響台灣
+台灣企業應該注意
+台灣品牌可以學
+模型推論的台灣關聯
+```
+
+If no qualified Taiwan news is found, write:
+
+```text
+台灣新聞不足
+已查來源：
+已查關鍵字：
+下一步補查：
+```
+
+Do not use generic Taiwan implications to fill Taiwan news quota.
+
+---
+
+## 5. Full Daily Radar Gate
 
 Applies only to:
 
@@ -118,9 +174,13 @@ Completion requirements:
 ```text
 6 大核心領域皆達 5 則大型重要新聞 + 3 則小眾潛力候選
 已完成必要 repo 檔案讀取
+已讀取 configs/news_freshness_and_taiwan_news.yml
 已完成搜尋
 已完成最近 7 日 reports 去重
 已完成高風險 claim 檢查
+已完成今日新增點檢查
+已完成歷史重複主題檢查
+已完成台灣新聞有效性檢查
 已輸出 Coverage Matrix
 已輸出 Data Gaps / Retry Notes
 已輸出 post-report backtest / model adjustment panel
@@ -139,7 +199,9 @@ If any requirement is missing, mark:
 不可視為完整正式播報
 ```
 
-### 5.2 Daily Push Brief Gate
+---
+
+## 6. Daily Push Brief Gate
 
 Applies only to:
 
@@ -155,33 +217,23 @@ Daily Push Brief is a structured concise radar, not a free-form summary.
 ```text
 Daily Push Brief 不代表可刪減結構。
 Brief 只代表單則內容字數較短。
-所有章節、欄位、證據追溯、台灣映射、指標狀態仍必須完整保留。
-```
-
-```text
-Brief means:
-- shorter wording per item
-- fewer items than Full Daily Radar
-- full template structure preserved
-
-Brief does NOT mean:
-- removing required sections
-- reducing domain structure
-- merging Taiwan mapping into one generic paragraph
-- replacing news with synthesis
-- treating indicator status or conclusions as news
+所有章節、欄位、證據追溯、台灣新聞、指標狀態仍必須完整保留。
 ```
 
 Completion requirements:
 
 ```text
 已讀取必要入口檔，或明確揭露缺失
+已讀取 configs/news_freshness_and_taiwan_news.yml
 6 大核心領域皆有覆蓋
 每一核心領域包含 exactly 3 則大型訊號
 每一核心領域包含 exactly 1 則小眾 / 潛力候選
-每一核心領域包含 1–2 則台灣映射
+每一核心領域包含 1–2 則台灣新聞，或明確標示台灣新聞不足
 每則新聞 / 訊號包含 evidence trace
+每則新聞 / 訊號包含今日新增點
+每則新聞 / 訊號標示是否重複歷史主題
 Retail Focus Block 五項固定檢查存在
+New Information / History Duplicate Check 存在
 Data Gaps and Retry Notes 存在
 Final Indicator Status and News Synthesis Panel 存在且放在最後
 Post-brief Review 存在
@@ -196,178 +248,103 @@ Daily Push Brief must write:
 精簡版狀態：complete concise brief / partial concise brief。
 完整 48 則正式閘門：未嘗試 / 未通過 / 另需分段研究版。
 結構閘門狀態：通過 / 未通過。
+新資訊密度狀態：通過 / 偏低 / 未通過。
+台灣新聞狀態：通過 / 不足 / 未完整。
 ```
 
-Do not use the Full Daily Radar 5+3 gate to mark Daily Push Brief as failed.
-If any Daily Push Brief structural requirement is missing, mark `partial concise brief`.
+If any Daily Push Brief structural or freshness requirement is missing, mark `partial concise brief`.
 
-### 5.3 Post-Execution Backtest-to-Memory Gate
+---
 
-A change is complete only when the following are checked:
+## 7. News Search Gate
+
+Applies to:
 
 ```text
-Post-Execution Record captured: yes / no / not needed
-Evidence captured: yes / no / not enough evidence
-Failure Attribution classified: yes / no / not applicable
-Dependency / Sync Impact checked: local / child repo / mother Brain / none / unknown
-Memory Patch Candidate status: none / observe / local child memory / mother Brain candidate / human decision required
-Checker result: pass / fail / not run / not available
-Completion status: complete / partial change / no downstream sync required
+AGENT_NEWS_SEARCH
+workflows/news_search_content_workflow.md
 ```
 
-For this Level 2 radar repo, the gate is required when evidence affects daily output quality, missed signals, source gaps, routing gaps, market radar corrections, or reusable report behavior. Memory Patch Candidate is normally `observe` unless the signal is repeated or structural.
-
-If evidence is missing, status must be:
+Completion requirements:
 
 ```text
-partial change
+topic identified
+sources searched
+claims labelled
+major news and candidates separated
+today_new_information included for each news item
+historical duplication status included
+Taiwan news searched or Taiwan news insufficiency disclosed when relevant
+data gaps disclosed
+handoff suggestion included
 ```
 
-If mother Brain sync is suspected but not checked, status must be:
+If missing, mark:
 
 ```text
-partial change
-```
-
-### 5.4 Mandatory Memory Trigger Check Gate
-
-A task must run Memory Trigger Check before completion when any of the following changed:
-
-```text
-source-of-truth file
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-DEPENDENCY_MAP.md
-AGENT_DEFINITION_MAP.md
-brain.manifest.yaml
-workflow / template / report mode
-child repo mount status
-cross-repo sync state
-memory policy
-backtest / evidence rule
-radar scope / source gap / missed-signal rule
-```
-
-Required output:
-
-```text
-Memory update triggered: yes / no
-Trigger type: user boundary correction / source-of-truth changed / child repo sync changed / dependency-route changed / post-execution evidence changed / repeated backtest finding / none
-Memory Patch Candidate: none / observe / local child / mother Brain / human decision required
-Target files:
-Review required: yes / no
-Completion status: complete / partial
-```
-
-If this gate is triggered but not performed, status must be:
-
-```text
-partial change
+news search partial
 ```
 
 ---
 
-## 6. Coverage Matrix rules
+## 8. News Content Gate
+
+Applies to:
+
+```text
+AGENT_NEWS_CONTENT
+workflows/news_content_workflow.md
+```
+
+Completion requirements:
+
+```text
+input signal identified
+source / evidence label preserved
+today_new_information preserved or marked missing
+historical duplication status preserved or marked missing
+Taiwan news vs Taiwan implication separated
+uncertainty not removed
+output ready for human review
+```
+
+If missing, mark:
+
+```text
+content draft partial
+```
+
+---
+
+## 9. Coverage Matrix rules
 
 ### Full Daily Radar
 
-| 核心領域 | 大型新聞數 | 小眾候選數 | 是否達標 | 缺口 |
-|---|---:|---:|---|---|
-| AI 模型 / Agent / 工作流替代 | >=5 | >=3 |  |  |
-| 區塊鏈 / 加密 / RWA / Agent payments | >=5 | >=3 |  |  |
-| 零售 / 消費 / 社群 / 服飾 | >=5 | >=3 |  |  |
-| 全球市場 / 資金流 / 地緣政治 | >=5 | >=3 |  |  |
-| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | >=5 | >=3 |  |  |
-| 勞動 / 消費壓力 / 台灣本地訊號 | >=5 | >=3 |  |  |
+| 核心領域 | 大型新聞數 | 小眾候選數 | 台灣新聞 | New Info Check | 是否達標 | 缺口 |
+|---|---:|---:|---|---|---|---|
+| AI 模型 / Agent / 工作流替代 | >=5 | >=3 | required | required |  |  |
+| 區塊鏈 / 加密 / RWA / Agent payments | >=5 | >=3 | required | required |  |  |
+| 零售 / 消費 / 社群 / 服飾 | >=5 | >=3 | required | required |  |  |
+| 全球市場 / 資金流 / 地緣政治 | >=5 | >=3 | required | required |  |  |
+| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | >=5 | >=3 | required | required |  |  |
+| 勞動 / 消費壓力 / 台灣本地訊號 | >=5 | >=3 | required | required |  |  |
 
 ### Daily Push Brief
 
-| 核心領域 | 大型訊號數 | 小眾候選數 | 台灣映射數 | Evidence Trace | 精簡版狀態 | 漏抓風險 |
-|---|---:|---:|---:|---|---|---|
-| AI 模型 / Agent / 工作流替代 | 3 | 1 | 1–2 | required |  |  |
-| 區塊鏈 / 加密 / RWA / Agent payments | 3 | 1 | 1–2 | required |  |  |
-| 零售 / 消費 / 社群 / 服飾 | 3 | 1 | 1–2 | required |  |  |
-| 全球市場 / 資金流 / 地緣政治 | 3 | 1 | 1–2 | required |  |  |
-| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | 3 | 1 | 1–2 | required |  |  |
-| 勞動 / 消費壓力 / 台灣本地訊號 | 3 | 1 | 1–2 | required |  |  |
-
----
-
-## 7. High-risk claim gate
-
-All modes must apply the same evidence check for high-risk claims.
-
-High-risk claims include:
-
-```text
-精確數字
-重大政策
-公司重大事件
-新技術突破
-加密資金流
-台灣本地判斷
-外部模型提供的陌生訊號
-```
-
-Evidence handling:
-
-```text
-官方、權威媒體、多來源交叉驗證 → 可採用
-可信媒體但資料不完整 → 可採用，但標中證據與不確定點
-只有社群或模型敘事 → 只能列候選
-查不到來源 → 不得放入事實區
-來源支持方向但不支持數字 → 方向保留，數字降級或不採用
-來源支持舊事件但不是今日新事件 → 標示為背景訊號或歷史已播
-```
-
-External model outputs are scouts, not judges:
-
-```text
-外部模型輸出 → 拆成高風險 claim → 查來源 → 證據分級 → 採用 / 降級 / 不採用 → 回補到報告或規則
-```
-
----
-
-## 8. News vs Indicator / Synthesis Rule
-
-Daily Push Brief must keep news, indicators, and synthesis separate.
-
-```text
-News / signal = source-backed event, data change, company action, policy change, product release, market move, or verifiable observation.
-Indicator status = derived state based on one or more news items or fixed metrics.
-Synthesis = model or analyst conclusion based on multiple news items.
-```
-
-Rules:
-
-```text
-1. Indicator status and synthesis must be placed in the final panel.
-2. Indicator status and synthesis must not count toward the 3+1 domain quota.
-3. Every indicator status and synthesis statement must reference supporting news IDs.
-4. If supporting news IDs are missing, mark it as candidate inference or data gap.
-5. Do not write a summary sentence in a news slot.
-```
-
----
-
-## 9. Frozen dependencies
-
-These files are frozen history and should not drive active routing:
-
-```text
-AI_PROJECT_OS_ADOPTION_PLAN.md
-AI_AGENT_MODEL_ADOPTION_PLAN.md
-POST_CHANGE_SYNC_ADOPTION.md
-README_AGENT_MODEL_NOTE.md
-CURRENT_DECISIONS_APPEND.md
-archive/
-```
+| 核心領域 | 大型訊號數 | 小眾候選數 | 台灣新聞數 | Evidence Trace | New Info Check | 精簡版狀態 | 漏抓風險 |
+|---|---:|---:|---:|---|---|---|---|
+| AI 模型 / Agent / 工作流替代 | 3 | 1 | 1–2 | required | required |  |  |
+| 區塊鏈 / 加密 / RWA / Agent payments | 3 | 1 | 1–2 | required | required |  |  |
+| 零售 / 消費 / 社群 / 服飾 | 3 | 1 | 1–2 | required | required |  |  |
+| 全球市場 / 資金流 / 地緣政治 | 3 | 1 | 1–2 | required | required |  |  |
+| 科技發展 / 機器人 / 生技 / 能源 / 半導體 | 3 | 1 | 1–2 | required | required |  |  |
+| 勞動 / 消費壓力 / 台灣本地訊號 | 3 | 1 | 1–2 | required | required |  |  |
 
 ---
 
 ## 10. Sync rule
 
-When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, or Memory Trigger Check gate changes, check:
+When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, freshness rule, Taiwan news rule, or Memory Trigger Check gate changes, check:
 
 ```text
 PROJECT_MAP.md
@@ -378,6 +355,7 @@ AGENTS.md
 AGENT_DEFINITION_MAP.md
 DEPENDENCY_MAP.md
 templates/
+configs/
 brain.manifest.yaml
 check_mount_integrity.sh
 ```
@@ -389,12 +367,9 @@ AGENT_DEFINITION_MAP.md
 → DEPENDENCY_MAP.md
 → workflows/
 → templates/
+→ configs/
 → check_mount_integrity.sh
 ```
-
-No workflow or template change is considered complete unless `DEPENDENCY_MAP.md` recognizes the same output mode and completion gate.
-
-No separate active daily execution gate file should be introduced. If a separate gate file exists, it is historical / deprecated and must not drive active routing.
 
 ---
 
