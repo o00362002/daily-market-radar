@@ -10,11 +10,21 @@ All routes that output news, search results, or content must apply:
 configs/news_freshness_and_taiwan_news.yml
 ```
 
-This rule prevents two recurring failures:
+Routes that perform search or radar collection must also apply:
+
+```text
+configs/source_routing_rules.yml
+SOURCE_LIBRARY_SPEC.md
+sources/key_media_library.yml
+sources/official_and_data_sources.yml
+```
+
+These rules prevent three recurring failures:
 
 ```text
 1. Repeating historical concepts as if they are new daily news.
 2. Replacing Taiwan news with generic Taiwan implications.
+3. Starting from broad keyword search while skipping the fixed source library.
 ```
 
 ---
@@ -28,7 +38,7 @@ This rule prevents two recurring failures:
 | `AGENT_NEWS_SEARCH` | specific topic news search |
 | `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
 | `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
-| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, or watchlist change |
+| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, or watchlist change |
 
 ---
 
@@ -64,8 +74,8 @@ Do not route to `AGENT_RADAR_REPORT` unless the user explicitly asks:
 
 ```text
 正式版
-完整正式版
 完整版
+完整正式版
 完整研究歸檔版
 正式每日雷達
 完整每日雷達
@@ -102,18 +112,24 @@ AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
 → templates/daily_report_template.md or templates/daily_report_template_v2.md
 → configs/news_freshness_and_taiwan_news.yml
+→ configs/source_routing_rules.yml
+→ SOURCE_LIBRARY_SPEC.md + sources/
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
 
 AGENT_DAILY_PUSH_BRIEF
 → workflows/daily_push_brief_workflow.md
 → templates/daily_push_brief_template.md
 → configs/news_freshness_and_taiwan_news.yml
+→ configs/source_routing_rules.yml
+→ SOURCE_LIBRARY_SPEC.md + sources/
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
 
 AGENT_NEWS_SEARCH
 → workflows/news_search_content_workflow.md
 → templates/news_search_content_template.md or templates/news_search_content_template_v2.md
 → configs/news_freshness_and_taiwan_news.yml
+→ configs/source_routing_rules.yml
+→ SOURCE_LIBRARY_SPEC.md + sources/
 
 AGENT_NEWS_CONTENT
 → workflows/news_content_workflow.md
@@ -128,6 +144,19 @@ Route, workflow, template, config, and gate must match. If they do not match, ma
 ```
 
 Do not use a separate active daily execution-gate file for route completion rules. Daily output completion gates live in `DEPENDENCY_MAP.md`.
+
+---
+
+## Source-library search boundary
+
+For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, and `AGENT_NEWS_SEARCH`:
+
+```text
+- Fixed source library must be checked before generic keyword fallback.
+- Keyword search can filter, expand, retry, or discover sources, but must not replace source-library coverage.
+- Material source gaps must be disclosed in the output or final status panel.
+- Official / data sources should be used to verify high-risk claims and indicator changes.
+```
 
 ---
 
