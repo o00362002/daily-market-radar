@@ -1,6 +1,29 @@
 # 多語言來源策略
 
-本檔定義每日市場情報系統的搜尋來源策略。重點不是固定來源表，而是「來源類型 + 語言覆蓋 + 交叉驗證 + 漏抓回補」。
+本檔定義每日市場情報系統的搜尋來源策略。
+
+更新方向：來源策略不再只是「來源類型 + 語言覆蓋 + 交叉驗證 + 漏抓回補」，而是新增固定來源庫優先方法。
+
+```text
+固定來源庫 / source library
+→ 來源內關鍵字與主題過濾
+→ 外部關鍵字 fallback
+→ 新來源 discovery
+→ coverage audit
+```
+
+關鍵字搜尋仍然保留，但不再是第一步。
+
+Active source-library files:
+
+```text
+SOURCE_LIBRARY_SPEC.md
+configs/source_routing_rules.yml
+sources/key_media_library.yml
+sources/official_and_data_sources.yml
+```
+
+---
 
 ## 1. 語言覆蓋
 
@@ -30,15 +53,62 @@
 - 若內容屬評論、專欄、管理觀點或二手整理，不得單獨寫成已證實事實，需標示為觀點 / 產業解讀 / 待驗證推論。
 - 台灣零售、百貨、服飾、商圈、品牌經營、AI 導入與管理議題若主流即時新聞不足，需使用這兩類來源做補充掃描，避免台灣本地訊號缺口過大。
 
+---
+
 ## 2. 搜尋順序
 
-每日搜尋必須從大範圍到小範圍：
+### 2.1 主流程：來源庫優先
+
+每日搜尋必須先從固定來源庫開始，再使用關鍵字 fallback。
+
+```text
+1. 讀取 `configs/source_routing_rules.yml`
+2. 讀取 `sources/key_media_library.yml`
+3. 讀取 `sources/official_and_data_sources.yml`
+4. 依任務領域 / 語言 / 地區篩選 priority sources
+5. 先抓 RSS / API / 官方頁 / 分類頁 / 站內搜尋
+6. 在已抓取來源結果內做關鍵字與主題過濾
+7. 重大 claim 用官方 / 數據來源交叉驗證
+8. 來源庫不足時才使用外部 keyword search
+9. 仍不足時使用 GDELT / Media Cloud / Google News 類工具做 discovery
+10. 輸出或內部記錄 coverage audit
+```
+
+### 2.2 搜尋範圍順序
+
+每日搜尋仍須從大範圍到小範圍：
 
 ```text
 宏觀總體 → 資金流 → 產業 → 平台政策 → 供應鏈 → 公司/產品 → 產品用量經濟 → 社群/用戶行為 → 小型候選訊號
 ```
 
 避免一開始只搜熱門新聞，導致早期弱訊號漏掉。
+
+### 2.3 關鍵字搜尋定位
+
+關鍵字搜尋是第二層探針，不是主幹。
+
+Allowed:
+
+```text
+- 來源庫內搜尋 / 過濾
+- 事件補查
+- 台灣新聞缺口 retry
+- 歷史重複檢查
+- 新來源 discovery
+- priority sources 無命中時 fallback
+```
+
+Not allowed:
+
+```text
+- 用泛搜尋取代固定來源庫
+- 只用搜尋結果就宣稱 coverage complete
+- 用台灣推論取代台灣新聞
+- 用 synthesis 填滿新聞數
+```
+
+---
 
 ## 3. 來源優先級
 
@@ -69,7 +139,11 @@
 
 C 級來源只能作為候選訊號，不可直接寫成結論。
 
+---
+
 ## 4. 每日硬搜尋關鍵字組
+
+以下關鍵字組仍保留，但執行順序應在來源庫檢查之後，或作為來源庫內部過濾條件。
 
 ### AI 工作流替代
 
@@ -202,6 +276,8 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - 商業周刊 消費壓力 薪資 物價
 - HBR 哈佛商業評論 人才 管理 AI 工作
 
+---
+
 ## 5. 交叉驗證規則
 
 - 重大訊號至少嘗試找 2 種以上來源類型。
@@ -209,7 +285,8 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - 若不同來源互相矛盾，放入資料不足與不確定區。
 - 若來源時間過舊但被重新討論，必須分開標示原事件時間與再發酵時間。
 - OpenAI / Anthropic / Google / Microsoft 等 AI 產品功能與 pricing 類訊號，必須優先查官方公告、Help Center、Status、Release Notes；若官方未見但媒體或社群有訊號，不得刪除，應列候選並標示官方未確認。
-- 台灣商業媒體與管理媒體來源若只提供觀點或案例解讀，需與官方數據、公司公告、主流新聞、財報、產業報告或實地訊號交叉驗證；不得把評論性文章單獨提升為高證據。
+
+---
 
 ## 6. 來源擴充規則
 
@@ -221,5 +298,27 @@ C 級來源只能作為候選訊號，不可直接寫成結論。
 - 是否需要新增硬搜尋關鍵字？
 - 是否有新的 AI 產品商業化指標來源，例如 pricing page、usage limit page、promo campaign、enterprise offer、credit / token / coupon / gift code 機制、社群使用量回報？
 - 台灣繁中來源是否需要補強新的商業媒體、產業媒體、百貨 / 零售專門來源、政府統計或管理觀點來源？
+- `sources/key_media_library.yml` 是否需要新增 / 降級 / 移除來源？
+- `sources/official_and_data_sources.yml` 是否需要新增官方、數據、交易所、公司 IR 或百貨 / 品牌公告來源？
 
 來源策略必須持續變動，不得固定成死表。
+
+---
+
+## 7. Coverage audit
+
+每次輸出 Daily Push Brief、Full Daily Radar 或 News Search Output 時，必須能回溯以下欄位：
+
+```text
+source_library_checked: yes / partial / no
+priority_sources_checked: count or list
+source_hits: count or list
+source_misses: count or list
+keyword_fallback_used: yes / no
+official_or_data_crosscheck_used: yes / partial / no / not_required
+taiwan_sources_checked_when_relevant: yes / partial / no
+external_discovery_used_when_needed: yes / no
+remaining_source_gap: none / partial / material
+```
+
+若使用者問「這些總結根據哪些新聞」，應能從 coverage audit 回答，而不是只回推模型自己的整理。
