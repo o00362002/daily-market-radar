@@ -1,0 +1,83 @@
+# News Freshness and Taiwan News Rules
+# Purpose: prevent repeated historical concepts from being repackaged as daily news, and ensure Taiwan sections contain Taiwan news rather than generic Taiwan implications.
+
+news_freshness_and_taiwan_news:
+  required: true
+
+  core_principles:
+    - "每日情報優先提供今日新增資訊，不得用昨日或歷史已播概念填滿欄位。"
+    - "若重複歷史主題，必須有新數據、新公司動作、新政策、新市場反應、新鏈上數據或新台灣新聞，否則不得列入大型訊號。"
+    - "台灣段在 Daily Push Brief 與 Full Daily Radar 中應優先是台灣新聞，不是模型推論的台灣映射。"
+    - "台灣影響、台灣推論、台灣產業關聯只能放在結論 / synthesis / final panel，不得取代台灣新聞。"
+
+  required_fields_per_news_item:
+    - ID
+    - event
+    - today_new_information
+    - source_and_time
+    - evidence_level
+    - historical_duplication_status
+    - uncertainty_or_next_verification
+
+  historical_duplication_status_values:
+    - new_today
+    - repeated_theme_with_new_data
+    - repeated_theme_with_new_company_action
+    - repeated_theme_with_new_policy
+    - repeated_theme_with_new_market_reaction
+    - repeated_theme_with_new_taiwan_news
+    - background_only_do_not_count
+    - historical_replay_do_not_count
+
+  can_count_as_major_signal_when:
+    - "new_today"
+    - "repeated_theme_with_new_data"
+    - "repeated_theme_with_new_company_action"
+    - "repeated_theme_with_new_policy"
+    - "repeated_theme_with_new_market_reaction"
+    - "repeated_theme_with_new_taiwan_news"
+
+  cannot_count_as_major_signal_when:
+    - "background_only_do_not_count"
+    - "historical_replay_do_not_count"
+    - "only_model_synthesis"
+    - "only_generic_taiwan_implication"
+    - "old_research_without_new_relevance"
+    - "old_company_news_without_new_update"
+
+  taiwan_news_definition:
+    must_be_one_of:
+      - "台灣官方資料 / 政策 / 統計"
+      - "台灣公司公告 / 財報 / 法說 / 重大動作"
+      - "台灣媒體報導的本地產業事件"
+      - "台灣百貨 / 商場 / 品牌 / 通路 / 展店 / 撤櫃 / 商圈新聞"
+      - "台灣市場數據 / 股市 / 匯率 / 就業 / 消費 / 信用數據"
+      - "國際事件中明確包含台灣公司、台灣供應鏈、台灣市場或台灣政策的新聞"
+
+    not_taiwan_news:
+      - "國際新聞對台灣可能有影響"
+      - "台灣企業應該注意"
+      - "台灣品牌可以學"
+      - "模型推論的台灣關聯"
+      - "沒有台灣來源或台灣事件的泛化結論"
+
+  if_taiwan_news_not_found:
+    output_required:
+      - "台灣新聞不足"
+      - "已查來源"
+      - "已查關鍵字"
+      - "下一步補查來源"
+    rule: "不得用泛泛台灣映射補位。"
+
+  applies_to:
+    - Daily Push Brief
+    - Full Daily Radar
+    - news_search_agent
+    - news_content_agent
+
+  quality_gate:
+    - "每則新聞是否有 today_new_information？"
+    - "每則新聞是否有 historical_duplication_status？"
+    - "大型訊號是否排除 background_only_do_not_count / historical_replay_do_not_count？"
+    - "台灣段是否為台灣新聞，而非台灣推論？"
+    - "若台灣新聞不足，是否明確標示已查來源與下一步？"
