@@ -4,10 +4,14 @@ Purpose: search a user-specified news topic and produce a source-backed news out
 
 This workflow is owned by `news_search_agent` in `AGENT_DEFINITION_MAP.md`.
 
-Required shared rule:
+Required shared rules:
 
 ```text
 configs/news_freshness_and_taiwan_news.yml
+configs/source_routing_rules.yml
+SOURCE_LIBRARY_SPEC.md
+sources/key_media_library.yml
+sources/official_and_data_sources.yml
 ```
 
 ---
@@ -41,25 +45,42 @@ news_content_agent = rewriting / expanding already selected news or radar signal
 
 ---
 
+## source-first rule
+
+When the topic maps to an existing radar domain, `news_search_agent` should check the fixed source library before broad keyword fallback.
+
+Minimum source path:
+
+```text
+1. Map topic to radar domain.
+2. Check sources/key_media_library.yml.
+3. Check sources/official_and_data_sources.yml when claims are high-risk or data-backed.
+4. Use topic keywords inside collected source results.
+5. Use generic keyword fallback only after the source-library check or when the source files are unavailable.
+6. Disclose source gaps when material.
+```
+
+---
+
 ## ordered_steps
 
 ```text
 1. Identify requested topic and scope.
-2. Read minimal repo context: AGENTS.md, AGENT_DEFINITION_MAP.md, configs/source_strategy.md, configs/evidence.yml, configs/news_freshness_and_taiwan_news.yml, memory/watchlist.md when relevant.
-3. Search current sources in relevant languages.
-4. Prioritize today / latest new information before background context.
-5. Cross-check important claims with source type and source time.
-6. Classify historical duplication status.
-7. Search Taiwan news when Taiwan, retail, market, consumer, business, AI adoption, labor, or user relevance is requested.
-8. Classify items into:
-   - major news
-   - potential / niche signal
-   - background context, not counted as news
-   - insufficient data
-9. Rank by relevance to the user's topic and freshness.
-10. Add Taiwan news when available; add Taiwan implications only as synthesis, not as Taiwan news.
-11. Output using templates/news_search_content_template.md.
-12. Suggest whether to hand off to news_content_agent for deeper article / social post / retail angle.
+2. Read minimal repo context: AGENTS.md, AGENT_DEFINITION_MAP.md, configs/source_strategy.md, configs/source_routing_rules.yml, configs/evidence.yml, configs/news_freshness_and_taiwan_news.yml, SOURCE_LIBRARY_SPEC.md, sources/key_media_library.yml, sources/official_and_data_sources.yml, memory/watchlist.md when relevant.
+3. Map the topic to one or more source-library domains.
+4. Check priority global, Taiwan, official, and data sources for the mapped domains.
+5. Search / filter inside collected source results using topic keywords.
+6. Prioritize today / latest new information before background context.
+7. Cross-check important claims with source type and source time.
+8. Use generic keyword search only for fallback, enrichment, or discovery.
+9. Classify historical duplication status.
+10. Search Taiwan news when Taiwan, retail, market, consumer, business, AI adoption, labor, or user relevance is requested.
+11. Classify items into major news, potential / niche signal, background context, or insufficient data.
+12. Rank by relevance to the user's topic and freshness.
+13. Add Taiwan news when available; add Taiwan implications only as synthesis, not as Taiwan news.
+14. Output using templates/news_search_content_template.md.
+15. Include source-library coverage note when material.
+16. Suggest whether to hand off to news_content_agent for deeper article / social post / retail angle.
 ```
 
 ---
@@ -90,6 +111,22 @@ Taiwan news if available
 Taiwan / user implication if relevant
 cannot conclude
 next verification
+```
+
+---
+
+## source coverage note
+
+When material, include:
+
+```text
+source_library_checked: yes / partial / no
+checked_source_types:
+checked_priority_sources:
+checked_keywords:
+keyword_fallback_used: yes / no
+official_or_data_crosscheck_used: yes / partial / no / not_required
+remaining_gap: none / partial / material
 ```
 
 ---
@@ -164,6 +201,7 @@ evidence level
 today_new_information
 historical duplication status
 Taiwan news vs Taiwan implication boundary
+source-library coverage note when relevant
 ```
 
 ---
@@ -174,7 +212,9 @@ Can be marked complete when:
 
 ```text
 topic identified
-sources searched
+source-library route checked or missing files disclosed
+priority sources searched
+keyword fallback used only after source checks or disclosed as exception
 claims labelled
 major news and candidates separated
 today_new_information included for each news item

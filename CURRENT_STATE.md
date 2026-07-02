@@ -1,6 +1,6 @@
 # daily-market-radar｜CURRENT_STATE
 
-最後更新：2026-07-01
+最後更新：2026-07-02
 
 ---
 
@@ -30,6 +30,7 @@ HIGH_LEVEL_INDEX.md = high-level projection index
 CURRENT_STATE.md = current reality
 CURRENT_DECISIONS.md = accepted decisions
 DEPENDENCY_MAP.md = dependency map
+SOURCE_LIBRARY_SPEC.md + sources/ = local source-library execution module
 brain.manifest.yaml = thin mount manifest
 ```
 
@@ -56,6 +57,7 @@ file_governance: active
 backtest_growth_control: active
 frozen_history_check: required
 adoption_gate_under_interface: true
+source_library_module: active_draft
 ```
 
 ---
@@ -63,7 +65,17 @@ adoption_gate_under_interface: true
 ## 5. 目前判斷
 
 ```text
-具備固定 workflow、configs、memory、templates、reports 與 loop checklist，但不需要升級成 Agent Product System。
+具備固定 workflow、configs、sources、memory、templates、reports 與 loop checklist，但不需要升級成 Agent Product System。
+```
+
+Search / radar collection is moving from keyword-first to source-library-first:
+
+```text
+fixed source library
+→ source-scoped keyword and topic filtering
+→ generic keyword fallback
+→ external discovery
+→ coverage audit
 ```
 
 Backtest 也要檢查專案成長控制：

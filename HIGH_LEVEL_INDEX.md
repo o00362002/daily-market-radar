@@ -10,6 +10,7 @@ AGENTS.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 AGENT_DEFINITION_MAP.md
+DEPENDENCY_MAP.md
 ```
 
 ---
@@ -33,7 +34,16 @@ recurring intelligence workflow / daily report system
 ## 3. 核心模組
 
 ```text
-configs / memory / templates / reports / workflows / radar rules / search retry / post-report review
+configs / sources / memory / templates / reports / workflows / radar rules / source library / search retry / post-report review
+```
+
+Source-library module:
+
+```text
+SOURCE_LIBRARY_SPEC.md
+configs/source_routing_rules.yml
+sources/key_media_library.yml
+sources/official_and_data_sources.yml
 ```
 
 ---
@@ -46,6 +56,8 @@ Daily Push Brief = concise daily user-facing output, uses workflows/daily_push_b
 News Search Output = standalone topic news search, uses workflows/news_search_content_workflow.md and templates/news_search_content_template.md
 News Content Output = converts selected news / radar signals into content, uses workflows/news_content_workflow.md and templates/news_content_template.md
 ```
+
+Search outputs now use source library before generic keyword fallback.
 
 ---
 
@@ -64,6 +76,7 @@ radar_report_agent searches and grades cross-domain daily radar signals.
 news_search_agent searches and grades one specified news topic.
 news_content_agent writes content from already graded / labelled signals.
 news_content_agent must not upgrade evidence or replace radar search.
+radar_report_agent and news_search_agent must check source library before generic keyword fallback.
 ```
 
 ---
@@ -84,6 +97,7 @@ Projection files create no canonical rules.
 Frozen history is not current state.
 Backtest also checks keep / revise / delete / archive / add / promote / demote.
 Schema coverage must not be overstated.
+Source library is local execution infrastructure, not mother Brain architecture.
 ```
 
 ---
@@ -111,4 +125,5 @@ CURRENT_DECISIONS_APPEND.md
 不要把 Daily Push Brief 寫成完整 48-signal formal report
 不要把 news_search_agent 的指定主題新聞寫成完整每日市場雷達
 不要把 news_content_agent 的內容稿寫成已驗證情報判斷
+不要把來源庫檢查寫成已完成，除非實際讀取 sources/ 與 source routing rules
 ```

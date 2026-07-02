@@ -1,0 +1,144 @@
+version: 0.1
+last_updated: 2026-07-02
+status: active_draft
+purpose: >
+  Source-first routing rules for Daily Push Brief, Full Daily Radar, and News Search Output.
+  This config makes fixed source-library checks mandatory before broad keyword fallback.
+
+applies_to:
+  - AGENT_RADAR_REPORT
+  - AGENT_DAILY_PUSH_BRIEF
+  - AGENT_NEWS_SEARCH
+
+required_files:
+  - SOURCE_LIBRARY_SPEC.md
+  - sources/key_media_library.yml
+  - sources/official_and_data_sources.yml
+  - configs/source_strategy.md
+  - configs/news_freshness_and_taiwan_news.yml
+
+source_first_rule:
+  summary: >
+    Before generic web search, load relevant source-library files and check priority sources
+    for the requested domain, region, and language.
+  order:
+    - identify_route_and_domain
+    - load_source_routing_rules
+    - load_relevant_source_library
+    - collect_priority_sources
+    - classify_source_hits
+    - run_source_scoped_keyword_filter
+    - cross_check_with_official_or_data_sources
+    - run_generic_keyword_fallback_if_needed
+    - run_external_discovery_if_coverage_gap_remains
+    - output_or_record_coverage_audit
+
+keyword_search_role:
+  allowed:
+    - source_scoped_filtering
+    - event_expansion
+    - taiwan_news_gap_retry
+    - historical_duplicate_check
+    - new_source_discovery
+    - fallback_when_priority_sources_are_empty
+  disallowed:
+    - replacing_priority_source_checks
+    - replacing_taiwan_news_with_taiwan_implications
+    - using_search_results_without_source_type_labels
+    - marking_coverage_complete_without_source_audit
+
+fetch_priority:
+  - official_api
+  - official_rss_or_atom
+  - official_newsroom_or_release_page
+  - verified_media_rss_or_section_page
+  - trusted_news_database_or_aggregator
+  - generic_web_search
+  - social_or_community_candidate
+
+per_domain_minimum_source_mix:
+  daily_push_brief:
+    global_media_minimum: 3
+    taiwan_media_minimum: 1
+    official_or_data_source_minimum: 1
+    keyword_fallback_required_when_hits_below_target: true
+  full_daily_radar:
+    global_media_minimum: 5
+    taiwan_media_minimum: 2
+    official_or_data_source_minimum: 2
+    keyword_fallback_required_when_hits_below_target: true
+    external_discovery_required_when_5_plus_3_not_met: true
+  news_search_output:
+    global_media_minimum: 2
+    taiwan_media_minimum_when_relevant: 1
+    official_or_data_source_minimum_when_high_risk: 1
+    keyword_fallback_required_when_hits_below_target: true
+
+coverage_audit_fields:
+  required:
+    - source_library_checked
+    - priority_sources_checked
+    - source_hits
+    - source_misses
+    - keyword_fallback_used
+    - official_or_data_crosscheck_used
+    - taiwan_sources_checked_when_relevant
+    - external_discovery_used_when_needed
+    - remaining_source_gap
+  allowed_values:
+    source_library_checked: [yes, partial, no]
+    keyword_fallback_used: [yes, no]
+    official_or_data_crosscheck_used: [yes, partial, no, not_required]
+    remaining_source_gap: [none, partial, material]
+
+source_health_rules:
+  track_after_execution:
+    - last_success_at
+    - last_empty_at
+    - fail_count
+    - hit_rate_by_domain
+    - duplicate_rate
+    - false_positive_notes
+    - usage_policy_notes
+  storage_candidates:
+    - memory/source_health_log.json
+    - memory/topic_coverage_log.json
+    - reports/backtests/
+  escalation:
+    demote_source_when:
+      - repeated_fetch_failure
+      - repeated_low_quality_hits
+      - unclear_usage_policy_for_automation
+      - content_farm_or_low_originality_pattern
+    promote_source_when:
+      - repeated_early_signal_hits
+      - high_original_reporting_rate
+      - strong_taiwan_direct_news_coverage
+      - reliable_official_or_data_trace
+
+completion_gate_patch:
+  daily_push_brief:
+    must_include_or_internally_satisfy:
+      - source_library_checked
+      - six_domains_checked_against_source_library
+      - keyword_fallback_disclosed_when_used
+      - material_source_gap_disclosed
+  full_daily_radar:
+    must_include:
+      - source_library_coverage_matrix
+      - priority_source_check_summary
+      - source_gap_and_retry_notes
+      - external_discovery_note_when_5_plus_3_not_met
+  news_search_output:
+    must_include_or_disclose:
+      - relevant_source_library_checked
+      - checked_sources_or_source_types
+      - checked_keywords
+      - remaining_gap
+
+hard_boundaries:
+  - Indicator status and synthesis do not count as news.
+  - Taiwan implications do not count as Taiwan news.
+  - Social signals are candidates only unless verified by stronger source types.
+  - Paid or restricted sources can be listed as watchlist items, but automated use requires policy check.
+  - Generic web search is fallback, not the primary evidence base.

@@ -1,0 +1,380 @@
+version: 0.1
+last_updated: 2026-07-02
+status: draft_seed
+purpose: >
+  Official, regulator, company, market, macro, chain, and data sources for cross-checking
+  media signals. These sources are used to upgrade or downgrade evidence quality.
+
+shared_rules:
+  evidence_priority:
+    - official_release_or_dataset
+    - regulator_or_exchange
+    - company_ir_or_product_release
+    - audited_or_methodologically_clear_data
+    - trusted_media_summary
+    - social_or_unverified_candidate
+  use_cases:
+    - verify_high_risk_claims
+    - confirm_today_new_information
+    - track_fixed_indicators
+    - avoid_news_only_synthesis
+
+sources:
+  macro_markets:
+    - source_id: fred
+      name: FRED Federal Reserve Economic Data
+      region: US
+      languages: [en]
+      source_type: macro_data
+      domains: [macro, rates, labor, inflation, credit]
+      priority: high
+      evidence_default: high
+      fetch_method: api_or_site
+      homepage_url: https://fred.stlouisfed.org/
+      usage_policy: check_required
+      freshness_expectation: varies_by_series
+    - source_id: bls
+      name: U.S. Bureau of Labor Statistics
+      region: US
+      languages: [en]
+      source_type: official_statistics
+      domains: [labor, inflation, wages, jobs]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release_or_api
+      homepage_url: https://www.bls.gov/
+      usage_policy: check_required
+      freshness_expectation: monthly
+    - source_id: bea
+      name: U.S. Bureau of Economic Analysis
+      region: US
+      languages: [en]
+      source_type: official_statistics
+      domains: [gdp, income, consumption, trade]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release_or_api
+      homepage_url: https://www.bea.gov/
+      usage_policy: check_required
+      freshness_expectation: monthly_or_quarterly
+    - source_id: fed
+      name: Federal Reserve
+      region: US
+      languages: [en]
+      source_type: central_bank
+      domains: [rates, monetary_policy, financial_conditions]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.federalreserve.gov/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: imf
+      name: International Monetary Fund
+      region: Global
+      languages: [en, multi]
+      source_type: international_organization
+      domains: [macro, global_growth, debt, policy]
+      priority: medium
+      evidence_default: high
+      fetch_method: official_release_or_data
+      homepage_url: https://www.imf.org/
+      usage_policy: check_required
+      freshness_expectation: weekly_or_event_driven
+    - source_id: world_bank
+      name: World Bank Data
+      region: Global
+      languages: [en, multi]
+      source_type: international_data
+      domains: [macro, development, country_data]
+      priority: medium
+      evidence_default: high
+      fetch_method: api_or_site
+      homepage_url: https://data.worldbank.org/
+      usage_policy: check_required
+      freshness_expectation: periodic
+    - source_id: bis
+      name: Bank for International Settlements
+      region: Global
+      languages: [en]
+      source_type: international_finance_organization
+      domains: [banking, liquidity, financial_system, crypto_policy]
+      priority: medium
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.bis.org/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: taiwan_cbc
+      name: 中央銀行
+      region: Taiwan
+      languages: [zh-TW, en]
+      source_type: central_bank
+      domains: [taiwan, rates, fx, monetary_policy]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release_or_data
+      homepage_url: https://www.cbc.gov.tw/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: dgbas_tw
+      name: 行政院主計總處
+      region: Taiwan
+      languages: [zh-TW, en]
+      source_type: official_statistics
+      domains: [taiwan, gdp, cpi, wages, labor]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release_or_data
+      homepage_url: https://www.dgbas.gov.tw/
+      usage_policy: check_required
+      freshness_expectation: monthly_or_quarterly
+    - source_id: twse
+      name: Taiwan Stock Exchange
+      region: Taiwan
+      languages: [zh-TW, en]
+      source_type: exchange
+      domains: [taiwan_market, listed_companies, trading]
+      priority: high
+      evidence_default: high
+      fetch_method: official_data_or_release
+      homepage_url: https://www.twse.com.tw/
+      usage_policy: check_required
+      freshness_expectation: daily
+
+  ai_company_official:
+    - source_id: openai_news
+      name: OpenAI News
+      region: Global
+      languages: [en]
+      source_type: company_official
+      domains: [ai_models, ai_products, agents, pricing]
+      priority: high
+      evidence_default: high
+      fetch_method: official_news_or_release_notes
+      homepage_url: https://openai.com/news/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: openai_help_release_notes
+      name: OpenAI Help / Release Notes
+      region: Global
+      languages: [en]
+      source_type: company_official_support
+      domains: [ai_products, usage_limits, pricing, reliability]
+      priority: high
+      evidence_default: high
+      fetch_method: official_help_center
+      homepage_url: https://help.openai.com/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: anthropic_news
+      name: Anthropic News
+      region: Global
+      languages: [en]
+      source_type: company_official
+      domains: [ai_models, agents, enterprise_ai]
+      priority: high
+      evidence_default: high
+      fetch_method: official_news
+      homepage_url: https://www.anthropic.com/news
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: google_deepmind_blog
+      name: Google DeepMind Blog
+      region: Global
+      languages: [en]
+      source_type: company_official_research
+      domains: [ai_models, ai_research, agents]
+      priority: high
+      evidence_default: high
+      fetch_method: official_blog
+      homepage_url: https://deepmind.google/discover/blog/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: microsoft_ai_blog
+      name: Microsoft AI Blog
+      region: Global
+      languages: [en]
+      source_type: company_official
+      domains: [enterprise_ai, copilots, agents, cloud]
+      priority: high
+      evidence_default: high
+      fetch_method: official_blog
+      homepage_url: https://blogs.microsoft.com/ai/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: nvidia_blog
+      name: NVIDIA Blog
+      region: Global
+      languages: [en]
+      source_type: company_official
+      domains: [ai_infrastructure, chips, robotics, enterprise_ai]
+      priority: high
+      evidence_default: high
+      fetch_method: official_blog
+      homepage_url: https://blogs.nvidia.com/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: meta_ai_blog
+      name: Meta AI Blog
+      region: Global
+      languages: [en]
+      source_type: company_official_research
+      domains: [ai_models, open_models, ai_research]
+      priority: medium
+      evidence_default: high
+      fetch_method: official_blog
+      homepage_url: https://ai.meta.com/blog/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+
+  crypto_chain_market_data:
+    - source_id: defillama
+      name: DeFiLlama
+      region: Global
+      languages: [en]
+      source_type: crypto_data
+      domains: [defi, tvl, stablecoins, fees, chains]
+      priority: high
+      evidence_default: high_for_metrics
+      fetch_method: api_or_site
+      homepage_url: https://defillama.com/
+      usage_policy: check_required
+      freshness_expectation: daily
+    - source_id: token_terminal
+      name: Token Terminal
+      region: Global
+      languages: [en]
+      source_type: crypto_financial_data
+      domains: [protocol_revenue, fees, fundamentals]
+      priority: high
+      evidence_default: high_for_metrics
+      fetch_method: api_or_site_check_required
+      homepage_url: https://tokenterminal.com/
+      usage_policy: check_required
+      freshness_expectation: daily
+    - source_id: dune
+      name: Dune
+      region: Global
+      languages: [en]
+      source_type: crypto_analytics_platform
+      domains: [onchain_data, dashboards, custom_queries]
+      priority: medium
+      evidence_default: medium_high_for_transparent_queries
+      fetch_method: dashboard_or_api_check_required
+      homepage_url: https://dune.com/
+      usage_policy: check_required
+      freshness_expectation: varies
+    - source_id: coingecko
+      name: CoinGecko
+      region: Global
+      languages: [en, multi]
+      source_type: crypto_market_data
+      domains: [prices, market_caps, token_metadata]
+      priority: medium
+      evidence_default: medium_high_for_market_data
+      fetch_method: api_or_site
+      homepage_url: https://www.coingecko.com/
+      usage_policy: check_required
+      freshness_expectation: daily
+    - source_id: coinmarketcap
+      name: CoinMarketCap
+      region: Global
+      languages: [en, multi]
+      source_type: crypto_market_data
+      domains: [prices, market_caps, token_metadata]
+      priority: medium
+      evidence_default: medium_high_for_market_data
+      fetch_method: api_or_site
+      homepage_url: https://coinmarketcap.com/
+      usage_policy: check_required
+      freshness_expectation: daily
+
+  regulators_policy:
+    - source_id: sec
+      name: U.S. Securities and Exchange Commission
+      region: US
+      languages: [en]
+      source_type: regulator
+      domains: [securities, crypto_policy, markets, filings]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release_or_edgar
+      homepage_url: https://www.sec.gov/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: cftc
+      name: U.S. Commodity Futures Trading Commission
+      region: US
+      languages: [en]
+      source_type: regulator
+      domains: [derivatives, commodities, crypto_policy]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.cftc.gov/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: esma
+      name: European Securities and Markets Authority
+      region: Europe
+      languages: [en, multi]
+      source_type: regulator
+      domains: [markets, crypto_policy, eu_regulation]
+      priority: medium
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.esma.europa.eu/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: sfc_hk
+      name: Hong Kong Securities and Futures Commission
+      region: Hong Kong
+      languages: [en, zh-HK]
+      source_type: regulator
+      domains: [crypto_policy, markets, asia_finance]
+      priority: medium
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.sfc.hk/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+    - source_id: fsc_tw
+      name: 金融監督管理委員會
+      region: Taiwan
+      languages: [zh-TW, en]
+      source_type: regulator
+      domains: [taiwan_finance, crypto_policy, securities, banking]
+      priority: high
+      evidence_default: high
+      fetch_method: official_release
+      homepage_url: https://www.fsc.gov.tw/
+      usage_policy: check_required
+      freshness_expectation: event_driven
+
+  retail_company_and_mall_sources:
+    - source_id: mall_ir_and_newsroom_placeholder
+      name: Mall / department store IR and newsroom watchlist
+      region: Global_Taiwan
+      languages: [multi]
+      source_type: company_official_watchlist
+      domains: [retail, malls, department_store, tenant_mix]
+      priority: high
+      evidence_default: high_when_official
+      fetch_method: official_site_manual_watchlist
+      homepage_url: check_required
+      usage_policy: check_required
+      freshness_expectation: event_driven
+      notes: Add Shin Kong Mitsukoshi, Far Eastern, Breeze, Mitsui, Uniqlo, Fast Retailing, apparel brand IR/newsroom sources as needed.
+    - source_id: google_trends
+      name: Google Trends
+      region: Global
+      languages: [multi]
+      source_type: search_interest_data
+      domains: [consumer_interest, retail, brands, fashion]
+      priority: medium
+      evidence_default: medium_for_interest_direction
+      fetch_method: site_or_pytrends_check_required
+      homepage_url: https://trends.google.com/
+      usage_policy: check_required
+      freshness_expectation: daily_or_weekly

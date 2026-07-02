@@ -1,0 +1,618 @@
+version: 0.1
+last_updated: 2026-07-02
+status: draft_seed
+purpose: >
+  Fixed key media library for source-first radar search. This file gives each radar
+  domain a stable set of global and Taiwan media sources before keyword fallback.
+
+schema_note: >
+  Feed URLs, usage policy, and source health require verification before automated
+  commercial use. Use `check_required` when a source is useful but the exact feed/API
+  or license is not confirmed.
+
+shared_rules:
+  fetch_priority:
+    - rss_or_api
+    - official_section_page
+    - site_search
+    - trusted_news_database
+    - generic_web_search_fallback
+  evidence_note:
+    - news_agency_and_major_financial_media_are_usually_high_or_medium_high
+    - industry_media_are_usually_medium
+    - commentary_columns_are_not_standalone_facts
+    - social_sources_are_low_evidence_candidates_only
+
+radar_domains:
+  ai_models_agents_workflow:
+    description: AI models, AI agents, enterprise workflow automation, AI adoption, AI product economics.
+    global_media:
+      - source_id: techcrunch_ai
+        name: TechCrunch AI
+        region: Global
+        languages: [en]
+        source_type: tech_media
+        domains: [ai, startups, enterprise_ai]
+        priority: high
+        evidence_default: medium
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://techcrunch.com/category/artificial-intelligence/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: the_information_ai
+        name: The Information
+        region: Global
+        languages: [en]
+        source_type: tech_business_media
+        domains: [ai, big_tech, startups]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_newsletter_check_required
+        homepage_url: https://www.theinformation.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: venturebeat_ai
+        name: VentureBeat AI
+        region: Global
+        languages: [en]
+        source_type: tech_media
+        domains: [ai, enterprise_ai, ai_apps]
+        priority: medium
+        evidence_default: medium
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://venturebeat.com/category/ai/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: the_decoder
+        name: The Decoder
+        region: Global
+        languages: [en]
+        source_type: ai_media
+        domains: [ai_models, ai_products, ai_research]
+        priority: medium
+        evidence_default: medium
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://the-decoder.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: semafor_tech
+        name: Semafor Technology
+        region: Global
+        languages: [en]
+        source_type: global_media
+        domains: [technology, ai, policy]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_search
+        homepage_url: https://www.semafor.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: ithome_tw
+        name: iThome
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: tech_media
+        domains: [ai, enterprise_it, cybersecurity, cloud]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.ithome.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: bnext_tw
+        name: 數位時代
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: tech_business_media
+        domains: [ai, startups, digital_business]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.bnext.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: cna_tw_tech
+        name: 中央社科技
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: news_agency
+        domains: [ai, technology, taiwan]
+        priority: high
+        evidence_default: high
+        fetch_method: rss_or_site_search
+        homepage_url: https://www.cna.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+
+  crypto_rwa_agent_payments:
+    description: Crypto, RWA, tokenized assets, stablecoins, agent payments, DeFi, exchanges, regulation.
+    global_media:
+      - source_id: coindesk
+        name: CoinDesk
+        region: Global
+        languages: [en]
+        source_type: crypto_media
+        domains: [crypto, markets, regulation, rwa]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://www.coindesk.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: the_block
+        name: The Block
+        region: Global
+        languages: [en]
+        source_type: crypto_media
+        domains: [crypto, exchanges, defi, policy]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_api_check_required
+        homepage_url: https://www.theblock.co/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: blockworks
+        name: Blockworks
+        region: Global
+        languages: [en]
+        source_type: crypto_media
+        domains: [crypto, defi, finance, rwa]
+        priority: high
+        evidence_default: medium
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://blockworks.co/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: dl_news
+        name: DL News
+        region: Global
+        languages: [en]
+        source_type: crypto_media
+        domains: [defi, crypto_markets, crypto_policy]
+        priority: medium
+        evidence_default: medium
+        fetch_method: section_or_rss_check_required
+        homepage_url: https://www.dlnews.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: abmedia_tw
+        name: 鏈新聞 ABMedia
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: crypto_media
+        domains: [crypto, taiwan, regulation, markets]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://abmedia.io/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: blocktempo_tw
+        name: 動區動趨 BlockTempo
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: crypto_media
+        domains: [crypto, web3, taiwan]
+        priority: medium
+        evidence_default: medium_low
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.blocktempo.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+
+  retail_consumer_social_fashion:
+    description: Retail, department stores, malls, street retail, consumer pressure, social commerce, fashion, apparel.
+    global_media:
+      - source_id: retail_dive
+        name: Retail Dive
+        region: Global
+        languages: [en]
+        source_type: industry_media
+        domains: [retail, consumer, ecommerce, store_operations]
+        priority: high
+        evidence_default: medium
+        fetch_method: newsletter_or_site_check_required
+        homepage_url: https://www.retaildive.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: nrf_news
+        name: NRF News
+        region: Global
+        languages: [en]
+        source_type: industry_association_media
+        domains: [retail, consumer, policy]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: newsroom_or_site_search
+        homepage_url: https://nrf.com/
+        usage_policy: check_required
+        freshness_expectation: weekly
+      - source_id: vogue_business
+        name: Vogue Business
+        region: Global
+        languages: [en]
+        source_type: fashion_business_media
+        domains: [fashion, luxury, retail, consumer]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_or_newsletter_check_required
+        homepage_url: https://www.voguebusiness.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: business_of_fashion
+        name: Business of Fashion
+        region: Global
+        languages: [en]
+        source_type: fashion_business_media
+        domains: [fashion, luxury, retail, brands]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_or_newsletter_check_required
+        homepage_url: https://www.businessoffashion.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: glossy
+        name: Glossy
+        region: Global
+        languages: [en]
+        source_type: fashion_retail_media
+        domains: [fashion, beauty, retail, consumer]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_or_newsletter_check_required
+        homepage_url: https://www.glossy.co/
+        usage_policy: check_required
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: economic_daily_tw
+        name: 經濟日報
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: financial_media
+        domains: [retail, consumer, market, taiwan_business]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://money.udn.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: commercial_times_tw
+        name: 工商時報
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: financial_media
+        domains: [retail, consumer, market, taiwan_business]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.ctee.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: business_weekly_tw
+        name: 商業周刊
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: business_media
+        domains: [retail, consumer, management, brand]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_search_or_newsletter
+        homepage_url: https://www.businessweekly.com.tw/
+        usage_policy: check_required
+        freshness_expectation: weekly
+      - source_id: hbr_tw
+        name: HBR 哈佛商業評論繁體中文版
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: management_media
+        domains: [management, ai_adoption, retail_strategy, consumer]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_search
+        homepage_url: https://www.hbrtaiwan.com/
+        usage_policy: check_required
+        freshness_expectation: weekly
+      - source_id: cna_tw_retail
+        name: 中央社財經/產經
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: news_agency
+        domains: [taiwan, retail, consumer, market]
+        priority: high
+        evidence_default: high
+        fetch_method: rss_or_site_search
+        homepage_url: https://www.cna.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+
+  global_markets_capital_flows_geopolitics:
+    description: Macro, markets, rates, FX, capital flows, trade, geopolitics, policy.
+    global_media:
+      - source_id: reuters_markets
+        name: Reuters Markets
+        region: Global
+        languages: [en]
+        source_type: news_agency
+        domains: [markets, macro, geopolitics, policy]
+        priority: high
+        evidence_default: high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.reuters.com/markets/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: bloomberg_markets
+        name: Bloomberg Markets
+        region: Global
+        languages: [en]
+        source_type: financial_media
+        domains: [markets, macro, finance, geopolitics]
+        priority: high
+        evidence_default: high
+        fetch_method: site_or_terminal_check_required
+        homepage_url: https://www.bloomberg.com/markets
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: financial_times
+        name: Financial Times
+        region: Global
+        languages: [en]
+        source_type: financial_media
+        domains: [macro, markets, geopolitics, business]
+        priority: high
+        evidence_default: high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.ft.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+      - source_id: nikkei_asia
+        name: Nikkei Asia
+        region: Asia
+        languages: [en]
+        source_type: financial_media
+        domains: [asia, markets, geopolitics, technology]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://asia.nikkei.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: cna_tw_markets
+        name: 中央社財經
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: news_agency
+        domains: [taiwan, markets, macro, policy]
+        priority: high
+        evidence_default: high
+        fetch_method: rss_or_site_search
+        homepage_url: https://www.cna.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: economic_daily_tw_markets
+        name: 經濟日報財經
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: financial_media
+        domains: [markets, macro, taiwan_business]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://money.udn.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: commercial_times_tw_markets
+        name: 工商時報財經
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: financial_media
+        domains: [markets, macro, taiwan_business]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.ctee.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+
+  technology_development_robotics_biotech_energy_semiconductor:
+    description: Frontier technology, robotics, biotech, energy, semiconductors, hardware supply chain.
+    global_media:
+      - source_id: ieee_spectrum
+        name: IEEE Spectrum
+        region: Global
+        languages: [en]
+        source_type: technology_media
+        domains: [robotics, semiconductors, engineering, ai]
+        priority: medium
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://spectrum.ieee.org/
+        usage_policy: check_required
+        freshness_expectation: weekly
+      - source_id: semianalysis
+        name: SemiAnalysis
+        region: Global
+        languages: [en]
+        source_type: semiconductor_research_media
+        domains: [semiconductors, ai_infrastructure, chips]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_newsletter_check_required
+        homepage_url: https://www.semianalysis.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: weekly
+      - source_id: ars_technica
+        name: Ars Technica
+        region: Global
+        languages: [en]
+        source_type: technology_media
+        domains: [technology, science, ai, energy]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://arstechnica.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: technology_review
+        name: MIT Technology Review
+        region: Global
+        languages: [en]
+        source_type: technology_media
+        domains: [ai, biotech, energy, robotics]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.technologyreview.com/
+        usage_policy: check_required
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: technews_tw
+        name: 科技新報
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: technology_media
+        domains: [semiconductors, energy, technology, ai]
+        priority: high
+        evidence_default: medium
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://technews.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: digitimes_tw
+        name: DIGITIMES Asia
+        region: Taiwan
+        languages: [zh-TW, en]
+        source_type: supply_chain_media
+        domains: [semiconductors, hardware, supply_chain, ai_infrastructure]
+        priority: high
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.digitimes.com/
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+
+  labor_consumption_pressure_taiwan_local:
+    description: Labor market, wage pressure, consumer credit stress, local Taiwan economy and demand signals.
+    global_media:
+      - source_id: ap_business
+        name: AP Business
+        region: Global
+        languages: [en]
+        source_type: news_agency
+        domains: [labor, consumer, economy, policy]
+        priority: medium
+        evidence_default: high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://apnews.com/hub/business
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: cnbc_economy
+        name: CNBC Economy
+        region: Global
+        languages: [en]
+        source_type: financial_media
+        domains: [economy, consumer, markets, labor]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.cnbc.com/economy/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: wsj_economy
+        name: Wall Street Journal Economy
+        region: Global
+        languages: [en]
+        source_type: financial_media
+        domains: [economy, labor, consumer, markets]
+        priority: high
+        evidence_default: high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://www.wsj.com/news/economy
+        usage_policy: check_required
+        paywall: true
+        freshness_expectation: daily
+    taiwan_media:
+      - source_id: cna_tw_labor_consumer
+        name: 中央社生活/財經
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: news_agency
+        domains: [taiwan, labor, consumer, policy]
+        priority: high
+        evidence_default: high
+        fetch_method: rss_or_site_search
+        homepage_url: https://www.cna.com.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: tw_news_labor_local
+        name: 公視新聞網
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: public_media
+        domains: [taiwan, labor, society, local]
+        priority: medium
+        evidence_default: medium_high
+        fetch_method: site_or_rss_check_required
+        homepage_url: https://news.pts.org.tw/
+        usage_policy: check_required
+        freshness_expectation: daily
+      - source_id: commonwealth_tw
+        name: 天下雜誌
+        region: Taiwan
+        languages: [zh-TW]
+        source_type: business_media
+        domains: [consumer, labor, management, taiwan_business]
+        priority: medium
+        evidence_default: medium
+        fetch_method: site_search_or_newsletter
+        homepage_url: https://www.cw.com.tw/
+        usage_policy: check_required
+        freshness_expectation: weekly
+
+external_discovery_sources:
+  - source_id: gdelt
+    name: GDELT Project
+    source_type: global_news_database
+    region: Global
+    languages: [multi]
+    domains: [all]
+    priority: fallback_high
+    evidence_default: discovery_only
+    fetch_method: api_or_bigquery
+    homepage_url: https://www.gdeltproject.org/
+    usage_policy: check_required
+    notes: Use for global multilingual discovery and coverage-gap scanning, not as a replacement for source verification.
+  - source_id: mediacloud
+    name: Media Cloud
+    source_type: media_research_database
+    region: Global
+    languages: [multi]
+    domains: [media_analysis, source_discovery]
+    priority: fallback_medium
+    evidence_default: discovery_only
+    fetch_method: api_check_required
+    homepage_url: https://www.mediacloud.org/
+    usage_policy: check_required
+  - source_id: common_crawl_cc_news
+    name: Common Crawl CC-News
+    source_type: web_news_dataset
+    region: Global
+    languages: [multi]
+    domains: [historical_backtest, broad_discovery]
+    priority: research_low
+    evidence_default: discovery_only
+    fetch_method: dataset
+    homepage_url: https://commoncrawl.org/
+    usage_policy: check_required
+    notes: Useful for research/backtest; too heavy for default daily execution.
