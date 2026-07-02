@@ -11,10 +11,14 @@ Brief 只代表單則內容字數較短。
 所有章節、欄位、證據追溯、台灣新聞、指標狀態仍必須完整保留。
 ```
 
-Required shared rule:
+Required shared rules:
 
 ```text
 configs/news_freshness_and_taiwan_news.yml
+configs/source_routing_rules.yml
+SOURCE_LIBRARY_SPEC.md
+sources/key_media_library.yml
+sources/official_and_data_sources.yml
 ```
 
 ---
@@ -84,6 +88,24 @@ Brief does not mean:
 - replacing news with synthesis
 - treating indicator status or conclusions as news
 - replaying old concepts without today's new information
+- skipping the fixed source library and only doing keyword search
+```
+
+---
+
+## source-first rule
+
+Daily Push Brief must check the fixed source library before generic keyword fallback.
+
+Minimum internal flow:
+
+```text
+1. Load configs/source_routing_rules.yml.
+2. Load sources/key_media_library.yml.
+3. Load sources/official_and_data_sources.yml.
+4. For each of six domains, check relevant global media, Taiwan media, and official/data sources.
+5. Use keyword search to filter, enrich, or retry gaps.
+6. Disclose material source gaps in Data Gaps and Retry Notes.
 ```
 
 ---
@@ -94,14 +116,15 @@ Brief does not mean:
 0. Read status and mode
 1. Hard gate status: concise mode / full gate not attempted or not passed
 2. Six-domain coverage matrix
-3. Each core domain: exactly 3 major signals
-4. Each core domain: exactly 1 niche / potential candidate
-5. Each core domain: 1–2 Taiwan news items directly under the domain
-6. Retail focus block with five fixed checks
-7. New Information / History Duplicate Check
-8. Data gaps and retry notes
-9. Final indicator status and news synthesis panel
-10. Post-brief review inside the final panel
+3. Source-library coverage audit, compact version
+4. Each core domain: exactly 3 major signals
+5. Each core domain: exactly 1 niche / potential candidate
+6. Each core domain: 1–2 Taiwan news items directly under the domain
+7. Retail focus block with five fixed checks
+8. New Information / History Duplicate Check
+9. Data gaps and retry notes
+10. Final indicator status and news synthesis panel
+11. Post-brief review inside the final panel
 ```
 
 ---
@@ -130,6 +153,8 @@ Taiwan news: 1–2 items
 Evidence trace: required for every news / signal item
 New information check: required for every news / signal item
 Historical duplication status: required for every news / signal item
+Source-library check status: yes / partial / no
+Keyword fallback: yes / no
 ```
 
 Taiwan section must be Taiwan news, not generic Taiwan mapping:
@@ -249,6 +274,7 @@ Final Indicator Status and News Synthesis Panel must include:
 - data gaps
 - today’s main themes
 - Taiwan news summary
+- source-library coverage note
 - post-brief review
 ```
 
@@ -267,6 +293,7 @@ If using this workflow, write:
 結構閘門狀態：通過 / 未通過。
 新資訊密度狀態：通過 / 偏低 / 未通過。
 台灣新聞狀態：通過 / 不足 / 未完整。
+來源庫檢查狀態：通過 / partial / 未完成。
 ```
 
 Do not write the concise brief as a full formal report.
@@ -279,6 +306,8 @@ Concise mode can be marked `complete concise brief` only when:
 
 ```text
 entry read complete or missing files disclosed
+source routing rules read
+source library read or missing files disclosed
 six domains covered
 all domains contain exactly 3 major signals
 all domains contain exactly 1 niche candidate
@@ -286,6 +315,7 @@ all domains contain 1–2 Taiwan news items or explicit Taiwan news insufficienc
 all news / signals contain evidence trace
 all news / signals contain today_new_information and historical_duplication_status
 retail focus block with five fixed checks is present
+source-library coverage audit is present or internally satisfied with material gaps disclosed
 data gaps are disclosed
 final indicator status and news synthesis panel is present
 indicator status and conclusions point back to news IDs
