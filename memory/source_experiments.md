@@ -16,6 +16,7 @@
 3. 無效來源要記錄原因，避免每天重複踩雷。
 4. 每個來源需標示適合主題、更新速度、是否第一手、是否容易重複 Reuters、RSS / API 是否可用、是否加入固定媒體庫。
 5. Source Experiment 必須放在每日報告最後，接在推播後回測與模型調整面板之後。
+6. Retail 類來源必須拆分為 Retail Media、Shopping Mall / Department Store、Brand Sources 三類，不能只看通路與媒體。
 ```
 
 ### 每日輸出格式
@@ -46,7 +47,7 @@ Source Experiment
 | 欄位 | 說明 |
 |---|---|
 | source | 來源名稱 |
-| domains | 適合主題，例如 AI、Retail、Crypto、Taiwan、Geopolitics |
+| domains | 適合主題，例如 AI、Retail、Brand、Crypto、Taiwan、Geopolitics |
 | freshness | 更新速度 |
 | primary_source | 是否第一手來源 |
 | reuters_overlap | 是否常常只是重複 Reuters |
@@ -63,6 +64,7 @@ Source Experiment
 | Reuters / FT / Guardian 組合 | AI、Markets、Policy、Crypto | 快 | 部分 | 中 | 部分 | 保留 | 可抓政策、公司動作與資金流新訊號，但不能讓 Reuters 重複填滿整份報告。 |
 | Retail / Grocery AI 專題搜尋 | Retail、AI shopping assistant | 中快 | 否 | 低 | 未確認 | 保留 | 今日抓到 Pick n Pay「Penny」，證明零售 AI 應用不只發生在美國。 |
 | 台灣產業關鍵字搜尋：AI 供應鏈 / PCB / IC 載板 / 百貨超市 | Taiwan、Semiconductor、Retail | 中 | 否 | 中 | 未確認 | 保留但需改進 | 可抓到 Unimicron 與 LOPIA，但台灣零售、勞動、加密仍不足。 |
+| Brand official channels / 品牌官方來源 | Brand、Fashion、Retail、Consumer | 中快 | 是 | 低 | 部分 | 新增保留 | 必須追蹤品牌官網 Newsroom、門市公告、IG / FB / Threads / LINE 官方帳號、會員活動、聯名、價格、折扣、展店與撤店。 |
 | 泛零售舊新聞搜尋 | Retail | 慢 | 否 | 高 | 未確認 | 降權 | 容易抓到舊 AI shopping 或電子價牌背景，不可計入今日大型訊號。 |
 | 台灣影響推論式補位 | Taiwan mapping | 不適用 | 否 | 不適用 | 不適用 | 淘汰 | 不得用「台灣可能受影響」替代台灣新聞。 |
 
@@ -72,16 +74,46 @@ Source Experiment
 
 下次每日推播需優先測試下列來源，每日至少 3 種：
 
-### Retail
+### Retail Media
 
 - Retail Dive
 - Retail Brew
 - Chain Store Age
 - Shopping Center Business
 - NRF
+
+### Shopping Mall / Department Store
+
 - 百貨官方公告
-- 商場社群
-- 品牌 IG / FB
+- 商場官方 News / Event
+- 商場社群：Facebook、Instagram、Threads、LINE OA
+- 招商 / tenant mix 公告
+- 商圈新聞與地方媒體
+
+### Brand Sources
+
+品牌來源必須成為 Retail 雷達獨立類別，不可只附屬於百貨或商場。
+
+固定追蹤項目：
+
+- 品牌官網 Newsroom / Press / Blog
+- 品牌門市列表與新櫃公告
+- 品牌 IG / FB / Threads / TikTok / LINE OA
+- 品牌會員活動與 CRM 訊息
+- 聯名、快閃、展店、撤店、改裝、升級店型
+- 價格帶變化、折扣深度、出清活動、新品節奏
+- 台灣服飾品牌、國際服飾品牌、運動戶外品牌、生活風格品牌
+
+優先品牌池需依雷達任務動態調整，初始可含：
+
+- UNIQLO / GU
+- ZARA / H&M
+- MUJI
+- Nike / Adidas / New Balance
+- Lululemon
+- Life8 / Laking / OB 嚴選 / Poly Lulu
+- NET / lativ
+- 主要百貨進駐品牌與近期撤櫃品牌
 
 ### Crypto
 
