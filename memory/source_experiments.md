@@ -182,6 +182,72 @@ If no: Taiwan crypto legislative trigger not checked.
 
 ---
 
+## 2026-07-04 Missed Case Archive：DA 交易者聯盟 IG Social Channel
+
+### 漏抓事件
+
+使用者指出：DA 交易者聯盟的 Instagram 有報導 `虛擬資產服務法` 三讀通過，但每日報告與後續補查沒有抓到。
+
+### 為什麼沒抓到
+
+```text
+1. 來源被抽象化：
+   DA 交易者聯盟只被記成「台灣加密來源」，沒有拆成具體 channel：IG / FB / Threads / YouTube / 官網 / Linktree。
+
+2. 泛搜尋限制：
+   Instagram 內容常常不會被一般搜尋引擎完整索引，尤其是貼文文字、限動、輪播圖文字與圖片內文字。
+   所以「搜尋 DA 交易者聯盟 + 虛擬資產服務法」不等於「已檢查 DA IG」。
+
+3. 社群來源閘門缺失：
+   系統沒有要求 social-first source 必須做 direct channel check，導致 IG 有貼文但被視為查無。
+
+4. 證據分級誤用：
+   DA IG 對於「發現新聞」有價值，但若是法案三讀，最終證據仍必須回查立法院、金管會、中央社或法規資料庫。
+```
+
+### 已更新規則
+
+已在 `configs/source_routing_rules.yml` 新增與修正：
+
+```text
+fetch_priority:
+  - official_social_channel_or_public_post
+
+coverage_audit_fields:
+  - social_channels_checked_when_required
+
+mandatory_source_overlays.taiwan_crypto_social_channel_trigger
+```
+
+DA 交易者聯盟新增：
+
+```text
+channel_priority: [instagram, facebook_or_threads_if_available, website_or_linktree_if_available, generic_search_fallback]
+social_check_required: true
+```
+
+### 新規則摘要
+
+```text
+若來源是 social-first，或使用者指定 IG / FB / Threads / LINE / YouTube：
+
+不能只用 generic web search 代表已檢查。
+必須：
+1. 直接檢查官方社群帳號；或
+2. 使用貼文 URL / 截圖 / 文字轉錄；或
+3. 明確標示 social channel inaccessible / unchecked。
+```
+
+### 下次 Coverage Audit 必填
+
+```text
+social_channels_checked_when_required: yes / partial / no / not_required
+DA 交易者聯盟 IG checked: yes / partial / no
+If no: Social source not checked directly; generic search may miss Instagram/Facebook/Threads/LINE posts.
+```
+
+---
+
 ## Next Source Tests
 
 下次每日推播需優先測試下列來源，每日至少 3 種：
@@ -244,8 +310,8 @@ If no: Taiwan crypto legislative trigger not checked.
 - Coinglass
 - Artemis
 - The Block
-- DA 交易者聯盟
-- 邦妮區塊鏈
+- DA 交易者聯盟 IG / social channel
+- 邦妮區塊鏈 social channel
 - 加密城市
 - 區塊勢
 
