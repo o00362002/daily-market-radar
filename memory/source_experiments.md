@@ -248,6 +248,73 @@ If no: Social source not checked directly; generic search may miss Instagram/Fac
 
 ---
 
+## 2026-07-04 Generalization Archive：Channel-aware Source Checks
+
+### 使用者確認
+
+使用者確認：除了 DA 交易者聯盟外，其他類似來源也要用同樣方式處理。
+
+### 已更新規格
+
+已在 `SOURCE_LIBRARY_SPEC.md` 將 DA IG 個案提升為通用來源規格：
+
+```text
+source name ≠ all channels checked
+```
+
+新增通用欄位：
+
+```text
+publishing_channels
+channel_priority
+social_first
+channel_check_required
+channel_access_status
+```
+
+### 通用規則
+
+```text
+任何來源
+→ 讀取 publishing_channels
+→ 判斷 channel_priority
+→ 若 social_first = true 或 channel_check_required = true
+→ 強制 direct channel check
+→ 無法存取則標示 unchecked / inaccessible / partial
+→ generic search 不得冒充 direct channel check
+→ 重大 claim 回查官方 / 數據 / 高證據來源
+```
+
+### 適用範圍
+
+```text
+不只 DA 交易者聯盟，也包含：
+- 邦妮區塊鏈 IG / YouTube / 社群
+- 加密城市社群渠道
+- 區塊勢 Podcast / newsletter / 社群
+- 台灣加密 KOL、研究帳號、交易社群
+- 品牌官方 IG / FB / Threads / TikTok / LINE OA
+- 百貨、購物中心、商場官方社群
+- AI 開發者社群、產品發布帳號
+- 公司高層公開社群帳號
+- Podcast-first / YouTube-first / newsletter-first 產業媒體
+```
+
+### 下次報告新增 audit
+
+```text
+social_channels_checked_when_required: yes / partial / no / not_required
+channel_gaps: none / list
+```
+
+若沒有直接檢查 social-first / channel-first 來源，必須標示：
+
+```text
+Social/channel-first source not checked directly; generic search may miss posts or channel-native content.
+```
+
+---
+
 ## Next Source Tests
 
 下次每日推播需優先測試下列來源，每日至少 3 種：
@@ -312,8 +379,8 @@ If no: Social source not checked directly; generic search may miss Instagram/Fac
 - The Block
 - DA 交易者聯盟 IG / social channel
 - 邦妮區塊鏈 social channel
-- 加密城市
-- 區塊勢
+- 加密城市 social channel if relevant
+- 區塊勢 podcast / newsletter / social if relevant
 
 ### AI
 
@@ -335,6 +402,7 @@ If no: Social source not checked directly; generic search may miss Instagram/Fac
 ```text
 Source Library
 → source-specific search
+→ channel-aware source check
 → cross-domain trigger detection
 → evidence grading
 → missed-case replay
@@ -343,4 +411,4 @@ Source Library
 → Source Library update
 ```
 
-目標是建立一套可持續演化的 Source Intelligence Library，讓 Search Agent 依主題自動選來源，而不是每天從零開始搜尋。
+目標是建立一套可持續演化的 Source Intelligence Library，讓 Search Agent 依主題自動選來源與渠道，而不是每天從零開始搜尋。
