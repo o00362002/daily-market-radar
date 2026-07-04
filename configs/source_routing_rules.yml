@@ -144,6 +144,92 @@ hard_boundaries:
   - Generic web search is fallback, not the primary evidence base.
 
 mandatory_source_overlays:
+  taiwan_crypto_legislative_trigger:
+    applies_when:
+      - domain_is_crypto_rwa_agent_payments
+      - taiwan_news_required_or_taiwan_mapping_relevant
+      - any_taiwan_crypto_policy_or_regulation_term_detected
+      - crypto_segment_has_taiwan_gap
+    rule: >
+      Taiwan crypto policy coverage must check legislative and regulator sources before
+      declaring Taiwan crypto news insufficient. Crypto media checks are not enough.
+      If a law name, bill name, VASP, virtual asset, stablecoin, exchange regulation,
+      AML, or third-party payment term appears, trigger official legislative search.
+    priority: highest_for_taiwan_crypto_policy
+    required_official_sources:
+      - source_id: legislative_yuan
+        name: 立法院
+        source_type: legislature_official
+        evidence_default: high
+        fetch_method: official_site_or_bill_system_search
+        use_for: [third_reading, bill_progress, committee_review, legislative_agenda, floor_vote]
+      - source_id: legislative_yuan_bills
+        name: 立法院議案系統
+        source_type: legislature_bill_database
+        evidence_default: high
+        fetch_method: bill_system_search
+        use_for: [bill_text, bill_status, proposer, third_reading_status]
+      - source_id: fsc_tw
+        name: 金融監督管理委員會
+        source_type: regulator_official
+        evidence_default: high
+        fetch_method: official_newsroom_or_site_search
+        use_for: [regulator_response, vasp_rules, registration, sublaw, enforcement]
+      - source_id: executive_yuan_tw
+        name: 行政院
+        source_type: executive_official
+        evidence_default: high
+        fetch_method: official_newsroom_or_site_search
+        use_for: [cabinet_bill, policy_context, promulgation_followup]
+      - source_id: president_office_tw
+        name: 總統府
+        source_type: government_official
+        evidence_default: high
+        fetch_method: official_newsroom_or_site_search
+        use_for: [promulgation]
+      - source_id: laws_moj_tw
+        name: 全國法規資料庫
+        source_type: law_database
+        evidence_default: high
+        fetch_method: law_database_search
+        use_for: [promulgated_law_text, effective_date, amended_articles]
+      - source_id: cna_tw_policy
+        name: 中央社政治 / 財經
+        source_type: news_agency
+        evidence_default: high
+        fetch_method: site_or_news_search
+        use_for: [legislative_news, policy_summary]
+    hard_keywords:
+      - 虛擬資產服務法
+      - 虛擬資產專法
+      - 虛擬資產服務
+      - 虛擬資產服務業
+      - VASP
+      - 三讀
+      - 三讀通過
+      - 立法院
+      - 立法院議案系統
+      - 金管會
+      - 交易所監管
+      - 幣商
+      - 穩定幣
+      - 代幣化
+      - 反洗錢
+      - 洗錢防制法
+      - 第三方支付
+      - 登記
+      - 登錄
+      - 施行日期
+      - 子法
+    audit_requirement: >
+      If Taiwan crypto news is marked insufficient, the report must state whether
+      the legislative trigger was executed. If not executed, write:
+      Taiwan crypto legislative trigger not checked.
+    reporting_rule: >
+      If a Taiwan crypto law or bill passes third reading, classify it as a Major Signal,
+      not a candidate. Distinguish third_reading_passed, presidential_promulgation,
+      effective_date, and sublaw_stage.
+
   taiwan_crypto_sources:
     applies_when:
       - domain_is_crypto_rwa_agent_payments
@@ -152,7 +238,8 @@ mandatory_source_overlays:
     rule: >
       Taiwan crypto coverage must not rely only on global crypto media or generic search.
       These Taiwan-focused crypto sources must be checked as fixed-source probes before
-      declaring Taiwan crypto news insufficient.
+      declaring Taiwan crypto news insufficient. For policy/law events, these sources are
+      secondary and must be cross-checked with the legislative trigger above.
     sources:
       - source_id: da_trader_alliance_tw
         name: DA 交易者聯盟
