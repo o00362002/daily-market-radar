@@ -39,6 +39,7 @@ These rules prevent three recurring failures:
 | `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
 | `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
 | `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, or watchlist change |
+| `AGENT_SOCIAL_CHANNEL_READER` | specialist sub-agent for public Instagram / X / Facebook / Threads and other channel-first source checks |
 
 ---
 
@@ -101,6 +102,28 @@ If user wording is ambiguous between daily push and full archive, choose `AGENT_
 
 General words such as 每日 / 播報 / 新聞 / 市場雷達 / today / brief do not upgrade the route to the full archive workflow.
 
+Route to `AGENT_SOCIAL_CHANNEL_READER` as a specialist sub-agent, not the primary daily output route, when the task requires:
+
+```text
+Instagram / IG
+X / Twitter
+Facebook / FB
+Threads
+YouTube
+TikTok
+LINE OA
+Discord
+Telegram
+Podcast
+Newsletter
+社群帳號直查
+社群來源讀取
+channel-first source check
+social-first source check
+```
+
+For daily reports, the primary route remains `AGENT_DAILY_PUSH_BRIEF` or `AGENT_RADAR_REPORT`; these routes may invoke `AGENT_SOCIAL_CHANNEL_READER` when channel-aware checks are required.
+
 ---
 
 ## Dependency chain
@@ -114,6 +137,8 @@ AGENT_RADAR_REPORT
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
+→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
 
 AGENT_DAILY_PUSH_BRIEF
@@ -122,6 +147,8 @@ AGENT_DAILY_PUSH_BRIEF
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
+→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
 
 AGENT_NEWS_SEARCH
@@ -130,11 +157,21 @@ AGENT_NEWS_SEARCH
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
+→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 
 AGENT_NEWS_CONTENT
 → workflows/news_content_workflow.md
 → templates/news_content_template.md or templates/news_content_template_v2.md
 → configs/news_freshness_and_taiwan_news.yml
+
+AGENT_SOCIAL_CHANNEL_READER
+→ agent_specs/social_channel_reader_agent.md
+→ skill_specs/social_channel_reading_skill.md
+→ tools/social_channel_reader_tool.md
+→ configs/source_routing_rules.yml
+→ SOURCE_LIBRARY_SPEC.md
+→ claim-risk verification through skill_specs/claim_risk_check_skill.md when needed
 ```
 
 Route, workflow, template, config, and gate must match. If they do not match, mark the output as:
@@ -156,6 +193,7 @@ For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, and `AGENT_NEWS_SEARCH`:
 - Keyword search can filter, expand, retry, or discover sources, but must not replace source-library coverage.
 - Material source gaps must be disclosed in the output or final status panel.
 - Official / data sources should be used to verify high-risk claims and indicator changes.
+- If a source is social-first or channel-first, invoke `AGENT_SOCIAL_CHANNEL_READER` or explicitly mark channel check gaps.
 ```
 
 ---
@@ -170,6 +208,31 @@ For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, `AGENT_NEWS_SEARCH`, and `AG
 - Repeated themes need new data / company action / policy / market reaction / chain metric / Taiwan news to count as current news.
 - Taiwan news must be source-backed Taiwan event / data / company action / policy / market news.
 - Taiwan implication is model inference and must not be counted as Taiwan news.
+```
+
+---
+
+## Social channel reading boundary
+
+For `AGENT_SOCIAL_CHANNEL_READER` and any route invoking it:
+
+```text
+- Minimum channel coverage: Instagram, X / Twitter, Facebook, Threads.
+- Optional channels: YouTube, TikTok, LINE OA, Discord, Telegram, Podcast, Newsletter, Website / Linktree.
+- Generic search does not count as direct social-channel check.
+- Public social posts are discovery signals, usually medium_low evidence.
+- Policy, law, finance, market, and investment claims must be verified with official / data / trusted-media sources.
+- No private-account scraping, hidden-login scraping, captcha bypass, or unauthorized collection.
+```
+
+Required audit fields:
+
+```text
+social_channels_checked_when_required: yes / partial / no / not_required
+minimum_channels_checked: Instagram / X / Facebook / Threads = yes / partial / no
+channel_gaps: none / list
+social_tool_mode_used: official_api / public_url / screenshot / third_party_actor / generic_search_fallback / none
+policy_or_access_blockers: none / list
 ```
 
 ---
