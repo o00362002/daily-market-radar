@@ -98,6 +98,90 @@ Source Experiment
 
 ---
 
+## 2026-07-04 Missed Case Archive：Taiwan Crypto Legislative Trigger
+
+### 漏抓事件
+
+使用者指出：`虛擬資產服務法` 已三讀通過，但每日報告未抓到。
+
+### 為什麼沒搜到
+
+```text
+1. 搜尋路由錯誤：
+   系統把台灣加密優先路由到 crypto media / community sources，
+   例如加密城市、ABMedia、DA 交易者聯盟、邦妮區塊鏈、區塊勢，
+   但沒有先跑立法院 / 金管會 / 行政院 / 法規資料庫。
+
+2. 關鍵字錯誤：
+   原本偏向 crypto、VASP、穩定幣、金管會、虛擬資產等字，
+   但沒有把「虛擬資產服務法」「三讀」「立法院議案系統」「專法」設成硬搜尋。
+
+3. 證據閘門錯誤：
+   台灣加密媒體未命中時，系統直接傾向標示台灣新聞不足，
+   沒有觸發 legislative retry。
+
+4. 來源層級錯誤：
+   法案三讀屬政策 / 法規 / 立法事件，
+   不應只依賴加密媒體或泛搜尋。
+```
+
+### 已更新規則
+
+已在 `configs/source_routing_rules.yml` 新增：
+
+```text
+mandatory_source_overlays.taiwan_crypto_legislative_trigger
+```
+
+### 新規則摘要
+
+```text
+若任一條件成立：
+- crypto 段需要台灣新聞
+- 台灣加密新聞不足
+- 出現 VASP / 虛擬資產 / 穩定幣 / 交易所監管 / 幣商 / AML / 第三方支付
+- 出現法案、專法、三讀、立法院、議案系統等關鍵字
+
+必須先查：
+- 立法院
+- 立法院議案系統
+- 金管會
+- 行政院
+- 總統府
+- 全國法規資料庫
+- 中央社政治 / 財經
+
+再查：
+- DA 交易者聯盟
+- 邦妮區塊鏈
+- 加密城市
+- 區塊勢
+```
+
+### 報告分類規則
+
+```text
+台灣加密法案三讀通過 = Major Signal
+不可列為 candidate
+不可被 Robinhood / tokenized stocks / 社群敘事取代
+
+必須區分：
+- third_reading_passed：三讀通過
+- presidential_promulgation：總統公布
+- effective_date：施行日期
+- sublaw_stage：授權子法 / 監管細則
+```
+
+### 下次 Coverage Audit 必填
+
+```text
+Taiwan crypto legislative trigger checked: yes / partial / no
+Checked official sources: 立法院 / 議案系統 / 金管會 / 行政院 / 總統府 / 全國法規資料庫 / 中央社
+If no: Taiwan crypto legislative trigger not checked.
+```
+
+---
+
 ## Next Source Tests
 
 下次每日推播需優先測試下列來源，每日至少 3 種：
@@ -147,6 +231,13 @@ Source Experiment
 
 ### Crypto
 
+- 立法院
+- 立法院議案系統
+- 金管會
+- 行政院
+- 總統府
+- 全國法規資料庫
+- 中央社政治 / 財經
 - DeFiLlama
 - RWA.xyz
 - Token Terminal
