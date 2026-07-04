@@ -39,7 +39,7 @@ These rules prevent three recurring failures:
 | `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
 | `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
 | `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, or watchlist change |
-| `AGENT_SOCIAL_CHANNEL_READER` | specialist sub-agent for public Instagram / X / Facebook / Threads and other channel-first source checks |
+| `AGENT_SOCIAL_CHANNEL_READER` | specialist sub-agent for public Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree and other channel-first source checks |
 
 ---
 
@@ -112,10 +112,11 @@ Threads
 YouTube
 TikTok
 LINE OA
+Newsletter
+Website / Linktree / bio link
 Discord
 Telegram
 Podcast
-Newsletter
 社群帳號直查
 社群來源讀取
 channel-first source check
@@ -217,8 +218,8 @@ For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, `AGENT_NEWS_SEARCH`, and `AG
 For `AGENT_SOCIAL_CHANNEL_READER` and any route invoking it:
 
 ```text
-- Minimum channel coverage: Instagram, X / Twitter, Facebook, Threads.
-- Optional channels: YouTube, TikTok, LINE OA, Discord, Telegram, Podcast, Newsletter, Website / Linktree.
+- Baseline channel coverage: Instagram, X / Twitter, Facebook, Threads, YouTube, TikTok, LINE OA, Newsletter, Website / Linktree.
+- Optional channels: Discord, Telegram, Podcast, Forum / community board, App push / member message when user-provided or officially accessible.
 - Generic search does not count as direct social-channel check.
 - Public social posts are discovery signals, usually medium_low evidence.
 - Policy, law, finance, market, and investment claims must be verified with official / data / trusted-media sources.
@@ -229,7 +230,7 @@ Required audit fields:
 
 ```text
 social_channels_checked_when_required: yes / partial / no / not_required
-minimum_channels_checked: Instagram / X / Facebook / Threads = yes / partial / no
+baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
 channel_gaps: none / list
 social_tool_mode_used: official_api / public_url / screenshot / third_party_actor / generic_search_fallback / none
 policy_or_access_blockers: none / list
