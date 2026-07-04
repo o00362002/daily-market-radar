@@ -1,5 +1,5 @@
 version: 0.1
-last_updated: 2026-07-02
+last_updated: 2026-07-04
 status: active_draft
 purpose: >
   Source-first routing rules for Daily Push Brief, Full Daily Radar, and News Search Output.
@@ -142,3 +142,75 @@ hard_boundaries:
   - Social signals are candidates only unless verified by stronger source types.
   - Paid or restricted sources can be listed as watchlist items, but automated use requires policy check.
   - Generic web search is fallback, not the primary evidence base.
+
+mandatory_source_overlays:
+  taiwan_crypto_sources:
+    applies_when:
+      - domain_is_crypto_rwa_agent_payments
+      - taiwan_news_required_or_taiwan_mapping_relevant
+      - crypto_segment_has_taiwan_gap
+    rule: >
+      Taiwan crypto coverage must not rely only on global crypto media or generic search.
+      These Taiwan-focused crypto sources must be checked as fixed-source probes before
+      declaring Taiwan crypto news insufficient.
+    sources:
+      - source_id: da_trader_alliance_tw
+        name: DA 交易者聯盟
+        source_type: taiwan_crypto_community_media
+        evidence_default: medium_low
+        use_for: [trader_sentiment, taiwan_crypto_discussion, market_narrative, education]
+        verification_rule: cross_check_with_official_or_data_sources_for_major_claims
+        fetch_method: fixed_source_direct_check
+      - source_id: bonnie_blockchain_tw
+        name: 邦妮區塊鏈
+        source_type: taiwan_crypto_media_or_education
+        evidence_default: medium_low
+        use_for: [taiwan_crypto_education, market_events, exchange_discussion, community_topics]
+        verification_rule: cross_check_with_official_or_data_sources_for_major_claims
+        fetch_method: fixed_source_direct_check
+      - source_id: cryptocity_tw
+        name: 加密城市
+        source_type: taiwan_crypto_media
+        evidence_default: medium
+        use_for: [crypto_news, taiwan_crypto_market, regulation, exchanges, projects]
+        verification_rule: cross_check_with_fsc_exchange_project_or_company_official_sources
+        fetch_method: fixed_source_direct_check
+      - source_id: blocktrend_tw
+        name: 區塊勢
+        source_type: taiwan_crypto_analysis_media
+        evidence_default: medium
+        use_for: [web3_trends, policy_context, crypto_business_models, structural_analysis]
+        verification_rule: treat_analysis_as_context_unless_original_sources_are_cited
+        fetch_method: fixed_source_direct_check
+    audit_requirement: >
+      If Taiwan crypto news is marked insufficient, coverage audit must say whether these
+      four sources were checked. If not checked, write: Taiwan crypto fixed sources not checked.
+
+  taiwan_brand_management_sources:
+    applies_when:
+      - domain_is_retail_consumer_social_fashion
+      - taiwan_brand_or_management_context_relevant
+      - brand_sources_required
+    rule: >
+      Taiwan brand coverage must include management and business media sources when official
+      brand, mall, or department store sources are insufficient. These sources are not substitutes
+      for official brand announcements, but they are required probes for brand strategy,
+      consumer insight, retail cases, and management interpretation.
+    sources:
+      - source_id: business_weekly_tw_brand
+        name: 商業周刊 / Business Weekly Taiwan
+        source_type: taiwan_business_media
+        evidence_default: medium
+        use_for: [brand_strategy, retail_cases, consumer_trends, taiwan_business_context]
+        verification_rule: commentary_or_case_analysis_not_standalone_fact
+        fetch_method: fixed_source_direct_check
+      - source_id: hbr_tw_brand_management
+        name: HBR 哈佛商業評論繁體中文版
+        source_type: taiwan_management_media
+        evidence_default: medium
+        use_for: [brand_management, retail_strategy, ai_adoption, consumer_behavior, management_framework]
+        verification_rule: management_opinion_or_case_requires_original_data_for_high_evidence
+        fetch_method: fixed_source_direct_check
+    audit_requirement: >
+      If Retail / Brand Sources are marked insufficient, coverage audit must say whether
+      商業周刊 and HBR 哈佛商業評論 were checked as Taiwan brand-management probes.
