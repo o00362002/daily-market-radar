@@ -67,7 +67,7 @@ Not allowed:
 - Replacing Taiwan news with generic Taiwan implications.
 - Filling source gaps with synthesis only.
 - Marking source library coverage as complete when only keywords were searched.
-- Treating a generic search for a source name as proof that its Instagram / Facebook / Threads / LINE / YouTube / podcast / newsletter channels were checked.
+- Treating a generic search for a source name as proof that its Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree channels were checked.
 ```
 
 ---
@@ -147,23 +147,55 @@ channel_access_status
 
 ### 4.1 Channel-aware metadata
 
-凡來源可能把重要內容優先發布在社群、影音、Podcast、Newsletter、LINE 或其他非網站渠道，應補 channel metadata，而不是只記來源名稱。
+凡來源可能把重要內容優先發布在社群、影音、Newsletter、LINE、Website / Linktree 或其他非傳統網站渠道，應補 channel metadata，而不是只記來源名稱。
+
+Baseline channels:
+
+```text
+- Instagram
+- X / Twitter
+- Facebook
+- Threads
+- YouTube
+- TikTok
+- LINE OA
+- Newsletter
+- Website / Linktree / bio link
+```
+
+Optional channels:
+
+```text
+- Discord
+- Telegram
+- Podcast
+- Forum / community board
+- App push / member message, when user-provided or officially accessible
+```
 
 ```yaml
 - source_id: example_social_first_source
   name: Example Source
   publishing_channels:
-    - website
+    - website_linktree
     - instagram
+    - x
+    - facebook
     - threads
     - youtube
+    - tiktok
+    - line_oa
     - newsletter
   channel_priority:
     - instagram
+    - x
+    - facebook
     - threads
-    - website
     - youtube
+    - tiktok
+    - line_oa
     - newsletter
+    - website_linktree
     - generic_search_fallback
   social_first: true
   channel_check_required: true
@@ -187,8 +219,8 @@ channel_access_status
 
 ```text
 - 台灣加密媒體、KOL、交易社群、研究帳號
-- 品牌官方 Instagram / Facebook / Threads / TikTok / LINE OA
-- 百貨、購物中心、商場官方社群
+- 品牌官方 Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree
+- 百貨、購物中心、商場官方社群與活動頁
 - AI 開發者社群、產品發布帳號、Discord / forum 公開訊號
 - 公司高層公開社群帳號
 - Podcast / YouTube-first 產業媒體
@@ -255,6 +287,7 @@ keyword_fallback_used: yes / no
 external_discovery_used: yes / no
 taiwan_sources_checked: yes / partial / no
 social_channels_checked_when_required: yes / partial / no / not_required
+baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
 channel_gaps: none / list
 source_gap: none / partial / material
 ```
