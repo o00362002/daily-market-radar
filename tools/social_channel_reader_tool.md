@@ -8,7 +8,7 @@ This is not a scraper implementation. It defines approved acquisition routes, fa
 
 ---
 
-## Minimum channel scope
+## Baseline channel scope
 
 ```text
 must_support:
@@ -16,16 +16,18 @@ must_support:
   - X / Twitter
   - Facebook
   - Threads
-
-optional_when_relevant:
   - YouTube
   - TikTok
   - LINE OA
+  - Newsletter
+  - Website / Linktree / bio link
+
+optional_when_relevant:
   - Discord
   - Telegram
   - Podcast
-  - Newsletter
-  - Website / Linktree / bio link
+  - Forum / community board
+  - App push / member message, when user-provided or officially accessible
 ```
 
 ---
@@ -45,6 +47,7 @@ examples:
   - Threads API where app permissions allow
   - YouTube Data API
   - RSS / Atom for podcasts and newsletters
+  - public website / Linktree / bio link page where accessible
 allowed_for:
   - public data
   - owned or authorized accounts
@@ -62,7 +65,9 @@ priority: 2
 allowed_for:
   - public post pages
   - public profile pages
-  - public web-visible Threads / X / Facebook / Instagram content
+  - public web-visible Threads / X / Facebook / Instagram / YouTube / TikTok content
+  - newsletter public archive pages
+  - website / Linktree / bio link pages
 risk: medium
 notes:
   - Some platforms block unauthenticated reading.
@@ -101,6 +106,7 @@ examples:
   - Apify X / Twitter Scraper
   - Apify Facebook Pages Scraper
   - Apify Threads Scraper, if available
+  - Apify YouTube / TikTok public-data actors, if compliant
   - other social listening vendors
 allowed_for:
   - public data only
@@ -183,19 +189,72 @@ notes:
   - Generic search often misses Threads posts.
 ```
 
+### YouTube
+
+```text
+preferred:
+  - YouTube Data API
+  - public channel page
+  - video URL
+  - Shorts URL
+minimum_output:
+  - title / description / publish time / channel / transcript availability
+```
+
+### TikTok
+
+```text
+preferred:
+  - public post URL
+  - public profile page if accessible
+  - approved third-party actor if compliant
+notes:
+  - video OCR / transcript may be needed.
+```
+
+### LINE OA
+
+```text
+preferred:
+  - public broadcast archive if available
+  - official public page
+  - user-provided screenshot / copied message
+notes:
+  - Many LINE OA messages are not publicly indexable; mark user_input_required when needed.
+```
+
+### Newsletter
+
+```text
+preferred:
+  - RSS / Atom
+  - public archive page
+  - email/user-provided excerpt when authorized by user
+notes:
+  - Newsletter content may be paywalled or email-only; mark access blocker.
+```
+
+### Website / Linktree / bio link
+
+```text
+preferred:
+  - official website
+  - newsroom / blog
+  - Linktree / bio link page
+  - campaign / event page
+notes:
+  - Treat as a channel because many social-first sources route readers through bio links.
+```
+
 ### Optional channels
 
 ```text
-YouTube:
-  - YouTube Data API / public channel / video URL
-TikTok:
-  - public post URL / approved third-party actor if compliant
-LINE OA:
-  - user-provided screenshot / public broadcast archive if available
 Discord / Telegram:
   - public channels only; no private scraping
-Podcast / Newsletter:
-  - RSS / archive / public post page
+Podcast:
+  - RSS / archive / public episode page
+Forum / community board:
+  - public pages only
 ```
 
 ---
@@ -205,7 +264,7 @@ Podcast / Newsletter:
 ```yaml
 source_id: string
 source_name: string
-channel: instagram | x | facebook | threads | youtube | tiktok | line | discord | telegram | podcast | newsletter | website
+channel: instagram | x | facebook | threads | youtube | tiktok | line_oa | newsletter | website_linktree | discord | telegram | podcast | forum | app_push
 check_status: hit | no_hit | inaccessible | not_available | policy_blocked | user_input_required
 checked_at: YYYY-MM-DDTHH:mm:ss+08:00
 method: official_api | public_url | screenshot | user_transcript | third_party_actor | generic_search_fallback
@@ -248,7 +307,7 @@ Daily report coverage audit must include:
 
 ```text
 social_channels_checked_when_required: yes / partial / no / not_required
-minimum_channels_checked: Instagram / X / Facebook / Threads = yes / partial / no
+baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
 channel_gaps: none / list
 social_tool_mode_used: official_api / public_url / screenshot / third_party_actor / generic_search_fallback / none
 policy_or_access_blockers: none / list
