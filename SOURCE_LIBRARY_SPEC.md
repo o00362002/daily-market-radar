@@ -24,6 +24,7 @@ Source Library first
 2. 固定來源庫可以提高速度、穩定性、可追溯性與回測能力。
 3. 關鍵字仍然必要，但應用於來源庫內搜尋、事件補查、漏抓 retry、新來源發現。
 4. 每日報告要能回答：已檢查哪些來源、哪些命中、哪些沒有命中。
+5. 來源名稱不等於已檢查所有發布渠道；social-first / channel-first 來源必須做 channel-aware check。
 ```
 
 ---
@@ -37,10 +38,12 @@ Source Library first
 2. Load `configs/source_routing_rules.yml`.
 3. Load relevant files under `sources/`.
 4. Fetch priority sources by domain and region.
-5. Search / filter inside collected source items.
-6. Use keyword search only as fallback, enrichment, or discovery.
-7. Cross-check important claims with official / data / trusted media sources.
-8. Output coverage audit.
+5. Resolve each source's publishing channels and channel priority.
+6. Direct-check required channels for social-first / channel-first sources.
+7. Search / filter inside collected source items.
+8. Use keyword search only as fallback, enrichment, or discovery.
+9. Cross-check important claims with official / data / trusted media sources.
+10. Output coverage audit, including channel gaps when relevant.
 ```
 
 ### 2.2 Role of keyword search
@@ -64,6 +67,7 @@ Not allowed:
 - Replacing Taiwan news with generic Taiwan implications.
 - Filling source gaps with synthesis only.
 - Marking source library coverage as complete when only keywords were searched.
+- Treating a generic search for a source name as proof that its Instagram / Facebook / Threads / LINE / YouTube / podcast / newsletter channels were checked.
 ```
 
 ---
@@ -78,7 +82,7 @@ sources/official_and_data_sources.yml
 = official, regulator, company, exchange, macro, market, chain, and research/data sources.
 
 configs/source_routing_rules.yml
-= execution rules for source-first routing, fallback, source health, and coverage audit.
+= execution rules for source-first routing, fallback, source health, channel-aware checks, and coverage audit.
 ```
 
 ---
@@ -134,6 +138,61 @@ last_success_at
 fail_count
 bias_note
 notes
+publishing_channels
+channel_priority
+social_first
+channel_check_required
+channel_access_status
+```
+
+### 4.1 Channel-aware metadata
+
+凡來源可能把重要內容優先發布在社群、影音、Podcast、Newsletter、LINE 或其他非網站渠道，應補 channel metadata，而不是只記來源名稱。
+
+```yaml
+- source_id: example_social_first_source
+  name: Example Source
+  publishing_channels:
+    - website
+    - instagram
+    - threads
+    - youtube
+    - newsletter
+  channel_priority:
+    - instagram
+    - threads
+    - website
+    - youtube
+    - newsletter
+    - generic_search_fallback
+  social_first: true
+  channel_check_required: true
+  channel_access_status: unknown
+```
+
+通用判斷規則：
+
+```text
+任何來源
+→ 讀取 publishing_channels
+→ 判斷 channel_priority
+→ 若 social_first = true 或 channel_check_required = true
+→ 強制 direct channel check
+→ 無法存取則標示 unchecked / inaccessible / partial
+→ generic search 不得冒充 direct channel check
+→ 重大 claim 回查官方 / 數據 / 高證據來源
+```
+
+此規則適用所有領域，不只 DA 交易者聯盟或台灣加密，包括但不限於：
+
+```text
+- 台灣加密媒體、KOL、交易社群、研究帳號
+- 品牌官方 Instagram / Facebook / Threads / TikTok / LINE OA
+- 百貨、購物中心、商場官方社群
+- AI 開發者社群、產品發布帳號、Discord / forum 公開訊號
+- 公司高層公開社群帳號
+- Podcast / YouTube-first 產業媒體
+- Newsletter-first 研究來源
 ```
 
 ---
@@ -158,6 +217,7 @@ Each domain should include:
 - Taiwan media sources when relevant
 - official / company / regulator sources
 - data or indicator sources when available
+- social / channel-first sources when relevant
 - fallback discovery method
 ```
 
@@ -173,11 +233,14 @@ Preferred order:
 3. official newsroom / release page
 4. verified media RSS / section page
 5. trusted news database / aggregator
-6. generic web search
-7. social / community sources as low-evidence candidates only
+6. required direct channel check for social-first / channel-first sources
+7. generic web search
+8. unverified social / community candidates
 ```
 
 Do not scrape aggressively when RSS, API, or section pages are available.
+
+Direct channel checks are discovery mechanisms, not automatic high evidence. A social post can discover a major event, but policy, law, market, financial, or investment claims still require stronger verification.
 
 ---
 
@@ -191,10 +254,18 @@ priority_sources_checked: count or list
 keyword_fallback_used: yes / no
 external_discovery_used: yes / no
 taiwan_sources_checked: yes / partial / no
+social_channels_checked_when_required: yes / partial / no / not_required
+channel_gaps: none / list
 source_gap: none / partial / material
 ```
 
 If the output is user-facing, disclose source gaps when material.
+
+若來源是 social-first / channel-first，但沒有直接檢查其必要渠道，必須明確標示：
+
+```text
+Social/channel-first source not checked directly; generic search may miss posts or channel-native content.
+```
 
 ---
 
@@ -212,6 +283,9 @@ duplicate_rate
 hit_rate_by_domain
 false_positive_notes
 usage_policy_notes
+channel_access_status
+channel_hit_rate
+channel_last_success_at
 ```
 
 Recommended storage:
