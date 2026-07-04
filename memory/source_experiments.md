@@ -70,6 +70,34 @@ Source Experiment
 
 ---
 
+## 2026-07-04 Source Addition Archive
+
+### Taiwan Crypto Sources
+
+使用者指定新增台灣加密貨幣資訊來源。已歸入 `configs/source_routing_rules.yml` 的 `mandatory_source_overlays.taiwan_crypto_sources`。
+
+| Source | Domains | Evidence Default | Keep Status | Notes |
+|---|---|---|---|---|
+| DA 交易者聯盟 | Taiwan crypto、trader sentiment、market narrative | medium_low | 保留 | 適合追交易者敘事與台灣社群熱點；重大 claim 必須回查官方、鏈上數據、交易所或公司公告。 |
+| 邦妮區塊鏈 | Taiwan crypto education、market events、exchange discussion | medium_low | 保留 | 適合補台灣大眾加密教育與社群關注議題；不可單獨作政策或市場事實結論。 |
+| 加密城市 | Taiwan crypto news、regulation、exchanges、projects | medium | 保留 | 適合台灣 crypto 日常新聞掃描；政策、交易所與項目事件需交叉驗證。 |
+| 區塊勢 | Web3 trends、policy context、business models | medium | 保留 | 適合深度分析與結構判讀；若為觀點需標示，不替代官方事實。 |
+
+固定規則：若每日報告標示「台灣加密新聞不足」，必須說明是否已檢查上述四個來源。未檢查時需明確寫：`Taiwan crypto fixed sources not checked.`
+
+### Taiwan Brand / Management Sources
+
+使用者指定台灣品牌來源加入商業周刊與 HBR 哈佛商業評論。兩者原本已在 Retail Taiwan media 中，但本次進一步歸入 `configs/source_routing_rules.yml` 的 `mandatory_source_overlays.taiwan_brand_management_sources`，避免只被當成一般零售媒體。
+
+| Source | Domains | Evidence Default | Keep Status | Notes |
+|---|---|---|---|---|
+| 商業周刊 / Business Weekly Taiwan | brand strategy、retail cases、consumer trends、Taiwan business context | medium | 保留 | 適合品牌經營、零售案例、消費趨勢與台灣商業脈絡。評論或案例不可直接當成已證實事實。 |
+| HBR 哈佛商業評論繁體中文版 | brand management、retail strategy、AI adoption、consumer behavior、management framework | medium | 保留 | 適合管理框架、品牌策略、零售 AI 導入與消費者行為；需有原始資料才可提升證據等級。 |
+
+固定規則：若 Retail / Brand Sources 標示不足，必須說明是否已檢查商業周刊與 HBR 哈佛商業評論。未檢查時需標示缺口。
+
+---
+
 ## Next Source Tests
 
 下次每日推播需優先測試下列來源，每日至少 3 種：
@@ -103,6 +131,8 @@ Source Experiment
 - 聯名、快閃、展店、撤店、改裝、升級店型
 - 價格帶變化、折扣深度、出清活動、新品節奏
 - 台灣服飾品牌、國際服飾品牌、運動戶外品牌、生活風格品牌
+- 商業周刊 / Business Weekly Taiwan
+- HBR 哈佛商業評論繁體中文版
 
 優先品牌池需依雷達任務動態調整，初始可含：
 
@@ -123,6 +153,10 @@ Source Experiment
 - Coinglass
 - Artemis
 - The Block
+- DA 交易者聯盟
+- 邦妮區塊鏈
+- 加密城市
+- 區塊勢
 
 ### AI
 
