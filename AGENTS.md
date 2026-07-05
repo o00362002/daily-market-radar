@@ -206,3 +206,9 @@ Required check:
 If the change affects local project memory, dependency gates, route selection, source library, or reusable workflow behavior, record it through the local backtest / decision process before treating it as durable.
 
 Do not promote evidence into memory automatically. Do not push child repo implementation details into the mother Brain unless they affect cross-repo governance.
+
+
+## Owner Lens（監督 AI，零門檻）｜Supervising the AI
+
+結構性變更宣稱 complete 前，AI 必須自答母腦 `skill_specs/owner_lens_audit.md` 的六個質詢並附人話收據；使用者說「跑 owner 檢查」即可發動。答案無證據路徑＝視為沒做。
+Before claiming complete on structural changes, the AI must answer the mother Brain six Owner-Lens questions with evidence and emit the 5-line receipt. Trigger: say "run the owner check". Answers without evidence paths count as not done.
