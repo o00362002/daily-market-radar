@@ -34,15 +34,16 @@ AI 產品用量經濟
 
 ## 2. Human-AI Collaboration Brain 掛載定位
 
-本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 active thin mount。
+本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 active thin mount。正式模型不是「Level 分級」，而是 `MOUNT_DEPTH.md` 的 capability-based mount depth。`Level 2` 只保留為 legacy alias。
 
 ```text
-Level: Level 2 Runtime-Lite Brain
-Role: recurring intelligence workflow / daily report system
-Mother version: v1.19-draft
+Mother repo: o00362002/Human-AI-Collaboration-Brain
+Mother version: v2.0-draft
 Mother architecture: compact_five_layer
 Mount mode: active thin mount
-Layer depth: level_scaled
+Legacy alias: Level 2
+Capabilities: entry, state, decisions, routing
+Complexity signals: generates-output
 ```
 
 Source of truth：
@@ -56,9 +57,23 @@ PROJECT_MAP.md
 HIGH_LEVEL_INDEX.md
 DEPENDENCY_MAP.md
 AGENT_DEFINITION_MAP.md
+SYSTEM_PROMPT.md
 ```
 
-Projection files create no canonical rules. Frozen history is not current state.
+Inherited mother-brain contracts：
+
+```text
+BRAIN_ARCHITECTURE.md
+MOUNT_DEPTH.md
+schema/INDEX.md
+rules/universal_execution_contract.md
+rules/role_boundary_contract.md
+specs/execution_edge_module_model.md
+specs/programmable_control_layer.md
+specs/flow_selection_and_enforcement.md
+```
+
+Projection files create no canonical rules. Evidence files do not become memory without approval. Frozen history is not current state.
 
 ---
 
@@ -67,16 +82,16 @@ Projection files create no canonical rules. Frozen history is not current state.
 AI 或協作者進入本 repo 時，先讀：
 
 ```text
-SYSTEM_PROMPT.md
+AGENTS.md
+brain.manifest.yaml
 PROJECT_MAP.md
 HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 README.md
-AGENTS.md
-brain.manifest.yaml
 DEPENDENCY_MAP.md
 AGENT_DEFINITION_MAP.md
+SYSTEM_PROMPT.md
 ```
 
 再依任務讀取：
@@ -88,4 +103,65 @@ templates/
 reports/
 workflows/
 evals/
+sources/
 ```
+
+---
+
+## 4. 掛載深度判斷
+
+```text
+Capabilities: entry, state, decisions, routing
+Legacy alias: Level 2
+```
+
+原因：本 repo 是 recurring intelligence workflow，有固定流程、固定 sources/configs/memory/templates/reports 與回測補漏，但不需要升級為多 agent product runtime。
+
+---
+
+## 5. Role Boundary / Execution Boundary
+
+Canonical role boundary is inherited from:
+
+```text
+rules/role_boundary_contract.md
+```
+
+Local rule:
+
+```text
+Agent owns outcome but cannot approve itself.
+Workflow orders forward execution only.
+Skill judges search / coverage quality when defined.
+Tool operates without semantic judgement.
+Loop reviews, rejects, retries, backtests, and proposes improvement.
+Evidence does not become Memory without approval.
+```
+
+---
+
+## 6. Source-library-first radar method
+
+Search / radar collection is moving from keyword-first to source-library-first:
+
+```text
+fixed source library
+→ source-scoped keyword and topic filtering
+→ generic keyword fallback
+→ external discovery
+→ coverage audit
+```
+
+The source library is a local execution module, not a mother-brain architecture layer.
+
+---
+
+## 7. Backtest / Growth Control
+
+Backtest 不只檢查新聞漏抓，也檢查專案是否需要：
+
+```text
+keep / revise / delete / archive / add / promote / demote / observe
+```
+
+新增規則、模板、workflow、skill、loop、schema 或 source module 前，先檢查能否用凍結歷史、指回 Core、降權 Projection 或刪減重複段落解決。
