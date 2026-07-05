@@ -20,13 +20,17 @@ Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ## 1. 掛載定位
 
 ```text
-Level: Level 2 Runtime-Lite Brain
-Role: recurring intelligence workflow / daily report system
-Mother version: v1.19-draft
+Mother version: v2.0-draft
 Mother architecture: compact_five_layer
 Mount mode: active thin mount
-Layer depth: level_scaled
+Mount depth: entry + state + decisions + routing
+Legacy alias: Level 2
+Capabilities: entry, state, decisions, routing
+Complexity signals: generates-output
+Role: recurring intelligence workflow / daily report system
 ```
+
+`Level 2` 只保留作為 legacy alias。正式定位以 `brain.manifest.yaml` 的 capabilities、complexity_signals 與 depth_note 為準。
 
 ---
 
@@ -35,6 +39,7 @@ Layer depth: level_scaled
 ```text
 README.md
 SYSTEM_PROMPT.md
+PROJECT_OS_MOUNT.md
 PROJECT_MAP.md
 HIGH_LEVEL_INDEX.md
 CURRENT_STATE.md
@@ -61,6 +66,8 @@ configs/source_routing_rules.yml = source routing and coverage audit rules
 sources/key_media_library.yml = global and Taiwan key media by radar domain
 sources/official_and_data_sources.yml = official, regulator, company, market, macro, chain, and data sources
 ```
+
+Source library is local execution infrastructure, not mother Brain architecture.
 
 ---
 
@@ -95,7 +102,19 @@ radar_report_agent and news_search_agent must check source library before generi
 
 ---
 
-## 6. Routing
+## 6. Mother v2 inherited contracts
+
+```text
+MOUNT_DEPTH.md
+rules/role_boundary_contract.md
+specs/flow_selection_and_enforcement.md
+docs/AI_EXECUTION_FLOW.md
+schema/INDEX.md
+```
+
+---
+
+## 7. Routing
 
 ```text
 Task routing lives inside AGENT_DEFINITION_MAP.md.
@@ -104,20 +123,21 @@ No standalone ROUTING.md is active.
 
 ---
 
-## 7. Convergence Notes
+## 8. Convergence Notes
 
 ```text
 Projection files create no canonical rules.
 Evidence does not become Memory without approval.
 Frozen history is preserved but removed from active routing.
-Backtest includes keep / revise / delete / archive / add / promote / demote.
+Backtest includes keep / revise / delete / archive / add / promote / demote / observe.
 Adoption Gate belongs under Interface & Integration Layer.
-Source library is local execution infrastructure, not mother Brain architecture.
+Level names are legacy aliases only.
+Flow Profile cannot disable the enforcement floor.
 ```
 
 ---
 
-## 8. Frozen History
+## 9. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -125,25 +145,7 @@ AI_AGENT_MODEL_ADOPTION_PLAN.md
 POST_CHANGE_SYNC_ADOPTION.md
 README_AGENT_MODEL_NOTE.md
 CURRENT_DECISIONS_APPEND.md
+ADOPTION_LEVELS.md
 ```
 
----
-
-## 9. 同步檢查
-
-重大變更時檢查：
-
-```text
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-HIGH_LEVEL_INDEX.md
-PROJECT_MAP.md
-AGENTS.md
-AGENT_DEFINITION_MAP.md
-DEPENDENCY_MAP.md
-SOURCE_LIBRARY_SPEC.md
-configs/source_routing_rules.yml
-sources/
-brain.manifest.yaml
-check_mount_integrity.sh
-```
+These files are retained for historical context only. They are not active routing or active source of truth.
