@@ -10,6 +10,7 @@ route → workflow → template chains
 mode-specific completion gates
 source-library routing gates
 feed-stack routing gates
+FreshRSS ingestion gate addendum
 sync checks
 ```
 
@@ -24,6 +25,7 @@ Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
 Agent map and task routing: AGENT_DEFINITION_MAP.md
 Dependency and completion gates: DEPENDENCY_MAP.md
+FreshRSS ingestion gate addendum: DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md
 Freshness and Taiwan news rules: configs/news_freshness_and_taiwan_news.yml
 Source routing rules: configs/source_routing_rules.yml
 Feed discovery stack: configs/feed_discovery_stack.yml
@@ -46,6 +48,7 @@ Full Daily Radar
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → configs/feed_discovery_stack.yml when feed/discovery stack is relevant
+→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are used
 → SOURCE_LIBRARY_SPEC.md + sources/
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
 
@@ -56,6 +59,7 @@ Daily Push Brief
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → configs/feed_discovery_stack.yml when feed/discovery stack is relevant
+→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS is available
 → SOURCE_LIBRARY_SPEC.md + sources/
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
 
@@ -66,6 +70,7 @@ News Search Output
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
 → configs/feed_discovery_stack.yml when feed/discovery stack is relevant
+→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are requested
 → SOURCE_LIBRARY_SPEC.md + sources/
 
 News Content Output
@@ -132,6 +137,7 @@ configs/feed_discovery_stack.yml
 sources/channel_feed_sources.json
 sources/discovery_providers.yml
 FRESHRSS_SEEDS.opml when importing starter feeds
+DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are used
 ```
 
 Core requirements:
@@ -174,6 +180,7 @@ Completion requirements:
 已完成來源庫優先檢查
 已完成必要搜尋與 fallback
 已完成 feed stack check when relevant
+已完成 FreshRSS ingestion gate when FreshRSS candidates are used
 已完成最近 7 日 reports 去重
 已完成高風險 claim 檢查
 已完成今日新增點檢查
@@ -182,6 +189,7 @@ Completion requirements:
 已輸出 Coverage Matrix
 已輸出 Source Library Coverage Matrix 或等效來源覆蓋審計
 已輸出 Feed Stack Coverage Audit when relevant
+已輸出 FreshRSS Ingestion Audit when FreshRSS candidates are used
 已輸出 Data Gaps / Retry Notes
 已輸出 post-report backtest / model adjustment panel
 ```
@@ -203,6 +211,7 @@ Completion requirements:
 已讀取必要入口檔，或明確揭露缺失
 已讀取 freshness / Taiwan news rules
 已讀取 source routing rules, SOURCE_LIBRARY_SPEC.md, and sources/，或明確揭露缺失
+已讀取 FreshRSS ingestion addendum when FreshRSS is available
 6 大核心領域皆有覆蓋
 每一核心領域包含 exactly 3 則大型訊號
 每一核心領域包含 exactly 1 則小眾 / 潛力候選
@@ -212,6 +221,7 @@ Completion requirements:
 每則新聞 / 訊號標示是否重複歷史主題
 Source-library coverage audit 存在或 material gaps 已揭露
 Feed stack audit 存在或 material feed gaps 已揭露 when relevant
+FreshRSS ingestion audit 存在或 FreshRSS unavailable 已揭露 when relevant
 Data Gaps and Retry Notes 存在
 Final Indicator Status and News Synthesis Panel 存在且放在最後
 Post-brief Review 存在
@@ -230,9 +240,10 @@ Daily Push Brief must write:
 台灣新聞狀態：通過 / 不足 / 未完整。
 來源庫檢查狀態：通過 / partial / 未完成。
 Feed stack 狀態：通過 / partial / 未完成 / not_required。
+FreshRSS ingestion 狀態：通過 / partial / 未完成 / not_available。
 ```
 
-If any structural, freshness, Taiwan-news, source-library, or required feed-stack item is missing, mark `partial concise brief`.
+If any structural, freshness, Taiwan-news, source-library, required feed-stack, or required FreshRSS ingestion item is missing, mark `partial concise brief`.
 
 ---
 
@@ -244,6 +255,7 @@ Completion requirements:
 topic identified
 source-library route checked or missing files disclosed
 feed-stack relevance checked or marked not_required
+FreshRSS candidate gate checked or marked not_available when relevant
 priority sources searched
 keyword fallback used only after source checks or disclosed as exception
 claims labelled
@@ -265,7 +277,7 @@ news search partial
 
 ## 8. Sync rule
 
-When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, freshness rule, source-library rule, feed-stack rule, source routing rule, Taiwan news rule, or Memory Trigger Check gate changes, check:
+When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, freshness rule, source-library rule, feed-stack rule, FreshRSS ingestion rule, source routing rule, Taiwan news rule, or Memory Trigger Check gate changes, check:
 
 ```text
 PROJECT_MAP.md
@@ -275,6 +287,7 @@ CURRENT_DECISIONS.md
 AGENTS.md
 AGENT_DEFINITION_MAP.md
 DEPENDENCY_MAP.md
+DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md
 templates/
 configs/
 sources/
