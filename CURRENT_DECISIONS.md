@@ -33,6 +33,8 @@ infra/rss-stack/.env.example
 infra/rss-stack/README.md
 FRESHRSS_SEEDS.md
 FRESHRSS_SEEDS.opml
+SOURCE_LIBRARY_SPEC.md
+DEPENDENCY_MAP.md
 AGENT_DEFINITION_MAP.md
 reports/feed_stack_sync_status_2026-07-07.md
 
@@ -46,11 +48,15 @@ reports/feed_stack_sync_status_2026-07-07.md
 原 /github/repos/DIYgod/RSSHub/releases 未驗證為有效 RSSHub releases route，改用 GitHub 官方 releases.atom。
 ```
 
-### Partial / blocked
+### Runtime validation still pending
 
 ```text
-SOURCE_LIBRARY_SPEC.md 與 DEPENDENCY_MAP.md 的直接更新曾被 connector/platform write safety filter 擋下。
-本次不宣稱兩檔已完成同步；需後續手動或下一輪以更小 patch 完成。
+SOURCE_LIBRARY_SPEC.md、DEPENDENCY_MAP.md、AGENT_DEFINITION_MAP.md 已完成 source-of-truth 同步。
+尚未完成的是 RSSHub / FreshRSS runtime 驗證：
+1. 啟動 RSSHub + FreshRSS。
+2. 匯入 FRESHRSS_SEEDS.opml。
+3. 確認 FreshRSS 能 refresh enabled feeds。
+4. 後續再把 smoke-test seed 換成真正 market-radar 來源。
 ```
 
 ---
