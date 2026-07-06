@@ -23,14 +23,22 @@ Picnob route template for Instagram-like public profiles: verified in upstream r
 GitHub releases candidate: previous /github/repos/DIYgod/RSSHub/releases was not verified as a valid RSSHub route, so GitHub official releases.atom is used instead.
 ```
 
+## Runtime result
+
+```text
+FreshRSS service is reachable and can display feed items.
+RSSHub service is reachable because it returned a structured route error page.
+rsshub_youtube_route_smoke_seed failed runtime validation with route is empty.
+The failed YouTube smoke seed is now disabled and removed from FRESHRSS_SEEDS.opml.
+```
+
 ## OPML status
 
 ```text
 FRESHRSS_SEEDS.opml exists.
-It includes only verified seed entries.
+It includes only currently enabled seed entries.
 Enabled OPML seed entries are aligned with sources/channel_feed_sources.json:
 - rsshub_project_github_releases_atom
-- rsshub_youtube_route_smoke_seed
 ```
 
 ## Source-of-truth sync
@@ -52,17 +60,18 @@ The README no longer depends on tools/feed-stack/*.js helper scripts, because th
 ## Remaining runtime checks
 
 ```text
-1. Run RSSHub + FreshRSS locally or on the chosen server.
-2. Import FRESHRSS_SEEDS.opml into FreshRSS.
-3. Confirm FreshRSS can refresh both enabled feeds.
-4. Replace smoke-test route entries with real market-radar sources only after concrete accounts are chosen and route output is tested.
-5. Keep route templates disabled until verified concrete source entries exist.
+1. Pull latest main locally.
+2. Re-import FRESHRSS_SEEDS.opml into FreshRSS.
+3. Confirm the GitHub releases Atom seed refreshes successfully.
+4. Pick concrete market-radar accounts or official feeds.
+5. Enable each real feed only after route output or direct RSS output is tested.
 ```
 
 ## Completion boundary
 
 ```text
 Repo-side wiring is complete.
-Runtime validation is environment-dependent and remains pending until Docker services are actually started and FreshRSS refresh is observed.
-Smoke-test seed replacement remains pending until concrete market-radar accounts or official feeds are selected and tested.
+Docker and FreshRSS service startup is practically validated by the user screenshot.
+One RSSHub route smoke seed failed and was removed.
+Final market-radar feed replacement remains pending until concrete sources are selected and tested.
 ```
