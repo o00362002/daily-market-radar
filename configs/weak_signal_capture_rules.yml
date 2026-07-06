@@ -1,4 +1,4 @@
-version: 0.1
+version: 0.2
 last_updated: 2026-07-07
 status: active_draft
 purpose: >
@@ -10,12 +10,21 @@ signal_role:
   source_promotion: long_term_source_decision
   daily_brief: output_selection_and_evidence_boundary
 
+core_principle:
+  truth_score_and_influence_score_are_separate: true
+  low_truth_score_does_not_equal_zero_signal_value: true
+  false_or_unverified_items_can_still_affect_market_narratives: true
+  annotate_before_excluding: true
+
 capture_policy:
   capture_low_confidence_high_potential: true
   capture_social_first_signals: true
   capture_niche_project_signals: true
   capture_emerging_keyword_clusters: true
   capture_unverified_but_repeated_signals: true
+  capture_false_but_influential_narratives: true
+  capture_new_concepts_even_before_confirmation: true
+  capture_new_use_cases_even_from_weak_sources: true
   do_not_count_as_confirmed_news_by_default: true
 
 candidate_types:
@@ -29,6 +38,9 @@ candidate_types:
   - crypto_protocol_signal
   - ai_agent_workflow_case
   - policy_rumor_or_pre_signal
+  - false_but_influential_narrative
+  - unverified_new_concept
+  - unverified_new_application
 
 score_dimensions:
   novelty: 25
@@ -37,13 +49,32 @@ score_dimensions:
   source_proximity_to_original: 15
   actionability_for_future_tracking: 10
   taiwan_or_retail_relevance_bonus: 10
-  evidence_weakness_penalty: -20
+  influence_or_spread_score: 20
+  new_concept_bonus: 15
+  new_application_bonus: 15
+  evidence_weakness_penalty: -10
   hype_or_noise_penalty: -20
+
+truth_status_values:
+  confirmed: verified by official, data, primary actor, or multiple reliable sources
+  partially_supported: some supporting evidence but not enough for confirmed news
+  unverified: not verified yet but worth watching
+  disputed: credible disagreement exists
+  likely_false: likely wrong but may still influence narratives
+  false_but_influential: false or misleading, but spreading enough to affect attention, behavior, market, policy, or social discussion
+
+influence_status_values:
+  low_spread: isolated mention
+  repeated_mentions: seen multiple times or across different channels
+  narrative_forming: repeated framing is emerging
+  market_or_policy_attention: appears to affect prices, policy debate, company actions, or public behavior
+  mainstreamed: entered major media or official response cycle
 
 capture_thresholds:
   add_to_weak_signal_pool: 55
   watchlist_priority: 70
   candidate_for_brief_niche_slot: 80
+  keep_even_if_truth_low_when_influence_at_least: 75
 
 required_fields:
   - signal_id
@@ -54,6 +85,8 @@ required_fields:
   - source_url
   - source_name
   - source_confidence
+  - truth_status
+  - influence_status
   - evidence_status
   - domain_ids
   - novelty_reason
@@ -67,7 +100,8 @@ status_values:
   watching: retained for follow-up
   promoted_to_news: confirmed enough to cite as news
   promoted_to_source_candidate: source itself is worth tracking
-  rejected_noise: low value or hype
+  retained_as_influential_false_signal: false or disputed but influential enough to track
+  rejected_noise: low value, no spread, no novelty, or pure engagement bait
   expired: no follow-up signal within watch window
 
 watch_windows:
@@ -76,6 +110,7 @@ watch_windows:
   ai_agent_signal_days: 21
   retail_trend_signal_days: 30
   taiwan_policy_signal_days: 30
+  false_but_influential_signal_days: 14
 
 output_boundary:
   allowed:
@@ -83,10 +118,20 @@ output_boundary:
     - potential_pool_section
     - trend_watch_note
     - post_brief_review
+    - narrative_risk_note
   not_allowed:
     - confirmed_major_news_without_verification
     - taiwan_news_quota_without_qualified_taiwan_source
     - final_conclusion_without_supporting_news_or_followup_evidence
+    - presenting_unverified_or_false_item_as_fact
+
+annotation_required_when_low_truth:
+  - mark_truth_status
+  - mark_influence_status
+  - explain_why_retained
+  - state_what_would_confirm_it
+  - state_what_would_invalidate_it
+  - avoid_definitive_language
 
 audit_fields:
   - weak_signals_checked
@@ -94,4 +139,5 @@ audit_fields:
   - weak_signals_used_as_niche_candidates
   - weak_signals_promoted
   - weak_signals_rejected
+  - false_but_influential_signals_retained
   - weak_signal_gaps
