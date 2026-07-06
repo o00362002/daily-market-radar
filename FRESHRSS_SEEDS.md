@@ -5,6 +5,7 @@ Use the enabled entries in `sources/channel_feed_sources.json` as the first manu
 Current enabled entries:
 
 ```text
+openai_news_rss
 rsshub_project_github_releases_atom
 ```
 
@@ -14,7 +15,12 @@ Runtime test result:
 rsshub_youtube_route_smoke_seed returned an empty route during local RSSHub runtime testing and is disabled.
 ```
 
-The current seed is a starter validation feed, not the final market-radar source set.
+Current seed roles:
+
+```text
+openai_news_rss = first real market-radar official AI source.
+rsshub_project_github_releases_atom = feed-stack infrastructure monitoring source.
+```
 
 Next replacement rule:
 
