@@ -1,0 +1,203 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Define the RSSHub + FreshRSS + GDELT + Media Cloud collection and discovery stack
+  for daily-market-radar. This config turns channel-first sources into repeatable feed
+  checks, keeps discovery separate from evidence, and prevents weak models from
+  skipping social/channel-native sources.
+
+applies_to:
+  - AGENT_RADAR_REPORT
+  - AGENT_DAILY_PUSH_BRIEF
+  - AGENT_NEWS_SEARCH
+  - AGENT_SOCIAL_CHANNEL_READER
+  - AGENT_RADAR_CONFIG
+
+required_files:
+  - configs/source_routing_rules.yml
+  - SOURCE_LIBRARY_SPEC.md
+  - sources/key_media_library.yml
+  - sources/official_and_data_sources.yml
+  - sources/channel_feed_sources.json
+  - sources/discovery_providers.yml
+  - configs/query_recipes.yml
+  - memory/potential_pool.md
+
+stack_roles:
+  rsshub:
+    role: channel_to_feed_adapter
+    description: >
+      Converts channel-native or non-RSS public sources into RSS/Atom-like feeds when
+      a valid RSSHub route exists. RSSHub is a collection adapter, not an evidence upgrader.
+    evidence_effect: none
+    output: feed_items
+  freshrss:
+    role: self_hosted_feed_inbox
+    description: >
+      Receives RSSHub routes and direct RSS/Atom feeds, stores unread/new items,
+      supports categories, search, saved queries, OPML import/export, and API access.
+    evidence_effect: none
+    output: collected_feed_items
+  gdelt:
+    role: global_external_discovery
+    description: >
+      Broad global media discovery and multilingual gap scanning. Use to find events,
+      source clusters, angles, and missing regions. Do not treat GDELT alone as final evidence.
+    evidence_effect: discovery_only
+    output: discovery_candidates
+  media_cloud:
+    role: media_ecosystem_discovery
+    description: >
+      Source discovery and media-coverage analysis. Use to identify relevant media outlets,
+      coverage clusters, and under-covered topics. Do not treat Media Cloud alone as final evidence.
+    evidence_effect: discovery_only
+    output: discovery_candidates
+
+execution_order:
+  - id: load_stack_config
+    required: true
+    action: Load this file plus sources/channel_feed_sources.json and sources/discovery_providers.yml.
+  - id: route_domain
+    required: true
+    action: Map request to six core domains plus any domains/<id>/ packs.
+  - id: run_fixed_query_recipes
+    required: true
+    action: Run configs/query_recipes.yml and domain-pack query_recipes before free-form queries.
+  - id: collect_feed_items
+    required: true
+    action: Pull FreshRSS categories and direct RSS/RSSHub feeds for the domain and time window.
+  - id: run_channel_route_probe
+    required: true
+    action: For social-first/channel-first sources, probe enabled RSSHub routes first; if no route exists, mark route_missing or route_unverified.
+  - id: run_external_discovery
+    required: true_when_gap
+    action: Use GDELT and/or Media Cloud when fixed feeds and source library leave a material gap.
+  - id: classify_items
+    required: true
+    action: Classify each item as major_news, niche_candidate, indicator_update, duplicate_no_update, source_discovery, or rejected_low_quality.
+  - id: push_no_prefilter_candidates
+    required: true
+    action: Add new concepts/applications/combinations/trends to memory/potential_pool.md before output filtering.
+  - id: verify_evidence
+    required: true
+    action: Verify high-risk claims with official/data/company/regulator/trusted media sources.
+  - id: output_audit
+    required: true
+    action: Output feed/discovery coverage audit or record it in reports/backtests/.
+
+freshness_windows:
+  daily_push_brief:
+    preferred: 24h
+    fallback: 72h
+  full_daily_radar:
+    preferred: 24h
+    fallback: 7d
+  discovery_backfill:
+    preferred: 7d
+    fallback: 30d
+
+feed_categories:
+  ai_agents_workflow: AI_AGENT_WORKFLOW
+  crypto_rwa_agent_payments: CRYPTO_RWA_AGENT_PAYMENTS
+  retail_consumer_social_fashion: RETAIL_CONSUMER_SOCIAL_FASHION
+  global_markets_capital_geopolitics: GLOBAL_MARKETS_CAPITAL_GEOPOLITICS
+  technology_development: TECHNOLOGY_DEVELOPMENT
+  labor_consumption_taiwan: LABOR_CONSUMPTION_TAIWAN
+  source_discovery: SOURCE_DISCOVERY
+  potential_pool: POTENTIAL_POOL
+
+route_status_policy:
+  verified: may_run_automatically
+  needs_route_verification: may_be_listed_but_must_not_count_as_checked
+  broken: do_not_use_until_fixed
+  blocked_or_login_required: mark_access_gap
+  no_route: use_direct_public_url_or_generic_search_fallback_and_disclose_gap
+
+no_prefilter_capture:
+  required: true
+  capture_to: memory/potential_pool.md
+  capture_when_any:
+    - new_concept
+    - new_application
+    - new_scene
+    - new_business_model
+    - new_combination
+    - new_trend_seed
+    - source_cluster_found_by_gdelt_or_media_cloud
+    - social_or_channel_signal_with_public_trace
+  do_not_discard_because:
+    - too_small
+    - weak_evidence
+    - not_mainstream
+    - not_yet_relevant_to_existing_domains
+    - already_covered_by_mainstream_but_new_angle_exists
+
+external_discovery_policy:
+  gdelt:
+    use_when:
+      - region_or_language_gap
+      - event_cluster_needed
+      - broad_multilingual_discovery_needed
+      - sudden_topic_spike_check
+    not_for:
+      - final_claim_evidence_without_original_source
+      - private_or_paywalled_content_bypass
+  media_cloud:
+    use_when:
+      - source_discovery_needed
+      - media_ecosystem_map_needed
+      - undercovered_topic_check
+      - outlet_or_collection_discovery
+    not_for:
+      - final_claim_evidence_without_original_source
+      - replacing_official_or_company_sources
+
+coverage_audit_fields:
+  required:
+    - feed_stack_loaded
+    - freshrss_checked
+    - rsshub_routes_checked
+    - rsshub_route_gaps
+    - direct_rss_feeds_checked
+    - gdelt_used_when_gap
+    - media_cloud_used_when_gap
+    - potential_pool_capture_done
+    - official_or_data_crosscheck_done
+    - remaining_channel_gap
+  allowed_values:
+    feed_stack_loaded: [yes, partial, no]
+    freshrss_checked: [yes, partial, no]
+    rsshub_routes_checked: [yes, partial, no, not_required]
+    gdelt_used_when_gap: [yes, no, not_required]
+    media_cloud_used_when_gap: [yes, no, not_required]
+    potential_pool_capture_done: [yes, partial, no]
+    official_or_data_crosscheck_done: [yes, partial, no, not_required]
+    remaining_channel_gap: [none, partial, material]
+
+hard_boundaries:
+  - RSSHub and FreshRSS improve collection coverage, not evidence strength.
+  - GDELT and Media Cloud are discovery providers; original article, official source, company source, or trusted media must still be checked before factual certainty.
+  - Do not scrape private accounts, hidden login areas, captcha-protected pages, or restricted app-only content.
+  - If a social/channel route is missing, say route_missing; do not mark channel check complete.
+  - Generic web search fallback does not equal direct Instagram/Threads/LINE/YouTube/TikTok channel check.
+  - Feed stack failure must be disclosed as infrastructure gap, not silently replaced by synthesis.
+
+completion_gate_patch:
+  daily_push_brief:
+    must_include_or_internally_satisfy:
+      - feed_stack_loaded_or_gap_disclosed
+      - feed_or_channel_check_done_when_required
+      - external_discovery_done_when_material_gap
+      - potential_pool_capture_done_for_new_weak_signals
+  full_daily_radar:
+    must_include:
+      - Feed Stack Coverage Audit
+      - RSSHub/FreshRSS route status when channel-first sources are used
+      - GDELT/Media Cloud discovery note when 5+3 is not met
+      - potential_pool capture note
+  news_search_output:
+    must_include_or_disclose:
+      - feed_stack_relevance
+      - checked_feeds_or_channel_routes
+      - external_discovery_used_or_not_required
