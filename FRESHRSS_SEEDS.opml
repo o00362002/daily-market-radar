@@ -6,6 +6,7 @@
   <body>
     <outline text="RSS_INFRA" title="RSS_INFRA">
       <outline text="RSSHub GitHub releases Atom" title="RSSHub GitHub releases Atom" type="rss" xmlUrl="https://github.com/DIYgod/RSSHub/releases.atom"/>
+      <outline text="RSSHub YouTube route smoke seed" title="RSSHub YouTube route smoke seed" type="rss" xmlUrl="http://localhost:1200/youtube/channel/UCDwDMPOZfxVV0x_dz0eQ8KQ"/>
     </outline>
   </body>
 </opml>
