@@ -31,7 +31,7 @@ FreshRSS service is reachable and can display feed items.
 RSSHub service is reachable because it returned a structured route error page.
 rsshub_youtube_route_smoke_seed failed runtime validation with route is empty.
 The failed YouTube smoke seed is now disabled and removed from FRESHRSS_SEEDS.opml.
-OpenAI News RSS still needs local FreshRSS refresh confirmation after pulling latest main.
+OpenAI News RSS was confirmed by the user as present in local FreshRSS after OPML import.
 ```
 
 ## OPML status
@@ -63,12 +63,10 @@ The README no longer depends on tools/feed-stack/*.js helper scripts, because th
 ## Remaining runtime checks
 
 ```text
-1. Pull latest main locally.
-2. Re-import FRESHRSS_SEEDS.opml into FreshRSS.
-3. Confirm OpenAI News RSS refreshes successfully.
-4. Confirm the GitHub releases Atom seed refreshes successfully.
-5. Pick more concrete market-radar accounts or official feeds.
-6. Enable each new feed only after route output or direct RSS output is tested.
+1. Confirm the GitHub releases Atom seed refreshes successfully if not already checked.
+2. Add more concrete market-radar official feeds.
+3. Enable each new feed only after route output or direct RSS output is tested.
+4. Expand from AI official feeds to crypto/data, Taiwan official sources, and retail/brand sources.
 ```
 
 ## Completion boundary
@@ -77,6 +75,6 @@ The README no longer depends on tools/feed-stack/*.js helper scripts, because th
 Repo-side wiring is complete.
 Docker and FreshRSS service startup is practically validated by the user screenshot.
 One RSSHub route smoke seed failed and was removed.
-First real official AI market-radar feed seed has been added: openai_news_rss.
-FreshRSS refresh confirmation remains pending on the user's local runtime.
+First real official AI market-radar feed seed is active locally: openai_news_rss.
+Next milestone: add and validate more real market-radar source feeds.
 ```
