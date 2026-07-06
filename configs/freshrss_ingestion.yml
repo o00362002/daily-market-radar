@@ -1,0 +1,99 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Define how the daily-market-radar workflows should treat FreshRSS as an automated
+  feed inbox and candidate source pool. FreshRSS is not a manual reading task.
+
+source_role:
+  freshrss: feed_inbox_and_candidate_pool
+  rsshub: public_channel_to_feed_adapter
+  direct_rss: official_or_public_feed_source
+
+runtime:
+  base_url_env: FRESHRSS_BASE_URL
+  default_local_base_url: http://localhost:8080
+  user_env: FRESHRSS_DEFAULT_USER
+  api_password_env: FRESHRSS_API_PASSWORD
+  seed_opml_path: FRESHRSS_SEEDS.opml
+
+fetch_window:
+  default_lookback_hours: 48
+  scheduled_brief_lookback_hours: 24
+  manual_retry_lookback_hours: 72
+  timezone: Asia/Taipei
+
+candidate_policy:
+  freshrss_items_are_candidates: true
+  count_as_final_evidence_by_default: false
+  original_source_url_required: true
+  source_id_required: true
+  domain_mapping_required: true
+  today_new_information_required: true
+  dedupe_required: true
+  high_risk_claims_need_original_source_check: true
+
+status_mapping:
+  unread: preferred_new_candidate
+  read: lower_priority_candidate
+  starred: human_flagged_candidate
+  failed_feed: source_health_issue
+
+minimum_candidate_fields:
+  - candidate_id
+  - source_id
+  - source_name
+  - feed_category
+  - domain_ids
+  - title
+  - url
+  - original_url
+  - published_at
+  - fetched_at
+  - summary
+  - evidence_default
+  - today_new_information
+  - historical_duplication_status
+  - ingestion_status
+  - notes
+
+dedupe_keys:
+  primary:
+    - canonical_url
+  secondary:
+    - title
+    - source_id
+    - published_date
+
+routing_rules:
+  ai_official:
+    categories: [AI_OFFICIAL]
+    target_domains: [ai_agents_workflow, technology_development, global_markets_capital_geopolitics]
+  rss_infra:
+    categories: [RSS_INFRA]
+    target_domains: [technology_development]
+    output_rule: infrastructure_signal_only
+
+output_boundary:
+  allowed_uses:
+    - source_library_first_candidate_discovery
+    - daily_push_brief_source_scan
+    - full_daily_radar_source_scan
+    - source_health_monitoring
+  not_allowed_uses:
+    - replacing_original_source_verification
+    - filling_taiwan_news_quota_without_taiwan_source
+    - counting_infrastructure_feed_as_market_news
+    - treating_social_or_feed_summary_as_final_fact
+
+audit_fields:
+  - freshrss_checked
+  - freshrss_base_url
+  - freshrss_fetch_window_hours
+  - freshrss_feed_hits
+  - freshrss_feed_misses
+  - freshrss_failed_feeds
+  - freshrss_candidates_created
+  - freshrss_candidates_used_in_output
+  - freshrss_candidates_rejected
+  - remaining_feed_gap
