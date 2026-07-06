@@ -2,12 +2,13 @@
 
 本檔定義 `daily-market-radar` 的來源庫優先搜尋方法。
 
-這不是把關鍵字搜尋刪掉，而是把搜尋順序從「keyword-first」改成「source-first」。
+Active order:
 
 ```text
 Source Library first
-→ Topic / keyword query second
-→ External discovery third
+→ Query recipes second
+→ Verified feed stack third when relevant
+→ External discovery fourth when gaps remain
 → Coverage audit before output
 ```
 
@@ -17,62 +18,59 @@ Source Library first
 
 每日市場雷達與指定主題新聞搜尋，不應只依賴即時關鍵字搜尋。
 
-原因：
-
 ```text
-1. 關鍵字搜尋容易被熱門重複新聞、SEO 內容、低品質轉載與搜尋排序污染。
-2. 固定來源庫可以提高速度、穩定性、可追溯性與回測能力。
-3. 關鍵字仍然必要，但應用於來源庫內搜尋、事件補查、漏抓 retry、新來源發現。
-4. 每日報告要能回答：已檢查哪些來源、哪些命中、哪些沒有命中。
-5. 來源名稱不等於已檢查所有發布渠道；social-first / channel-first 來源必須做 channel-aware check。
+1. 固定來源庫提高速度、穩定性、可追溯性與回測能力。
+2. 固定 query recipes 讓弱模型照抄執行，不依賴模型自行發明查詢。
+3. Feed stack 讓公開 channel-first 來源變成可重複檢查的 feed inbox。
+4. External discovery providers 只負責發現缺口，不取代原始來源驗證。
+5. 每日報告要能回答：已檢查哪些來源、feeds、routes、providers，以及剩下哪些缺口。
 ```
 
 ---
 
-## 2. Source-first model
-
-### 2.1 Primary flow
+## 2. Primary flow
 
 ```text
 1. Read task route and topic scope.
-2. Load `configs/source_routing_rules.yml`.
-3. Load relevant files under `sources/`.
-4. Fetch priority sources by domain and region.
-5. Resolve each source's publishing channels and channel priority.
-6. Direct-check required channels for social-first / channel-first sources.
-7. Search / filter inside collected source items.
-8. Use keyword search only as fallback, enrichment, or discovery.
-9. Cross-check important claims with official / data / trusted media sources.
-10. Output coverage audit, including channel gaps when relevant.
+2. Load configs/source_routing_rules.yml.
+3. Load configs/query_recipes.yml and relevant domain-pack query_recipes.
+4. Load SOURCE_LIBRARY_SPEC.md and relevant sources/ files.
+5. Fetch priority sources by domain and region.
+6. If feed stack is relevant, load configs/feed_discovery_stack.yml and sources/channel_feed_sources.json.
+7. Check verified RSSHub routes, direct RSS feeds, and FreshRSS categories when available.
+8. Search/filter inside collected source and feed items.
+9. Use keyword search only as fallback, enrichment, or discovery.
+10. Use GDELT / Media Cloud only when source-library and feed-stack coverage still leave a material gap.
+11. Cross-check important claims with official / data / trusted media sources.
+12. Output source/feed/discovery coverage audit.
 ```
 
-### 2.2 Role of keyword search
+Keyword search remains active, but it is not the first move.
 
-Keyword search remains active, but it is no longer the first move.
-
-Allowed uses:
+Allowed:
 
 ```text
 - Search within collected source results.
+- Search within collected feed results.
 - Expand a confirmed event into related coverage.
 - Check if Taiwan has direct source-backed news.
-- Discover new sources outside the existing source library.
+- Discover new sources outside the current source library.
 - Retry a domain when fixed sources return insufficient coverage.
 ```
 
 Not allowed:
 
 ```text
-- Using a generic web search result list as if it were complete coverage.
+- Using generic search as complete coverage.
 - Replacing Taiwan news with generic Taiwan implications.
 - Filling source gaps with synthesis only.
-- Marking source library coverage as complete when only keywords were searched.
-- Treating a generic search for a source name as proof that its Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree channels were checked.
+- Marking source coverage complete when only keywords were searched.
+- Treating an unverified RSSHub route template as a checked feed.
 ```
 
 ---
 
-## 3. Source file roles
+## 3. Active source and feed files
 
 ```text
 sources/key_media_library.yml
@@ -82,35 +80,26 @@ sources/official_and_data_sources.yml
 = official, regulator, company, exchange, macro, market, chain, and research/data sources.
 
 configs/source_routing_rules.yml
-= execution rules for source-first routing, fallback, source health, channel-aware checks, and coverage audit.
+= execution rules for source-first routing, fallback, source health, and coverage audit.
+
+configs/feed_discovery_stack.yml
+= RSSHub + FreshRSS + GDELT + Media Cloud execution boundary and audit fields.
+
+sources/channel_feed_sources.json
+= direct RSS and RSSHub route registry. Only verified + enabled entries count as checked feeds.
+
+sources/discovery_providers.yml
+= GDELT and Media Cloud provider registry. Discovery only, not final evidence.
+
+FRESHRSS_SEEDS.opml
+= seed OPML file for verified starter feeds.
 ```
 
 ---
 
 ## 4. Source record schema
 
-Each source should use this shape when practical:
-
-```yaml
-- source_id: cna_tw
-  name: 中央社
-  region: Taiwan
-  languages: [zh-TW]
-  source_type: news_agency
-  domains: [taiwan, macro, market, retail, policy]
-  priority: high
-  evidence_default: high
-  fetch_method: rss_or_site_search
-  feed_url: check_required
-  homepage_url: https://www.cna.com.tw/
-  usage_policy: check_required
-  paywall: false
-  freshness_expectation: daily
-  health_status: unknown
-  notes: 台灣即時與官方性新聞基礎來源
-```
-
-### Required fields
+Required fields:
 
 ```text
 source_id
@@ -126,7 +115,7 @@ usage_policy
 freshness_expectation
 ```
 
-### Recommended fields
+Recommended fields:
 
 ```text
 feed_url
@@ -145,86 +134,17 @@ channel_check_required
 channel_access_status
 ```
 
-### 4.1 Channel-aware metadata
-
-凡來源可能把重要內容優先發布在社群、影音、Newsletter、LINE、Website / Linktree 或其他非傳統網站渠道，應補 channel metadata，而不是只記來源名稱。
-
-Baseline channels:
+Feed/channel rule:
 
 ```text
-- Instagram
-- X / Twitter
-- Facebook
-- Threads
-- YouTube
-- TikTok
-- LINE OA
-- Newsletter
-- Website / Linktree / bio link
-```
-
-Optional channels:
-
-```text
-- Discord
-- Telegram
-- Podcast
-- Forum / community board
-- App push / member message, when user-provided or officially accessible
-```
-
-```yaml
-- source_id: example_social_first_source
-  name: Example Source
-  publishing_channels:
-    - website_linktree
-    - instagram
-    - x
-    - facebook
-    - threads
-    - youtube
-    - tiktok
-    - line_oa
-    - newsletter
-  channel_priority:
-    - instagram
-    - x
-    - facebook
-    - threads
-    - youtube
-    - tiktok
-    - line_oa
-    - newsletter
-    - website_linktree
-    - generic_search_fallback
-  social_first: true
-  channel_check_required: true
-  channel_access_status: unknown
-```
-
-通用判斷規則：
-
-```text
-任何來源
-→ 讀取 publishing_channels
-→ 判斷 channel_priority
-→ 若 social_first = true 或 channel_check_required = true
-→ 強制 direct channel check
-→ 無法存取則標示 unchecked / inaccessible / partial
-→ generic search 不得冒充 direct channel check
-→ 重大 claim 回查官方 / 數據 / 高證據來源
-```
-
-此規則適用所有領域，不只 DA 交易者聯盟或台灣加密，包括但不限於：
-
-```text
-- 台灣加密媒體、KOL、交易社群、研究帳號
-- 品牌官方 Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree
-- 百貨、購物中心、商場官方社群與活動頁
-- AI 開發者社群、產品發布帳號、Discord / forum 公開訊號
-- 公司高層公開社群帳號
-- Podcast / YouTube-first 產業媒體
-- Newsletter-first 研究來源
+source metadata
+→ publishing_channels
+→ channel_priority
+→ if social_first = true or channel_check_required = true
+→ check verified RSSHub route / direct RSS / FreshRSS category when configured
+→ mark unchecked / inaccessible / partial when no usable feed route exists
+→ generic search must not be treated as direct channel check
+→ major claims still require official / data / trusted source verification
 ```
 
 ---
@@ -242,29 +162,32 @@ The active source library should support at least these six domains:
 6. Labor / consumption pressure / Taiwan local signals
 ```
 
-### 5.1 Domain extension（2026-07-06 起）
-
-六大核心領域之外的新領域，一律用 `domains/<domain_id>/` 領域包掛載：
+### 5.1 Domain extension
 
 ```text
-掃描時的領域清單 = 六大核心領域 + domains/ 下所有領域包
-新領域 = 複製 domains/_template/ 填完 domain_pack.json + sources.json
-完整性由 tools/brain/check-domain-packs.js 在 commit 關口驗證
-規格與執行規則見 domains/README.md
+Scan domain list = six core domains + domains/ packs.
+New domain = copy domains/_template/ and fill domain_pack.json + sources.json.
+Completeness is checked by tools/brain/check-domain-packs.js.
+Domain-pack query_recipes follow the same rule as configs/query_recipes.yml.
 ```
 
-領域包內的 `query_recipes` 與核心六領域的 `configs/query_recipes.yml` 同規則：
-固定配方照抄執行，弱模型不自行發明查詢。
-
-Each domain should include:
+### 5.2 Feed stack extension
 
 ```text
-- global media sources
-- Taiwan media sources when relevant
-- official / company / regulator sources
-- data or indicator sources when available
-- social / channel-first sources when relevant
-- fallback discovery method
+RSSHub = public channel-to-feed adapter.
+FreshRSS = self-hosted feed inbox / aggregator.
+GDELT = global multilingual discovery provider.
+Media Cloud = media ecosystem / source discovery provider.
+```
+
+Rules:
+
+```text
+1. RSSHub route must be verified in sources/channel_feed_sources.json before it counts as checked.
+2. Direct RSS feeds can be enabled for OPML only after feed URL and usage policy are verified.
+3. FreshRSS inbox items are collection traces, not final factual proof.
+4. GDELT / Media Cloud discoveries must be traced back to original sources before factual use.
+5. New concepts, applications, combinations, or trend seeds found through feeds/discovery go into memory/potential_pool.md before output filtering.
 ```
 
 ---
@@ -278,15 +201,15 @@ Preferred order:
 2. official RSS / Atom
 3. official newsroom / release page
 4. verified media RSS / section page
-5. trusted news database / aggregator
-6. required direct channel check for social-first / channel-first sources
-7. generic web search
-8. unverified social / community candidates
+5. verified RSSHub route or FreshRSS collected feed
+6. trusted news database / aggregator
+7. required direct channel check for channel-first sources
+8. GDELT / Media Cloud discovery when material gaps remain
+9. generic web search
+10. unverified community candidates
 ```
 
-Do not scrape aggressively when RSS, API, or section pages are available.
-
-Direct channel checks are discovery mechanisms, not automatic high evidence. A social post can discover a major event, but policy, law, market, financial, or investment claims still require stronger verification.
+Collection routes are discovery mechanisms, not automatic high evidence.
 
 ---
 
@@ -298,27 +221,26 @@ Every Daily Push Brief, Full Daily Radar, and News Search Output should include 
 source_library_checked: yes / partial / no
 priority_sources_checked: count or list
 keyword_fallback_used: yes / no
+feed_stack_loaded: yes / partial / no
+freshrss_checked: yes / partial / no / not_required
+rsshub_routes_checked: yes / partial / no / not_required
+rsshub_route_gaps: none / list
+direct_rss_feeds_checked: yes / partial / no / not_required
 external_discovery_used: yes / no
+gdelt_used_when_gap: yes / no / not_required
+media_cloud_used_when_gap: yes / no / not_required
 taiwan_sources_checked: yes / partial / no
 social_channels_checked_when_required: yes / partial / no / not_required
-baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
+potential_pool_capture_done: yes / partial / no
 channel_gaps: none / list
 source_gap: none / partial / material
 ```
 
-If the output is user-facing, disclose source gaps when material.
-
-若來源是 social-first / channel-first，但沒有直接檢查其必要渠道，必須明確標示：
-
-```text
-Social/channel-first source not checked directly; generic search may miss posts or channel-native content.
-```
+If the output is user-facing, disclose source/feed/discovery gaps when material.
 
 ---
 
 ## 8. Source health loop
-
-After repeated use, update source health through local evidence, not memory guesswork.
 
 Track:
 
@@ -333,6 +255,10 @@ usage_policy_notes
 channel_access_status
 channel_hit_rate
 channel_last_success_at
+feed_last_success_at
+rsshub_route_status
+freshrss_category_health
+discovery_provider_hit_rate
 ```
 
 Recommended storage:
@@ -351,4 +277,4 @@ This source library is a local child-repo execution module.
 
 It does not change the mother Brain architecture unless it introduces cross-repo governance, reusable source-routing policy, or a new universal memory rule.
 
-Projection files may reference this spec, but durable source-of-truth changes must be recorded through `CURRENT_DECISIONS.md` and dependency checks.
+Durable source-of-truth changes must be recorded through `CURRENT_DECISIONS.md` and dependency checks.
