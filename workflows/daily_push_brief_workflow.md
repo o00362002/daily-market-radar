@@ -16,9 +16,12 @@ Required shared rules:
 ```text
 configs/news_freshness_and_taiwan_news.yml
 configs/source_routing_rules.yml
+configs/freshrss_ingestion.yml
 SOURCE_LIBRARY_SPEC.md
 sources/key_media_library.yml
 sources/official_and_data_sources.yml
+sources/channel_feed_sources.json
+templates/feed_item_candidate_schema.md
 ```
 
 ---
@@ -89,13 +92,14 @@ Brief does not mean:
 - treating indicator status or conclusions as news
 - replaying old concepts without today's new information
 - skipping the fixed source library and only doing keyword search
+- treating FreshRSS items as final facts without original-source checks
 ```
 
 ---
 
 ## source-first rule
 
-Daily Push Brief must check the fixed source library before generic keyword fallback.
+Daily Push Brief must check the fixed source library and FreshRSS candidate inbox before generic keyword fallback.
 
 Minimum internal flow:
 
@@ -103,10 +107,32 @@ Minimum internal flow:
 1. Load configs/source_routing_rules.yml.
 2. Load sources/key_media_library.yml.
 3. Load sources/official_and_data_sources.yml.
-4. For each of six domains, check relevant global media, Taiwan media, and official/data sources.
-5. Use keyword search to filter, enrich, or retry gaps.
-6. Disclose material source gaps in Data Gaps and Retry Notes.
+4. Load configs/freshrss_ingestion.yml.
+5. Load sources/channel_feed_sources.json and FRESHRSS_SEEDS.opml when feed stack is available.
+6. For each of six domains, check relevant global media, Taiwan media, official/data sources, and FreshRSS feed candidates.
+7. Normalize FreshRSS items with templates/feed_item_candidate_schema.md.
+8. Use query recipes and keyword search to filter, enrich, or retry gaps.
+9. Disclose material source and feed gaps in Data Gaps and Retry Notes.
 ```
+
+FreshRSS is a candidate pool. It accelerates source discovery, but the original source URL, today_new_information, historical duplication status, and evidence trace still control whether an item enters the brief.
+
+---
+
+## FreshRSS ingestion rule
+
+When FreshRSS is reachable, Daily Push Brief must treat it as an automated input, not as a manual reading task.
+
+```text
+1. Check FreshRSS items within the configured lookback window.
+2. Map each item back to source_id in sources/channel_feed_sources.json.
+3. Create feed candidates using templates/feed_item_candidate_schema.md.
+4. Reject stale, duplicate, infrastructure-only, or unsupported items.
+5. Allow only verified official/direct feeds or verified route outputs to contribute to news candidates.
+6. Preserve feed health failures in memory/feed_ingestion_log.json or post-brief review.
+```
+
+Infrastructure-only feeds, such as RSSHub release monitoring, may appear in feed-stack health notes but must not count as market news.
 
 ---
 
@@ -117,14 +143,15 @@ Minimum internal flow:
 1. Hard gate status: concise mode / full gate not attempted or not passed
 2. Six-domain coverage matrix
 3. Source-library coverage audit, compact version
-4. Each core domain: exactly 3 major signals
-5. Each core domain: exactly 1 niche / potential candidate
-6. Each core domain: 1–2 Taiwan news items directly under the domain
-7. Retail focus block with five fixed checks
-8. New Information / History Duplicate Check
-9. Data gaps and retry notes
-10. Final indicator status and news synthesis panel
-11. Post-brief review inside the final panel
+4. FreshRSS / feed-stack coverage audit, compact version
+5. Each core domain: exactly 3 major signals
+6. Each core domain: exactly 1 niche / potential candidate
+7. Each core domain: 1–2 Taiwan news items directly under the domain
+8. Retail focus block with five fixed checks
+9. New Information / History Duplicate Check
+10. Data gaps and retry notes
+11. Final indicator status and news synthesis panel
+12. Post-brief review inside the final panel
 ```
 
 ---
@@ -154,6 +181,7 @@ Evidence trace: required for every news / signal item
 New information check: required for every news / signal item
 Historical duplication status: required for every news / signal item
 Source-library check status: yes / partial / no
+FreshRSS candidate check: yes / partial / no / not_available
 Keyword fallback: yes / no
 ```
 
@@ -180,6 +208,7 @@ If no qualified Taiwan news is found, write:
 ```text
 台灣新聞不足
 已查來源：
+已查 FreshRSS / feed candidates：
 已查關鍵字：
 下一步補查：
 ```
@@ -208,6 +237,7 @@ Do not count an item as a major signal if it is only:
 - model synthesis
 - generic Taiwan implication
 - historical replay without new data / action / policy / market reaction / Taiwan news
+- FreshRSS feed item without original-source check
 ```
 
 Repeated themes can count only if they contain:
@@ -234,6 +264,7 @@ The following must not be counted as news:
 - Taiwan implications
 - model inference
 - cross-domain summary
+- feed-stack health notes
 ```
 
 Every synthesis statement must point back to supporting news IDs.
@@ -275,6 +306,7 @@ Final Indicator Status and News Synthesis Panel must include:
 - today’s main themes
 - Taiwan news summary
 - source-library coverage note
+- FreshRSS / feed-stack coverage note
 - post-brief review
 ```
 
@@ -294,6 +326,7 @@ If using this workflow, write:
 新資訊密度狀態：通過 / 偏低 / 未通過。
 台灣新聞狀態：通過 / 不足 / 未完整。
 來源庫檢查狀態：通過 / partial / 未完成。
+FreshRSS / feed-stack 狀態：通過 / partial / 未完成 / not_available。
 ```
 
 Do not write the concise brief as a full formal report.
@@ -308,6 +341,8 @@ Concise mode can be marked `complete concise brief` only when:
 entry read complete or missing files disclosed
 source routing rules read
 source library read or missing files disclosed
+freshrss ingestion config read or FreshRSS unavailable disclosed
+feed candidates checked or not_available disclosed
 six domains covered
 all domains contain exactly 3 major signals
 all domains contain exactly 1 niche candidate
@@ -316,6 +351,7 @@ all news / signals contain evidence trace
 all news / signals contain today_new_information and historical_duplication_status
 retail focus block with five fixed checks is present
 source-library coverage audit is present or internally satisfied with material gaps disclosed
+FreshRSS / feed-stack coverage audit is present or material feed gaps disclosed
 data gaps are disclosed
 final indicator status and news synthesis panel is present
 indicator status and conclusions point back to news IDs
