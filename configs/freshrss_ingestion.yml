@@ -1,4 +1,4 @@
-version: 0.1
+version: 0.2
 last_updated: 2026-07-07
 status: active_draft
 purpose: >
@@ -15,7 +15,16 @@ runtime:
   default_local_base_url: http://localhost:8080
   user_env: FRESHRSS_DEFAULT_USER
   api_password_env: FRESHRSS_API_PASSWORD
+  api_path: /api/greader.php
+  api_type: google_reader_compatible
   seed_opml_path: FRESHRSS_SEEDS.opml
+  candidate_output_path: data/freshrss/feed_candidates_latest.json
+  pull_tool: tools/freshrss/greader_pull_candidates.py
+
+secret_policy:
+  never_commit_api_password: true
+  read_password_from_env_only: true
+  rotate_if_accidentally_committed: true
 
 fetch_window:
   default_lookback_hours: 48
