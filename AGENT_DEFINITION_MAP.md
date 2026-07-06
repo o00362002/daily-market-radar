@@ -14,17 +14,21 @@ Routes that perform search or radar collection must also apply:
 
 ```text
 configs/source_routing_rules.yml
+configs/feed_discovery_stack.yml
 SOURCE_LIBRARY_SPEC.md
 sources/key_media_library.yml
 sources/official_and_data_sources.yml
+sources/channel_feed_sources.json
+sources/discovery_providers.yml
 ```
 
-These rules prevent three recurring failures:
+These rules prevent four recurring failures:
 
 ```text
 1. Repeating historical concepts as if they are new daily news.
 2. Replacing Taiwan news with generic Taiwan implications.
 3. Starting from broad keyword search while skipping the fixed source library.
+4. Treating channel-native sources as checked when RSSHub/FreshRSS routes were not verified.
 ```
 
 ---
@@ -38,7 +42,7 @@ These rules prevent three recurring failures:
 | `AGENT_NEWS_SEARCH` | specific topic news search |
 | `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
 | `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
-| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, or watchlist change |
+| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, feed stack, RSSHub/FreshRSS, discovery provider, or watchlist change |
 | `AGENT_SOCIAL_CHANNEL_READER` | specialist sub-agent for public Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree and other channel-first source checks |
 
 ---
@@ -121,6 +125,8 @@ Podcast
 社群來源讀取
 channel-first source check
 social-first source check
+RSSHub route check
+FreshRSS feed check
 ```
 
 For daily reports, the primary route remains `AGENT_DAILY_PUSH_BRIEF` or `AGENT_RADAR_REPORT`; these routes may invoke `AGENT_SOCIAL_CHANNEL_READER` when channel-aware checks are required.
@@ -137,7 +143,9 @@ AGENT_RADAR_REPORT
 → templates/daily_report_template.md or templates/daily_report_template_v2.md
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
+→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
 → skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
 → agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 → DEPENDENCY_MAP.md / Full Daily Radar Gate
@@ -147,7 +155,9 @@ AGENT_DAILY_PUSH_BRIEF
 → templates/daily_push_brief_template.md
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
+→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
 → skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
 → agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 → DEPENDENCY_MAP.md / Daily Push Brief Gate
@@ -157,7 +167,9 @@ AGENT_NEWS_SEARCH
 → templates/news_search_content_template.md or templates/news_search_content_template_v2.md
 → configs/news_freshness_and_taiwan_news.yml
 → configs/source_routing_rules.yml
+→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
 → SOURCE_LIBRARY_SPEC.md + sources/
+→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
 → skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
 → agent_specs/social_channel_reader_agent.md when delegated channel checks are required
 
@@ -171,7 +183,9 @@ AGENT_SOCIAL_CHANNEL_READER
 → skill_specs/social_channel_reading_skill.md
 → tools/social_channel_reader_tool.md
 → configs/source_routing_rules.yml
+→ configs/feed_discovery_stack.yml when RSSHub/FreshRSS/GDELT/Media Cloud is used
 → SOURCE_LIBRARY_SPEC.md
+→ sources/channel_feed_sources.json when RSSHub/FreshRSS routes are used
 → claim-risk verification through skill_specs/claim_risk_check_skill.md when needed
 ```
 
@@ -193,6 +207,9 @@ For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, and `AGENT_NEWS_SEARCH`:
 - Fixed source library must be checked before generic keyword fallback.
 - Keyword search can filter, expand, retry, or discover sources, but must not replace source-library coverage.
 - Fixed query recipes (configs/query_recipes.yml; domains/<id>/sources.json query_recipes) run before free-form queries; free-form queries are supplements and must be disclosed in coverage audit.
+- When channel-first sources are relevant, load configs/feed_discovery_stack.yml and sources/channel_feed_sources.json before claiming channel coverage.
+- RSSHub/FreshRSS improve collection coverage, not evidence strength.
+- GDELT/Media Cloud discover sources and event clusters, but original sources still need verification.
 - Material source gaps must be disclosed in the output or final status panel.
 - Official / data sources should be used to verify high-risk claims and indicator changes.
 - If a source is social-first or channel-first, invoke `AGENT_SOCIAL_CHANNEL_READER` or explicitly mark channel check gaps.
@@ -233,9 +250,11 @@ For `AGENT_SOCIAL_CHANNEL_READER` and any route invoking it:
 - Baseline channel coverage: Instagram, X / Twitter, Facebook, Threads, YouTube, TikTok, LINE OA, Newsletter, Website / Linktree.
 - Optional channels: Discord, Telegram, Podcast, Forum / community board, App push / member message when user-provided or officially accessible.
 - Generic search does not count as direct social-channel check.
+- RSSHub route templates do not count as checked channels until route_status = verified and enabled_for_opml = true in sources/channel_feed_sources.json.
+- FreshRSS unread/feed inbox is collection evidence only; it does not prove factual claims.
 - Public social posts are discovery signals, usually medium_low evidence.
 - Policy, law, finance, market, and investment claims must be verified with official / data / trusted-media sources.
-- No private-account scraping, hidden-login scraping, captcha bypass, or unauthorized collection.
+- Restricted/private access is outside this repo's allowed collection scope.
 ```
 
 Required audit fields:
@@ -243,8 +262,10 @@ Required audit fields:
 ```text
 social_channels_checked_when_required: yes / partial / no / not_required
 baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
+rsshub_routes_checked: yes / partial / no / not_required
+freshrss_checked: yes / partial / no / not_required
 channel_gaps: none / list
-social_tool_mode_used: official_api / public_url / screenshot / third_party_actor / generic_search_fallback / none
+social_tool_mode_used: official_api / public_url / RSSHub_verified_route / FreshRSS_feed_inbox / screenshot / generic_search_fallback / none
 policy_or_access_blockers: none / list
 ```
 
