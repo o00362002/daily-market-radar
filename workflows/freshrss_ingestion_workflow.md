@@ -18,6 +18,7 @@ sources/channel_feed_sources.json
 FRESHRSS_SEEDS.opml
 templates/feed_item_candidate_schema.md
 memory/feed_ingestion_log.json
+tools/freshrss/greader_pull_candidates.py
 ```
 
 ---
@@ -28,6 +29,7 @@ FreshRSS ingestion runs after fixed source library loading and before keyword fa
 
 ```text
 source library + official/data sources
+→ FreshRSS Google Reader API pull
 → FreshRSS feed inbox candidates
 → query recipes and targeted keyword retry
 → external discovery providers when gaps remain
@@ -54,13 +56,39 @@ source health check
 
 ---
 
+## API pull step
+
+When FreshRSS API credentials are available locally, run:
+
+```bash
+python3 tools/freshrss/greader_pull_candidates.py
+```
+
+The tool reads these environment variables only:
+
+```text
+FRESHRSS_BASE_URL
+FRESHRSS_DEFAULT_USER
+FRESHRSS_API_PASSWORD
+```
+
+It writes:
+
+```text
+data/freshrss/feed_candidates_latest.json
+```
+
+Do not commit API passwords or local feed candidate output unless explicitly needed for a test fixture.
+
+---
+
 ## Minimum ingestion loop
 
 ```text
 1. Load configs/freshrss_ingestion.yml.
 2. Load sources/channel_feed_sources.json.
 3. Load FRESHRSS_SEEDS.opml or FreshRSS feed list.
-4. Fetch new FreshRSS items in the configured lookback window.
+4. Pull new FreshRSS items through the Google Reader compatible API when available.
 5. Normalize each item using templates/feed_item_candidate_schema.md.
 6. Map source_id to domain_ids and feed_category.
 7. Dedupe by canonical URL, then title + source_id + published date.
