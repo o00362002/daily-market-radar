@@ -109,6 +109,18 @@ def strip_html(value: str) -> str:
     return value
 
 
+def extract_registry_items(data: Any) -> list[dict[str, Any]]:
+    if isinstance(data, list):
+        return [item for item in data if isinstance(item, dict)]
+    if not isinstance(data, dict):
+        return []
+    for key in ("feeds", "sources", "items", "entries"):
+        value = data.get(key)
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, dict)]
+    return []
+
+
 def load_source_registry() -> dict[str, dict[str, dict[str, Any]]]:
     # Lightweight local mapping. The canonical registry remains sources/channel_feed_sources.json.
     path = Path("sources/channel_feed_sources.json")
@@ -117,8 +129,8 @@ def load_source_registry() -> dict[str, dict[str, dict[str, Any]]]:
         return registry
 
     data = json.loads(path.read_text(encoding="utf-8"))
-    sources = data.get("sources", []) if isinstance(data, dict) else []
-    for item in sources:
+    items = extract_registry_items(data)
+    for item in items:
         for key in ("feed_url", "xmlUrl", "rsshub_url"):
             feed_url = item.get(key)
             if feed_url:
@@ -273,7 +285,7 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "feed_candidates_latest.json"
     payload = {
-        "version": "0.3",
+        "version": "0.4",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source": "FreshRSS Google Reader compatible API",
         "item_count": len(candidates),
