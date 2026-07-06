@@ -3,6 +3,9 @@
 ## Completed
 
 ```text
+CURRENT_DECISIONS.md
+DEPENDENCY_MAP.md
+SOURCE_LIBRARY_SPEC.md
 AGENT_DEFINITION_MAP.md
 sources/channel_feed_sources.json
 FRESHRSS_SEEDS.md
@@ -24,44 +27,26 @@ GitHub releases candidate: previous /github/repos/DIYgod/RSSHub/releases was not
 ```text
 FRESHRSS_SEEDS.opml exists.
 It includes only verified seed entries.
-The enabled entries in sources/channel_feed_sources.json match the OPML seed intent.
+Enabled OPML seed entries are aligned with sources/channel_feed_sources.json:
+- rsshub_project_github_releases_atom
+- rsshub_youtube_route_smoke_seed
 ```
 
-## Blocked by connector/platform safety filter
-
-The following intended source-of-truth updates were attempted but blocked by the write safety filter:
+## Source-of-truth sync
 
 ```text
-SOURCE_LIBRARY_SPEC.md
-DEPENDENCY_MAP.md
+CURRENT_DECISIONS.md records the 2026-07-07 feed stack decision.
+DEPENDENCY_MAP.md includes Shared Feed Stack Gate and Feed stack status fields.
+SOURCE_LIBRARY_SPEC.md includes feed stack layer, provider roles, fetch priority, and coverage audit fields.
+AGENT_DEFINITION_MAP.md includes feed stack dependencies and route/audit boundaries.
 ```
 
-These updates were not claimed complete.
-
-## Manual patch still required
-
-Add feed stack references to:
+## Remaining manual checks
 
 ```text
-SOURCE_LIBRARY_SPEC.md
-DEPENDENCY_MAP.md
-CURRENT_DECISIONS.md
-```
-
-Minimum required manual additions:
-
-```text
-configs/feed_discovery_stack.yml
-sources/channel_feed_sources.json
-sources/discovery_providers.yml
-FRESHRSS_SEEDS.opml
-```
-
-Gate rule to add:
-
-```text
-RSSHub / FreshRSS are collection coverage only.
-GDELT / Media Cloud are discovery only.
-Original source verification is still required before factual use.
-Only route_status = verified and enabled_for_opml = true may be imported into OPML.
+1. Run RSSHub + FreshRSS locally.
+2. Import FRESHRSS_SEEDS.opml into FreshRSS.
+3. Confirm FreshRSS can refresh both enabled feeds.
+4. Replace smoke-test route entries with real market-radar sources only after concrete accounts are chosen and route output is tested.
+5. Keep route templates disabled until verified concrete source entries exist.
 ```
