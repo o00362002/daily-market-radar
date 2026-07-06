@@ -1,0 +1,97 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Preserve early, niche, non-mainstream, and potential trend signals without treating them
+  as confirmed news. This prevents the radar from only selecting high-confidence mainstream sources.
+
+signal_role:
+  weak_signal_pool: trend_candidate_memory
+  source_promotion: long_term_source_decision
+  daily_brief: output_selection_and_evidence_boundary
+
+capture_policy:
+  capture_low_confidence_high_potential: true
+  capture_social_first_signals: true
+  capture_niche_project_signals: true
+  capture_emerging_keyword_clusters: true
+  capture_unverified_but_repeated_signals: true
+  do_not_count_as_confirmed_news_by_default: true
+
+candidate_types:
+  - emerging_trend
+  - niche_project
+  - social_first_signal
+  - creator_or_builder_signal
+  - early_market_structure_change
+  - repeated_keyword_cluster
+  - local_retail_observation
+  - crypto_protocol_signal
+  - ai_agent_workflow_case
+  - policy_rumor_or_pre_signal
+
+score_dimensions:
+  novelty: 25
+  relevance_to_core_domains: 25
+  repetition_across_sources: 15
+  source_proximity_to_original: 15
+  actionability_for_future_tracking: 10
+  taiwan_or_retail_relevance_bonus: 10
+  evidence_weakness_penalty: -20
+  hype_or_noise_penalty: -20
+
+capture_thresholds:
+  add_to_weak_signal_pool: 55
+  watchlist_priority: 70
+  candidate_for_brief_niche_slot: 80
+
+required_fields:
+  - signal_id
+  - captured_at
+  - signal_type
+  - title
+  - summary
+  - source_url
+  - source_name
+  - source_confidence
+  - evidence_status
+  - domain_ids
+  - novelty_reason
+  - why_it_might_matter
+  - what_would_confirm_it
+  - what_would_invalidate_it
+  - next_check_query
+  - status
+
+status_values:
+  watching: retained for follow-up
+  promoted_to_news: confirmed enough to cite as news
+  promoted_to_source_candidate: source itself is worth tracking
+  rejected_noise: low value or hype
+  expired: no follow-up signal within watch window
+
+watch_windows:
+  default_days: 14
+  crypto_fast_signal_days: 7
+  ai_agent_signal_days: 21
+  retail_trend_signal_days: 30
+  taiwan_policy_signal_days: 30
+
+output_boundary:
+  allowed:
+    - niche_candidate_slot
+    - potential_pool_section
+    - trend_watch_note
+    - post_brief_review
+  not_allowed:
+    - confirmed_major_news_without_verification
+    - taiwan_news_quota_without_qualified_taiwan_source
+    - final_conclusion_without_supporting_news_or_followup_evidence
+
+audit_fields:
+  - weak_signals_checked
+  - weak_signals_captured
+  - weak_signals_used_as_niche_candidates
+  - weak_signals_promoted
+  - weak_signals_rejected
+  - weak_signal_gaps
