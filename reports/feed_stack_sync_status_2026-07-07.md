@@ -8,6 +8,7 @@ DEPENDENCY_MAP.md
 SOURCE_LIBRARY_SPEC.md
 AGENT_DEFINITION_MAP.md
 sources/channel_feed_sources.json
+infra/rss-stack/README.md
 FRESHRSS_SEEDS.md
 FRESHRSS_SEEDS.opml
 ```
@@ -41,12 +42,27 @@ SOURCE_LIBRARY_SPEC.md includes feed stack layer, provider roles, fetch priority
 AGENT_DEFINITION_MAP.md includes feed stack dependencies and route/audit boundaries.
 ```
 
-## Remaining manual checks
+## Documentation sync
 
 ```text
-1. Run RSSHub + FreshRSS locally.
+infra/rss-stack/README.md now points to the existing FRESHRSS_SEEDS.opml workflow.
+The README no longer depends on tools/feed-stack/*.js helper scripts, because those helper scripts were not added.
+```
+
+## Remaining runtime checks
+
+```text
+1. Run RSSHub + FreshRSS locally or on the chosen server.
 2. Import FRESHRSS_SEEDS.opml into FreshRSS.
 3. Confirm FreshRSS can refresh both enabled feeds.
 4. Replace smoke-test route entries with real market-radar sources only after concrete accounts are chosen and route output is tested.
 5. Keep route templates disabled until verified concrete source entries exist.
+```
+
+## Completion boundary
+
+```text
+Repo-side wiring is complete.
+Runtime validation is environment-dependent and remains pending until Docker services are actually started and FreshRSS refresh is observed.
+Smoke-test seed replacement remains pending until concrete market-radar accounts or official feeds are selected and tested.
 ```
