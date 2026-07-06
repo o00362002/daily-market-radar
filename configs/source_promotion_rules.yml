@@ -1,0 +1,96 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Define how daily-market-radar promotes discovered sources into long-term tracked sources.
+  The system may automatically discover and score sources, but only high-confidence sources
+  should be promoted without human review.
+
+source_promotion_model:
+  discover: automatic
+  score: automatic
+  candidate_registry: automatic
+  promote_high_confidence_official_feeds: allowed
+  promote_social_or_unstable_routes: review_required
+
+score_thresholds:
+  auto_promote: 85
+  review_queue: 60
+  discovery_log_only: 0
+
+scoring_weights:
+  official_source: 25
+  verified_feed_or_api: 20
+  repeated_hits_7d: 15
+  repeated_hits_30d: 10
+  six_domain_relevance: 15
+  original_information_density: 10
+  taiwan_relevance_bonus: 10
+  feed_stability: 10
+  duplicate_or_syndicated_penalty: -15
+  unstable_social_route_penalty: -20
+  unknown_identity_penalty: -25
+
+promotion_rules:
+  official_direct_rss:
+    auto_discover: true
+    auto_score: true
+    auto_promote_if_score_at_least: 85
+    required_checks:
+      - source_identity_verified
+      - feed_url_responds
+      - domain_mapping_confirmed
+      - not_duplicate_source
+  official_newsroom_without_feed:
+    auto_discover: true
+    auto_score: true
+    auto_promote_if_score_at_least: null
+    action: keep_as_candidate_until_feed_or_fetch_method_verified
+  rsshub_public_channel:
+    auto_discover: true
+    auto_score: true
+    auto_promote_if_score_at_least: null
+    action: review_required_before_enable_opml
+  media_or_blog_source:
+    auto_discover: true
+    auto_score: true
+    auto_promote_if_score_at_least: null
+    action: review_required_before_long_term_tracking
+  government_or_regulator_feed:
+    auto_discover: true
+    auto_score: true
+    auto_promote_if_score_at_least: 80
+    required_checks:
+      - official_domain_verified
+      - feed_or_api_responds
+      - source_frequency_reasonable
+
+candidate_lifecycle:
+  discovered: source was found by query, GDELT, Media Cloud, FreshRSS item, or manual seed
+  scored: source has a computed or manually assigned score
+  review_queue: source is promising but needs validation
+  promoted: source is in sources/channel_feed_sources.json or official source library
+  enabled_for_opml: feed is in FRESHRSS_SEEDS.opml
+  rejected: source should not be tracked long-term
+
+write_targets:
+  candidate_registry: memory/source_candidate_registry.json
+  promoted_feed_registry: sources/channel_feed_sources.json
+  opml_seed_file: FRESHRSS_SEEDS.opml
+
+hard_blocks:
+  - unknown_identity_social_account
+  - login_required_or_private_content
+  - unstable_scrape_without_source_value
+  - duplicate_feed_same_publisher_same_scope
+  - no_original_information
+  - spam_or_low_quality_aggregator
+
+audit_fields:
+  - source_candidates_checked
+  - source_candidates_created
+  - source_candidates_promoted
+  - source_candidates_rejected
+  - auto_promotions
+  - review_required_candidates
+  - promotion_gaps
