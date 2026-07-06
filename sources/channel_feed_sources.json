@@ -1,5 +1,5 @@
 {
-  "version": "0.4",
+  "version": "0.5",
   "last_updated": "2026-07-07",
   "status": "active_draft",
   "purpose": "Registry for direct RSS feeds and RSSHub route candidates used by the feed discovery stack. Only verified concrete routes or direct feeds may be enabled for OPML import.",
@@ -17,8 +17,9 @@
   },
   "verification_summary": {
     "verified_on": "2026-07-07",
-    "method": "upstream RSSHub route-code inspection plus local runtime smoke test where available",
+    "method": "upstream RSSHub route-code inspection, local runtime smoke test where available, and official-site feed discovery",
     "notes": [
+      "OpenAI official homepage exposes an RSS link for openai.com/news/rss.xml and is enabled as the first real market-radar feed seed.",
       "YouTube /youtube/channel/:id route exists upstream, but the initial smoke-test channel returned an empty route at runtime and is disabled.",
       "YouTube official channel RSS should be preferred when channel_id is known and the feed returns items.",
       "Telegram /telegram/channel/:username route exists upstream and can be used for public channel previews; no concrete market-radar Telegram feed is enabled yet.",
@@ -28,6 +29,21 @@
     ]
   },
   "feeds": [
+    {
+      "source_id": "openai_news_rss",
+      "name": "OpenAI News RSS",
+      "domain_ids": ["ai_agents_workflow", "technology_development", "global_markets_capital_geopolitics"],
+      "region": "global",
+      "languages": ["en"],
+      "feed_kind": "direct_rss",
+      "feed_url": "https://openai.com/news/rss.xml",
+      "route_status": "verified_official_link",
+      "enabled_for_opml": true,
+      "opml_category": "daily-market-radar/AI_OFFICIAL",
+      "evidence_default": "high_when_official",
+      "use_for": ["openai_model_news", "openai_product_news", "agent_workflow_news", "ai_policy_and_company_updates"],
+      "verification_rule": "official OpenAI homepage exposes RSS link; still confirm FreshRSS refresh after import"
+    },
     {
       "source_id": "rsshub_project_github_releases_atom",
       "name": "RSSHub GitHub releases Atom",
