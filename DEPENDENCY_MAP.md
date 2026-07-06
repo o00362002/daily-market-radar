@@ -107,7 +107,7 @@ Core requirements:
 2. Query recipes before free-form queries.
 3. Official/data cross-check for important claims when available.
 4. Material source gaps disclosed.
-5. Source health recorded through memory/source_health_log.json, memory/topic_coverage_log.json, or reports/backtests/ when implemented.
+5. Source health recorded through memory/source_health_log.json, memory/topic_coverage_log.json (path-ok；規劃中尚未建立), or reports/backtests/ when implemented.
 ```
 
 Audit fields:

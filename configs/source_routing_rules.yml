@@ -104,9 +104,9 @@ source_health_rules:
     - false_positive_notes
     - usage_policy_notes
     - social_channel_access_status
-  storage_candidates:
-    - memory/source_health_log.json
-    - memory/topic_coverage_log.json
+  storage_candidates:  # path-ok；規劃中尚未建立
+    - memory/source_health_log.json  # path-ok
+    - memory/topic_coverage_log.json  # path-ok
     - reports/backtests/
   escalation:
     demote_source_when:

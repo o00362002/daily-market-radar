@@ -49,7 +49,7 @@ CURRENT_DECISIONS.md
 ADOPTION_LEVELS.md
 CONTEXT_ROUTING.md
 DEPENDENCY_MAP.md
-docs/MAINTENANCE_GUIDE.md
+docs/MAINTENANCE_GUIDE.md（母腦舊制清單殘留，本 repo 已掛 brain-core，是否仍適用待審——見 spawn_task）
 ```
 
 不存在的檔案不用硬補，除非該 Level 需要。若判定不受影響，記錄：

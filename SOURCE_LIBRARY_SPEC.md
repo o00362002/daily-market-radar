@@ -261,7 +261,7 @@ freshrss_category_health
 discovery_provider_hit_rate
 ```
 
-Recommended storage:
+Recommended storage（path-ok；規劃中尚未建立，需要時再建）:
 
 ```text
 memory/source_health_log.json

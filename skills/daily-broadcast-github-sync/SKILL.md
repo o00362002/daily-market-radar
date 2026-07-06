@@ -82,7 +82,7 @@ When the user explicitly asks to整理進 GitHub after discussion, save a post-b
 
 ## File organization recommendation
 
-Use this structure unless the repo already defines a different one:
+Use this structure (path-ok；視需要才建立) unless the repo already defines a different one:
 
 ```text
 reports/YYYY/YYYY-MM-DD.md
