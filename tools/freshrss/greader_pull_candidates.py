@@ -67,6 +67,13 @@ def normalize_base_url(base_url: str) -> str:
     return base_url.rstrip("/") + "/"
 
 
+def normalize_name(value: str | None) -> str:
+    value = value or ""
+    value = value.lower().strip()
+    value = re.sub(r"\s+", " ", value)
+    return value
+
+
 def greader_url(base_url: str, path: str) -> str:
     return urljoin(normalize_base_url(base_url), "api/greader.php/" + path.lstrip("/"))
 
@@ -102,35 +109,56 @@ def strip_html(value: str) -> str:
     return value
 
 
-def load_source_registry() -> dict[str, dict[str, Any]]:
+def load_source_registry() -> dict[str, dict[str, dict[str, Any]]]:
     # Lightweight local mapping. The canonical registry remains sources/channel_feed_sources.json.
     path = Path("sources/channel_feed_sources.json")
+    registry = {"by_url": {}, "by_name": {}}
     if not path.exists():
-        return {}
+        return registry
+
     data = json.loads(path.read_text(encoding="utf-8"))
     sources = data.get("sources", []) if isinstance(data, dict) else []
-    registry: dict[str, dict[str, Any]] = {}
     for item in sources:
         for key in ("feed_url", "xmlUrl", "rsshub_url"):
             feed_url = item.get(key)
             if feed_url:
-                registry[feed_url] = item
-                registry[feed_url.rstrip("/")] = item
+                registry["by_url"][feed_url] = item
+                registry["by_url"][feed_url.rstrip("/")] = item
+        for key in ("name", "source_id"):
+            name = item.get(key)
+            if name:
+                registry["by_name"][normalize_name(name)] = item
     return registry
 
 
-def feed_id_to_url(feed_id: str) -> str:
-    # Google Reader style IDs often look like feed/https://example.com/feed.xml
+def feed_id_to_url(feed_id: str, subscription: dict[str, Any]) -> str:
+    # FreshRSS may return internal stream IDs like feed/4. Prefer subscription URL fields when available.
+    for key in ("url", "htmlUrl", "feedUrl", "xmlUrl"):
+        value = subscription.get(key)
+        if isinstance(value, str) and value.startswith(("http://", "https://")):
+            return value
     return feed_id.removeprefix("feed/")
 
 
-def lookup_source_meta(registry: dict[str, dict[str, Any]], feed_url: str) -> tuple[dict[str, Any], str]:
-    if feed_url in registry:
-        return registry[feed_url], "mapped_by_exact_feed_url"
+def lookup_source_meta(
+    registry: dict[str, dict[str, dict[str, Any]]],
+    feed_url: str,
+    source_name: str | None,
+) -> tuple[dict[str, Any], str]:
+    by_url = registry.get("by_url", {})
+    by_name = registry.get("by_name", {})
+
+    if feed_url in by_url:
+        return by_url[feed_url], "mapped_by_exact_feed_url"
     trimmed = feed_url.rstrip("/")
-    if trimmed in registry:
-        return registry[trimmed], "mapped_by_trimmed_feed_url"
-    return {}, "unmapped_feed_url"
+    if trimmed in by_url:
+        return by_url[trimmed], "mapped_by_trimmed_feed_url"
+
+    normalized_source_name = normalize_name(source_name)
+    if normalized_source_name in by_name:
+        return by_name[normalized_source_name], "mapped_by_source_name"
+
+    return {}, "unmapped_feed_url_and_name"
 
 
 def make_candidate_id(source_id: str | None, title: str, published_at: str | None, url: str) -> str:
@@ -156,10 +184,10 @@ def normalize_items(items: list[dict[str, Any]], subscriptions: dict[str, dict[s
 
         origin = item.get("origin") or {}
         stream_id = origin.get("streamId") or ""
-        feed_url = feed_id_to_url(stream_id)
         sub = subscriptions.get(stream_id, {})
+        feed_url = feed_id_to_url(stream_id, sub)
         source_name = origin.get("title") or sub.get("title")
-        source_meta, mapping_status = lookup_source_meta(registry, feed_url)
+        source_meta, mapping_status = lookup_source_meta(registry, feed_url, source_name)
         source_id = source_meta.get("source_id")
         domain_ids = source_meta.get("domain_ids") or source_meta.get("domains") or []
         feed_category = source_meta.get("opml_category") or None
@@ -245,7 +273,7 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "feed_candidates_latest.json"
     payload = {
-        "version": "0.2",
+        "version": "0.3",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source": "FreshRSS Google Reader compatible API",
         "item_count": len(candidates),
