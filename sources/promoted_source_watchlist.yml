@@ -1,0 +1,95 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Track promoted long-term sources before every source has a verified feed/API/RSSHub route.
+  This bridges source promotion and OPML enablement.
+
+promotion_boundary:
+  source_promoted_to_watchlist: source should be checked regularly by source library or query workflow
+  enabled_for_opml: source has verified RSS/Atom/API/RSSHub route and can be imported into FreshRSS
+  weak_signal_cluster: theme should be watched, but not treated as a single trusted source
+
+promoted_sources:
+  ai_official:
+    - source_id: anthropic_news
+      name: Anthropic News
+      source_url: https://www.anthropic.com/news
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [ai_agents_workflow, technology_development, global_markets_capital_geopolitics]
+    - source_id: google_deepmind_blog
+      name: Google DeepMind Blog
+      source_url: https://deepmind.google/discover/blog/
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [ai_agents_workflow, technology_development]
+    - source_id: nvidia_blog
+      name: NVIDIA Blog
+      source_url: https://blogs.nvidia.com/
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [technology_development, ai_agents_workflow, global_markets_capital_geopolitics]
+
+  crypto_data:
+    - source_id: defillama
+      name: DeFiLlama
+      source_url: https://defillama.com/
+      promotion_status: promoted_to_official_data_source_library
+      opml_status: not_applicable_data_source
+      domains: [crypto_rwa_agent_payments]
+    - source_id: coingecko
+      name: CoinGecko
+      source_url: https://www.coingecko.com/
+      promotion_status: promoted_to_official_data_source_library
+      opml_status: not_applicable_data_source
+      domains: [crypto_rwa_agent_payments, global_markets_capital_geopolitics]
+
+  taiwan_official:
+    - source_id: fsc_tw
+      name: 金融監督管理委員會
+      source_url: https://www.fsc.gov.tw/
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [global_markets_capital_geopolitics, labor_consumption_taiwan, crypto_rwa_agent_payments]
+    - source_id: taiwan_cbc
+      name: 中央銀行
+      source_url: https://www.cbc.gov.tw/
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [global_markets_capital_geopolitics, labor_consumption_taiwan]
+    - source_id: dgbas_tw
+      name: 行政院主計總處
+      source_url: https://www.dgbas.gov.tw/
+      promotion_status: promoted_to_official_source_library
+      opml_status: not_enabled_feed_not_verified
+      domains: [labor_consumption_taiwan, global_markets_capital_geopolitics]
+
+  retail_official:
+    - source_id: fast_retailing_ir
+      name: Fast Retailing IR / News
+      source_url: https://www.fastretailing.com/eng/ir/
+      promotion_status: promoted_to_watchlist_addendum
+      opml_status: not_enabled_feed_not_verified
+      domains: [retail_consumer_social_fashion, global_markets_capital_geopolitics]
+
+watching_clusters:
+  retail:
+    - source_id: taiwan_department_store_news_cluster
+      name: Taiwan Department Store / Mall News Cluster
+      status: kept_as_discovery_cluster
+      weak_signal_pool_status: eligible_for_local_retail_trend_signals
+  weak_signal:
+    - source_id: agent_payments_social_cluster
+      name: Agent Payments Social / Builder Signal Cluster
+      status: kept_as_weak_signal_cluster
+      weak_signal_pool_status: active
+    - source_id: ai_agent_enterprise_use_cases
+      name: AI Agent Enterprise Use Case Cluster
+      status: kept_as_weak_signal_cluster
+      weak_signal_pool_status: active
+
+next_actions:
+  - verify feed/API/RSSHub path for promoted official sources
+  - only then enable sources in FRESHRSS_SEEDS.opml
+  - keep weak signal clusters in memory/potential_pool.md rather than OPML
