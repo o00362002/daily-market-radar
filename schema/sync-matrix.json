@@ -1,0 +1,14 @@
+{
+ "schema": "brain-sync-matrix/v1",
+ "version": "1",
+ "_note": "daily-market-radar 連動矩陣（機器版）。消費者：tools/brain/check-sync-matrix.js（commit 提醒，pre-commit hook 觸發）。保持短。",
+ "byFile": {
+  "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md"],
+  "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md"],
+  "AGENT_DEFINITION_MAP.md": ["CONTEXT_ROUTING.md"]
+ },
+ "byPrefix": {
+  "workflows/": ["CONTEXT_ROUTING.md"],
+  "rules/": ["AGENTS.md", "README.md"]
+ }
+}

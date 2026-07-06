@@ -137,6 +137,16 @@ if [ "${SKIP_PROCESS_GATE:-}" != "1" ] && git rev-parse --is-inside-work-tree >/
   fi
 fi
 
+# 連動同步提醒＋文件路徑現實檢查（advisory）。檢查器由母腦複製到 tools/brain/。
+if command -v node >/dev/null 2>&1; then
+  if [ -f tools/brain/check-sync-matrix.js ]; then
+    node tools/brain/check-sync-matrix.js "$SESSION_ROOT" || warn "sync-matrix 有應檢視而未動的檔案（advisory，見上）"
+  fi
+  if [ -f tools/brain/check-doc-paths.js ]; then
+    node tools/brain/check-doc-paths.js "$SESSION_ROOT" || warn "doc-paths：文件宣稱的路徑與檔案樹不一致（advisory，見上）"
+  fi
+fi
+
 # Mount default: .gitignore should ignore Obsidian's viewer-layer settings (.obsidian/).
 # Advisory (warn, not fail): scaffold emits this; a hand-made mount may have forgotten it.
 if [ -f .gitignore ] && grep -qE '^\.obsidian/?$' .gitignore; then
