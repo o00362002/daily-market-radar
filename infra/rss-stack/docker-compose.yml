@@ -1,0 +1,93 @@
+name: daily-market-radar-rss-stack
+
+services:
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: daily-market-radar-rsshub
+    restart: unless-stopped
+    ports:
+      - "${RSSHUB_PORT:-1200}:1200"
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: redis://redis:6379/
+      PLAYWRIGHT_WS_ENDPOINT: ws://browserless:3000
+    depends_on:
+      redis:
+        condition: service_healthy
+      browserless:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1200/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  browserless:
+    image: browserless/chrome:latest
+    container_name: daily-market-radar-browserless
+    restart: unless-stopped
+    ulimits:
+      core:
+        hard: 0
+        soft: 0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: daily-market-radar-rsshub-redis
+    restart: unless-stopped
+    volumes:
+      - rsshub_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: daily-market-radar-freshrss
+    restart: unless-stopped
+    ports:
+      - "${FRESHRSS_PORT:-8080}:80"
+    environment:
+      TZ: ${TZ:-Asia/Taipei}
+      CRON_MIN: ${FRESHRSS_CRON_MIN:-2,32}
+      FRESHRSS_ENV: production
+      LISTEN: 0.0.0.0:80
+      INTERNAL_HOST_ALLOWLIST: rsshub:1200
+      FRESHRSS_INSTALL: >-
+        --api-enabled
+        --base-url ${FRESHRSS_BASE_URL:-http://localhost:8080}
+        --default-user ${FRESHRSS_DEFAULT_USER:-admin}
+        --language zh
+      FRESHRSS_USER: >-
+        --api-password ${FRESHRSS_API_PASSWORD:-change-me-api-password}
+        --email ${FRESHRSS_ADMIN_EMAIL:-admin@example.local}
+        --language zh
+        --password ${FRESHRSS_ADMIN_PASSWORD:-change-me-admin-password}
+        --user ${FRESHRSS_DEFAULT_USER:-admin}
+    volumes:
+      - freshrss_data:/var/www/FreshRSS/data
+      - freshrss_extensions:/var/www/FreshRSS/extensions
+    depends_on:
+      rsshub:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "cli/health.php"]
+      timeout: 10s
+      start_period: 60s
+      start_interval: 11s
+      interval: 75s
+      retries: 3
+
+volumes:
+  rsshub_redis_data:
+  freshrss_data:
+  freshrss_extensions:

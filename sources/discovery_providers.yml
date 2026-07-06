@@ -1,0 +1,106 @@
+version: 0.1
+last_updated: 2026-07-07
+status: active_draft
+purpose: >
+  Registry for external discovery providers used after fixed source-library and feed-stack
+  checks leave coverage gaps. Providers here discover topics, source clusters, regions,
+  and event angles; they do not replace original sources or official verification.
+
+providers:
+  gdelt_doc_2_api:
+    name: GDELT DOC 2.0 API
+    provider_type: global_news_discovery_api
+    homepage_url: https://www.gdeltproject.org/
+    api_reference_url: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+    cost: free_open
+    auth_required: false
+    role: discovery_only
+    strengths:
+      - broad global news monitoring
+      - multilingual discovery
+      - time-window search
+      - event and narrative clustering support
+      - region/language gap checks
+    limitations:
+      - not final evidence by itself
+      - original article must be checked
+      - may surface duplicate syndicated coverage
+      - query syntax and result limits require validation per use
+    use_when:
+      - six_domain_coverage_gap
+      - taiwan_or_regional_gap
+      - non_english_angle_needed
+      - event_cluster_or_topic_spike_needed
+      - source_first_feeds_have_low_coverage
+    output_classification:
+      - source_discovery
+      - event_cluster_candidate
+      - potential_pool_candidate
+      - retry_input
+    minimum_audit_fields:
+      - query
+      - time_window
+      - mode_or_endpoint
+      - result_count
+      - representative_sources
+      - original_source_checked_yes_no
+      - adopted_or_discarded_reason
+
+  media_cloud_search_directory:
+    name: Media Cloud Search / Directory
+    provider_type: media_ecosystem_and_source_discovery
+    homepage_url: https://www.mediacloud.org/
+    api_reference_url: https://www.mediacloud.org/
+    cost: free_or_account_dependent
+    auth_required: unknown_or_account_dependent
+    role: source_discovery_and_media_coverage_analysis
+    strengths:
+      - source discovery
+      - media ecosystem mapping
+      - coverage salience analysis
+      - undercovered topic checks
+      - outlet collection discovery
+    limitations:
+      - access path may require account or UI use
+      - not final evidence by itself
+      - original article or source page must be checked
+      - source directory does not guarantee current feed availability
+    use_when:
+      - missing_media_sources_for_domain
+      - need_new_regional_or_niche_sources
+      - coverage_bias_or_undercoverage_check
+      - source_health_backtest
+    output_classification:
+      - new_source_candidate
+      - source_cluster_candidate
+      - media_coverage_note
+      - potential_pool_candidate
+    minimum_audit_fields:
+      - search_topic
+      - collection_or_directory_scope
+      - candidate_sources
+      - source_type
+      - language_region
+      - whether_added_to_source_library
+      - adopted_or_discarded_reason
+
+provider_role_boundaries:
+  discovery_provider_is_not_evidence_source: true
+  original_source_required_for_fact_claims: true
+  official_or_data_crosscheck_required_for_high_risk_claims: true
+  duplicate_cluster_check_required: true
+  potential_pool_capture_before_output_filter: true
+
+recommended_daily_use:
+  daily_push_brief:
+    use_when: material_gap_after_source_library_and_feed_stack
+    max_depth: light
+    required_note: gdelt_or_media_cloud_used_when_gap
+  full_daily_radar:
+    use_when: any_core_domain_below_5_plus_3_after_retry
+    max_depth: full
+    required_note: external_discovery_trace
+  news_search_output:
+    use_when: topic_has_low_source_coverage_or_needs_source_discovery
+    max_depth: topic_scoped
+    required_note: discovery_provider_relevance
