@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>daily-market-radar feed stack seeds</title>
+  </head>
+  <body>
+    <outline text="RSS_INFRA" title="RSS_INFRA">
+      <outline text="RSSHub GitHub releases Atom" title="RSSHub GitHub releases Atom" type="rss" xmlUrl="https://github.com/DIYgod/RSSHub/releases.atom"/>
+    </outline>
+  </body>
+</opml>
