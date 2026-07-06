@@ -1,6 +1,70 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-07-02
+最後更新：2026-07-06
+
+---
+
+## 2026-07-06：換掛 brain-core（舊母腦退役）
+
+### Decision
+
+本 repo 的治理掛載從 `Human-AI-Collaboration-Brain`（母腦 v2.0-draft thin mount）
+換成 `brain-core`（蒸餾核）。不再使用 Level / capability 散文模型；
+改為五原則（P1–P5）＋ 五條不變式，每條不變式都有機器消費者。
+
+### Why
+
+母腦終局檢驗（2026-07-06，見 brain-core/DECISIONS.md）量化證明散文治理失效：
+入口稅 38.8K tokens、23 條規則 13 條零消費。brain-core 把規則寫成資料＋檢查器，
+在 commit 關口自動出現——不靠人記、不靠 AI 自律讀。本 repo 是 brain-core 第一個
+真實掛載專案（對照協議見 brain-core/COMPARE.md）。
+
+### Result
+
+```text
+改：brain.manifest.yaml / AGENTS.md / CLAUDE.md / PROJECT_OS_MOUNT.md / README.md /
+    PROJECT_MAP.md / HIGH_LEVEL_INDEX.md / CONTEXT_ROUTING.md / CURRENT_STATE.md /
+    schema/sync-matrix.json / check_mount_integrity.sh（薄包裝，CI 不用改）
+增：tools/brain/check-core.js / tools/brain/check-domain-packs.js / tools/install_hooks.sh
+證據：reports/execution_checks/2026-07-06_brain_core_mount_and_domain_extension.md
+不動：configs/ sources/ workflows/ templates/ memory/ 的內容規則（雷達行為不變）
+```
+
+---
+
+## 2026-07-06：多領域擴充機制＋潛力池不預篩＋固定查詢配方
+
+### Decision
+
+```text
+1. 新領域一律用 domains/<domain_id>/ 領域包掛載（domain_pack.json + sources.json），
+   複製 domains/_template/ 填完即生效；完整性由 check-domain-packs 在 commit 關口驗。
+   六大核心領域維持在 configs/radars.yml + sources/key_media_library.yml（canonical 不動）。
+2. 蒐集階段不做預先篩選：新概念/新應用/新場景/新商業模式/新組合/新趨勢苗頭一律入
+   memory/potential_pool.md，不得以「太小/證據弱/看起來不重要/主流已報導/與現有領域無關」
+   為由丟棄。篩選與 5+3 計數只發生在輸出階段；被淘汰項目留池改狀態，定期聚類回顧。
+3. 弱模型可執行的固定查詢配方：configs/query_recipes.yml（核心六領域）與領域包內
+   query_recipes。配方照抄執行，模型自由發想的查詢只能補充且需在 coverage audit 揭露。
+```
+
+### Why
+
+外部研究（research/global_news_trend_projects_2026-07-06.md）：
+DEFRA horizon scanning 實務證明蒐集階段的價值過濾會系統性漏掉早期訊號
+（本 repo 的虛擬資產服務法漏抓即同型錯誤）；structured-output 研究證明
+小模型在固定管線＋固定 schema 下準確率僅損失約 2%；商業媒體監測業的共同架構
+是「引擎領域無關、領域＝配置」。
+
+### Result
+
+```text
+增：domains/README.md / domains/_template/{domain_pack.json,sources.json} /
+    configs/query_recipes.yml / memory/potential_pool.md /
+    research/global_news_trend_projects_2026-07-06.md
+改：configs/edge_case_discovery.yml（capture_no_prefilter）/
+    SOURCE_LIBRARY_SPEC.md（§5.1 domain extension）/
+    AGENT_DEFINITION_MAP.md（query recipes 順序＋domain extension boundary）
+```
 
 ---
 

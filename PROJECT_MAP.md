@@ -5,14 +5,13 @@
 Source of truth：
 
 ```text
-Current mount: brain.manifest.yaml
+Current mount: brain.manifest.yaml（core: o00362002/brain-core）
 Execution entry: AGENTS.md
 Current state: CURRENT_STATE.md
 Current decisions: CURRENT_DECISIONS.md
 Agent map and task routing: AGENT_DEFINITION_MAP.md
 Dependency and completion gates: DEPENDENCY_MAP.md
 Source-library routing: configs/source_routing_rules.yml, SOURCE_LIBRARY_SPEC.md, sources/
-Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ```
 
 ---
@@ -20,34 +19,23 @@ Mother architecture: o00362002/Human-AI-Collaboration-Brain
 ## 1. 掛載定位
 
 ```text
-Mother version: v2.0-draft
-Mother architecture: compact_five_layer
-Mount mode: active thin mount
-Mount depth: entry + state + decisions + routing
-Legacy alias: Level 2
-Capabilities: entry, state, decisions, routing
-Complexity signals: generates-output
-Role: recurring intelligence workflow / daily report system
+Core repo: o00362002/brain-core（蒸餾核，2026-07-06 起）
+原則: P1–P5（規則必有機器消費者／入口極薄／資料驅動／模型無關層最厚／記憶輪替）
+Role: recurring intelligence workflow ＋ 多領域新聞趨勢掃描
+舊母腦: Human-AI-Collaboration-Brain 已退役
 ```
-
-`Level 2` 只保留作為 legacy alias。正式定位以 `brain.manifest.yaml` 的 capabilities、complexity_signals 與 depth_note 為準。
 
 ---
 
-## 2. 固定入口檔
+## 2. 入口檔
 
 ```text
-README.md
-SYSTEM_PROMPT.md
-PROJECT_OS_MOUNT.md
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-AGENTS.md
-AGENT_DEFINITION_MAP.md
-DEPENDENCY_MAP.md
+AGENTS.md（第一入口，按需路由）
+CLAUDE.md（薄適配器）
 brain.manifest.yaml
+README.md
+CURRENT_STATE.md / CURRENT_DECISIONS.md
+AGENT_DEFINITION_MAP.md / DEPENDENCY_MAP.md
 ```
 
 ---
@@ -55,7 +43,15 @@ brain.manifest.yaml
 ## 3. 核心模組
 
 ```text
-configs / sources / memory / templates / reports / workflows / radar rules / source library / search retry / post-report review
+configs/          雷達規則、來源路由、查詢配方、freshness、retry、edge case
+sources/          固定來源庫（六大核心領域媒體＋官方/數據來源）
+domains/          領域包擴充機制（新領域可插拔;_template 為起點）
+memory/           漏抓案例、來源實驗、watchlist、潛力池
+templates/        日報/推播/搜尋/內容模板
+workflows/        每日雷達、推播、主題搜尋、內容轉寫流程
+skill_specs/ tools/ agent_specs/  訊號搜尋、claim risk、coverage、社群渠道讀取
+reports/          日報、回測、execution checks（證據層）
+loops/ evals/     回測補漏迴圈、冷讀評測
 ```
 
 Source-library module:
@@ -67,11 +63,22 @@ sources/key_media_library.yml = global and Taiwan key media by radar domain
 sources/official_and_data_sources.yml = official, regulator, company, market, macro, chain, and data sources
 ```
 
-Source library is local execution infrastructure, not mother Brain architecture.
+---
+
+## 4. 多領域新聞趨勢掃描
+
+```text
+六大核心領域: configs/radars.yml（canonical，不動）
+新領域: domains/<domain_id>/domain_pack.json ＋ sources.json（spec: domains/README.md）
+固定查詢配方: configs/query_recipes.yml ＋ 領域包內 query_recipes（弱模型照抄執行）
+潛力池: memory/potential_pool.md（蒐集階段不預篩，configs/edge_case_discovery.yml capture_no_prefilter）
+完整性檢查: tools/brain/check-domain-packs.js（commit 關口自動驗）
+研究依據: research/global_news_trend_projects_2026-07-06.md
+```
 
 ---
 
-## 4. Active Workflows
+## 5. Active Workflows
 
 ```text
 workflows/daily_radar_workflow.md = full research / archive daily radar
@@ -80,11 +87,11 @@ workflows/news_search_content_workflow.md = standalone topic news search and rep
 workflows/news_content_workflow.md = convert confirmed / labelled signals into readable content
 ```
 
-Search workflows now use source library before generic keyword fallback.
+Search workflows use source library and fixed query recipes before generic keyword fallback.
 
 ---
 
-## 5. Active Agents
+## 6. Active Agents
 
 ```text
 radar_report_agent = produces radar reports and concise daily push briefs
@@ -102,18 +109,6 @@ radar_report_agent and news_search_agent must check source library before generi
 
 ---
 
-## 6. Mother v2 inherited contracts
-
-```text
-MOUNT_DEPTH.md
-rules/role_boundary_contract.md
-specs/flow_selection_and_enforcement.md
-docs/AI_EXECUTION_FLOW.md
-schema/INDEX.md
-```
-
----
-
 ## 7. Routing
 
 ```text
@@ -123,21 +118,7 @@ No standalone ROUTING.md is active.
 
 ---
 
-## 8. Convergence Notes
-
-```text
-Projection files create no canonical rules.
-Evidence does not become Memory without approval.
-Frozen history is preserved but removed from active routing.
-Backtest includes keep / revise / delete / archive / add / promote / demote / observe.
-Adoption Gate belongs under Interface & Integration Layer.
-Level names are legacy aliases only.
-Flow Profile cannot disable the enforcement floor.
-```
-
----
-
-## 9. Frozen History
+## 8. Frozen History
 
 ```text
 AI_PROJECT_OS_ADOPTION_PLAN.md
@@ -149,3 +130,9 @@ ADOPTION_LEVELS.md
 ```
 
 These files are retained for historical context only. They are not active routing or active source of truth.
+
+---
+
+## 9. 連動
+
+連動關係唯一住在 `schema/sync-matrix.json`；commit 時 check-sync-matrix 自動提醒。

@@ -32,18 +32,15 @@ AI 產品用量經濟
 
 ---
 
-## 2. Human-AI Collaboration Brain 掛載定位
+## 2. brain-core 掛載定位
 
-本 repo 以 `Human-AI-Collaboration-Brain` 作為架構來源，採 active thin mount。正式模型不是「Level 分級」，而是 `MOUNT_DEPTH.md` 的 capability-based mount depth。`Level 2` 只保留為 legacy alias。
+本 repo 自 2026-07-06 起掛載 [brain-core](https://github.com/o00362002/brain-core)（蒸餾核）作為治理核心；舊母腦 `Human-AI-Collaboration-Brain` 掛載已退役。
 
 ```text
-Mother repo: o00362002/Human-AI-Collaboration-Brain
-Mother version: v2.0-draft
-Mother architecture: compact_five_layer
-Mount mode: active thin mount
-Legacy alias: Level 2
-Capabilities: entry, state, decisions, routing
-Complexity signals: generates-output
+Core repo: o00362002/brain-core
+核心思想：規則是資料＋檢查器，在 commit 關口自己出現。
+原則：P1 規則必有機器消費者／P2 入口極薄／P3 資料驅動／
+      P4 模型無關層最厚／P5 記憶輪替
 ```
 
 Source of truth：
@@ -53,24 +50,18 @@ brain.manifest.yaml
 AGENTS.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-DEPENDENCY_MAP.md
 AGENT_DEFINITION_MAP.md
-SYSTEM_PROMPT.md
+DEPENDENCY_MAP.md
+schema/sync-matrix.json
 ```
 
-Inherited mother-brain contracts：
+機器層（本 repo 自足）：
 
 ```text
-BRAIN_ARCHITECTURE.md
-MOUNT_DEPTH.md
-schema/INDEX.md
-rules/universal_execution_contract.md
-rules/role_boundary_contract.md
-specs/execution_edge_module_model.md
-specs/programmable_control_layer.md
-specs/flow_selection_and_enforcement.md
+bash tools/install_hooks.sh          # 一次性：裝上 commit 關口
+bash check_mount_integrity.sh        # 體檢（CI 同入口）
+node tools/brain/check-core.js .     # 結構體檢
+node tools/brain/check-domain-packs.js .  # 領域包完整性
 ```
 
 Projection files create no canonical rules. Evidence files do not become memory without approval. Frozen history is not current state.
@@ -79,53 +70,28 @@ Projection files create no canonical rules. Evidence files do not become memory 
 
 ## 3. 執行入口
 
-AI 或協作者進入本 repo 時，先讀：
+AI 或協作者進入本 repo 時，第一入口是 `AGENTS.md`（按需路由，沒有必讀清單）。
+
+依任務讀取：
 
 ```text
-AGENTS.md
-brain.manifest.yaml
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-README.md
-DEPENDENCY_MAP.md
-AGENT_DEFINITION_MAP.md
-SYSTEM_PROMPT.md
-```
-
-再依任務讀取：
-
-```text
-configs/
-memory/
-templates/
-reports/
-workflows/
-evals/
-sources/
+configs/ sources/ domains/ memory/ templates/ reports/ workflows/ evals/
 ```
 
 ---
 
-## 4. 掛載深度判斷
+## 4. 多領域擴充與潛力池
 
 ```text
-Capabilities: entry, state, decisions, routing
-Legacy alias: Level 2
+六大核心領域: configs/radars.yml + sources/key_media_library.yml（canonical）
+新領域: domains/<domain_id>/ 領域包（複製 _template 填完即掛上,檢查器驗完整性）
+固定查詢配方: configs/query_recipes.yml（弱模型照抄執行,不自行發明查詢）
+潛力池: memory/potential_pool.md（蒐集階段不預篩:新概念/新應用/新趨勢/新組合全收）
 ```
-
-原因：本 repo 是 recurring intelligence workflow，有固定流程、固定 sources/configs/memory/templates/reports 與回測補漏，但不需要升級為多 agent product runtime。
 
 ---
 
 ## 5. Role Boundary / Execution Boundary
-
-Canonical role boundary is inherited from:
-
-```text
-rules/role_boundary_contract.md
-```
 
 Local rule:
 

@@ -6,6 +6,20 @@ edge_case_discovery:
   required: true
   principle: "每日報告不能只輸出主流新聞。大型重要新聞與小眾潛力候選訊號是兩個不同層級，兩者都必須輸出，不可互相替代。候選訊號必須優先抓小眾、非主流、早期、地方試點、小公司、研究原型、開發者工具、特殊商業模式、監管沙盒、失敗案例、反面成本或社群弱訊號。低證據訊號不得被刪除，而應列入候選訊號並標示未證實。"
 
+  capture_no_prefilter:
+    required: true
+    added: 2026-07-06
+    rule: >
+      蒐集階段不做預先篩選。掃描過程中凡出現新概念、新應用、新場景、新商業模式、
+      新組合（舊技術×新領域）、新趨勢苗頭、監管沙盒、研究原型、開發者工具、
+      失敗與反面成本或社群弱訊號，一律記入 memory/potential_pool.md，不做價值判斷。
+      不得以「太小」「證據弱」「看起來不重要」「主流已報導」「與現有領域無關」為由在蒐集階段丟棄。
+      篩選、計數與取捨只發生在輸出階段（本檔 5+3 閘門與候選定義照舊適用於輸出計數）；
+      被輸出淘汰的項目仍留在池中改狀態，不刪除。
+    pool_file: memory/potential_pool.md
+    review_cycle: 每雙週或每 10 份日報做一次池內聚類回顧，結果記入 reports/backtests/
+    method_basis: research/global_news_trend_projects_2026-07-06.md
+
   candidate_signal_definition:
     name: "小眾潛力候選訊號"
     must_be:

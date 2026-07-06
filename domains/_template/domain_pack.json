@@ -1,0 +1,38 @@
+{
+  "schema": "domain-pack/v1",
+  "_comment": "複製本目錄成 domains/<domain_id>/ 後,把所有 <角括號> 佔位符換成實際內容。填不完整 commit 會被 check-domain-packs 擋下。",
+  "id": "<domain_id_snake_case>",
+  "name": "<領域中文名稱>",
+  "positioning": "<一到兩句:這個領域在雷達中要回答什麼問題>",
+  "scope": [
+    "<範圍關鍵詞1>",
+    "<範圍關鍵詞2>",
+    "<範圍關鍵詞3>"
+  ],
+  "required_questions": [
+    "<今日此領域是否出現…?(必答問題1)>",
+    "<必答問題2>"
+  ],
+  "mainstream_search_angles": [
+    "<主流大事搜尋角度1>",
+    "<主流大事搜尋角度2>"
+  ],
+  "edge_search_angles": [
+    "<小眾/早期/地方試點/研究原型搜尋角度1>",
+    "<小眾搜尋角度2>"
+  ],
+  "output_mapping": [
+    "事件",
+    "今日新增點",
+    "來源 / 時間",
+    "證據等級",
+    "台灣 / 使用者映射",
+    "下一步觀察"
+  ],
+  "taiwan_mapping_rule": "<此領域的台灣新聞判定規則;無在地面向時寫 not_required 並說明>",
+  "minimum_daily": {
+    "large_news": 3,
+    "candidates": 2,
+    "_comment": "新領域最低量可低於核心六領域的 5+3;不足時照 search_retry_protocol 逐項 retry 並揭露"
+  }
+}

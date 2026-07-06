@@ -242,6 +242,20 @@ The active source library should support at least these six domains:
 6. Labor / consumption pressure / Taiwan local signals
 ```
 
+### 5.1 Domain extension（2026-07-06 起）
+
+六大核心領域之外的新領域，一律用 `domains/<domain_id>/` 領域包掛載：
+
+```text
+掃描時的領域清單 = 六大核心領域 + domains/ 下所有領域包
+新領域 = 複製 domains/_template/ 填完 domain_pack.json + sources.json
+完整性由 tools/brain/check-domain-packs.js 在 commit 關口驗證
+規格與執行規則見 domains/README.md
+```
+
+領域包內的 `query_recipes` 與核心六領域的 `configs/query_recipes.yml` 同規則：
+固定配方照抄執行，弱模型不自行發明查詢。
+
 Each domain should include:
 
 ```text

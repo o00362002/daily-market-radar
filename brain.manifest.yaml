@@ -1,90 +1,44 @@
-# brain.manifest.yaml — child mount (thin)
-# Projection file: the source of truth remains in the mother repo.
+# brain.manifest.yaml — child mount (brain-core)
+# Projection file: 核心原則的 source of truth 在 brain-core repo。
 schema: brain-manifest/v1
 manifest_kind: child
-mother_repo: o00362002/Human-AI-Collaboration-Brain
-mother_version: v2.0-draft
-mother_architecture: compact_five_layer
-level: Level 2                      # legacy alias（保留向下相容）
-capabilities: [entry, state, decisions, routing]
-complexity_signals: [generates-output]
-depth_note: recurring daily intelligence workflow with source library, report templates, memory, and routing; no cross-repo dependency depth required
-mounted_since: 2026-07-05
+core_repo: o00362002/brain-core
+core_version: v0
+mounted_since: 2026-07-06
+role: 每日市場情報雷達（recurring intelligence workflow）＋ 多領域新聞趨勢掃描
 
-architecture_layers:
-  - Brain Core / Charter
-  - Interface & Integration Layer
-  - Memory Layer
-  - Context Routing Layer
-  - Execution Edge
+previous_mount:
+  repo: o00362002/Human-AI-Collaboration-Brain
+  mother_version: v2.0-draft
+  status: unmounted_2026-07-06        # 舊母腦掛載已退役；why 見 CURRENT_DECISIONS.md
 
-mount:
-  mode: thin
-  role: execution_interface
-  layer_depth: capability_scaled
-  real_test_case: true
-  test_domain: daily-market-radar
-  status: active_thin_mount
+inherited_principles:                  # 來源：brain-core/DECISIONS.md 創立憲法
+  - P1 規則必有機器消費者
+  - P2 入口極薄、按需路由、沒有必讀清單
+  - P3 資料驅動（JSON/YAML＋檢查器 > 散文）
+  - P4 模型無關層最厚（檢查器/hook/schema；CLAUDE.md 只做薄適配）
+  - P5 記憶輪替（頭部預算＋季度歸檔＋superseded 標記）
 
-contracts:
+machine_layer:
   entry_contract: AGENTS.md
-  execution_contract: inherited_from_mother:rules/universal_execution_contract.md
-  role_boundary_contract: inherited_from_mother:rules/role_boundary_contract.md
-  folder_structure_guide: inherited_from_mother:PROJECT_FOLDER_STRUCTURE.md
-  mount_depth_contract: inherited_from_mother:MOUNT_DEPTH.md
-  schema_coverage_policy: inherited_from_mother:schema/INDEX.md
-  flow_profile_policy: inherited_from_mother:specs/flow_selection_and_enforcement.md
-  convergence_mode: inherited_from_mother
+  hook_installer: tools/install_hooks.sh
+  checkers:
+    - tools/brain/check-core.js          # 不變式4：必備檔＋入口預算＋不變式數量鎖
+    - tools/brain/check-sync-matrix.js   # 不變式2：連動提醒（advisory）
+    - tools/brain/check-doc-paths.js     # 不變式3：路徑現實（advisory）
+    - tools/brain/check-domain-packs.js  # 不變式5：領域包完整性
+  ci_wrapper: check_mount_integrity.sh   # CI 與人工共用同一入口
 
-file_governance:
-  core_files_define_current_state: true
-  projection_files_create_no_canonical_rules: true
-  evidence_files_do_not_become_memory_without_approval: true
-  archive_and_frozen_history_not_current_state: true
-
-backtest_growth_control:
-  required_when_project_grows: true
-  review_actions:
-    - keep
-    - revise
-    - delete
-    - archive
-    - add
-    - promote
-    - demote
-    - observe
-
-execution_edge:
-  execution_module_model: enabled_lightweight
-  programmable_control_layer: enabled_lightweight
-  backtest_capability: enabled_when_evidence_exists
-  post_execution_backtest_to_memory: inherited_from_mother
-
-execution_gates:
-  - entry
-  - dependency
-  - role_boundary
-  - plan
-  - execution
-  - post_action_check
-  - reality_sync
-
-checks:
-  execution_check: EXECUTION_CHECK.md
-  reality_check: bash check_mount_integrity.sh
-
-sync_policy:
-  high_level_index_check: required
-  optional_adapter_check: required
-  frozen_history_check: required
-  auto_sync_auto_pr: not_active_check_only
+domain_extension:
+  core_domains: configs/radars.yml       # 六大核心領域（canonical，不動）
+  packs_dir: domains/                    # 新領域＝複製 _template 填完（spec: domains/README.md）
+  query_recipes: configs/query_recipes.yml  # 固定查詢配方（弱模型照抄執行）
+  potential_pool: memory/potential_pool.md  # 蒐集階段不預篩，全收入池
+  capture_stage_no_filtering: true
 
 boundary:
-  inherits_compact_five_layer: true
   brain_never_executes: true
-  interface_exposes_access_not_authority: true
   agent_cannot_approve_itself: true
-  tool_without_judgement: true
-  loop_handles_retry_and_backtest: true
-  adoption_gate_under_interface: true
-  level_is_legacy_alias: true
+  human_final_review_for_structural_changes: true
+  evidence_needs_approval_to_become_memory: true
+  frozen_history_is_not_current_state: true

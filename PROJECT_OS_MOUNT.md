@@ -1,132 +1,73 @@
 # PROJECT_OS_MOUNT｜daily-market-radar
 
-This file is the local mount declaration for `daily-market-radar`.
-
-It is a Projection file, not the mother Brain source of truth.
+本檔是本 repo 的掛載宣告（Projection，不是 source of truth）。
 
 ---
 
 ## 1. Mount Identity
 
 ```text
-Mother brain: o00362002/Human-AI-Collaboration-Brain
-Mother version: v2.0-draft
-Mother architecture: compact_five_layer
-Mount mode: active thin mount
-Legacy alias: Level 2
-Capabilities: entry, state, decisions, routing
-Complexity signals: generates-output
-Role: recurring intelligence workflow / daily report system
+Core repo: o00362002/brain-core（蒸餾核）
+Core version: v0
+Mount since: 2026-07-06
+Role: 每日市場情報雷達（recurring intelligence workflow）＋ 多領域新聞趨勢掃描
+Previous mount: o00362002/Human-AI-Collaboration-Brain（已於 2026-07-06 退役）
 ```
 
 ---
 
-## 2. Source of Truth
+## 2. 掛載的實質內容
+
+brain-core 掛載＝繼承五原則＋複製機器層，不是複製資料夾結構：
 
 ```text
-Current mount: brain.manifest.yaml
-Execution entry: AGENTS.md
-Current state: CURRENT_STATE.md
-Current decisions: CURRENT_DECISIONS.md
-Project navigation: PROJECT_MAP.md
-High-level index: HIGH_LEVEL_INDEX.md
-Dependency gate: DEPENDENCY_MAP.md
-Local policy: SYSTEM_PROMPT.md
+P1 規則必有機器消費者
+P2 入口極薄、按需路由
+P3 資料驅動（JSON/YAML＋檢查器 > 散文）
+P4 模型無關層最厚；CLAUDE.md 只做薄適配
+P5 記憶輪替（頭部預算＋季度歸檔）
 ```
 
-Mother Brain source of truth remains in:
+機器層（本 repo 內自足，不依賴外部 repo 才能跑）：
 
 ```text
-o00362002/Human-AI-Collaboration-Brain
-```
-
----
-
-## 3. Inherited Architecture
-
-This repo inherits the mother Brain compact five-layer architecture and vocabulary. Local depth is determined by mounted capabilities, not by formal Level classification.
-
-```text
-1. Brain Core / Charter
-2. Interface & Integration Layer
-3. Memory Layer
-4. Context Routing Layer
-5. Execution Edge
+tools/install_hooks.sh               安裝 pre-commit 關口
+tools/brain/check-core.js            不變式4：必備檔＋入口預算＋不變式數量鎖
+tools/brain/check-sync-matrix.js     不變式2：連動提醒（advisory）
+tools/brain/check-doc-paths.js       不變式3：路徑現實（advisory）
+tools/brain/check-domain-packs.js    不變式5：領域包完整性
+check_mount_integrity.sh             CI／人工共用體檢入口（薄包裝）
 ```
 
 ---
 
-## 4. Inherited Contracts
+## 3. Source of Truth
 
 ```text
-BRAIN_ARCHITECTURE.md
-MOUNT_DEPTH.md
-schema/INDEX.md
-rules/universal_execution_contract.md
-rules/role_boundary_contract.md
-specs/execution_edge_module_model.md
-specs/programmable_control_layer.md
-specs/flow_selection_and_enforcement.md
-docs/AI_EXECUTION_FLOW.md
+掛載宣告: brain.manifest.yaml
+執行入口: AGENTS.md
+現況: CURRENT_STATE.md
+決策: CURRENT_DECISIONS.md
+任務路由: AGENT_DEFINITION_MAP.md
+依賴閘門: DEPENDENCY_MAP.md
+連動矩陣: schema/sync-matrix.json
+核心原則: o00362002/brain-core（P1–P5）
 ```
 
 ---
 
-## 5. Convergence Rules
+## 4. 舊母腦處置
 
 ```text
-Projection files create no canonical rules.
-Evidence does not become Memory without approval.
-Frozen history is preserved but removed from active routing.
-Backtest includes keep / revise / delete / archive / add / promote / demote / observe.
-Schema coverage must not be overstated.
-Adoption Gate belongs under Interface & Integration Layer.
-Level names are legacy aliases only.
-Flow Profile cannot disable the enforcement floor.
+舊母腦（Human-AI-Collaboration-Brain）掛載已退役;其 adoption 檔早已列為凍結歷史
+（AI_PROJECT_OS_ADOPTION_PLAN.md 等,見 CURRENT_STATE.md)。
+歷史 reports / memory 中的母腦引用屬凍結歷史,不回頭改寫。
+架構問題以 brain-core 為準;兩腦對照協議見 brain-core/COMPARE.md。
 ```
 
 ---
 
-## 6. Frozen History
+## 5. Sync Rule
 
-The following files are historical reference only:
-
-```text
-AI_PROJECT_OS_ADOPTION_PLAN.md
-AI_AGENT_MODEL_ADOPTION_PLAN.md
-POST_CHANGE_SYNC_ADOPTION.md
-README_AGENT_MODEL_NOTE.md
-CURRENT_DECISIONS_APPEND.md
-```
-
-Do not use frozen history to override current mount, state, decisions, or entry rules.
-
----
-
-## 7. Sync Rule
-
-When changing repo structure, mount depth, routing, workflow, tool, provider, radar scope, source library, template, report, or evidence process, check:
-
-```text
-README.md
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-AGENTS.md
-brain.manifest.yaml
-PROJECT_OS_MOUNT.md
-DEPENDENCY_MAP.md
-check_mount_integrity.sh
-```
-
-Required completion checks:
-
-```text
-Role boundary check
-Frozen history / growth control check
-Reality check
-Sync check
-Backtest record check
-Source-library coverage check, if source files changed
-```
+連動關係唯一住在 `schema/sync-matrix.json`（check-sync-matrix 在 commit 時自動提醒）。
+本檔不再維護散文版同步清單。

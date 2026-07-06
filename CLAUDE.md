@@ -1,20 +1,6 @@
-# CLAUDE.md
+# CLAUDE.md（薄適配器）
 
-Thin-mount entry for Claude and code agents.
+本體是 `AGENTS.md`——先讀它，不到一分鐘。核心掛載：brain-core（舊母腦已退役）。
 
-This file is not the source of truth.
-
-Level: Level 2 Runtime-Lite Brain.
-
-Read first:
-
-1. SYSTEM_PROMPT.md
-2. PROJECT_MAP.md
-3. HIGH_LEVEL_INDEX.md
-4. CURRENT_STATE.md
-5. CURRENT_DECISIONS.md
-6. README.md
-
-Use task-specific files in configs, memory, templates, and recent reports.
-
-Do not treat this repo as Level 3 runtime. It is a recurring report workflow.
+此檔只做 Claude 適配：無額外規則。commit 關口的檢查會自己出現；
+完成時出 5 行人話收據。就這樣。

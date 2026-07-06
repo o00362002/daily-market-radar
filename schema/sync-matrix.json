@@ -1,14 +1,22 @@
 {
  "schema": "brain-sync-matrix/v1",
- "version": "1",
+ "version": "2",
  "_note": "daily-market-radar 連動矩陣（機器版）。消費者：tools/brain/check-sync-matrix.js（commit 提醒，pre-commit hook 觸發）。保持短。",
  "byFile": {
   "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md"],
+  "AGENTS.md": ["CLAUDE.md", "README.md"],
+  "brain.manifest.yaml": ["AGENTS.md", "PROJECT_OS_MOUNT.md"],
   "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md"],
-  "AGENT_DEFINITION_MAP.md": ["CONTEXT_ROUTING.md"]
+  "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
+  "SOURCE_LIBRARY_SPEC.md": ["configs/source_routing_rules.yml", "sources/key_media_library.yml"],
+  "configs/edge_case_discovery.yml": ["memory/potential_pool.md", "configs/query_recipes.yml"],
+  "domains/README.md": ["SOURCE_LIBRARY_SPEC.md", "AGENT_DEFINITION_MAP.md"]
  },
  "byPrefix": {
-  "workflows/": ["CONTEXT_ROUTING.md"],
-  "rules/": ["AGENTS.md", "README.md"]
+  "workflows/": ["AGENT_DEFINITION_MAP.md", "DEPENDENCY_MAP.md"],
+  "rules/": ["AGENTS.md", "README.md"],
+  "sources/": ["SOURCE_LIBRARY_SPEC.md"],
+  "domains/": ["domains/README.md"],
+  "tools/": ["AGENTS.md", "check_mount_integrity.sh"]
  }
 }

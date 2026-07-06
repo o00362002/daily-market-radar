@@ -1,0 +1,127 @@
+version: 0.1
+last_updated: 2026-07-06
+status: active
+purpose: >
+  核心六領域的固定查詢配方(query recipes)。目的:預設較弱的模型也能照抄執行、
+  穩定搜到高品質新聞,不依賴模型自行發明查詢。配方是資料,不是建議——
+  照抄執行,可加日期限定詞(例如「本週」「July 2026」),不可刪改核心詞。
+
+usage_rules:
+  - 每個核心領域每日至少執行 mainstream 配方 2 條 + edge 配方 2 條;命中不足才啟動 retry。
+  - 配方先於自由發想:模型自己想的查詢只能作為配方跑完後的補充,且需在 coverage audit 揭露。
+  - 台灣缺口配方(taiwan_gap)只在該領域台灣新聞不足時執行,不可跳過直接標「台灣新聞不足」。
+  - 配方命中的項目照現有欄位規則記錄(edge_case_discovery output_template);缺資料標 unknown。
+  - 新領域的配方住在 domains/<domain_id>/sources.json 的 query_recipes,規則相同。
+  - 配方成效走 Source Experiment 迴圈:連續多日零命中或高噪音的配方,記錄後降權或改寫。
+
+recipes:
+  ai_agents_workflow:
+    mainstream:
+      - id: ai_model_release
+        query: "AI model release OR update announcement this week"
+      - id: ai_agent_enterprise
+        query: "AI agent enterprise deployment case study"
+      - id: ai_pricing_quota
+        query: "AI coding agent pricing OR usage limit OR credits change"
+    edge:
+      - id: ai_weird_usecase
+        query: "weird AI agent use case small business deployment"
+      - id: ai_failure_edge
+        query: "AI agent failure OR security incident OR abuse edge case"
+      - id: ai_local_pilot
+        query: "AI workflow automation pilot local company case"
+    taiwan_gap:
+      - id: ai_tw_adoption
+        query: "台灣 AI 導入 企業 案例 site:ithome.com.tw OR site:bnext.com.tw"
+      - id: ai_tw_official
+        query: "AI 政策 補助 數位發展部 site:cna.com.tw"
+
+  crypto_rwa_agent_payments:
+    mainstream:
+      - id: crypto_market_flow
+        query: "bitcoin ETF flows OR stablecoin supply change this week"
+      - id: crypto_regulation
+        query: "crypto regulation OR exchange enforcement news"
+      - id: rwa_tokenization
+        query: "RWA tokenization institutional launch"
+    edge:
+      - id: crypto_payment_pilot
+        query: "stablecoin payment pilot merchant OR remittance adoption"
+      - id: depin_deployment
+        query: "DePIN real-world deployment city infrastructure"
+      - id: agent_crypto_payment
+        query: "AI agent crypto payment experiment"
+    taiwan_gap:
+      - id: crypto_tw_legislative
+        query: "虛擬資產 OR VASP OR 穩定幣 立法院 OR 金管會"
+        note: 觸發 taiwan_crypto_legislative_trigger 時必跑;先查官方再查社群。
+      - id: crypto_tw_media
+        query: "台灣 加密 監管 交易所 site:abmedia.io OR site:blocktempo.com"
+
+  retail_consumer_social_fashion:
+    mainstream:
+      - id: retail_major_move
+        query: "retail earnings OR store expansion OR closure major brand this week"
+      - id: retail_omo
+        query: "omnichannel OR retail media network OR social commerce launch"
+      - id: fashion_brand_strategy
+        query: "fashion brand strategy shift OR DTC pivot news"
+    edge:
+      - id: retail_innovation_small
+        query: "retail innovation small brand case study pilot"
+      - id: store_tech_pilot
+        query: "store technology pilot AI shopping assistant OR smart fitting room"
+      - id: social_commerce_unusual
+        query: "social commerce unusual campaign local market"
+    taiwan_gap:
+      - id: retail_tw_department
+        query: "百貨 OR 商場 OR 展店 OR 撤櫃 site:money.udn.com OR site:ctee.com.tw"
+      - id: retail_tw_brand
+        query: "台灣 服飾品牌 OR 快閃店 OR 週年慶 新聞"
+
+  global_markets_capital_geopolitics:
+    mainstream:
+      - id: markets_macro_move
+        query: "markets rates dollar gold oil major move this week"
+      - id: capital_flows
+        query: "fund flows OR ETF flows OR foreign investment shift"
+      - id: geopolitics_policy
+        query: "geopolitics trade policy supply chain impact markets"
+    edge:
+      - id: niche_market_stress
+        query: "unusual capital flow small market stress signal"
+      - id: regional_policy_pilot
+        query: "regional policy pilot market impact early signal"
+    taiwan_gap:
+      - id: markets_tw_official
+        query: "台股 OR 匯率 OR 出口 央行 OR 金管會 site:cna.com.tw"
+
+  technology_development:
+    mainstream:
+      - id: tech_breakthrough
+        query: "technology breakthrough robotics OR biotech OR energy OR semiconductor this week"
+      - id: semi_supply_chain
+        query: "semiconductor supply chain order OR capacity news"
+    edge:
+      - id: tech_lab_pilot
+        query: "unusual technology breakthrough startup lab pilot"
+      - id: new_material_trial
+        query: "new material battery robotics sensor startup trial"
+    taiwan_gap:
+      - id: tech_tw_supply
+        query: "台灣 半導體 OR 供應鏈 OR PCB 載板 site:technews.tw OR site:digitimes.com"
+
+  labor_consumption_taiwan:
+    mainstream:
+      - id: labor_market_shift
+        query: "youth unemployment OR white collar layoffs OR wage data this week"
+      - id: consumer_pressure
+        query: "consumer credit stress OR downgrade spending shift data"
+    edge:
+      - id: ai_job_change_case
+        query: "AI changed job role small company case"
+      - id: genz_consumption_case
+        query: "Gen Z consumption shift local retail case"
+    taiwan_gap:
+      - id: labor_tw_official
+        query: "台灣 失業率 OR 薪資 OR 消費信心 主計總處 site:cna.com.tw OR site:news.pts.org.tw"

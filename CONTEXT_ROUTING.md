@@ -2,19 +2,17 @@
 
 ## 1. Architecture Adoption
 
-This repo is independent. It adopts `Human-AI Collaboration Brain` as an architecture method and AI collaboration pattern.
+本 repo 獨立，掛載 `brain-core` 作為治理核心（2026-07-06 起）。
 
 ```text
-Adopted architecture: Human-AI Collaboration Brain
-Architecture repo: o00362002/Human-AI-Collaboration-Brain
-Architecture role: project architecture method / documentation pattern / AI collaboration rules
-Runtime dependency: none
-Parent repo: none
+Core repo: o00362002/brain-core
+Core role: 治理原則（P1–P5）＋ 機器層（檢查器/hook/schema）來源
+Runtime dependency: none（機器層已複製進本 repo，自足）
 Content source of truth: daily-market-radar
-Repo Level: Level 2 runtime-lite
+舊母腦: Human-AI-Collaboration-Brain 已退役
 ```
 
-架構問題可參考 `Human-AI-Collaboration-Brain`；專案內容問題以本 repo 為準。
+架構問題參考 `brain-core`；專案內容問題以本 repo 為準。
 
 ---
 

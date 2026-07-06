@@ -1,0 +1,45 @@
+{
+  "schema": "news-source-pack/v1",
+  "_comment": "來源分層 + 固定查詢配方。tier 順序即檢查順序。每個 source 至少要有 url / rss / query 其一。query_recipes 是弱模型照抄執行的固定查詢,不可自行改寫核心詞。",
+  "domain": "<domain_id_snake_case>",
+  "tiers": [
+    {
+      "name": "official_data",
+      "_comment": "官方/監管/公司/統計/資料來源——證據等級最高,先查",
+      "sources": [
+        { "name": "<官方來源名>", "url": "<https://…>", "evidence_default": "high" }
+      ]
+    },
+    {
+      "name": "global_media",
+      "sources": [
+        { "name": "<國際產業媒體名>", "url": "<https://…>", "evidence_default": "medium" }
+      ]
+    },
+    {
+      "name": "local_media",
+      "_comment": "台灣或在地媒體;領域無在地面向時保留空陣列並在 domain_pack 說明",
+      "sources": [
+        { "name": "<在地媒體名>", "url": "<https://…>", "evidence_default": "medium_high" }
+      ]
+    },
+    {
+      "name": "social_first",
+      "_comment": "社群優先來源:適用 channel-aware 規則,generic search 不算已檢查",
+      "sources": [
+        { "name": "<帳號/社群名>", "url": "<頻道 URL>", "channel": "<instagram|x|threads|youtube|…>", "evidence_default": "medium_low" }
+      ]
+    },
+    {
+      "name": "discovery",
+      "_comment": "廣域發現(GDELT、Product Hunt、HN、學術、監管沙盒公告…),只作發現不作證據",
+      "sources": [
+        { "name": "<發現管道名>", "query": "<固定查詢字串>", "evidence_default": "discovery_only" }
+      ]
+    }
+  ],
+  "query_recipes": [
+    { "id": "<recipe_id_1>", "query": "<固定查詢字串,可含 site: 限定>", "use_for": "<主流大事|小眾候選|台灣缺口>" },
+    { "id": "<recipe_id_2>", "query": "<固定查詢字串>", "use_for": "<用途>" }
+  ]
+}

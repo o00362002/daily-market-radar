@@ -192,9 +192,21 @@ For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, and `AGENT_NEWS_SEARCH`:
 ```text
 - Fixed source library must be checked before generic keyword fallback.
 - Keyword search can filter, expand, retry, or discover sources, but must not replace source-library coverage.
+- Fixed query recipes (configs/query_recipes.yml; domains/<id>/sources.json query_recipes) run before free-form queries; free-form queries are supplements and must be disclosed in coverage audit.
 - Material source gaps must be disclosed in the output or final status panel.
 - Official / data sources should be used to verify high-risk claims and indicator changes.
 - If a source is social-first or channel-first, invoke `AGENT_SOCIAL_CHANNEL_READER` or explicitly mark channel check gaps.
+```
+
+## Domain extension boundary
+
+For all scan routes:
+
+```text
+- Scan domain list = six core domains + every pack under domains/ (spec: domains/README.md).
+- Adding a new domain = copy domains/_template/, fill domain_pack.json + sources.json; no workflow or entry file changes needed. check-domain-packs validates completeness at commit.
+- Capture stage has no prefiltering: any 新概念 / 新應用 / 新趨勢 / 新組合 signal goes into memory/potential_pool.md (configs/edge_case_discovery.yml capture_no_prefilter). Selection happens only at output stage and is recorded.
+- Route domain-pack changes through AGENT_RADAR_CONFIG.
 ```
 
 ---
