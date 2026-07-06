@@ -1,5 +1,5 @@
 {
-  "version": "0.2",
+  "version": "0.3",
   "last_updated": "2026-07-07",
   "status": "active_draft",
   "purpose": "Registry for direct RSS feeds and RSSHub route candidates used by the feed discovery stack. Only verified concrete routes or direct feeds may be enabled for OPML import.",
@@ -13,14 +13,14 @@
     "base_url_env": "FRESHRSS_BASE_URL",
     "category_prefix": "daily-market-radar",
     "import_format": "opml",
-    "seed_opml_path": "infra/rss-stack/freshrss-daily-market-radar.opml"
+    "seed_opml_path": "FRESHRSS_SEEDS.opml"
   },
   "verification_summary": {
     "verified_on": "2026-07-07",
     "method": "upstream RSSHub route-code inspection plus direct-feed validation where official feed exists",
     "notes": [
       "YouTube /youtube/channel/:id route exists upstream, but YouTube official channel RSS should be preferred when channel_id is known.",
-      "Telegram /telegram/channel/:username route exists upstream and can be used for public channel previews.",
+      "Telegram /telegram/channel/:username route exists upstream and can be used for public channel previews; no concrete market-radar Telegram feed is enabled yet.",
       "Threads /threads/:user route exists upstream, but no concrete market-radar account is enabled yet.",
       "Instagram should not use a guessed /instagram route; upstream visible route is picnob.info redirect and requires extra runtime support, so it remains disabled.",
       "The previous /github/repos/DIYgod/RSSHub/releases candidate was not verified as a valid RSSHub releases route; GitHub official releases.atom is used instead."
@@ -43,19 +43,19 @@
       "verification_rule": "official GitHub Atom feed; project updates are infrastructure signals, not market evidence by themselves"
     },
     {
-      "source_id": "rsshub_telegram_awesome_rsshub",
-      "name": "RSSHub Telegram channel via RSSHub",
+      "source_id": "rsshub_youtube_route_smoke_seed",
+      "name": "RSSHub YouTube route smoke seed",
       "domain_ids": ["ai_agents_workflow", "technology_development"],
       "region": "global",
-      "languages": ["en", "zh"],
+      "languages": ["en"],
       "feed_kind": "rsshub_route",
-      "rsshub_path": "/telegram/channel/awesomeRSSHub",
+      "rsshub_path": "/youtube/channel/UCDwDMPOZfxVV0x_dz0eQ8KQ",
       "route_status": "verified",
       "enabled_for_opml": true,
       "opml_category": "daily-market-radar/RSS_INFRA",
       "evidence_default": "medium_low",
-      "use_for": ["rsshub_channel_monitoring", "feed_stack_health", "route_regression_check"],
-      "verification_rule": "route path verified in upstream RSSHub telegram/channel route; public channel content only; infrastructure signal only"
+      "use_for": ["rsshub_route_smoke_test", "feed_stack_health"],
+      "verification_rule": "upstream route path and example channel are verified in RSSHub route code; infrastructure signal only"
     },
     {
       "source_id": "youtube_channel_route_template",
