@@ -6,10 +6,15 @@ Current enabled entries:
 
 ```text
 rsshub_project_github_releases_atom
-rsshub_youtube_route_smoke_seed
 ```
 
-These are starter validation feeds, not the final market-radar source set.
+Runtime test result:
+
+```text
+rsshub_youtube_route_smoke_seed returned an empty route during local RSSHub runtime testing and is disabled.
+```
+
+The current seed is a starter validation feed, not the final market-radar source set.
 
 Next replacement rule:
 
@@ -19,7 +24,7 @@ Next replacement rule:
 3. Set route_status = verified.
 4. Set enabled_for_opml = true only after verification.
 5. Add it to FRESHRSS_SEEDS.opml.
-6. Remove smoke-test entries after at least one real source per target domain is validated.
+6. Remove smoke-test or infrastructure-only entries after at least one real source per target domain is validated.
 ```
 
 Templates remain disabled until a concrete public account or official feed is selected and route output is tested.
