@@ -1,0 +1,21 @@
+{
+  "version": "0.1",
+  "last_updated": "2026-07-07",
+  "status": "placeholder",
+  "purpose": "Record FreshRSS ingestion runs, feed health, candidate counts, and rejected items after daily-market-radar runs.",
+  "runs": [],
+  "known_feed_status": [
+    {
+      "source_id": "openai_news_rss",
+      "status": "present_in_local_freshrss",
+      "last_confirmed": "2026-07-07",
+      "notes": "Confirmed by user after OPML import. Refresh success should be recorded by the next ingestion run."
+    },
+    {
+      "source_id": "rsshub_youtube_route_smoke_seed",
+      "status": "runtime_empty_disabled",
+      "last_confirmed": "2026-07-07",
+      "notes": "Local RSSHub route returned route is empty; disabled and removed from OPML."
+    }
+  ]
+}
