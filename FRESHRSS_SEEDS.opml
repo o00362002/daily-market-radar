@@ -4,6 +4,9 @@
     <title>daily-market-radar feed stack seeds</title>
   </head>
   <body>
+    <outline text="AI_OFFICIAL" title="AI_OFFICIAL">
+      <outline text="OpenAI News RSS" title="OpenAI News RSS" type="rss" xmlUrl="https://openai.com/news/rss.xml"/>
+    </outline>
     <outline text="RSS_INFRA" title="RSS_INFRA">
       <outline text="RSSHub GitHub releases Atom" title="RSSHub GitHub releases Atom" type="rss" xmlUrl="https://github.com/DIYgod/RSSHub/releases.atom"/>
     </outline>
