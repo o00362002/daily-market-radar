@@ -6,6 +6,21 @@
   <body>
     <outline text="AI_OFFICIAL" title="AI_OFFICIAL">
       <outline text="OpenAI News RSS" title="OpenAI News RSS" type="rss" xmlUrl="https://openai.com/news/rss.xml"/>
+      <outline text="NVIDIA Blog RSS" title="NVIDIA Blog RSS" type="rss" xmlUrl="https://blogs.nvidia.com/feed/"/>
+      <outline text="NVIDIA Developer Blog RSS" title="NVIDIA Developer Blog RSS" type="rss" xmlUrl="https://developer.nvidia.com/blog/feed/"/>
+      <outline text="Google AI Blog RSS" title="Google AI Blog RSS" type="rss" xmlUrl="https://blog.google/technology/ai/rss/"/>
+    </outline>
+    <outline text="AI_DISCOVERY" title="AI_DISCOVERY">
+      <outline text="TechCrunch AI RSS" title="TechCrunch AI RSS" type="rss" xmlUrl="https://techcrunch.com/category/artificial-intelligence/feed/"/>
+      <outline text="VentureBeat AI RSS" title="VentureBeat AI RSS" type="rss" xmlUrl="https://venturebeat.com/category/ai/feed/"/>
+      <outline text="The Verge AI RSS" title="The Verge AI RSS" type="rss" xmlUrl="https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"/>
+    </outline>
+    <outline text="CRYPTO_DISCOVERY" title="CRYPTO_DISCOVERY">
+      <outline text="CoinDesk RSS" title="CoinDesk RSS" type="rss" xmlUrl="https://www.coindesk.com/arc/outboundfeeds/rss/"/>
+      <outline text="Decrypt RSS" title="Decrypt RSS" type="rss" xmlUrl="https://decrypt.co/feed"/>
+    </outline>
+    <outline text="RETAIL_DISCOVERY" title="RETAIL_DISCOVERY">
+      <outline text="Retail Dive RSS" title="Retail Dive RSS" type="rss" xmlUrl="https://www.retaildive.com/feeds/news/"/>
     </outline>
     <outline text="RSS_INFRA" title="RSS_INFRA">
       <outline text="RSSHub GitHub releases Atom" title="RSSHub GitHub releases Atom" type="rss" xmlUrl="https://github.com/DIYgod/RSSHub/releases.atom"/>
