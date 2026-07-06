@@ -24,7 +24,6 @@ import json
 import os
 import re
 import sys
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +38,8 @@ class FeedCandidate:
     candidate_id: str
     source_id: str | None
     source_name: str | None
+    freshrss_stream_id: str
+    feed_url: str
     feed_category: str | None
     domain_ids: list[str]
     title: str
@@ -51,6 +52,7 @@ class FeedCandidate:
     today_new_information: str
     historical_duplication_status: str
     ingestion_status: str
+    mapping_status: str
     notes: str
 
 
@@ -109,15 +111,26 @@ def load_source_registry() -> dict[str, dict[str, Any]]:
     sources = data.get("sources", []) if isinstance(data, dict) else []
     registry: dict[str, dict[str, Any]] = {}
     for item in sources:
-        feed_url = item.get("feed_url")
-        if feed_url:
-            registry[feed_url] = item
+        for key in ("feed_url", "xmlUrl", "rsshub_url"):
+            feed_url = item.get(key)
+            if feed_url:
+                registry[feed_url] = item
+                registry[feed_url.rstrip("/")] = item
     return registry
 
 
 def feed_id_to_url(feed_id: str) -> str:
     # Google Reader style IDs often look like feed/https://example.com/feed.xml
     return feed_id.removeprefix("feed/")
+
+
+def lookup_source_meta(registry: dict[str, dict[str, Any]], feed_url: str) -> tuple[dict[str, Any], str]:
+    if feed_url in registry:
+        return registry[feed_url], "mapped_by_exact_feed_url"
+    trimmed = feed_url.rstrip("/")
+    if trimmed in registry:
+        return registry[trimmed], "mapped_by_trimmed_feed_url"
+    return {}, "unmapped_feed_url"
 
 
 def make_candidate_id(source_id: str | None, title: str, published_at: str | None, url: str) -> str:
@@ -146,7 +159,7 @@ def normalize_items(items: list[dict[str, Any]], subscriptions: dict[str, dict[s
         feed_url = feed_id_to_url(stream_id)
         sub = subscriptions.get(stream_id, {})
         source_name = origin.get("title") or sub.get("title")
-        source_meta = registry.get(feed_url, {})
+        source_meta, mapping_status = lookup_source_meta(registry, feed_url)
         source_id = source_meta.get("source_id")
         domain_ids = source_meta.get("domain_ids") or source_meta.get("domains") or []
         feed_category = source_meta.get("opml_category") or None
@@ -165,6 +178,8 @@ def normalize_items(items: list[dict[str, Any]], subscriptions: dict[str, dict[s
                 candidate_id=make_candidate_id(source_id, title, published_at, url),
                 source_id=source_id,
                 source_name=source_name,
+                freshrss_stream_id=stream_id,
+                feed_url=feed_url,
                 feed_category=feed_category,
                 domain_ids=list(domain_ids) if isinstance(domain_ids, list) else [],
                 title=title,
@@ -177,11 +192,33 @@ def normalize_items(items: list[dict[str, Any]], subscriptions: dict[str, dict[s
                 today_new_information="unknown_until_checked",
                 historical_duplication_status="unknown_until_checked",
                 ingestion_status="new",
+                mapping_status=mapping_status,
                 notes="Pulled from FreshRSS Google Reader compatible API",
             )
         )
 
     return candidates
+
+
+def summarize_mapping(candidates: list[FeedCandidate]) -> dict[str, Any]:
+    by_feed: dict[str, dict[str, Any]] = {}
+    for candidate in candidates:
+        key = candidate.feed_url or candidate.freshrss_stream_id or "unknown"
+        if key not in by_feed:
+            by_feed[key] = {
+                "feed_url": candidate.feed_url,
+                "freshrss_stream_id": candidate.freshrss_stream_id,
+                "source_name": candidate.source_name,
+                "source_id": candidate.source_id,
+                "mapping_status": candidate.mapping_status,
+                "count": 0,
+            }
+        by_feed[key]["count"] += 1
+    return {
+        "mapped_count": sum(1 for c in candidates if c.source_id),
+        "unmapped_count": sum(1 for c in candidates if not c.source_id),
+        "feeds": sorted(by_feed.values(), key=lambda x: x["count"], reverse=True),
+    }
 
 
 def main() -> int:
@@ -208,14 +245,16 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "feed_candidates_latest.json"
     payload = {
-        "version": "0.1",
+        "version": "0.2",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source": "FreshRSS Google Reader compatible API",
         "item_count": len(candidates),
+        "mapping_summary": summarize_mapping(candidates),
         "candidates": [asdict(candidate) for candidate in candidates],
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Wrote {len(candidates)} candidates to {output_path}")
+    print(json.dumps(payload["mapping_summary"], ensure_ascii=False, indent=2))
     return 0
 
 
