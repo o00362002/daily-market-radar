@@ -1,5 +1,5 @@
 {
-  "version": "0.3",
+  "version": "0.4",
   "last_updated": "2026-07-07",
   "status": "active_draft",
   "purpose": "Registry for direct RSS feeds and RSSHub route candidates used by the feed discovery stack. Only verified concrete routes or direct feeds may be enabled for OPML import.",
@@ -17,9 +17,10 @@
   },
   "verification_summary": {
     "verified_on": "2026-07-07",
-    "method": "upstream RSSHub route-code inspection plus direct-feed validation where official feed exists",
+    "method": "upstream RSSHub route-code inspection plus local runtime smoke test where available",
     "notes": [
-      "YouTube /youtube/channel/:id route exists upstream, but YouTube official channel RSS should be preferred when channel_id is known.",
+      "YouTube /youtube/channel/:id route exists upstream, but the initial smoke-test channel returned an empty route at runtime and is disabled.",
+      "YouTube official channel RSS should be preferred when channel_id is known and the feed returns items.",
       "Telegram /telegram/channel/:username route exists upstream and can be used for public channel previews; no concrete market-radar Telegram feed is enabled yet.",
       "Threads /threads/:user route exists upstream, but no concrete market-radar account is enabled yet.",
       "Instagram should not use a guessed /instagram route; upstream visible route is picnob.info redirect and requires extra runtime support, so it remains disabled.",
@@ -50,12 +51,12 @@
       "languages": ["en"],
       "feed_kind": "rsshub_route",
       "rsshub_path": "/youtube/channel/UCDwDMPOZfxVV0x_dz0eQ8KQ",
-      "route_status": "verified",
-      "enabled_for_opml": true,
+      "route_status": "runtime_empty",
+      "enabled_for_opml": false,
       "opml_category": "daily-market-radar/RSS_INFRA",
       "evidence_default": "medium_low",
-      "use_for": ["rsshub_route_smoke_test", "feed_stack_health"],
-      "verification_rule": "upstream route path and example channel are verified in RSSHub route code; infrastructure signal only"
+      "use_for": ["failed_route_smoke_test_record"],
+      "verification_rule": "upstream route path exists, but local runtime test returned route is empty; keep disabled until a concrete active channel is chosen and tested"
     },
     {
       "source_id": "youtube_channel_route_template",
@@ -105,7 +106,7 @@
       "domain_ids": ["crypto_rwa_agent_payments", "retail_consumer_social_fashion", "labor_consumption_taiwan"],
       "region": "multi",
       "languages": ["multi"],
-      "feed_kind": "rsshub_route_template",
+      "feed_kind": "rsshub_route_template_runtime_extra_required",
       "rsshub_path_template": "/picnob.info/user/{id}",
       "route_status": "verified_template_runtime_extra_required",
       "enabled_for_opml": false,
