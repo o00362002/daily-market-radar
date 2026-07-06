@@ -4,6 +4,8 @@ Purpose: retain early, niche, social-first, and potential trend signals that are
 
 This workflow prevents the radar from becoming only an official-news digest.
 
+It also prevents the system from deleting influential but unverified or disputed narratives too early.
+
 ---
 
 ## Execution position
@@ -11,9 +13,10 @@ This workflow prevents the radar from becoming only an official-news digest.
 ```text
 FreshRSS candidates / query recipes / GDELT / Media Cloud / social-route candidates
 → weak signal scoring
+→ truth_score and influence_score split
 → memory/potential_pool.md
 → follow-up checks
-→ promote, keep watching, or reject
+→ promote, keep watching, mark influential false signal, or reject
 ```
 
 ---
@@ -34,11 +37,12 @@ workflows/source_promotion_workflow.md
 
 ```text
 1. Inspect rejected or low-confidence candidate items before discarding them.
-2. If novelty and relevance are high, create a weak signal record.
-3. Store it in memory/potential_pool.md.
-4. Assign next_check_query and next_check_after.
-5. During future briefs, check whether the signal gained confirmation, repetition, or action.
-6. Promote to news, promote to source candidate, keep watching, or reject as noise.
+2. Score truth and influence separately.
+3. If novelty, relevance, or influence is high, create a weak signal record.
+4. Store it in memory/potential_pool.md.
+5. Assign next_check_query and next_check_after.
+6. During future briefs, check whether the signal gained confirmation, repetition, contradiction, or visible action.
+7. Promote to news, promote to source candidate, retain as influential false/disputed signal, keep watching, or reject as noise.
 ```
 
 ---
@@ -54,6 +58,9 @@ RWA / agent payment / x402 / protocol adoption hints
 AI agent workflow deployment cases
 small policy pre-signals
 Taiwan local retail or consumption signs
+new concepts before official confirmation
+new applications mentioned repeatedly by builders, users, investors, brands, or policy actors
+false or disputed claims that are spreading enough to affect behavior, prices, policy debate, search demand, or brand decisions
 ```
 
 ---
@@ -61,13 +68,15 @@ Taiwan local retail or consumption signs
 ## What not to capture
 
 ```text
-pure engagement bait
-untraceable rumor
-one-off hot take with no source
+pure engagement bait with no spread
+one-off hot take with no source and no repetition
 duplicate of already-covered news
 content unrelated to the six core domains
 unsafe or private-source material
+claims where no confirmation or invalidation path can be defined
 ```
+
+Do not reject solely because a signal is unverified, disputed, or likely false. If it has high spread or narrative impact, retain it with warning labels.
 
 ---
 
@@ -80,6 +89,7 @@ niche_candidate
 trend_watch_note
 potential_pool_update
 post_brief_review_item
+narrative_risk_note
 ```
 
 Weak signals must not be used as:
@@ -88,6 +98,20 @@ Weak signals must not be used as:
 confirmed major news
 Taiwan news quota filler without qualified Taiwan source
 final conclusion without evidence
+verified fact when truth_status is unverified, disputed, likely_false, or false_but_influential
+```
+
+---
+
+## Required annotation for low-truth high-influence signals
+
+```text
+truth_status: unverified / disputed / likely_false / false_but_influential
+influence_status: repeated_mentions / narrative_forming / market_or_policy_attention / mainstreamed
+why_retained_despite_low_truth
+what_would_confirm_it
+what_would_invalidate_it
+next_check_query
 ```
 
 ---
@@ -99,4 +123,5 @@ crypto / market structure signals: re-check within 7 days
 AI agent workflow signals: re-check within 21 days
 retail and consumer signals: re-check within 30 days
 Taiwan policy or local signals: re-check within 30 days
+false but influential narratives: re-check within 14 days
 ```
