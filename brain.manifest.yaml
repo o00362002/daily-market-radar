@@ -18,6 +18,7 @@ inherited_principles:                  # 來源：brain-core/DECISIONS.md 創立
   - P3 資料驅動（JSON/YAML＋檢查器 > 散文）
   - P4 模型無關層最厚（檢查器/hook/schema；CLAUDE.md 只做薄適配）
   - P5 記憶輪替（頭部預算＋季度歸檔＋superseded 標記）
+  - 關聯設計原則（強弱判準/漂移長邊/掛載盤點；brain-core DECISIONS 2026-07-07）
 
 machine_layer:
   entry_contract: AGENTS.md
