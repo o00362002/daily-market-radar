@@ -1,8 +1,8 @@
 {
-  "version": "0.1",
+  "version": "0.2",
   "last_updated": "2026-07-07",
   "status": "active_draft",
-  "purpose": "Registry for direct RSS feeds and RSSHub route candidates used by the feed discovery stack. RSSHub paths must be verified before they count as checked sources.",
+  "purpose": "Registry for direct RSS feeds and RSSHub route candidates used by the feed discovery stack. Only verified concrete routes or direct feeds may be enabled for OPML import.",
   "rsshub": {
     "base_url_env": "RSSHUB_BASE_URL",
     "default_local_base_url": "http://localhost:1200",
@@ -12,22 +12,50 @@
   "freshrss": {
     "base_url_env": "FRESHRSS_BASE_URL",
     "category_prefix": "daily-market-radar",
-    "import_format": "opml"
+    "import_format": "opml",
+    "seed_opml_path": "infra/rss-stack/freshrss-daily-market-radar.opml"
+  },
+  "verification_summary": {
+    "verified_on": "2026-07-07",
+    "method": "upstream RSSHub route-code inspection plus direct-feed validation where official feed exists",
+    "notes": [
+      "YouTube /youtube/channel/:id route exists upstream, but YouTube official channel RSS should be preferred when channel_id is known.",
+      "Telegram /telegram/channel/:username route exists upstream and can be used for public channel previews.",
+      "Threads /threads/:user route exists upstream, but no concrete market-radar account is enabled yet.",
+      "Instagram should not use a guessed /instagram route; upstream visible route is picnob.info redirect and requires extra runtime support, so it remains disabled.",
+      "The previous /github/repos/DIYgod/RSSHub/releases candidate was not verified as a valid RSSHub releases route; GitHub official releases.atom is used instead."
+    ]
   },
   "feeds": [
     {
-      "source_id": "rsshub_project_github",
-      "name": "RSSHub GitHub project",
+      "source_id": "rsshub_project_github_releases_atom",
+      "name": "RSSHub GitHub releases Atom",
       "domain_ids": ["ai_agents_workflow", "technology_development"],
       "region": "global",
       "languages": ["en", "zh"],
-      "feed_kind": "rsshub_route_candidate",
-      "rsshub_path": "/github/repos/DIYgod/RSSHub/releases",
-      "route_status": "needs_route_verification",
-      "enabled_for_opml": false,
+      "feed_kind": "direct_rss",
+      "feed_url": "https://github.com/DIYgod/RSSHub/releases.atom",
+      "route_status": "verified",
+      "enabled_for_opml": true,
+      "opml_category": "daily-market-radar/RSS_INFRA",
       "evidence_default": "medium_low",
-      "use_for": ["rsshub_release_monitoring", "route_change_awareness"],
-      "verification_rule": "verify_route_before_counting; project updates are not market evidence by themselves"
+      "use_for": ["rsshub_release_monitoring", "route_change_awareness", "feed_stack_health"],
+      "verification_rule": "official GitHub Atom feed; project updates are infrastructure signals, not market evidence by themselves"
+    },
+    {
+      "source_id": "rsshub_telegram_awesome_rsshub",
+      "name": "RSSHub Telegram channel via RSSHub",
+      "domain_ids": ["ai_agents_workflow", "technology_development"],
+      "region": "global",
+      "languages": ["en", "zh"],
+      "feed_kind": "rsshub_route",
+      "rsshub_path": "/telegram/channel/awesomeRSSHub",
+      "route_status": "verified",
+      "enabled_for_opml": true,
+      "opml_category": "daily-market-radar/RSS_INFRA",
+      "evidence_default": "medium_low",
+      "use_for": ["rsshub_channel_monitoring", "feed_stack_health", "route_regression_check"],
+      "verification_rule": "route path verified in upstream RSSHub telegram/channel route; public channel content only; infrastructure signal only"
     },
     {
       "source_id": "youtube_channel_route_template",
@@ -37,39 +65,25 @@
       "languages": ["multi"],
       "feed_kind": "rsshub_route_template",
       "rsshub_path_template": "/youtube/channel/{channel_id}",
-      "route_status": "needs_route_verification",
+      "route_status": "verified_template",
       "enabled_for_opml": false,
       "evidence_default": "medium_low",
       "use_for": ["youtube_first_sources", "product_demo_channels", "conference_demo_channels"],
-      "verification_rule": "replace channel_id and verify route response before use"
+      "verification_rule": "upstream route path exists; replace channel_id and prefer official YouTube RSS when available before enabling a concrete feed"
     },
     {
       "source_id": "telegram_channel_route_template",
       "name": "RSSHub Telegram channel route template",
-      "domain_ids": ["crypto_rwa_agent_payments", "global_markets_capital_geopolitics"],
+      "domain_ids": ["crypto_rwa_agent_payments", "global_markets_capital_geopolitics", "technology_development"],
       "region": "global",
       "languages": ["multi"],
       "feed_kind": "rsshub_route_template",
-      "rsshub_path_template": "/telegram/channel/{channel}",
-      "route_status": "needs_route_verification",
+      "rsshub_path_template": "/telegram/channel/{username}",
+      "route_status": "verified_template",
       "enabled_for_opml": false,
       "evidence_default": "low",
       "use_for": ["public_telegram_announcements", "crypto_project_updates", "market_narrative_monitoring"],
-      "verification_rule": "public channels only; verify official identity; cross-check major claims"
-    },
-    {
-      "source_id": "instagram_public_route_template",
-      "name": "RSSHub Instagram public account route template",
-      "domain_ids": ["crypto_rwa_agent_payments", "retail_consumer_social_fashion", "labor_consumption_taiwan"],
-      "region": "multi",
-      "languages": ["multi"],
-      "feed_kind": "rsshub_route_template",
-      "rsshub_path_template": "verify_in_RSSHub_docs_before_use",
-      "route_status": "needs_route_verification",
-      "enabled_for_opml": false,
-      "evidence_default": "low",
-      "use_for": ["instagram_first_sources", "mall_brand_posts", "taiwan_crypto_social_posts"],
-      "verification_rule": "only public content; if route cannot be verified, mark social_channel_unchecked"
+      "verification_rule": "upstream route path exists; public channels only; verify official identity and cross-check major claims before use"
     },
     {
       "source_id": "threads_public_route_template",
@@ -78,12 +92,26 @@
       "region": "multi",
       "languages": ["multi"],
       "feed_kind": "rsshub_route_template",
-      "rsshub_path_template": "verify_in_RSSHub_docs_before_use",
-      "route_status": "needs_route_verification",
+      "rsshub_path_template": "/threads/{user}",
+      "route_status": "verified_template",
       "enabled_for_opml": false,
       "evidence_default": "low",
       "use_for": ["threads_first_sources", "creator_economy_posts", "social_commerce_posts"],
-      "verification_rule": "only public content; verify with stronger source types for claims"
+      "verification_rule": "upstream route path exists; enable only after concrete public account is selected and route response is tested"
+    },
+    {
+      "source_id": "instagram_picnob_route_template",
+      "name": "RSSHub Picnob Instagram public account route template",
+      "domain_ids": ["crypto_rwa_agent_payments", "retail_consumer_social_fashion", "labor_consumption_taiwan"],
+      "region": "multi",
+      "languages": ["multi"],
+      "feed_kind": "rsshub_route_template",
+      "rsshub_path_template": "/picnob.info/user/{id}",
+      "route_status": "verified_template_runtime_extra_required",
+      "enabled_for_opml": false,
+      "evidence_default": "low",
+      "use_for": ["instagram_first_sources", "mall_brand_posts", "taiwan_crypto_social_posts"],
+      "verification_rule": "do not guess /instagram route; upstream picnob.info route exists but needs runtime support and concrete account testing before enablement"
     },
     {
       "source_id": "direct_rss_official_newsroom_template",
@@ -104,6 +132,7 @@
     "enabled_items_must_have": ["source_id", "name", "domain_ids", "feed_kind", "route_status", "evidence_default", "verification_rule"],
     "rsshub_route_candidates_count_as_checked_only_when": "route_status == verified AND enabled_for_opml == true",
     "templates_count_as_checked": false,
+    "verified_templates_count_as_checked": false,
     "social_first_claims_need_crosscheck": true
   }
 }
