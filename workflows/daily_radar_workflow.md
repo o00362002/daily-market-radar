@@ -27,6 +27,7 @@ Full reports must enforce:
 只有背景概念或歷史重播，不得計入 5+5。
 固定來源庫必須先於 generic keyword search 檢查。
 小眾候選必須是具體早期弱訊號，不得用空泛趨勢句補位。
+小眾候選必須分類 candidate_type 與 formation_level。
 ```
 
 ## name
@@ -81,20 +82,21 @@ Non-trigger phrases route to `AGENT_DAILY_PUSH_BRIEF` unless the user explicitly
 10. Build separate major-signal and niche-candidate search plans.
 11. Collect priority source candidates by domain, region, and language.
 12. Expand niche search into research, startup, product, niche industry, developer, social-first, hiring, on-chain, patent and clinical sources.
-13. Filter items with topic keywords and radar rules.
-14. Cross-check high-risk claims with official / data sources.
-15. Use generic keyword search only as fallback / enrichment / discovery.
-16. If 5 major + 5 niche candidates is not met, run retry and external discovery.
-17. Check source, date, claim risk, and 今日新增點.
-18. Check candidate concrete anchor, why early, scale path, cannot-conclude and next verification.
-19. Check Taiwan news validity by domain.
-20. Check coverage and historical duplicates.
-21. Remove background-only / historical-replay items from 5+5 count.
-22. Enforce Technology anti-AI-overcapture rule and non-AI scan.
-23. Format with the full daily report template.
-24. Output source-library coverage matrix and retry notes.
-25. Run missed-case backtest loop when needed.
-26. Complete final status check.
+13. For retail / consumer / social / fashion / trend domain, also check fashion media, style platforms, runway trend reports, brand official channels, merchandising shifts, assortment changes and street-style / social-style signals.
+14. Filter items with topic keywords and radar rules.
+15. Cross-check high-risk claims with official / data sources.
+16. Use generic keyword search only as fallback / enrichment / discovery.
+17. If 5 major + 5 niche candidates is not met, run retry and external discovery.
+18. Check source, date, claim risk, and 今日新增點.
+19. Check candidate_type, formation_level, concrete anchor, why early, scale path, cannot-conclude and next verification.
+20. Check Taiwan news validity by domain.
+21. Check coverage and historical duplicates.
+22. Remove background-only / historical-replay items from 5+5 count.
+23. Enforce Technology anti-AI-overcapture rule and non-AI scan.
+24. Format with the full daily report template.
+25. Output source-library coverage matrix and retry notes.
+26. Run missed-case backtest loop when needed.
+27. Complete final status check.
 ```
 
 ## required_checks
@@ -110,6 +112,9 @@ historical duplicate check
 Taiwan news validity check
 coverage check
 niche candidate concrete-anchor check
+candidate_type check
+formation_level check
+topic formation vs trend formation check
 candidate equality check
 gap note check
 technology anti-AI-overcapture check
@@ -120,20 +125,59 @@ missed-case backtest check
 
 Full Daily Radar must not start from generic keyword search. Generic search is allowed only after priority-source checks or when coverage expansion / Taiwan retry / external discovery is required.
 
+## six core domains
+
+```text
+1. AI models / agents / workflow replacement
+2. Crypto / RWA / agent payments
+3. Retail / consumer / social / fashion / trend
+4. Global markets / capital flows / geopolitics
+5. Technology development / robotics / biotech / energy / semiconductor
+6. Labor / consumption pressure / Taiwan local signals
+```
+
 ## niche candidate rule
 
 ```text
 Full target = at least 5 major signals + at least 5 niche candidates per domain when available.
 Candidate target equals major target.
 Mainstream wires alone are insufficient for niche-candidate completion.
-Every candidate needs a concrete anchor and must explain why early, why it could scale, what cannot be concluded, and next verification.
+Every candidate needs candidate_type, formation_level, concrete anchor, why early, why it could scale, what cannot be concluded, and next verification.
 If candidate quota is not met, run retry / external discovery before declaring a gap.
 Never fabricate candidates to satisfy quota.
 ```
 
+Candidate types:
+
+```text
+新領域
+新應用
+新概念
+新趨勢
+```
+
+Formation levels:
+
+```text
+弱訊號
+話題形成
+趨勢形成
+主流化中
+```
+
+Topic / trend rule:
+
+```text
+Many related reports, repeated media mentions, social discussion or spreading vocabulary = 話題形成.
+Many actual applications, pilots, product launches, company actions, investment, hiring, usage data or supply-chain changes = 趨勢形成.
+If already commercially broad and measurable, consider upgrading from candidate to major signal.
+```
+
+Do not call something a trend just because it has many articles. Many articles without adoption evidence is topic formation, not trend formation.
+
 ## Taiwan news rule
 
-Allowed Taiwan news includes Taiwan official data/policy/statistics, Taiwan company actions, local industry events, retail/channel news, market/labor/consumption data, or international news explicitly involving Taiwan entities.
+Allowed Taiwan news includes Taiwan official data/policy/statistics, Taiwan company actions, local industry events, retail/channel/fashion news, market/labor/consumption data, or international news explicitly involving Taiwan entities.
 
 Generic implications are not Taiwan news. If Taiwan news is not found, disclose checked sources, keywords and next retry. Taiwan crypto must obey the fixed-source and legislative-trigger audit in `configs/source_routing_rules.yml`.
 
@@ -154,6 +198,8 @@ ID
 Candidates additionally require:
 
 ```text
+candidate_type
+formation_level
 concrete_anchor
 why_niche_or_early
 why_it_could_scale
@@ -166,6 +212,26 @@ Items without new information must not count toward 5+5.
 ## technology rule
 
 Technology domain must obey `configs/technology_development.yml`. AI domain cannot consume Technology quota. At least six non-AI technology subdomains must be scanned; otherwise mark Technology coverage partial.
+
+## retail / fashion rule
+
+Retail domain is now:
+
+```text
+Retail / consumer / social / fashion / trend
+```
+
+It must scan channel changes and fashion/style/taste changes together:
+
+```text
+department store / mall / street retail
+brand openings / closures / tenant mix
+online retail / marketplace / social commerce
+fashion / apparel / style / trend signals
+流行趨勢 / 穿搭風格 / 顏色 / 材質 / 版型 / 商品類別變化
+assortment / merchandising / inventory / discount
+Taiwan retail / malls / department stores / brands / fashion channels
+```
 
 ## source coverage matrix requirement
 
@@ -181,6 +247,7 @@ external discovery used
 official / data cross-check used
 Taiwan sources checked
 niche source types checked
+formation_level coverage
 remaining source gap
 ```
 
@@ -195,4 +262,4 @@ reports/backtests/ when needed
 
 ## completion_rule
 
-The report can be marked `complete` only when required source-library checks, 5+5 equality target, candidate quality checks, technology checks, freshness, Taiwan news and backtest checks are complete. If any required check is skipped, mark `partial full report`.
+The report can be marked `complete` only when required source-library checks, 5+5 equality target, candidate quality checks, formation-level checks, technology checks, freshness, Taiwan news and backtest checks are complete. If any required check is skipped, mark `partial full report`.
