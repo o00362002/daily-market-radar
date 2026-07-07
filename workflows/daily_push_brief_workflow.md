@@ -85,9 +85,11 @@ Minimum internal flow:
 8. For each of six domains, check global media, Taiwan media, official/data sources, and feed candidates.
 9. Build major-signal pool and a separate niche-candidate pool.
 10. Expand candidate search beyond mainstream wires into research, startup, product, niche industry, developer, social-first, hiring, on-chain, patent and clinical sources.
-11. Normalize candidates and verify original source.
-12. Use query recipes and keyword search to filter, enrich, or retry gaps.
-13. Disclose material source and feed gaps.
+11. For retail / consumer / social / fashion / trend domain, also check fashion media, style platforms, runway trend reports, brand official channels, merchandising shifts, assortment changes and street-style / social-style signals.
+12. Normalize candidates and verify original source.
+13. Classify each candidate by candidate_type and formation_level.
+14. Use query recipes and keyword search to filter, enrich, or retry gaps.
+15. Disclose material source and feed gaps.
 ```
 
 FreshRSS is a candidate pool. It accelerates discovery but does not replace original-source verification.
@@ -103,7 +105,7 @@ FreshRSS is a candidate pool. It accelerates discovery but does not replace orig
 5. Each core domain: exactly 3 major signals
 6. Each core domain: exactly 3 niche / potential candidates
 7. Each core domain: 1–2 Taiwan news items directly under the domain
-8. Retail focus block with five fixed checks
+8. Retail / fashion focus block with fixed checks
 9. New Information / History Duplicate Check
 10. Data gaps and retry notes
 11. Final indicator status and news synthesis panel
@@ -115,7 +117,7 @@ FreshRSS is a candidate pool. It accelerates discovery but does not replace orig
 ```text
 1. AI models / agents / workflow replacement
 2. Crypto / RWA / agent payments
-3. Retail / consumer / social / fashion
+3. Retail / consumer / social / fashion / trend
 4. Global markets / capital flows / geopolitics
 5. Technology development / robotics / biotech / energy / semiconductor
 6. Labor / consumption pressure / Taiwan local signals
@@ -140,6 +142,8 @@ Keyword fallback: yes / no
 Candidate items additionally require:
 
 ```text
+candidate_type: 新領域 / 新應用 / 新概念 / 新趨勢
+formation_level: 弱訊號 / 話題形成 / 趨勢形成 / 主流化中
 concrete_anchor
 why_niche_or_early
 why_it_could_scale
@@ -147,7 +151,7 @@ cannot_conclude
 next_verification
 ```
 
-A candidate must be a source-backed early weak signal, not generic trend commentary. At least one concrete anchor is mandatory: company action, product experiment, paper/data, startup funding, developer adoption, on-chain metric, niche-industry event, social/community signal, pilot, hiring shift, patent, clinical trial, prototype, or supply-chain anomaly.
+A candidate must be a source-backed early weak signal, not generic trend commentary. At least one concrete anchor is mandatory: company action, product experiment, paper/data, startup funding, developer adoption, on-chain metric, niche-industry event, social/community signal, pilot, hiring shift, patent, clinical trial, prototype, supply-chain anomaly, fashion/style microtrend, brand merchandising shift or assortment change.
 
 ## candidate equality and retry rule
 
@@ -160,6 +164,16 @@ If still insufficient, disclose the candidate gap and mark partial concise brief
 ```
 
 Mainstream wires alone are insufficient for candidate completion. Candidate search must expand into non-English/regional and non-mainstream sources.
+
+## topic / trend formation rule
+
+```text
+Many related reports, repeated media mentions, social discussion or spreading vocabulary = 話題形成.
+Many actual applications, pilots, product launches, company actions, investment, hiring, usage data or supply-chain changes = 趨勢形成.
+If already commercially broad and measurable, consider upgrading from candidate to major signal.
+```
+
+Do not call something a trend just because it has many articles. Many articles without adoption evidence is topic formation, not trend formation.
 
 ## Taiwan news rule
 
@@ -184,7 +198,7 @@ Indicators, themes, conclusions, Taiwan implications, model inference and cross-
 
 Technology domain must obey `configs/technology_development.yml`. AI domain cannot consume Technology quota. At least six non-AI technology subdomains must be scanned; otherwise mark Technology coverage partial.
 
-## retail focus rule
+## retail / fashion focus rule
 
 The concise report must preserve:
 
@@ -192,9 +206,13 @@ The concise report must preserve:
 department store / mall / street retail
 brand openings / closures / tenant mix
 online retail / marketplace / social commerce
+fashion / apparel / style / trend signals
+流行趨勢 / 穿搭風格 / 顏色 / 材質 / 版型 / 商品類別變化
 fashion inventory / discount / mid-price pressure
-Taiwan retail / malls / department stores / brands
+Taiwan retail / malls / department stores / brands / fashion channels
 ```
+
+Retail domain is not only channel news. It must include fashion, apparel, style, trend, assortment and consumer taste shifts when source-backed.
 
 ## final indicator and synthesis panel rule
 
@@ -227,11 +245,11 @@ feed status checked or unavailable disclosed
 six domains covered
 all domains contain exactly 3 major signals
 all domains contain exactly 3 niche candidates
-all candidates contain concrete anchor and early-signal fields
+all candidates contain candidate_type, formation_level, concrete anchor and early-signal fields
 all domains contain 1–2 Taiwan news items or explicit valid insufficiency disclosure
 all items contain evidence trace
 all items contain today_new_information and historical_duplication_status
-retail focus block present
+retail / fashion focus block present
 source-library coverage audit present or material gaps disclosed
 candidate retry / external discovery executed when quota missed
 data gaps disclosed
