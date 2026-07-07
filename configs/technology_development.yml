@@ -6,6 +6,18 @@ technology_development:
   required: true
   principle: "科技發展與突破是一個獨立主雷達，不是 AI 段落的附屬品。每日報告必須同時追蹤 AI 驅動的科技突破與非 AI 的單獨科技突破；AI 只是其中一種加速器，不是全部。"
 
+  anti_ai_overcapture_rule:
+    status: active
+    summary: "AI domain 不得重複佔用 Technology domain quota。AI server、GPU、AI governance、AI compliance agent、AI workflow 若主要價值在 AI 生態、治理或供應鏈風險，應歸入 AI / Agent / AI supply chain，不得用來填滿科技發展段。"
+    not_counted_as_standalone_technology_breakthrough:
+      - AI model release without non-AI technical breakthrough
+      - AI agent workflow adoption
+      - AI server export control / compliance probe
+      - GPU supply-chain governance when mainly regulatory
+      - energy geopolitics / oil price / OPEC production without energy technology breakthrough
+      - company earnings or stock movement without technical milestone
+    must_disclose_when_no_signal: "非 AI / 單獨科技突破：本次未見高證據重大訊號 / 資料缺口。"
+
   scope:
     ai_related:
       - AI models / agents / multimodal systems
@@ -21,16 +33,41 @@ technology_development:
       - physics / particle physics / condensed matter / optics
       - chemistry / catalysis / batteries / industrial chemistry
       - materials science / new materials / superconductors / semiconductors
-      - energy / nuclear / fusion / grid / storage / hydrogen / geothermal
-      - robotics / humanoid robots / industrial robots / sensors / actuators
+      - energy technology / nuclear / SMR / fusion / grid / storage / hydrogen / geothermal
+      - robotics hardware / humanoid robots / industrial robots / sensors / actuators
       - semiconductor / compute / chips / HBM / photonics / advanced packaging
       - quantum computing / quantum sensing / cryptography
       - space technology / satellite / launch / defense tech
+      - communications / 6G / optical communications / direct-to-device satellite
       - manufacturing automation / industrial technology
       - cybersecurity / identity / governance
       - climate technology / carbon capture / water / agriculture tech
       - scientific awards / Nobel / major academic breakthroughs
       - research papers / lab-to-industry translation
+
+  required_non_ai_scan_subdomains:
+    minimum_checked_per_report: 6
+    list:
+      - semiconductor_process_packaging_photonics_hbm
+      - robotics_hardware_actuators_sensors
+      - energy_technology_battery_grid_fusion_smr_geothermal
+      - quantum_computing_sensing_networking
+      - biotech_medtech_clinical_trials
+      - space_satellite_launch_communications
+      - advanced_materials
+      - manufacturing_automation
+      - cybersecurity_identity
+      - climate_water_agritech
+
+  technology_maturity_labels:
+    - research
+    - prototype
+    - benchmark_breakthrough
+    - pilot
+    - commercialization
+    - cost_curve_decline
+    - supply_chain_formation
+    - regulatory_clearance
 
   required_questions:
     - 今日是否有任何科技領域出現突破，不論是否由 AI 驅動？
@@ -41,21 +78,15 @@ technology_development:
     - 哪些指標會連動：算力需求、GPU / HBM、實驗週期、研發成本、專利、投資、臨床進度、產品上市、人才需求、供應鏈瓶頸？
     - 這個事件對台灣可能影響什麼：半導體、伺服器、醫療科技、生技、製造、能源、材料、零售工具化、教育與職能？
 
-  examples:
-    - case: "2024 Nobel Prize in Physics"
-      interpretation: "John Hopfield and Geoffrey Hinton 因奠定 artificial neural networks 的 foundational discoveries 獲獎，這是 AI、物理、統計力學與機器學習交會形成科技底層能力的例子。"
-    - case: "2024 Nobel Prize in Chemistry"
-      interpretation: "David Baker、Demis Hassabis、John Jumper 因 computational protein design 與 protein structure prediction 獲獎，代表 computational methods 推動蛋白質設計、藥物研發、生物材料與生命科學突破。"
-    - case: "Standalone non-AI technology breakthrough"
-      interpretation: "若出現新電池材料、半導體製程、核融合、量子感測、醫療器材、機器人關節、太空發射或臨床試驗突破，即使沒有 AI，也必須列入科技發展與突破雷達。"
-
   output_requirements:
     - 每日報告需有「科技發展與突破」段落，不得只寫 AI 公司新聞或 AI 模型發布。
     - 科技發展段必須分成「AI 驅動突破」與「非 AI / 單獨科技突破」。
-    - 每則科技突破至少標示：技術本質、是否 AI 驅動、影響領域、突破指標、商業化路徑、連動指標、台灣映射、證據等級。
+    - 非 AI / 單獨科技突破至少掃描 required_non_ai_scan_subdomains 中 6 個子域；未完成需標示 partial。
+    - 每則科技突破至少標示：技術本質、是否 AI 驅動、technology_maturity、影響領域、突破指標、商業化路徑、連動指標、台灣映射、證據等級。
     - 若是重大科學獎項或論文，需說明它影響的是哪一條未來科技路徑，而不是只寫得獎或發布。
     - 若事件尚未商業化，列為候選訊號或科技路徑訊號，不得寫成已經產業落地。
     - 若今日沒有重大非 AI 科技突破，也必須寫「非 AI / 單獨科技突破：本次未見高證據重大訊號 / 資料缺口」，不得省略。
+    - 純市場價格、財報、能源地緣、監管調查不得冒充 technology breakthrough；若保留，只能標示為產業週期 / 政策 / 供應鏈訊號。
 
   linked_indicators:
     - research paper volume / citations / benchmark improvement
@@ -76,6 +107,8 @@ technology_development:
   quality_gate:
     - 今天是否檢查「AI 驅動科技突破」？
     - 今天是否檢查「非 AI / 單獨科技突破」？
+    - 今天是否至少掃描 6 個非 AI 技術子域？
+    - 今天是否把 AI supply chain / AI governance 與真正科技突破分開？
     - 今天是否把科技突破連到可觀測指標，而不是只寫新聞？
     - 今天是否說明「這會讓未來科技怎麼發展」？
     - 今天是否把台灣可能受影響的產業或職能列出？
