@@ -1,0 +1,105 @@
+version: 1.0
+last_updated: 2026-07-07
+status: active
+purpose: >
+  Define niche / potential candidate signals as early weak-signal reconnaissance,
+  not generic trend commentary, and keep candidate quota equal to major-signal quota
+  in both concise and full daily modes.
+
+quota_policy:
+  principle: "小眾候選數量必須與大型訊號數量相同。"
+  daily_push_brief:
+    major_signals_per_domain: 3
+    niche_candidates_per_domain: 3
+    quota_name: 3_plus_3
+  full_daily_radar:
+    major_signals_per_domain_minimum_when_available: 5
+    niche_candidates_per_domain_minimum_when_available: 5
+    quota_name: 5_plus_5
+  equality_rule: >
+    For every domain, the target niche-candidate count equals the target major-signal count.
+    If evidence or source access is insufficient, do not fabricate candidates; mark the
+    candidate gap, execute retry / external discovery, and downgrade report status as required.
+
+candidate_definition:
+  summary: >
+    小眾候選訊號是尚未成為主流大新聞、但可能擴大的早期弱訊號。
+    它不是模型感想、空泛趨勢句、主流新聞換句話說，也不是沒有事件依據的預測。
+  must_have_at_least_one_concrete_anchor:
+    - specific_company_action
+    - product_launch_or_experiment
+    - research_paper_or_dataset
+    - startup_funding_or_hiring_shift
+    - developer_tool_or_open_source_adoption
+    - onchain_metric_or_usage_change
+    - niche_industry_media_event
+    - social_or_community_signal
+    - regulatory_pilot_or_local_policy_test
+    - supply_chain_or_procurement_anomaly
+    - patent_clinical_trial_prototype_or_pilot
+  preferred_properties:
+    - not_yet_mainstream_headline
+    - cross_domain_amplification_potential
+    - observable_next_step_metric
+    - asymmetric_upside_or_structural_change_potential
+    - early_stage_uncertainty_explicitly_disclosed
+
+invalid_candidates:
+  - generic_trend_statement_without_event
+  - model_opinion_without_source
+  - mainstream_major_signal_rephrased_as_candidate
+  - old_background_concept_without_today_new_information
+  - Taiwan_implication_without_Taiwan_event
+  - unsupported_prediction
+  - vague_statement_such_as_regulation_remains_a_variable
+
+required_candidate_fields:
+  - id
+  - candidate_signal
+  - concrete_anchor
+  - today_new_information
+  - source_and_time
+  - why_niche_or_early
+  - why_it_could_scale
+  - evidence_level
+  - historical_duplication_status
+  - uncertainty
+  - cannot_conclude
+  - next_verification
+  - Taiwan_news_or_mapping_when_relevant
+
+source_expansion:
+  required_source_types:
+    - research_papers
+    - startup_and_funding_sources
+    - product_release_notes
+    - niche_industry_media
+    - developer_communities
+    - official_social_channels
+    - hiring_and_job_postings
+    - onchain_and_market_data
+    - patents_and_clinical_trials
+    - regional_and_non_English_sources
+  rule: >
+    Mainstream wires alone are insufficient for niche-candidate completion.
+    Candidate search must expand beyond Reuters/AP-style headline coverage.
+
+retry_rule:
+  when_candidate_quota_not_met:
+    - check_fixed_niche_sources
+    - check_non_English_and_regional_sources
+    - check_research_and_product_sources
+    - check_social_first_sources_when_required
+    - run_cross_domain_trigger_search
+    - run_external_discovery
+    - record_remaining_gap
+  no_fabrication: true
+
+quality_gate:
+  - candidate_count_equals_major_target_or_gap_disclosed
+  - each_candidate_has_concrete_anchor
+  - each_candidate_explains_why_niche_or_early
+  - each_candidate_explains_why_it_could_scale
+  - each_candidate_states_cannot_conclude
+  - each_candidate_has_next_verification
+  - mainstream_headline_rephrasing_rejected
