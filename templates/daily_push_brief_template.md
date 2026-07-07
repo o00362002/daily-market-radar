@@ -1,37 +1,16 @@
 # Daily Push Brief Template
 
 Daily Push Brief is a structured concise radar, not a free-form summary.
+Concise means shorter wording per item, not fewer reconnaissance categories.
 
-```text
-Daily Push Brief 不代表可刪減結構。
-Brief 只代表單則內容字數較短。
-所有章節、欄位、證據追溯、台灣新聞、指標狀態仍必須完整保留。
-```
-
-Required shared rule:
+Required shared rules:
 
 ```text
 configs/news_freshness_and_taiwan_news.yml
+configs/source_routing_rules.yml
+configs/niche_candidate_policy.yml
+configs/technology_development.yml
 ```
-
-Important correction:
-
-```text
-「台灣映射」在 Daily Push Brief 中改為「台灣新聞」。
-使用者要的是台灣新聞內容，不是模型把國際新聞套到台灣的策略推論。
-每個領域的台灣段必須優先放台灣本地新聞 / 官方資料 / 公司動作 / 數據 / 產業事件。
-若當日查無合格台灣新聞，必須寫「台灣新聞不足」與已查來源，不得用泛泛台灣影響補位。
-```
-
-New information rule:
-
-```text
-每日情報必須優先提供今日新增資訊。
-不得用昨日或歷史已播概念重複填滿 3+1。
-若重複歷史主題，必須有新數據 / 新公司動作 / 新政策 / 新市場反應 / 新鏈上數據 / 新台灣新聞，否則不得列入大型訊號。
-```
-
----
 
 ## 0. Basic Info
 
@@ -39,7 +18,7 @@ New information rule:
 報告日期：YYYY/MM/DD（星期X）台灣時間
 輸出模式：每日推播精簡版
 精簡版狀態：complete concise brief / partial concise brief
-完整 48 則正式閘門：未嘗試 / 未通過 / 另需分段研究版
+完整正式閘門：未嘗試 / 未通過 / 另需分段研究版
 系統資料讀取狀態：已讀取 / 部分無法讀取 / 無法讀取
 歷史去重狀態：已檢查近期 reports / 未完整
 結構閘門狀態：通過 / 未通過
@@ -47,260 +26,133 @@ New information rule:
 台灣新聞狀態：通過 / 不足 / 未完整
 ```
 
----
-
 ## 1. Six-domain Coverage Matrix
 
-| 核心領域 | 掃描狀態 | 大型訊號數 | 小眾候選數 | 台灣新聞數 | Evidence Trace | New Info Check | 今日狀態 | 漏抓風險 |
-|---|---|---:|---:|---:|---|---|---|---|
-| AI / Agent / 工作流 |  | 3 | 1 | 1–2 | required | required |  |  |
-| 加密 / RWA / Agent payments |  | 3 | 1 | 1–2 | required | required |  |  |
-| 零售 / 消費 / 社群 / 服飾 |  | 3 | 1 | 1–2 | required | required |  |  |
-| 全球市場 / 資金流 / 地緣 |  | 3 | 1 | 1–2 | required | required |  |  |
-| 科技發展 / 半導體 / 能源 / 機器人 |  | 3 | 1 | 1–2 | required | required |  |  |
-| 勞動 / 消費壓力 / 台灣 |  | 3 | 1 | 1–2 | required | required |  |  |
+| 核心領域 | 掃描狀態 | 大型訊號數 | 小眾候選數 | 台灣新聞數 | Evidence Trace | New Info Check | 漏抓風險 |
+|---|---|---:|---:|---:|---|---|---|
+| AI / Agent / 工作流 |  | 3 | 3 | 1–2 | required | required |  |
+| 加密 / RWA / Agent payments |  | 3 | 3 | 1–2 | required | required |  |
+| 零售 / 消費 / 社群 / 服飾 |  | 3 | 3 | 1–2 | required | required |  |
+| 全球市場 / 資金流 / 地緣 |  | 3 | 3 | 1–2 | required | required |  |
+| 科技發展 / 半導體 / 能源 / 機器人 |  | 3 | 3 | 1–2 | required | required |  |
+| 勞動 / 消費壓力 / 台灣 |  | 3 | 3 | 1–2 | required | required |  |
 
----
+## 2. Per-domain Block
 
-## 2. Domain Blocks
+Repeat this block for all six domains.
 
-Each domain must include exactly:
+### [DOMAIN]
+
+**大型訊號（3）**
+
+1. ID：[DOMAIN]-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+2. ID：[DOMAIN]-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+3. ID：[DOMAIN]-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+
+**小眾候選（3）**
+
+1. ID：[DOMAIN]-C1｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+2. ID：[DOMAIN]-C2｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+3. ID：[DOMAIN]-C3｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+
+**台灣新聞（1–2）**
+
+- ID：TW-[DOMAIN]-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+- ID：TW-[DOMAIN]-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+
+## 3. Candidate Quality Gate
 
 ```text
-大型訊號：3 則
-小眾候選：1 則
-台灣新聞：1–2 則
+小眾候選不是趨勢感想。
+每則至少有一個具體錨點：公司 / 產品 / 論文 / 數據 / 融資 / 招聘 / 開源採用 / 鏈上指標 / 社群事件 / pilot / patent / clinical trial / prototype / supply-chain anomaly。
+主流大型新聞換句話說不得算候選。
+空泛句如「監管仍是變數」不得算候選。
+候選必須說明：為何早期、為何可能放大、不能下什麼結論、下一步驗證。
 ```
 
-News / signals must be real events, data changes, company actions, policy changes, product releases, market moves, or source-backed observations.
-
-Indicators, synthesis, themes, Taiwan implications, and model conclusions must not be counted as news.
-
-Each news item must keep concise evidence trace:
+If fewer than 3 qualified candidates are found in a domain:
 
 ```text
-ID：
-事件：
-今日新增點：
-來源 / 時間：
-證據等級：high / medium / low / insufficient_data
-是否重複歷史主題：new_today / repeated_theme_with_new_data / repeated_theme_with_new_company_action / repeated_theme_with_new_policy / repeated_theme_with_new_market_reaction / repeated_theme_with_new_taiwan_news / background_only_do_not_count / historical_replay_do_not_count
-不確定點 / 下一步：
+run candidate retry / external discovery
+check non-English and regional sources
+check research / startup / product / niche industry / developer / social-first / hiring / on-chain sources
+never fabricate
+mark remaining candidate gap
+mark partial concise brief when completion gate is not met
 ```
 
-Each Taiwan news item must keep the same trace:
+## 4. Technology Development Rule
+
+Technology block must separate:
 
 ```text
-ID：TW-[DOMAIN]-1
-台灣新聞：
-今日新增點：
-來源 / 時間：
-證據等級：
-是否重複歷史主題：
-不確定點 / 下一步：
+AI-driven technology breakthrough
+standalone non-AI technology breakthrough
 ```
 
----
+AI supply chain / AI governance cannot consume Technology quota. Scan at least six non-AI technology subdomains or mark partial.
 
-### 2.1 AI / Agent / 工作流
+## 5. Taiwan News Rule
 
-**大型訊號（3）**
-1. ID：AI-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：AI-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：AI-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+Taiwan news must be local news / official data / company action / market data / industry event. Generic Taiwan implications do not count.
 
-**小眾候選（1）**
-- ID：AI-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
+For Taiwan crypto, report fixed-source audit. If DA 交易者聯盟 / 邦妮區塊鏈 / 加密城市 / 區塊勢 were not checked as required, do not claim Taiwan crypto news is absent.
 
-**台灣新聞（1–2）**
-- ID：TW-AI-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-AI-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-### 2.2 加密 / RWA / Agent payments
-
-**大型訊號（3）**
-1. ID：CRYPTO-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：CRYPTO-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：CRYPTO-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**小眾候選（1）**
-- ID：CRYPTO-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**台灣新聞（1–2）**
-- ID：TW-CRYPTO-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-CRYPTO-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-### 2.3 零售 / 消費 / 社群 / 服飾
-
-**大型訊號（3）**
-1. ID：RETAIL-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：RETAIL-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：RETAIL-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**小眾候選（1）**
-- ID：RETAIL-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**台灣新聞（1–2）**
-- ID：TW-RETAIL-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-RETAIL-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-### 2.4 全球市場 / 資金流 / 地緣
-
-**大型訊號（3）**
-1. ID：MARKET-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：MARKET-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：MARKET-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**小眾候選（1）**
-- ID：MARKET-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**台灣新聞（1–2）**
-- ID：TW-MARKET-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-MARKET-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-### 2.5 科技發展 / 半導體 / 能源 / 機器人
-
-**大型訊號（3）**
-1. ID：TECH-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：TECH-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：TECH-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**小眾候選（1）**
-- ID：TECH-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**台灣新聞（1–2）**
-- ID：TW-TECH-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-TECH-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-### 2.6 勞動 / 消費壓力 / 台灣
-
-**大型訊號（3）**
-1. ID：LABOR-1｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-2. ID：LABOR-2｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-3. ID：LABOR-3｜事件：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**小眾候選（1）**
-- ID：LABOR-C1｜候選訊號：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
-**台灣新聞（1–2）**
-- ID：TW-LABOR-1｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-- ID：TW-LABOR-2｜台灣新聞：｜今日新增點：｜來源 / 時間：｜證據等級：｜是否重複歷史主題：｜不確定點 / 下一步：
-
----
-
-## 3. Retail Focus Block
-
-Retail Focus Block must preserve the five fixed checks. It should reference news IDs above and must prioritize Taiwan retail news when discussing Taiwan.
+## 6. Retail Focus Block
 
 ```text
 百貨 / 購物中心 / 街邊店：
-  新聞依據：
-  台灣新聞依據：
-  資料缺口：
-  下一步：
-
 品牌展店 / 撤店 / tenant mix：
-  新聞依據：
-  台灣新聞依據：
-  資料缺口：
-  下一步：
-
 社群商務 / 內容導購：
-  新聞依據：
-  台灣新聞依據：
-  資料缺口：
-  下一步：
-
 服飾庫存 / 折扣 / 中價品牌壓力：
-  新聞依據：
-  台灣新聞依據：
-  資料缺口：
-  下一步：
-
 台灣零售 / 商圈 / 百貨 / 品牌訊號：
-  台灣新聞依據：
-  資料缺口：
-  下一步：
 ```
 
----
+Each line should reference supporting news IDs where possible.
 
-## 4. New Information / History Duplicate Check
+## 7. New Information / History Duplicate Check
 
-| 新聞 ID | 今日新增點 | 是否重複歷史主題 | 可否計入 3+1 | 原因 |
+| ID | 今日新增點 | 是否重複歷史主題 | 可否計入 | 原因 |
 |---|---|---|---|---|
-|  |  |  | yes / no |  |
 
----
+## 8. Source / Feed Coverage Audit
 
-## 5. Data Gaps and Retry Notes
+```text
+source_library_checked:
+priority_sources_checked:
+FreshRSS_checked:
+niche_source_types_checked:
+keyword_fallback_used:
+official_or_data_crosscheck_used:
+Taiwan_sources_checked:
+social_channels_checked_when_required:
+remaining_source_gap:
+```
+
+## 9. Data Gaps and Retry Notes
 
 | 缺口 | 已嘗試 | 下一步 |
 |---|---|---|
-| 台灣新聞不足 |  |  |
-| 新資訊不足 |  |  |
-| 歷史去重未完整 |  |  |
 
----
-
-## 6. Final Indicator Status and News Synthesis Panel
-
-This panel is required but must stay at the end of the brief.
-
-Indicators and conclusions are not news. They must not be counted toward the 3+1 domain quota.
-
-### 6.1 Indicator Status Summary
-
-| 指標領域 | 今日狀態 | 方向 | 支撐新聞 ID | 資料缺口 |
-|---|---|---|---|---|
-
-### 6.2 Today’s Main Themes
+## 10. Final Indicator Status and News Synthesis Panel
 
 ```text
-主旋律 1：
-支撐新聞：
-判斷類型：模型歸納 / 資料判斷，不是單一新聞
+indicator domain:
+today status:
+direction:
+supporting news IDs:
+data gaps:
+today main themes:
+Taiwan news summary:
+source-library coverage note:
+feed-stack coverage note:
+post-brief review:
 ```
 
-### 6.3 Taiwan News Summary
+This panel does not count toward 3+3.
 
-```text
-今日台灣新聞重點：
-1.
-2.
-3.
+## Completion Gate
 
-台灣新聞不足領域：
-- 
-```
+A concise brief is complete only when all six domains have exactly 3 major signals and exactly 3 qualified niche candidates, plus required Taiwan news or valid insufficiency disclosure, evidence traces, freshness checks, source audits, retry notes, retail block, final panel and post-brief review.
 
-### 6.4 Post-brief Review
-
-```text
-今日漏抓風險：
-新資訊密度：通過 / 偏低 / 未通過
-台灣新聞完整度：通過 / 不足 / 未完整
-是否需啟動完整研究版：yes / no
-是否需交給 news_content_agent 產內容：yes / no
-模型調整：
-今日最終一句話：
-```
-
-### 6.5 Misread Guard
-
-```text
-上述指標狀態與今日主旋律為報告歸納，不是新聞本體。
-台灣段落若無台灣新聞，不得用台灣推論補位。
-所有指標與結論必須回指上方新聞 ID。
-若無法回指新聞 ID，必須標示為資料缺口或候選推論。
-```
+If not, write `partial concise brief` and disclose the gap.
