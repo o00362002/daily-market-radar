@@ -27,7 +27,7 @@ configs/technology_development.yml
 |---|---:|---:|---:|---|---|---|---|
 | AI 模型 / Agent / 工作流替代 | >=5 | >=5 | required | required | required |  |  |
 | 區塊鏈 / 加密 / RWA / Agent payments | >=5 | >=5 | required | required | required |  |  |
-| 零售 / 消費 / 社群 / 服飾 | >=5 | >=5 | required | required | required |  |  |
+| 零售 / 消費 / 社群 / 服飾 / 時尚 / 流行 | >=5 | >=5 | required | required | required |  |  |
 | 全球市場 / 資金流 / 地緣政治 | >=5 | >=5 | required | required | required |  |  |
 | 科技發展 / 機器人 / 生技 / 能源 / 半導體 | >=5 | >=5 | required | required | required |  |  |
 | 勞動 / 消費壓力 / 台灣本地訊號 | >=5 | >=5 | required | required | required |  |  |
@@ -65,6 +65,8 @@ Each counted candidate must include:
 ```text
 ID:
 候選訊號:
+候選類型：新領域 / 新應用 / 新概念 / 新趨勢
+形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中
 具體錨點:
 今日新增點:
 來源 / 時間:
@@ -82,11 +84,21 @@ ID:
 Candidate quality rule:
 
 ```text
-候選必須有具體公司 / 產品 / 論文 / 數據 / 融資 / 招聘 / 開源採用 / 鏈上指標 / 社群事件 / pilot / patent / clinical trial / prototype / supply-chain anomaly 等錨點。
+候選必須有具體公司 / 產品 / 論文 / 數據 / 融資 / 招聘 / 開源採用 / 鏈上指標 / 社群事件 / pilot / patent / clinical trial / prototype / supply-chain anomaly / 時尚風格微趨勢 / 品牌商品組合變化 等錨點。
+每則候選必須標示候選類型：新領域 / 新應用 / 新概念 / 新趨勢。
+每則候選必須標示形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中。
 不得用空泛趨勢句補位。
 不得把大型主流新聞換句話說當候選。
-主流 wires 不足以完成候選搜尋，必須擴展研究、新創、產品、小眾產業、開發者、社群、招聘、鏈上與區域 / 非英語來源。
+主流 wires 不足以完成候選搜尋，必須擴展研究、新創、產品、小眾產業、開發者、社群、招聘、鏈上、時尚媒體、品牌官方、商品組合、區域 / 非英語來源。
 不足 5 則時先 retry / external discovery；仍不足才標示 gap，不得捏造。
+```
+
+Formation rule:
+
+```text
+很多報導、很多討論、詞彙或敘事開始擴散 = 話題形成。
+很多品牌、公司、平台、地區開始應用、試點、投資、招聘或數據同步出現 = 趨勢形成。
+已廣泛商業化且有明確數據 = 主流化中，應評估是否升級為大型訊號。
 ```
 
 ## 5. Taiwan News Section
@@ -125,7 +137,7 @@ Remaining gap:
 
 AI supply chain / AI governance cannot consume Technology quota.
 
-## 8. Retail Focus Block
+## 8. Retail / Fashion Focus Block
 
 ```text
 百貨 / 購物中心 / 街邊店：
@@ -151,6 +163,12 @@ AI supply chain / AI governance cannot consume Technology quota.
   台灣新聞依據：
   資料缺口：
   下一步：
+
+時尚 / 流行 / 穿搭風格 / 顏色 / 材質 / 版型 / 品類變化：
+  新聞依據：
+  台灣新聞依據：
+  資料缺口：
+  下一步：
 ```
 
 ## 9. Source Coverage / Candidate Discovery Audit
@@ -159,8 +177,10 @@ AI supply chain / AI governance cannot consume Technology quota.
 source_library_checked:
 priority_sources_checked:
 niche_source_types_checked:
+formation_level_coverage:
 non-English/regional sources checked:
 social-first sources checked when required:
+fashion/style/brand sources checked when relevant:
 keyword_fallback_used:
 external_discovery_used:
 official/data cross-check used:
@@ -188,4 +208,4 @@ remaining_source_gap:
 
 ## Completion Gate
 
-Formal completion requires six domains, >=5 major signals and >=5 qualified niche candidates per domain when available, retry before gaps, 7-day de-duplication, evidence grading, Taiwan news checks, technology anti-overcapture checks, source audits, and post-report backtest.
+Formal completion requires six domains, >=5 major signals and >=5 qualified niche candidates per domain when available, candidate type / formation level, retry before gaps, 7-day de-duplication, evidence grading, Taiwan news checks, technology anti-overcapture checks, source audits, and post-report backtest.
