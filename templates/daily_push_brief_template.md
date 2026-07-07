@@ -32,7 +32,7 @@ configs/technology_development.yml
 |---|---|---:|---:|---:|---|---|---|
 | AI / Agent / 工作流 |  | 3 | 3 | 1–2 | required | required |  |
 | 加密 / RWA / Agent payments |  | 3 | 3 | 1–2 | required | required |  |
-| 零售 / 消費 / 社群 / 服飾 |  | 3 | 3 | 1–2 | required | required |  |
+| 零售 / 消費 / 社群 / 服飾 / 時尚 / 流行 |  | 3 | 3 | 1–2 | required | required |  |
 | 全球市場 / 資金流 / 地緣 |  | 3 | 3 | 1–2 | required | required |  |
 | 科技發展 / 半導體 / 能源 / 機器人 |  | 3 | 3 | 1–2 | required | required |  |
 | 勞動 / 消費壓力 / 台灣 |  | 3 | 3 | 1–2 | required | required |  |
@@ -51,9 +51,9 @@ Repeat this block for all six domains.
 
 **小眾候選（3）**
 
-1. ID：[DOMAIN]-C1｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
-2. ID：[DOMAIN]-C2｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
-3. ID：[DOMAIN]-C3｜候選訊號：｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+1. ID：[DOMAIN]-C1｜候選訊號：｜候選類型：新領域 / 新應用 / 新概念 / 新趨勢｜形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+2. ID：[DOMAIN]-C2｜候選訊號：｜候選類型：新領域 / 新應用 / 新概念 / 新趨勢｜形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
+3. ID：[DOMAIN]-C3｜候選訊號：｜候選類型：新領域 / 新應用 / 新概念 / 新趨勢｜形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中｜具體錨點：｜今日新增點：｜來源 / 時間：｜為何小眾 / 早期：｜為何可能放大：｜證據等級：｜是否重複歷史主題：｜不能下的結論：｜下一步驗證：
 
 **台灣新聞（1–2）**
 
@@ -64,10 +64,20 @@ Repeat this block for all six domains.
 
 ```text
 小眾候選不是趨勢感想。
-每則至少有一個具體錨點：公司 / 產品 / 論文 / 數據 / 融資 / 招聘 / 開源採用 / 鏈上指標 / 社群事件 / pilot / patent / clinical trial / prototype / supply-chain anomaly。
+每則至少有一個具體錨點：公司 / 產品 / 論文 / 數據 / 融資 / 招聘 / 開源採用 / 鏈上指標 / 社群事件 / pilot / patent / clinical trial / prototype / supply-chain anomaly / 時尚風格微趨勢 / 品牌商品組合變化。
+每則必須標示候選類型：新領域 / 新應用 / 新概念 / 新趨勢。
+每則必須標示形成程度：弱訊號 / 話題形成 / 趨勢形成 / 主流化中。
 主流大型新聞換句話說不得算候選。
 空泛句如「監管仍是變數」不得算候選。
 候選必須說明：為何早期、為何可能放大、不能下什麼結論、下一步驗證。
+```
+
+形成程度判斷：
+
+```text
+很多報導、很多討論、詞彙或敘事開始擴散 = 話題形成。
+很多品牌、公司、平台、地區開始應用、試點、投資、招聘或數據同步出現 = 趨勢形成。
+已廣泛商業化且有明確數據 = 主流化中，應評估是否升級為大型訊號。
 ```
 
 If fewer than 3 qualified candidates are found in a domain:
@@ -76,6 +86,7 @@ If fewer than 3 qualified candidates are found in a domain:
 run candidate retry / external discovery
 check non-English and regional sources
 check research / startup / product / niche industry / developer / social-first / hiring / on-chain sources
+check fashion / style / brand / assortment sources when relevant
 never fabricate
 mark remaining candidate gap
 mark partial concise brief when completion gate is not met
@@ -98,14 +109,15 @@ Taiwan news must be local news / official data / company action / market data / 
 
 For Taiwan crypto, report fixed-source audit. If DA 交易者聯盟 / 邦妮區塊鏈 / 加密城市 / 區塊勢 were not checked as required, do not claim Taiwan crypto news is absent.
 
-## 6. Retail Focus Block
+## 6. Retail / Fashion Focus Block
 
 ```text
 百貨 / 購物中心 / 街邊店：
 品牌展店 / 撤店 / tenant mix：
 社群商務 / 內容導購：
 服飾庫存 / 折扣 / 中價品牌壓力：
-台灣零售 / 商圈 / 百貨 / 品牌訊號：
+時尚 / 流行 / 穿搭風格 / 顏色 / 材質 / 版型 / 品類變化：
+台灣零售 / 商圈 / 百貨 / 品牌 / 時尚通路訊號：
 ```
 
 Each line should reference supporting news IDs where possible.
@@ -122,6 +134,7 @@ source_library_checked:
 priority_sources_checked:
 FreshRSS_checked:
 niche_source_types_checked:
+formation_level_coverage:
 keyword_fallback_used:
 official_or_data_crosscheck_used:
 Taiwan_sources_checked:
@@ -153,6 +166,6 @@ This panel does not count toward 3+3.
 
 ## Completion Gate
 
-A concise brief is complete only when all six domains have exactly 3 major signals and exactly 3 qualified niche candidates, plus required Taiwan news or valid insufficiency disclosure, evidence traces, freshness checks, source audits, retry notes, retail block, final panel and post-brief review.
+A concise brief is complete only when all six domains have exactly 3 major signals and exactly 3 qualified niche candidates, plus candidate type / formation level, required Taiwan news or valid insufficiency disclosure, evidence traces, freshness checks, source audits, retry notes, retail / fashion block, final panel and post-brief review.
 
 If not, write `partial concise brief` and disclose the gap.
