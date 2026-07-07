@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-07-07：零售領域加入時尚 / 流行，小眾候選新增類型與形成程度
+
+### Decision
+
+```text
+1. 品牌零售領域正式擴充為：零售 / 消費 / 社群 / 服飾 / 時尚 / 流行。
+2. Retail domain 不只看通路、展店、百貨、電商，也必須掃描時尚、流行、穿搭風格、顏色、材質、版型、品類、商品組合、品牌 merchandising 與消費者審美變化。
+3. 小眾候選新增 candidate_type：新領域 / 新應用 / 新概念 / 新趨勢。
+4. 小眾候選新增 formation_level：弱訊號 / 話題形成 / 趨勢形成 / 主流化中。
+5. 很多報導、很多討論、詞彙或敘事開始擴散 = 話題形成。
+6. 很多品牌、公司、平台、地區開始應用、試點、投資、招聘或數據同步出現 = 趨勢形成。
+7. 已廣泛商業化且有明確數據 = 主流化中，應評估是否升級為大型訊號。
+```
+
+### Why
+
+小眾候選原本容易被寫成空泛趨勢感想。這次把候選拆成「新領域、新應用、新概念、新趨勢」與「弱訊號、話題形成、趨勢形成、主流化中」，讓每日雷達能區分：
+
+```text
+只有人在講 = 話題形成
+很多開始做 = 趨勢形成
+已經廣泛商業化 = 可能升級大型訊號
+```
+
+零售領域若只看百貨、電商與通路，會漏掉服飾與品牌真正重要的上游：流行風格、穿搭語言、商品組合、材質與審美遷移。
+
+### Result
+
+```text
+更新：configs/niche_candidate_policy.yml
+更新：workflows/daily_push_brief_workflow.md
+更新：workflows/daily_radar_workflow.md
+更新：templates/daily_push_brief_template.md
+更新：templates/daily_report_template_v2.md
+```
+
+---
+
 ## 2026-07-07：小眾候選與大型訊號等量；精簡 3+3、完整 5+5
 
 ### Decision
@@ -77,27 +115,6 @@
 6. Feed/discovery 發現的新概念、新應用、新組合、新趨勢苗頭仍先進 memory/potential_pool.md，輸出階段才篩選。
 ```
 
-### Why
-
-研究檔 `research/global_news_trend_projects_2026-07-06.md` 已指出：RSSHub 可解決 social-first / channel-first 漏抓；FreshRSS 可作為自架聚合收件箱；GDELT / Media Cloud 適合做來源與事件缺口 discovery。此組合補的是固定來源庫之外的渠道與發現層。
-
-### Result
-
-```text
-configs/feed_discovery_stack.yml
-sources/channel_feed_sources.json
-sources/discovery_providers.yml
-infra/rss-stack/docker-compose.yml
-infra/rss-stack/.env.example
-infra/rss-stack/README.md
-FRESHRSS_SEEDS.md
-FRESHRSS_SEEDS.opml
-SOURCE_LIBRARY_SPEC.md
-DEPENDENCY_MAP.md
-AGENT_DEFINITION_MAP.md
-reports/feed_stack_sync_status_2026-07-07.md
-```
-
 ### Runtime validation still pending
 
 ```text
@@ -135,17 +152,6 @@ reports/feed_stack_sync_status_2026-07-07.md
 → 外部關鍵字 fallback
 → 新來源 discovery
 → coverage audit
-```
-
-Rules:
-
-```text
-1. AGENT_RADAR_REPORT、AGENT_DAILY_PUSH_BRIEF、AGENT_NEWS_SEARCH 必須先檢查固定來源庫，再使用 generic keyword search。
-2. 關鍵字搜尋保留，但降級為來源內過濾、事件補查、缺口 retry、外部 discovery。
-3. 每個核心領域要能回溯已查來源、命中來源、未命中來源、是否使用 fallback。
-4. 台灣新聞必須是 source-backed Taiwan event / data / company action / policy / market news，不得用台灣推論補位。
-5. 官方 / 數據 / 公司公告來源應用於高風險 claim 與指標變化交叉驗證。
-6. source library 是可維護活表，來源健康需透過回測與使用紀錄調整。
 ```
 
 ---
