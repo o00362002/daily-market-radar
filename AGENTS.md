@@ -64,6 +64,6 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 light=檢查器綠／standard=動 state/decisions 附 reports/／full=重大變更人終審＋具名第二訊號（Class C）；未認領決策→full。
 **本專案目標＝本專案回測/架構調整的量尺，由人 owner 定、AI 不自產（目標即量尺，不可自訂衡量自己的尺）：**
 
-本專案目標｜This project's goal: ___（owner 填：本專案為了什麼）___
+本專案目標｜This project's goal: 蒐集全世界重要訊息與新趨勢/新應用/新話題的**潛力訊息**，並藉此了解現在與未來方向的可能發展。（owner 定 2026-07-08）｜Surface the world's important information and potential signals of new trends / applications / topics, to understand the present and where things may head.
 
 安裝關口（一次性）：`bash tools/install_hooks.sh`｜體檢：`bash check_mount_integrity.sh`
