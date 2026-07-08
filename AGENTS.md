@@ -58,4 +58,12 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 想加規則？先答「誰、在什麼時點、用什麼機器消費它？」
 答不出 → 它是說明不是規則，寫進 CURRENT_DECISIONS.md 的 why 即可。
 
+## 繼承核心＋本專案目標｜Inherited governance + own goal（掛 brain-core）
+
+繼承 brain-core 角色邊界＋決策權/風險分級（權威見 brain-core DECISIONS）：三層命名本專案既有關口——
+light=檢查器綠／standard=動 state/decisions 附 reports/／full=重大變更人終審＋具名第二訊號（Class C）；未認領決策→full。
+**本專案目標＝本專案回測/架構調整的量尺，由人 owner 定、AI 不自產（目標即量尺，不可自訂衡量自己的尺）：**
+
+本專案目標｜This project's goal: ___（owner 填：本專案為了什麼）___
+
 安裝關口（一次性）：`bash tools/install_hooks.sh`｜體檢：`bash check_mount_integrity.sh`
