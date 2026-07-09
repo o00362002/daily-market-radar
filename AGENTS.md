@@ -41,7 +41,7 @@
 social-first 來源必須 direct channel check；generic search 不算已檢查。
 蒐集階段不預篩：新概念/新應用/新趨勢/新組合一律入 potential_pool；取捨只在輸出階段。
 政策/法規/市場重大 claim 必須回查官方或數據來源；生成者 ≠ 判官 ≠ 簽核人。
-Evidence 不經核可不成為 Memory；凍結歷史不是現況；專案細節不回灌 core/母腦。
+Evidence 不經核可不成為 Memory；凍結歷史不是現況。
 ```
 
 ## 關聯規則（Association rule, brain-core 2026-07-07）
