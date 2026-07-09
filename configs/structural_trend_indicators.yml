@@ -1,0 +1,159 @@
+version: 1.0
+last_updated: 2026-07-09
+status: active
+purpose: >
+  Add long-term structural trend indicators that every Daily Push Brief and Full Daily Radar
+  should evaluate when relevant. These indicators track whether current news points toward
+  productivity gains being unevenly shared, AI bubble dynamics, and brand/retail polarization.
+
+applies_to:
+  - AGENT_DAILY_PUSH_BRIEF
+  - AGENT_RADAR_REPORT
+  - AGENT_NEWS_SEARCH
+
+required_output_block:
+  name: Structural Trend Indicator Panel
+  location: before Final / Post-brief Review panel
+  required_in_daily_push: true
+  required_in_full_radar: true
+  rule: >
+    The report must evaluate each structural thesis as: toward / against / mixed / insufficient.
+    Do not force a direction when evidence is weak. Cite supporting signal IDs and list missing indicators.
+
+structural_theses:
+  productivity_free_ride_k_shaped_economy:
+    label: 生產力便車無法共享的 K 型經濟
+    thesis: >
+      AI / automation raises productivity for capital owners, top firms, high-skill workers,
+      and distribution platforms, but the gains are not broadly shared with workers,
+      small businesses, middle-skill roles, or consumers. This produces a K-shaped economy.
+    direction_values:
+      - toward
+      - against
+      - mixed
+      - insufficient
+    supporting_indicators:
+      - labor_productivity_up_but_real_wages_flat_or_down
+      - corporate_margin_expansion_without_wage_growth
+      - layoffs_or_hiring_freeze_while_AI_capex_rises
+      - junior_or_middle_skill_jobs_decline
+      - AI_tooling_benefits_accrue_to_large_firms_first
+      - platform_take_rates_or_data_moats_expand
+      - asset_prices_rise_faster_than_labor_income
+      - low_income_consumption_weakens_while_high_income_consumption_resilient
+      - automation_reduces_headcount_or_hours_without_price_sharing
+    counter_indicators:
+      - real_wage_growth_broad_based
+      - SME_AI_adoption_improves_survival_or_margin
+      - consumer_prices_decline_from_productivity_gains
+      - hiring_broadens_in_AI_augmented_roles
+      - productivity_tools_become_cheap_and_widely_accessible
+    evidence_to_seek:
+      - productivity_data
+      - real_wage_data
+      - margins_by_company_size
+      - layoff_and_hiring_data
+      - small_business_surveys
+      - consumer_price_changes
+      - job_posting_skill_shift
+      - income_segment_consumption_data
+
+  ai_bubble_trend:
+    label: AI 泡沫趨勢
+    thesis: >
+      AI investment, valuations, data-center capex, model spending, and related infrastructure
+      may be running ahead of monetization, cash flow, and durable productivity gains.
+      The bubble thesis strengthens when capital intensity rises faster than proven revenue,
+      and weakens when adoption, margins, and pricing power are validated.
+    direction_values:
+      - toward
+      - against
+      - mixed
+      - insufficient
+    supporting_indicators:
+      - AI_capex_growth_faster_than_AI_revenue
+      - data_center_debt_or_project_finance_rises
+      - GPU_or_memory_orders_pull_forward
+      - AI_stock_multiples_expand_despite_uncertain_cash_flow
+      - hyperscaler_depreciation_or_power_cost_pressure_rises
+      - model_price_competition_compresses_margins
+      - customers_report_unclear_ROI_or_pilot_fatigue
+      - AI_winner_trade_crowding_and_foreign_outflows
+      - regulators_or_central_banks_warn_about_AI_financial_stability
+    counter_indicators:
+      - AI_revenue_growth_matches_or_exceeds_capex
+      - clear_enterprise_ROI_and_retention
+      - operating_margin_expands_from_AI_products
+      - data_center_utilization_strong
+      - broad_customer_paid_adoption
+      - AI_capex_funded_by_operating_cash_flow_without_leverage_stress
+    evidence_to_seek:
+      - hyperscaler_capex_and_AI_revenue
+      - data_center_financing_terms
+      - GPU_HBM_memory_orders_and_inventory
+      - AI_stock_valuation_multiples
+      - enterprise_AI_ROI_surveys
+      - cloud_AI_usage_and_pricing
+      - central_bank_or_regulator_warnings
+      - ETF_and_factor_flow_data
+
+  brand_polarization_big_get_bigger_and_niche_survives:
+    label: 品牌大者更大 + 小眾存活，中間層萎縮
+    thesis: >
+      Consumer brands and retail channels polarize. Large platforms and large brands gain scale,
+      data, traffic, bargaining power, and AI tooling advantages; small niche brands survive through
+      strong identity, community, scarcity, creator-led demand, or premium specialization; mid-market
+      undifferentiated brands lose pricing power and shelf space.
+    direction_values:
+      - toward
+      - against
+      - mixed
+      - insufficient
+    supporting_indicators:
+      - large_platform_market_share_increases
+      - top_brands_gain_share_or_margin
+      - mid_price_brands_discount_more_or_close_stores
+      - department_store_tenant_mix_shifts_to_luxury_value_or_experience
+      - creator_or_niche_brands_gain_high_engagement_without_mass_distribution
+      - marketplace_rules_or_AI_search_favor_large_structured_catalogs
+      - private_label_or_ultra_low_price_pressure_mid_market
+      - premium_luxury_resilient_while_middle_weak
+      - small_distinctive_brands_sell_through_better_than_generic_middle
+    counter_indicators:
+      - mid_market_brands_gain_share
+      - broad_based_consumer_recovery
+      - marketplaces_reduce_large_brand_advantage
+      - discovery_tools_help_small_brands_scale_affordably
+      - department_stores_add_more_middle_market_brands_successfully
+    evidence_to_seek:
+      - brand_market_share_by_tier
+      - gross_margin_and_discount_rate_by_tier
+      - store_opening_closure_by_segment
+      - marketplace_search_visibility
+      - AI_recommendation_visibility
+      - social_engagement_to_sales_conversion
+      - department_store_tenant_mix
+      - sell_through_and_inventory_age_by_brand_type
+
+output_schema:
+  fields:
+    - thesis_label
+    - current_direction
+    - confidence
+    - supporting_signal_ids
+    - counter_signal_ids
+    - missing_data
+    - one_sentence_read
+    - next_verification
+  confidence_values:
+    - high
+    - medium
+    - low
+    - insufficient
+
+quality_gate:
+  - all_three_structural_theses_evaluated
+  - direction_not_forced_without_evidence
+  - supporting_signal_ids_or_gap_disclosed
+  - counter_indicators_considered
+  - next_verification_listed
