@@ -57,6 +57,7 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 
 想加規則？先答「誰、在什麼時點、用什麼機器消費它？」
 答不出 → 它是說明不是規則，寫進 CURRENT_DECISIONS.md 的 why 即可。
+提出新增檔案、新規則、新語彙、新檢查器、schema、workflow 或本地架構標籤前，先檢查既有本地檔案、route、checker、schema、workflow 或 evidence location 是否能承接；能承接就改既有。
 
 ## 繼承核心＋本專案目標｜Inherited governance + own goal（掛 brain-core）
 
