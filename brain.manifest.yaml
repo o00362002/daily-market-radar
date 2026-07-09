@@ -43,3 +43,4 @@ boundary:
   human_final_review_for_structural_changes: true
   evidence_needs_approval_to_become_memory: true
   frozen_history_is_not_current_state: true
+  child_details_do_not_backflow_to_core_or_mother: true
