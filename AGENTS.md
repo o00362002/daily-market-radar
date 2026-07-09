@@ -2,8 +2,17 @@
 
 一句話：**規則是資料＋檢查器，在 commit 關口自己出現；入口薄、按需路由。**
 
-核心掛載：[brain-core](https://github.com/o00362002/brain-core)（蒸餾核；P1–P5 見其 DECISIONS.md）。
-舊母腦 Human-AI-Collaboration-Brain 已退役，只存在凍結歷史與舊紀錄。
+Control links:
+
+```text
+Parent control panel: o00362002/personal-project-brain
+Local source-of-truth: this repo
+Agent entry: AGENTS.md
+Governance posture: core depth by default; mother depth by trigger
+```
+
+核心治理薄核：[brain-core](https://github.com/o00362002/brain-core)（蒸餾核；P1–P5 見其 DECISIONS.md）。
+舊母腦 Human-AI-Collaboration-Brain 掛載檔＝凍結歷史，不再是現行規則。
 
 ## 讀取路由（按需，沒有必讀清單）
 
