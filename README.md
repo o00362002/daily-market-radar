@@ -4,6 +4,15 @@
 
 每日播報在執行前，應先讀取本 repo 的入口層、雷達清單、固定指標追蹤、科技發展雷達、特殊應用雷達、搜尋 retry 規則、漏抓案例、歷史報告與回測規則，再進行多語言搜尋與交叉驗證。
 
+Control links:
+
+```text
+Parent control panel: o00362002/personal-project-brain
+Local source-of-truth: this repo
+Agent entry: AGENTS.md
+Governance posture: core depth by default; mother depth by trigger
+```
+
 ---
 
 ## 1. 核心定位
@@ -32,15 +41,14 @@ AI 產品用量經濟
 
 ---
 
-## 2. brain-core 掛載定位
+## 2. Governance posture
 
-本 repo 自 2026-07-06 起掛載 [brain-core](https://github.com/o00362002/brain-core)（蒸餾核）作為治理核心；舊母腦 `Human-AI-Collaboration-Brain` 掛載已退役。
+本 repo 採 core depth 作為預設治理薄核；必要時依 parent control panel 記錄的架構深度進入 mother depth。
 
 ```text
-Core repo: o00362002/brain-core
-核心思想：規則是資料＋檢查器，在 commit 關口自己出現。
-原則：P1 規則必有機器消費者／P2 入口極薄／P3 資料驅動／
-      P4 模型無關層最厚／P5 記憶輪替
+Parent control panel: o00362002/personal-project-brain
+Governance profile: o00362002/brain-core
+Current mount record: brain.manifest.yaml
 ```
 
 Source of truth：
