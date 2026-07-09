@@ -1,6 +1,84 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-07-07
+最後更新：2026-07-09
+
+---
+
+## 2026-07-09：同步修正 active gate / templates / structural indicators
+
+### Decision
+
+```text
+1. Daily Push Brief 與 Full Daily Radar 的 active templates 必須同步 daily_execution_quality_gate。
+2. 每次每日播報前必須先跑 source audit、7 日去重、primary-domain assignment、major rejection gate、niche fresh-anchor gate、Taiwan direct-source audit、Retail fixed matrix、Crypto fixed matrix、Structural Trend Indicator Panel。
+3. 大眾訊號若沒有 concrete today_new_information / fresh delta，不得計入 quota。
+4. 同一新聞只能有一個 primary_domain；其他領域只能引用，不得重複計 quota。
+5. 小眾候選必須有 fresh concrete anchor，不能只是大型新聞改寫、舊背景概念或趨勢感想。
+6. 小眾候選不足或新奇度低時，必須 retry / external discovery；仍不足才標 gap。
+7. 台灣新聞不足時不可用台灣映射補位，只能標 insufficient / not checked。
+8. Retail fixed matrix 與 Crypto fixed matrix 成為精簡版與完整版共同必填。
+9. Structural Trend Indicator Panel 成為共同必填，且品牌兩極化必須包含真分眾 / 假分眾。
+```
+
+### Active structural indicators
+
+```text
+1. 生產力便車無法共享的 K 型經濟
+2. AI 泡沫 / 過度投資趨勢
+3. 品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾
+```
+
+### Retail fixed matrix
+
+```text
+cost_pressure
+channel_offline_department_store_mall_street
+channel_online_marketplace_social_commerce
+product_fashion_style_assortment_material_fit_category
+inventory_markdown_mid_price_pressure
+membership_CRM_loyalty_retail_media
+social_commerce_content_discovery_AI_referral
+true_vs_fake_segmentation
+Taiwan_retail_commercial_district_department_store_brand
+```
+
+### Crypto fixed matrix
+
+```text
+BTC_ETH_SOL_market_structure
+ETF_flows
+stablecoin_supply_and_dry_powder
+RWA_tokenized_assets
+Perp_DEX_volume_OI_funding
+TVL_fees_revenue
+regulation_policy
+Taiwan_crypto_fixed_sources
+```
+
+### Required backtest counters
+
+```text
+duplicate_rejection_count
+field_overlap_rejection_count
+niche_low_novelty_rejection_count
+candidate_retry_paths_used
+Taiwan_qualified_item_count_after_audit
+Taiwan_direct_sources_checked
+retail_matrix_gaps
+crypto_matrix_gaps
+structural_thesis_evidence_change
+true_vs_fake_segmentation_status
+```
+
+### Result
+
+```text
+已存在：configs/daily_execution_quality_gate.yml
+已存在：configs/structural_trend_indicators.yml
+更新：templates/daily_push_brief_template.md
+更新：templates/daily_report_template_v2.md
+更新：CURRENT_DECISIONS.md
+```
 
 ---
 
@@ -18,28 +96,6 @@
 7. 已廣泛商業化且有明確數據 = 主流化中，應評估是否升級為大型訊號。
 ```
 
-### Why
-
-小眾候選原本容易被寫成空泛趨勢感想。這次把候選拆成「新領域、新應用、新概念、新趨勢」與「弱訊號、話題形成、趨勢形成、主流化中」，讓每日雷達能區分：
-
-```text
-只有人在講 = 話題形成
-很多開始做 = 趨勢形成
-已經廣泛商業化 = 可能升級大型訊號
-```
-
-零售領域若只看百貨、電商與通路，會漏掉服飾與品牌真正重要的上游：流行風格、穿搭語言、商品組合、材質與審美遷移。
-
-### Result
-
-```text
-更新：configs/niche_candidate_policy.yml
-更新：workflows/daily_push_brief_workflow.md
-更新：workflows/daily_radar_workflow.md
-更新：templates/daily_push_brief_template.md
-更新：templates/daily_report_template_v2.md
-```
-
 ---
 
 ## 2026-07-07：小眾候選與大型訊號等量；精簡 3+3、完整 5+5
@@ -55,30 +111,6 @@
 6. 候選不足時必須先 retry / external discovery；仍不足才標 gap，不得捏造。
 ```
 
-### Candidate quality
-
-每則候選至少需要一個具體錨點：公司、產品、論文、數據、融資、招聘、開源採用、鏈上指標、社群事件、pilot、patent、clinical trial、prototype 或 supply-chain anomaly。
-
-每則候選必須回答：
-
-```text
-為何小眾 / 早期
-為何可能放大
-不能下的結論
-下一步驗證
-```
-
-### Result
-
-```text
-新增：configs/niche_candidate_policy.yml
-更新：SYSTEM_PROMPT.md
-更新：workflows/daily_push_brief_workflow.md
-更新：workflows/daily_radar_workflow.md
-更新：templates/daily_push_brief_template.md
-更新：templates/daily_report_template_v2.md
-```
-
 ---
 
 ## 2026-07-07：Technology anti-AI-overcapture + Taiwan crypto source audit
@@ -90,14 +122,6 @@
 2. Technology 至少掃描 6 個非 AI 技術子域；不足標 partial。
 3. Taiwan crypto 若未檢查固定來源，不得宣稱無新台灣加密新聞。
 4. 固定來源包含 DA 交易者聯盟、邦妮區塊鏈、加密城市、區塊勢。
-```
-
-### Result
-
-```text
-更新：configs/technology_development.yml
-新增：memory/missed_cases/2026-07-07_technology_ai_overcapture_and_taiwan_crypto_sources.md
-歸檔：reports/2026/2026-07-07.md
 ```
 
 ---
@@ -115,7 +139,7 @@
 6. Feed/discovery 發現的新概念、新應用、新組合、新趨勢苗頭仍先進 memory/potential_pool.md，輸出階段才篩選。
 ```
 
-### Runtime validation still pending
+Runtime validation still pending:
 
 ```text
 1. 啟動 RSSHub + FreshRSS。
