@@ -2,6 +2,17 @@
 # Projection file: 核心原則的 source of truth 在 brain-core repo。
 schema: brain-manifest/v1
 manifest_kind: child
+
+parent_control_panel: o00362002/personal-project-brain
+local_source_of_truth: this_repo
+agent_entry: AGENTS.md
+
+governance_posture:
+  default_depth: core
+  trigger_depth: mother
+  core_profile: o00362002/brain-core
+  mother_depth: o00362002/Human-AI-Collaboration-Brain
+
 core_repo: o00362002/brain-core
 core_version: v0
 mounted_since: 2026-07-06
