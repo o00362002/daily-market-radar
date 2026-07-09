@@ -1,10 +1,11 @@
-version: 1.0
+version: 1.1
 last_updated: 2026-07-09
 status: active
 purpose: >
   Add long-term structural trend indicators that every Daily Push Brief and Full Daily Radar
   should evaluate when relevant. These indicators track whether current news points toward
   productivity gains being unevenly shared, AI bubble dynamics, and brand/retail polarization.
+  Brand polarization now includes the true segmentation vs fake segmentation thesis.
 
 applies_to:
   - AGENT_DAILY_PUSH_BRIEF
@@ -27,11 +28,7 @@ structural_theses:
       AI / automation raises productivity for capital owners, top firms, high-skill workers,
       and distribution platforms, but the gains are not broadly shared with workers,
       small businesses, middle-skill roles, or consumers. This produces a K-shaped economy.
-    direction_values:
-      - toward
-      - against
-      - mixed
-      - insufficient
+    direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
       - labor_productivity_up_but_real_wages_flat_or_down
       - corporate_margin_expansion_without_wage_growth
@@ -65,11 +62,7 @@ structural_theses:
       may be running ahead of monetization, cash flow, and durable productivity gains.
       The bubble thesis strengthens when capital intensity rises faster than proven revenue,
       and weakens when adoption, margins, and pricing power are validated.
-    direction_values:
-      - toward
-      - against
-      - mixed
-      - insufficient
+    direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
       - AI_capex_growth_faster_than_AI_revenue
       - data_center_debt_or_project_finance_rises
@@ -97,34 +90,59 @@ structural_theses:
       - central_bank_or_regulator_warnings
       - ETF_and_factor_flow_data
 
-  brand_polarization_big_get_bigger_and_niche_survives:
-    label: 品牌大者更大 + 小眾存活，中間層萎縮
+  brand_polarization_big_get_bigger_niche_survives_middle_shrinks_and_fake_segmentation:
+    label: 品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾
     thesis: >
       Consumer brands and retail channels polarize. Large platforms and large brands gain scale,
-      data, traffic, bargaining power, and AI tooling advantages; small niche brands survive through
-      strong identity, community, scarcity, creator-led demand, or premium specialization; mid-market
-      undifferentiated brands lose pricing power and shelf space.
-    direction_values:
-      - toward
-      - against
-      - mixed
-      - insufficient
+      data, traffic, bargaining power, retail-media power, AI tooling and structured catalog advantages;
+      small niche brands survive through strong identity, community, scarcity, creator-led demand,
+      local culture, subculture, or premium specialization; mid-market undifferentiated brands lose
+      pricing power, shelf space, traffic and margin. At the same time, AI and algorithms may create
+      fake segmentation: brands appear personalized through ads, prompts, recommendations, landing pages,
+      or micro-copy, but the underlying product, assortment, pricing, supply chain and community identity
+      remain generic. True segmentation means differentiated product, audience, channel, use case,
+      identity, merchandising and repeat behavior.
+    direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
       - large_platform_market_share_increases
       - top_brands_gain_share_or_margin
       - mid_price_brands_discount_more_or_close_stores
-      - department_store_tenant_mix_shifts_to_luxury_value_or_experience
+      - department_store_tenant_mix_shifts_to_luxury_value_experience_or_destination_tenants
       - creator_or_niche_brands_gain_high_engagement_without_mass_distribution
       - marketplace_rules_or_AI_search_favor_large_structured_catalogs
       - private_label_or_ultra_low_price_pressure_mid_market
       - premium_luxury_resilient_while_middle_weak
       - small_distinctive_brands_sell_through_better_than_generic_middle
+      - AI_generated_personalized_ads_without_product_or_assortment_difference
+      - same_product_repackaged_as_many_micro_segments
+      - algorithmic_targeting_replaces_real_customer_understanding
+      - AI_search_or_social_recommendations_concentrate_attention_on_big_or_highly_distinctive_brands
+      - mid_market_brands_use_pseudo_personalization_but_discount_rate_stays_high
     counter_indicators:
       - mid_market_brands_gain_share
       - broad_based_consumer_recovery
       - marketplaces_reduce_large_brand_advantage
       - discovery_tools_help_small_brands_scale_affordably
       - department_stores_add_more_middle_market_brands_successfully
+      - personalization_improves_repeat_rate_without_margin_or_identity_dilution
+      - brands_create_real_segmented_products_with_distinct_sell_through_and_loyalty
+    true_segmentation_indicators:
+      - distinct_product_design_or_material_or_fit_by_segment
+      - distinct_use_case_or_occasion
+      - clear_community_or_subculture_identity
+      - separate_assortment_or_merchandising_logic
+      - different_full_price_sell_through_by_segment
+      - repeat_purchase_or_membership_behavior_differs_by_segment
+      - brand_language_matches_product_and_customer_behavior
+      - channel_strategy_differs_by_segment
+    fake_segmentation_indicators:
+      - same_product_with_AI_generated_copy_for_many_personas
+      - only_ads_prompts_or_landing_pages_change
+      - personalization_lifts_clicks_but_not_repeat_or_full_price_sell_through
+      - micro_segment_names_without_operational_or_product_difference
+      - high_CAC_and_high_discounting_despite_personalization
+      - AI_recommendation_creates_attention_but_not_retention
+      - brand_claims_niche_identity_but_assortment_is_generic
     evidence_to_seek:
       - brand_market_share_by_tier
       - gross_margin_and_discount_rate_by_tier
@@ -134,6 +152,10 @@ structural_theses:
       - social_engagement_to_sales_conversion
       - department_store_tenant_mix
       - sell_through_and_inventory_age_by_brand_type
+      - repeat_purchase_by_segment
+      - full_price_sell_through_by_segment
+      - product_assortment_difference_by_segment
+      - CAC_and_retention_by_segment
 
 output_schema:
   fields:
@@ -156,4 +178,19 @@ quality_gate:
   - direction_not_forced_without_evidence
   - supporting_signal_ids_or_gap_disclosed
   - counter_indicators_considered
+  - true_vs_fake_segmentation_checked_inside_brand_polarization
   - next_verification_listed
+
+next_run_hard_checks:
+  - run_source_audit_before_drafting
+  - reject_major_signal_without_fresh_delta_or_today_new_information
+  - reject_niche_candidate_without_fresh_concrete_anchor
+  - reject_niche_candidate_that_is_only_major_signal_rephrasing
+  - reject_old_background_concept_as_today_news
+  - do_not_replace_taiwan_news_with_taiwan_implication
+  - output_structural_trend_indicator_panel
+  - include_true_vs_fake_segmentation_check_under_brand_polarization
+  - disclose_taiwan_direct_source_gap_if_not_checked
+  - record_duplicate_rejection_count
+  - record_niche_low_novelty_rejection_count
+  - record_candidate_retry_paths_used
