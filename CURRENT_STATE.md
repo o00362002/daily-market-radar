@@ -52,7 +52,7 @@ PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD -
 ## Frozen v1 behavior
 
 ```text
-固定 3+3 / 5+5 / 48-signal / 60-signal completion rules
+fixed-count completion rules
 split legacy source files as canonical identity
 Markdown prompt as sole execution contract
 ```
