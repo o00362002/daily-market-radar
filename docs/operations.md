@@ -1,29 +1,78 @@
 # Operations
 
-## Local Runtime
+## Local validation
 
 ```bash
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
-PYTHONPATH=src python -m radar.cli run-daily --date 2026-07-10
+PYTHONPATH=src python -m radar.cli sources health
 ```
 
-The bundled Codex Python 3.12 path is wired into `Makefile` by default. Override
-it with `PYTHON=/path/to/python3` when using a local virtual environment.
+`Makefile` defaults to `python3`. Override with `PYTHON=/path/to/python3` when needed.
 
-## Daily Order
+## Fixture run
+
+```bash
+PYTHONPATH=src python -m radar.cli run-daily \
+  --mode fixture \
+  --profile daily_push \
+  --date 2026-07-10
+```
+
+Fixture mode validates deterministic contracts only. It is always partial for real-world news completeness.
+
+## Live RSS run
+
+```bash
+PYTHONPATH=src python -m radar.cli run-daily \
+  --mode live-rss \
+  --profile daily_push \
+  --date 2026-07-10 \
+  --timeout-seconds 12 \
+  --per-feed-limit 20 \
+  --database data/radar.sqlite3
+```
+
+`live-rss` executes enabled RSS/Atom adapters in `config/source_registry.json`. It does not execute web, API, social, FreshRSS or external-discovery adapters. Those sources are listed in `source_audit.web_api_social_sources_not_executed` and keep the run partial when material.
+
+## Daily order
 
 ```text
-source health -> top-down ingest -> bottom-up ingest -> external gap discovery
--> normalize -> dedup -> event cluster -> event delta -> evidence verification
--> score -> coverage gate -> report plan -> render -> contract validation
--> post-run backtest
+source health
+→ top-down ingest
+→ bottom-up ingest
+→ external gap discovery
+→ normalize and URL safety
+→ document de-duplication
+→ event clustering
+→ historical material-delta check
+→ evidence verification
+→ importance / potential / confidence scoring
+→ coverage cells
+→ report plan and slot caps
+→ report contract validation
+→ optional persistence
+→ post-run backtest
 ```
 
-## RSS Stack Images
+Some stages are not yet connected in the live RSS path. Never hide an unexecuted stage.
 
-The RSS stack no longer uses `latest`. Image references are pinned through
-`infra/rss-stack/.env.example`. Before updating a tag or digest:
+## SQLite records
+
+When `--database` is supplied, the runtime initializes migrations and stores:
+
+```text
+fetch_runs
+reports
+report_payloads
+coverage_gaps
+```
+
+Local database files under `data/` are ignored by Git.
+
+## RSS stack
+
+Image references are pinned through `infra/rss-stack/.env.example`. Before changing a tag or digest:
 
 ```bash
 cd infra/rss-stack
@@ -34,4 +83,14 @@ curl -f http://localhost:1200/healthz
 curl -I http://localhost:8080
 ```
 
-Record the validation in `reports/execution_checks/`.
+FreshRSS availability does not prove source or evidence coverage. Record validation under `reports/execution_checks/`.
+
+## Failure behavior
+
+```text
+feed fetch failure → coverage gap
+empty source → empty/silent gap, not no-news
+invalid report contract → failed run
+fixture mode → partial
+unexecuted adapter family → degradation reason
+```
