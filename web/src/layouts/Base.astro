@@ -3,15 +3,32 @@ import '../styles/global.css';
 interface Props { title?: string; }
 const { title = '全球情報雷達 Daily Market Radar' } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const nav = [
-  ['今日 Today', ''],
-  ['歷史 History', 'history/1'],
-  ['趨勢 Trends', 'trends'],
-  ['零售 Retail', 'retail'],
-  ['加密 Crypto', 'crypto'],
-  ['台灣 Taiwan', 'taiwan'],
+const href = (path: string) => `${base}${base.endsWith('/') ? '' : '/'}${path}`.replace(/\/+$/, '/');
+
+// Sidebar navigation: symbol + label. Active state is derived from the current
+// pathname so deep pages (reports/*) still highlight their section.
+const nav: { label: string; sub: string; path: string; sym: string; match: string[] }[] = [
+  { label: '今日', sub: 'Today', path: '', sym: '◎', match: [''] },
+  { label: '歷史', sub: 'History', path: 'history/1', sym: '▤', match: ['history', 'reports'] },
+  { label: '趨勢', sub: 'Trends', path: 'trends', sym: '↗', match: ['trends'] },
+  { label: '零售', sub: 'Retail', path: 'retail', sym: '▣', match: ['retail'] },
+  { label: '加密', sub: 'Crypto', path: 'crypto', sym: '◇', match: ['crypto'] },
+  { label: '台灣', sub: 'Taiwan', path: 'taiwan', sym: '⊙', match: ['taiwan'] },
 ];
-const href = (path: string) => `${base}${base.endsWith('/') ? '' : '/'}${path}`.replace(/\/+$/, '/') ;
+
+const current = Astro.url.pathname;
+const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+// The site root builds without a trailing slash ('/daily-market-radar'), so treat
+// base-with-or-without-slash as the empty rest before prefix-stripping.
+const rest =
+  current === normalizedBase.slice(0, -1) || current === normalizedBase
+    ? ''
+    : current.startsWith(normalizedBase)
+      ? current.slice(normalizedBase.length)
+      : current.replace(/^\//, '');
+const section = rest.split('/')[0] ?? '';
+const isActive = (item: (typeof nav)[number]) =>
+  item.match.includes(section) || (item.path === '' && rest === '');
 ---
 <!doctype html>
 <html lang="zh-Hant">
@@ -22,21 +39,33 @@ const href = (path: string) => `${base}${base.endsWith('/') ? '' : '/'}${path}`.
     <meta name="description" content="全球每日事件情報雷達與多領域趨勢／潛力訊號掃描" />
   </head>
   <body>
-    <header class="site">
-      <div class="wrap">
-        <nav>
-          <span class="brand"><a href={href('')}>◎ 情報雷達</a></span>
-          {nav.map(([label, path]) => <a href={href(path)}>{label}</a>)}
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href={href('')}>
+          <span class="brand-mark">◎</span>
+          <span class="brand-text">
+            <span class="brand-name">情報雷達</span>
+            <span class="brand-sub">Daily Market Radar</span>
+          </span>
+        </a>
+        <nav class="side-nav" aria-label="主選單">
+          {nav.map((item) => (
+            <a class:list={['nav-item', { active: isActive(item) }]} href={href(item.path)} aria-current={isActive(item) ? 'page' : undefined}>
+              <span class="nav-sym" aria-hidden="true">{item.sym}</span>
+              <span class="nav-label">{item.label}</span>
+              <span class="nav-sub">{item.sub}</span>
+            </a>
+          ))}
         </nav>
-      </div>
-    </header>
-    <main class="wrap">
-      <slot />
-    </main>
-    <footer class="site">
-      <div class="wrap">
-        靜態投影自 validated RadarReportV2 · 事實／推論／反證／不確定／缺口分開標示 · 數量不是完整性證明
-      </div>
-    </footer>
+        <div class="side-foot">
+          靜態投影自 validated RadarReportV2<br />
+          事實／推論／反證／不確定／缺口分開標示<br />
+          數量不是完整性證明
+        </div>
+      </aside>
+      <main class="content">
+        <slot />
+      </main>
+    </div>
   </body>
 </html>
