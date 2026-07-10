@@ -22,8 +22,8 @@ Scoring：importance、potential、confidence 分開。
 ## Production reality
 
 ```text
-目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite durable document/event/delta/report/indicator/state/match storage、provider-neutral 7-strategy cross-day event resolution 與 20-type material-delta taxonomy、EventResolutionAuditV1、atomic UnitOfWork run-transaction（失敗 rollback、不覆蓋 last-valid-report）、fake-only application flow、replaceability/import/cycle architecture gates（10 ports）。
-尚未完成：web/API/social/FreshRSS adapters、完整 source health、外部 discovery provider、AI-assisted semantic scorer、結構指標 evaluator、scheduler、production credentials。
+目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite durable document/event/delta/report/indicator/state/match/source-health storage、provider-neutral 7-strategy cross-day event resolution 與 20-type material-delta taxonomy、EventResolutionAuditV1、atomic UnitOfWork run-transaction（失敗 rollback、不覆蓋 last-valid-report）、transport-seam SSRF-guarded adapters（safe web / generic JSON API / FreshRSS / GDELT discovery / social direct channels / conditional RSS）、deterministic source-health state machine、feature-traced Retail/Crypto/Structural deterministic evaluators（wired；資料不足即 insufficient，不造假趨勢）、fake-only application flow、replaceability/import/cycle architecture gates（10 ports）。
+尚未完成：多 adapter 收集 stage 併入 run-daily（health 記錄／registry 選路）、AI-assisted semantic scorer、evaluation modes（api/chat）、web projection、Astro、scheduler、production credentials。
 live-rss 只覆蓋 registry 內 RSS/Atom adapters；未執行來源必須成為 coverage gaps。
 因此 fixture 與目前 live-rss run 均不得宣稱完整全球新聞覆蓋。
 ```
