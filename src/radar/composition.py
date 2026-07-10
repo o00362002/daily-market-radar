@@ -6,8 +6,11 @@ from pathlib import Path
 from typing import Callable
 
 from radar.adapters.fixture import FixtureSourceAdapter
+from radar.adapters.openai_provider import OpenAiEvaluationProvider
 from radar.adapters.rss import RegistryRssSourceAdapter
 from radar.application import ApplicationDependencies, DailyRadarApplication
+from radar.evaluators.ai_assisted import AiAssistedEvaluator
+from radar.evaluators.cache import CostBudget
 from radar.evaluators.deterministic import DeterministicIntelligenceEvaluator
 from radar.publishers.noop import NoOpReportPublisher
 from radar.repositories.memory import (
@@ -46,6 +49,12 @@ class CompositionConfig:
     per_feed_limit: int = 20
     external_discovery_available: bool = True
     fixture_collection_aggregator_available: bool = False
+    ai_api_key: str = ""
+    ai_model: str = "gpt-4.1-mini"
+    ai_effective_mode: str = "auto"
+    ai_max_daily_cost_usd: float = 0.0
+    ai_max_items_per_run: int = 0
+    ai_max_input_tokens_per_run: int = 0
 
 
 @dataclass(frozen=True)
@@ -81,6 +90,24 @@ def compose_application(
 
     if config.evaluator_backend == "deterministic":
         evaluator = DeterministicIntelligenceEvaluator(active_clock)
+    elif config.evaluator_backend == "ai_assisted":
+        deterministic_evaluator = DeterministicIntelligenceEvaluator(active_clock)
+        provider = (
+            OpenAiEvaluationProvider(model=config.ai_model, api_key=config.ai_api_key)
+            if config.ai_api_key
+            else None
+        )
+        evaluator = AiAssistedEvaluator(
+            deterministic_evaluator,
+            provider,
+            clock=active_clock,
+            budget=CostBudget(
+                max_daily_cost_usd=config.ai_max_daily_cost_usd,
+                max_items_per_run=config.ai_max_items_per_run,
+                max_input_tokens_per_run=config.ai_max_input_tokens_per_run,
+            ),
+            effective_mode=config.ai_effective_mode,
+        )
     else:
         raise ValueError(f"unknown evaluator backend: {config.evaluator_backend}")
 

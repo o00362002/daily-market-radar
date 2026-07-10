@@ -2,13 +2,33 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from radar.application import ApplicationRunResult, DailyRunRequest
 from radar.composition import CompositionConfig, compose_application
 from radar.contracts.runtime import RuntimeContract
 from radar.domain.models import RunResult
+from radar.evaluators.modes import resolve_evaluation_mode
 from radar.schemas.source import SourceRegistry
+
+
+def _evaluator_config(evaluation_mode: str) -> dict[str, object]:
+    """Resolve evaluator backend + AI budget from the environment (never crashes)."""
+
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    resolved = resolve_evaluation_mode(evaluation_mode, api_key_available=bool(api_key))
+    if evaluation_mode in {"auto", "api-assisted"}:
+        return {
+            "evaluator_backend": "ai_assisted",
+            "ai_api_key": api_key,
+            "ai_model": os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
+            "ai_effective_mode": resolved.effective_mode if resolved.use_ai else evaluation_mode,
+            "ai_max_daily_cost_usd": float(os.environ.get("OPENAI_MAX_DAILY_COST_USD", "0") or 0),
+            "ai_max_items_per_run": int(os.environ.get("OPENAI_MAX_ITEMS_PER_RUN", "0") or 0),
+            "ai_max_input_tokens_per_run": int(os.environ.get("OPENAI_MAX_INPUT_TOKENS_PER_RUN", "0") or 0),
+        }
+    return {"evaluator_backend": "deterministic"}
 
 
 class _LegacySourceAuditView(dict[str, object]):
@@ -78,6 +98,7 @@ def run_daily_fixture(
     external_discovery_available: bool = True,
     profile_name: str = "daily_push",
     database_path: Path | None = None,
+    evaluation_mode: str = "deterministic",
 ) -> RunResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     composed = compose_application(
@@ -97,6 +118,7 @@ def run_daily_fixture(
             },
             external_discovery_available=external_discovery_available,
             fixture_collection_aggregator_available=freshrss_available,
+            **_evaluator_config(evaluation_mode),  # type: ignore[arg-type]
         )
     )
     result = composed.application.run(
@@ -104,7 +126,7 @@ def run_daily_fixture(
             date=date,
             profile=profile_name,
             ingestion_mode="fixture",
-            evaluation_mode="deterministic",
+            evaluation_mode=evaluation_mode,
         ),
         contract,
     )
@@ -119,6 +141,7 @@ def run_daily_live_rss(
     timeout_seconds: int = 12,
     per_feed_limit: int = 20,
     database_path: Path | None = None,
+    evaluation_mode: str = "deterministic",
 ) -> RunResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     registry = SourceRegistry.from_file(repo_root / "config/source_registry.json")
@@ -135,6 +158,7 @@ def run_daily_live_rss(
             migrations_dir=repo_root / "migrations" if database_path is not None else None,
             timeout_seconds=timeout_seconds,
             per_feed_limit=per_feed_limit,
+            **_evaluator_config(evaluation_mode),  # type: ignore[arg-type]
         ),
         source_registry=registry,
     )
@@ -143,7 +167,7 @@ def run_daily_live_rss(
             date=date,
             profile=profile_name,
             ingestion_mode="live_rss",
-            evaluation_mode="deterministic",
+            evaluation_mode=evaluation_mode,
         ),
         contract,
     )
