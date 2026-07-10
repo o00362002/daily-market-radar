@@ -1,23 +1,25 @@
 # Daily Market Radar
 
-`daily-market-radar` is an event-intelligence runtime and evidence archive, not a headline-summary repository.
+`daily-market-radar` is a deterministic-first global event-intelligence runtime, evidence archive and static dashboard. It tracks important current events, future-potential signals and material changes across global markets, AI, crypto, retail/fashion, technology, labor and Taiwan.
 
-## Core goal
-
-Surface important current events and potential weak signals across global markets, AI, crypto, retail/fashion, technology, labor and Taiwan, then track whether they change structural directions.
-
-## Active architecture
+## What is connected
 
 ```text
-AGENTS.md                     first entry
-config/runtime_contract.json  canonical execution/output contract
-config/source_registry.json   canonical source identity and adapters
-src/radar/                    deterministic runtime
-schemas/                      payload contracts
-migrations/                   persistence foundation
-workflows/ + templates/       human execution/rendering projections
-reports/ + memory/            evidence, backtests and approved learning
+Source registry
+→ direct RSS / Atom
+→ optional FreshRSS Google Reader inbox
+→ normalization and document de-duplication
+→ cross-day event resolution
+→ material-delta filtering
+→ deterministic / optional AI / chat-assisted evaluation
+→ strict RadarReportV2
+→ SQLite durable state
+→ versioned web projection
+→ Astro static dashboard
+→ scheduled GitHub Actions deployment
 ```
+
+The application depends on provider-neutral ports. Concrete RSS, FreshRSS, OpenAI, SQLite, filesystem and publishing implementations are selected only by the composition root.
 
 ## Runtime principles
 
@@ -26,85 +28,145 @@ source registry before generic search
 one real source = one source_id
 RSS/API/web/RSSHub/social = adapters
 one event = one primary report domain
-major importance, future potential and evidence confidence are independent
+importance, future potential and evidence confidence are independent
+Major/Potential is content-driven, not source-role routing
 Taiwan direct evidence != Taiwan implication
 slot caps != completeness
 coverage gaps must be visible
 fixture replay != live-news coverage
 ```
 
-## Profiles
+## Install and validate
 
-```text
-daily_push = concise slot-capped rendering
-full       = all qualified items within run budget
-```
-
-Completion is validated through source health, coverage cells, evidence trace, fresh material delta, de-duplication, rejection counters, retry audit, Taiwan direct evidence, Retail/Crypto matrices, structural indicators, report contract and backtest.
-
-## Canonical report domains
-
-Read from `config/runtime_contract.json`.
-Fine-grained radar modules live in `configs/radars.yml` and do not create additional report-domain quotas.
-
-## Structural indicators
-
-```text
-K-shaped AI productivity economy
-AI bubble / overinvestment
-brand polarization + true vs fake segmentation
-```
-
-## Source architecture
-
-`config/source_registry.json` is canonical. `FRESHRSS_SEEDS.opml` is generated from it. Legacy files under `sources/` remain compatibility inputs until regenerated.
-
-FreshRSS/RSSHub improve collection coverage only. Discovery providers locate sources and clusters; final claims must resolve to original evidence.
-
-## Validation and runtime
+Python 3.12+ is required.
 
 ```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
 make validate
-PYTHONPATH=src python -m radar.cli sources validate
-PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date 2026-07-10
-PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 --database <database-path>
+radar sources validate
+radar sources health
 ```
 
-`live-rss` fetches enabled RSS/Atom adapters and can persist documents, events, material deltas, reports,
-indicator observations and state to SQLite. It still reports partial when web, API, social, FreshRSS,
-external discovery or semantic evaluators are not executed.
+## Run modes
 
-## Current boundary
+### Fixture contract check
 
-Implemented:
+```bash
+radar run-daily \
+  --mode fixture \
+  --profile daily_push \
+  --evaluation-mode deterministic \
+  --date "$(TZ=Asia/Taipei date +%F)" \
+  --database data/radar.db
+```
+
+Fixture mode is never evidence of live-news completeness.
+
+### Direct RSS / Atom only
+
+```bash
+radar run-daily \
+  --mode live-rss \
+  --profile daily_push \
+  --evaluation-mode deterministic \
+  --date "$(TZ=Asia/Taipei date +%F)" \
+  --database data/radar.db
+```
+
+### Connected live collection
+
+```bash
+radar run-daily \
+  --mode live \
+  --profile daily_push \
+  --evaluation-mode auto \
+  --date "$(TZ=Asia/Taipei date +%F)" \
+  --database data/radar.db
+```
+
+`live` executes direct RSS/Atom and the optional FreshRSS collection inbox. Missing FreshRSS credentials are reported as a coverage gap and never stop direct RSS. Duplicate URLs collected through both paths are removed before event resolution.
+
+## Evaluation modes
 
 ```text
-fixture replay
-live RSS/Atom ingestion
-source registry and OPML validation
-URL normalization and de-duplication
-event clustering and major/potential separation
-coverage gaps and report contract
-optional SQLite report persistence
+deterministic  no AI import or API key; valid report with insufficient where evidence is absent
+auto           API enhancement when OPENAI_API_KEY exists, deterministic fallback otherwise
+api-assisted  explicitly request bounded OpenAI structured enhancement
+chat-assisted deterministic run followed by prepare-chat / import-chat
 ```
 
-Not production-complete:
+Deterministic system narratives use Taiwan Traditional Chinese. Without an AI key, foreign-language source headlines remain in the original language. API/chat-assisted translation must preserve the original headline and may not alter names, products, numbers, dates, URLs or evidence ids.
+
+## Potential candidate retention
 
 ```text
-web, API, social and FreshRSS adapters
-external discovery providers
-historical material-delta repository
-semantic scoring and structural indicator evaluators
-scheduler and production credentials
+daily_push Major      maximum 3 items per domain
+daily_push Potential  all qualified candidates retained in report data
+homepage Potential    top 3 per domain highlighted, complete pool remains visible
+full                  all qualified items within the run budget
 ```
 
-## Governance
+Potential is determined by content features such as pilots, prototypes, new applications, business-model changes, cross-domain combinations, adoption/diffusion and material deltas. Source role is only a supporting feature.
+
+## Build the website
+
+```bash
+radar export-web --out-dir "$PWD" --database data/radar.db
+cd web
+npm ci
+npm run types:check
+npm run build
+npm run dev
+```
+
+The local development site is normally available at `http://localhost:4321`.
+
+## Automation
+
+`.github/workflows/daily-intelligence.yml` runs daily at `0 23 * * *` UTC, equivalent to 07:00 Asia/Taipei. It restores the `radar-state` branch, runs `--mode live`, exports web artifacts, builds Astro, deploys validated non-fixture output and persists compressed/checksummed SQLite state.
+
+Owner-side GitHub settings:
 
 ```text
-Parent control panel: o00362002/personal-project-brain
-Core governance: o00362002/brain-core
-Local source of truth: this repo
-Sync edges: schema/sync-matrix.json
+Settings → Pages → Source = GitHub Actions
+Settings → Actions → General → Workflow permissions = Read and write
 ```
 
-Structural changes require human review. Evidence does not become Memory without approval.
+## Optional configuration
+
+See `.env.example` and `docs/secrets.md`.
+
+```text
+OPENAI_API_KEY / OPENAI_MODEL / OPENAI_MAX_*
+FRESHRSS_BASE_URL / FRESHRSS_USERNAME / FRESHRSS_API_PASSWORD
+DATABASE_URL
+RADAR_EVALUATION_MODE
+```
+
+No secrets are required for deterministic RSS collection, report generation, website build or deployment.
+
+## Honest current boundary
+
+Connected now:
+
+```text
+RSS / Atom
+FreshRSS inbox when configured
+cross-day event history and material delta
+Retail / Crypto / structural deterministic evaluators
+optional API and chat-assisted evaluation
+SQLite state, web projection, Astro and daily automation
+```
+
+Not yet safe to execute generically from the current registry:
+
+```text
+web-page watches that require source-specific extraction rules
+JSON/API sources without executable endpoint + pagination + field mappings
+GDELT gap discovery queries and original-source verification workflow
+authenticated X / Meta / Threads / Instagram official APIs
+```
+
+These remain explicit coverage gaps. They are not silently treated as checked, and the current system must not claim complete global coverage.
