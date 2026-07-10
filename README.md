@@ -11,7 +11,7 @@ Surface important current events and potential weak signals across global market
 ```text
 AGENTS.md                     first entry
 config/runtime_contract.json  canonical execution/output contract
-config/source_registry.yaml   canonical source identity and adapters
+config/source_registry.json   canonical source identity and adapters
 src/radar/                    deterministic runtime
 schemas/                      payload contracts
 migrations/                   persistence foundation
@@ -57,21 +57,44 @@ brand polarization + true vs fake segmentation
 
 ## Source architecture
 
-`config/source_registry.yaml` is canonical. `FRESHRSS_SEEDS.opml` is generated from it. Legacy files under `sources/` remain compatibility inputs until regenerated.
+`config/source_registry.json` is canonical. `FRESHRSS_SEEDS.opml` is generated from it. Legacy files under `sources/` remain compatibility inputs until regenerated.
 
 FreshRSS/RSSHub improve collection coverage only. Discovery providers locate sources and clusters; final claims must resolve to original evidence.
 
-## Validation
+## Validation and runtime
 
 ```bash
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
-PYTHONPATH=src python -m radar.cli run-daily --date 2026-07-10
+PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date 2026-07-10
+PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 --database data/radar.sqlite3
 ```
+
+`live-rss` fetches enabled RSS/Atom adapters and can persist report payloads and coverage gaps to SQLite. It still reports partial when web/API/social/FreshRSS, external discovery or semantic evaluators are not executed.
 
 ## Current boundary
 
-The deterministic fixture foundation is implemented. Live RSS/HTTP ingestion, durable production persistence, scheduler, external provider integrations, complete source health and broad Taiwan/niche source coverage are not yet production connected. Fixture runs must remain `partial` for real-world completeness.
+Implemented:
+
+```text
+fixture replay
+live RSS/Atom ingestion
+source registry and OPML validation
+URL normalization and de-duplication
+event clustering and major/potential separation
+coverage gaps and report contract
+optional SQLite report persistence
+```
+
+Not production-complete:
+
+```text
+web/API/social/FreshRSS adapters
+external discovery providers
+historical material-delta repository
+semantic scoring and structural indicator evaluators
+scheduler and production credentials
+```
 
 ## Governance
 
