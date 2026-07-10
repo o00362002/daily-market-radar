@@ -1,380 +1,193 @@
 # Daily Market Radar｜DEPENDENCY_MAP
 
-Thin-mount dependency map for the Daily Market Radar repo.
+Human-readable dependency and degradation map for Event Intelligence Runtime v2.
+Machine-derivable contract values live in `config/runtime_contract.json` and must not be hand-copied here.
 
-This file is the active source for:
-
-```text
-output modes
-route → workflow → template chains
-mode-specific completion gates
-source-library routing gates
-feed-stack routing gates
-FreshRSS ingestion gate addendum
-daily execution quality gate
-sync checks
-```
-
----
-
-## 1. Source of truth
+## 1. Sources of truth
 
 ```text
-Current mount: brain.manifest.yaml
 Execution entry: AGENTS.md
-Current state: CURRENT_STATE.md
-Current decisions: CURRENT_DECISIONS.md
-Agent map and task routing: AGENT_DEFINITION_MAP.md
-Dependency and completion gates: DEPENDENCY_MAP.md
-FreshRSS ingestion gate addendum: DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md
-Daily execution quality gate: configs/daily_execution_quality_gate.yml
-Structural trend indicators: configs/structural_trend_indicators.yml
-Freshness and Taiwan news rules: configs/news_freshness_and_taiwan_news.yml
-Source routing rules: configs/source_routing_rules.yml
-Feed discovery stack: configs/feed_discovery_stack.yml
-Source library spec: SOURCE_LIBRARY_SPEC.md
-Source library files: sources/key_media_library.yml, sources/official_and_data_sources.yml
-Feed registry: sources/channel_feed_sources.json
-Discovery provider registry: sources/discovery_providers.yml
-FreshRSS seed OPML: FRESHRSS_SEEDS.opml
+Current facts: CURRENT_STATE.md
+Accepted decisions: CURRENT_DECISIONS.md
+Runtime contract: config/runtime_contract.json
+Canonical source registry: config/source_registry.yaml
+Deterministic runtime: src/radar/
+Report schema: schemas/report.schema.json
+Database foundation: migrations/0001_runtime_foundation.sql
+Sync edges: schema/sync-matrix.json
 ```
 
----
+Semantic policies remain in `configs/`; human rendering remains in `workflows/` and `templates/`.
+If prose conflicts with the runtime contract, mark dependency drift and follow the machine contract.
 
-## 2. Active output modes and dependency chains
+## 2. Active execution chains
+
+### Daily Push Brief
 
 ```text
-Full Daily Radar
-→ AGENT_RADAR_REPORT
-→ workflows/daily_radar_workflow.md
-→ templates/daily_report_template_v2.md
-→ configs/daily_execution_quality_gate.yml
-→ configs/structural_trend_indicators.yml
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/niche_candidate_policy.yml
-→ configs/technology_development.yml
-→ configs/feed_discovery_stack.yml when feed/discovery stack is relevant
-→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are used
-→ SOURCE_LIBRARY_SPEC.md + sources/
-→ DEPENDENCY_MAP.md / Full Daily Radar Gate
-
-Daily Push Brief
-→ AGENT_DAILY_PUSH_BRIEF
-→ workflows/daily_push_brief_workflow.md
+AGENT_DAILY_PUSH_BRIEF
+→ config/runtime_contract.json profile=daily_push
+→ config/source_registry.yaml
+→ source health / ingest adapters
+→ normalize / deduplicate / event clustering / material delta
+→ evidence verification / independent scores
+→ coverage cells and gap discovery
+→ report planner with slot caps
 → templates/daily_push_brief_template.md
-→ configs/daily_execution_quality_gate.yml
-→ configs/structural_trend_indicators.yml
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/niche_candidate_policy.yml
-→ configs/technology_development.yml
-→ configs/feed_discovery_stack.yml when feed/discovery stack is relevant
-→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS is available
-→ SOURCE_LIBRARY_SPEC.md + sources/
-→ DEPENDENCY_MAP.md / Daily Push Brief Gate
-
-News Search Output
-→ AGENT_NEWS_SEARCH
-→ workflows/news_search_content_workflow.md
-→ templates/news_search_content_template.md or templates/news_search_content_template_v2.md
-→ configs/daily_execution_quality_gate.yml when topic maps to radar domains
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/feed_discovery_stack.yml when feed/discovery stack is relevant
-→ DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are requested
-→ SOURCE_LIBRARY_SPEC.md + sources/
-
-News Content Output
-→ AGENT_NEWS_CONTENT
-→ workflows/news_content_workflow.md
-→ templates/news_content_template.md or templates/news_content_template_v2.md
-→ configs/news_freshness_and_taiwan_news.yml
+→ schemas/report.schema.json + Python contract validation
+→ post-run backtest
 ```
 
-If route, workflow, template, config, and gate disagree, mark:
+### Full Daily Radar
 
 ```text
-依賴鏈不一致：partial / blocked
+AGENT_RADAR_REPORT
+→ config/runtime_contract.json profile=full
+→ same deterministic pipeline
+→ all qualified items within run budget
+→ templates/daily_report_template_v2.md
+→ report contract validation
+→ archive + backtest
 ```
 
----
-
-## 3. Active output caps
+### Topic Search
 
 ```text
-Daily Push Brief = major and potential slots are layout caps, not completeness proof.
-Full Daily Radar = output all items above quality gates or explicit gap cards.
-Candidate and major lanes stay independent through collection and only meet at event level.
-Old fixed-count completion rules are retired.
+AGENT_NEWS_SEARCH
+→ source registry route for the topic
+→ source health / ingest / fallback discovery
+→ event and evidence contracts
+→ topic-search template
 ```
 
-If any active file still contains old quota wording, the run must mark dependency drift and follow SYSTEM_PROMPT + niche_candidate_policy + current templates.
-
----
-
-## 4. Shared Daily Execution Quality Gate
-
-Mandatory file:
+### Content Rewrite
 
 ```text
-configs/daily_execution_quality_gate.yml
+AGENT_NEWS_CONTENT
+→ already validated report items
+→ content template
 ```
 
-Core requirements before drafting:
+Content rewrite cannot search broadly, upgrade evidence or alter event identity.
+
+## 3. Slot-cap rule
+
+Daily Push slot caps and Full profile behavior are read from `config/runtime_contract.json`.
 
 ```text
-1. Run source audit before drafting.
-2. Run recent reports de-dup or disclose gap.
-3. Assign one primary domain per news event.
-4. Reject major signals without concrete today_new_information.
-5. Reject historical replay / background-only items from quota.
-6. Build niche candidate pool separately from major news.
-7. Reject niche candidates without fresh concrete anchor.
-8. Reject niche candidates that are only major-news rephrasing.
-9. Run candidate retry / external discovery when quota or novelty is low.
-10. Run Taiwan direct-source audit; Taiwan implication cannot count as Taiwan news.
-11. Run Retail fixed matrix.
-12. Run Crypto fixed matrix.
-13. Run Structural Trend Indicator Panel.
-14. Record rejection and retry counts.
+slot cap = readability limit
+coverage gate = completeness check
 ```
 
-Required post-output backtest fields:
+A domain with fewer qualified items receives a gap card. Do not fabricate or repeat items.
+A run with many qualified items may keep overflow in machine output or archive while the brief renders only the cap.
+Historical fixed-count completion rules are frozen v1 behavior and are not active.
+
+## 4. Completion gate
+
+A run can be `complete` only when all requirements in `completion_requires` from the runtime contract pass.
+At minimum this includes:
 
 ```text
-duplicate_rejection_count
-field_overlap_rejection_count
-niche_low_novelty_rejection_count
-candidate_retry_paths_used
-Taiwan_qualified_item_count_after_audit
-Taiwan_direct_sources_checked
-retail_matrix_gaps
-crypto_matrix_gaps
-structural_thesis_evidence_change
-true_vs_fake_segmentation_status
+source health and run budget
+coverage cells by domain / region / language / source role / channel / time window
+evidence trace and original-source verification
+fresh material delta and historical de-duplication
+one primary domain per event
+major and potential lane separation
+rejection counters and retry audit
+Taiwan direct-evidence audit
+Retail fixed matrix
+Crypto fixed matrix
+Structural Trend Indicator Panel
+report schema and Python contract validation
+post-run backtest
 ```
 
-If this gate is skipped, mark partial / failed gate.
+Otherwise status is `partial` or `failed`, with explicit degradation reasons.
 
----
+## 5. Source and feed gate
 
-## 5. Shared Source Library Gate
-
-Mandatory files:
+Canonical source identity lives in `config/source_registry.yaml`.
 
 ```text
-configs/source_routing_rules.yml
-SOURCE_LIBRARY_SPEC.md
-sources/key_media_library.yml
-sources/official_and_data_sources.yml
-configs/query_recipes.yml
+one real source = one source_id
+RSS / API / web / RSSHub / social = adapters
+FRESHRSS_SEEDS.opml = generated projection
+FreshRSS / RSSHub = collection channels, not evidence stores
+GDELT / Media Cloud / Event Registry / NewsCatcher = discovery only
 ```
 
-Core requirements:
+Original evidence must be verified before a claim is accepted. Unavailable sources become coverage gaps, not `no news`.
+Legacy files under `sources/` remain compatibility inputs until regenerated from the registry.
+
+## 6. Taiwan gate
 
 ```text
-1. Fixed source library before generic keyword fallback.
-2. Query recipes before free-form queries.
-3. Official/data cross-check for important claims when available.
-4. Material source gaps disclosed.
-5. Source health recorded through memory/source_health_log.json, memory/topic_coverage_log.json (planned), or reports/backtests/ when implemented.
+direct_taiwan_evidence != taiwan_implication
 ```
 
-Audit fields:
+Taiwan direct evidence must resolve to a Taiwan source or an event explicitly involving a Taiwan entity.
+Generic implications do not satisfy Taiwan coverage. Social-first channels require direct checks.
+Taiwan crypto fixed-source failures must be disclosed as source gaps.
+
+## 7. Major and potential lanes
 
 ```text
-source_library_checked
-priority_sources_checked
-source_hits
-source_misses
-keyword_fallback_used
-official_or_data_crosscheck_used
-taiwan_sources_checked_when_relevant
-external_discovery_used_when_needed
-remaining_source_gap
+importance_score = importance now
+potential_score = future option value
+confidence_score = evidence strength
 ```
 
----
+These scores are independent. A single event cannot fill both major and potential lanes or multiple primary-domain slots.
+Potential items require candidate metadata and a fresh concrete anchor.
 
-## 6. Shared Feed Stack Gate
+## 8. Retail, Crypto and structural panels
 
-Applies when feed collection, RSSHub, FreshRSS, GDELT, Media Cloud, or discovery gaps are relevant.
+Keys are canonical in `config/runtime_contract.json`.
+The report contract must include every configured key, even when status is `insufficient`.
 
-Mandatory files:
+Structural indicators:
 
 ```text
-configs/feed_discovery_stack.yml
-sources/channel_feed_sources.json
-sources/discovery_providers.yml
-FRESHRSS_SEEDS.opml when importing starter feeds
-DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md when FreshRSS candidates are used
+K-shaped AI productivity economy
+AI bubble / overinvestment
+brand polarization + true vs fake segmentation
 ```
 
-Core requirements:
+They are cumulative direction meters and must include counterevidence and missing data.
+
+## 9. Live / fixture boundary
+
+Fixture replay proves deterministic structure only.
 
 ```text
-1. RSSHub and FreshRSS improve collection coverage, not evidence strength.
-2. Only route_status = verified and enabled_for_opml = true may be imported into OPML.
-3. Route templates do not count as checked feeds.
-4. GDELT and Media Cloud are discovery providers; original sources still need verification.
-5. New weak signals found through feeds/discovery enter memory/potential_pool.md before output-stage filtering.
-6. Material feed/discovery gaps disclosed.
+fixture ingestion != live source coverage
+CLI accepted != provider integrated
+schema exists != database persistence active
 ```
 
-Audit fields:
+The report must expose ingestion mode and cannot claim live completeness from fixture data.
+
+## 10. Runtime commands
+
+```bash
+make validate
+PYTHONPATH=src python -m radar.cli sources validate
+PYTHONPATH=src python -m radar.cli run-daily --date YYYY-MM-DD
+```
+
+`run-daily` remains partial until live adapters, source health and persistence are enabled and validated.
+
+## 11. Sync expectations
+
+`schema/sync-matrix.json` must link:
 
 ```text
-feed_stack_loaded
-freshrss_checked
-rsshub_routes_checked
-rsshub_route_gaps
-direct_rss_feeds_checked
-gdelt_used_when_gap
-media_cloud_used_when_gap
-potential_pool_capture_done
-official_or_data_crosscheck_done
-remaining_channel_gap
+runtime contract ↔ workflows / templates / report schema / runtime
+source registry ↔ OPML / source policy / source tests
+report model ↔ planner / contract validator / schema / tests
+CURRENT_DECISIONS ↔ reports execution record
 ```
 
----
-
-## 7. Full Daily Radar Gate
-
-Completion requirements:
-
-```text
-6 大核心領域皆達 >=5 大型重要新聞 + >=5 qualified niche candidates when available
-已完成必要 repo 檔案讀取
-已讀取 configs/daily_execution_quality_gate.yml
-已讀取 configs/structural_trend_indicators.yml
-已讀取 freshness / Taiwan news rules
-已讀取 source routing rules, SOURCE_LIBRARY_SPEC.md, and sources/
-已完成來源庫優先檢查
-已完成必要搜尋與 fallback
-已完成 feed stack check when relevant
-已完成 FreshRSS ingestion gate when FreshRSS candidates are used
-已完成最近 7 日 reports 去重，或標示未完整
-已完成高風險 claim 檢查
-已完成今日新增點檢查
-已完成歷史重複主題檢查
-已完成 primary-domain de-dup check
-已完成台灣新聞有效性檢查
-已完成 Retail fixed matrix
-已完成 Crypto fixed matrix
-已完成 Structural Trend Indicator Panel
-已輸出 Coverage Matrix
-已輸出 Source Library Coverage Matrix 或等效來源覆蓋審計
-已輸出 Feed Stack Coverage Audit when relevant
-已輸出 FreshRSS Ingestion Audit when FreshRSS candidates are used
-已輸出 Data Gaps / Retry Notes
-已輸出 post-report backtest / model adjustment panel
-```
-
-If any requirement is missing, mark:
-
-```text
-完整正式播報：未通過
-不可視為完整正式播報
-```
-
----
-
-## 8. Daily Push Brief Gate
-
-Completion requirements:
-
-```text
-已讀取必要入口檔，或明確揭露缺失
-已讀取 configs/daily_execution_quality_gate.yml
-已讀取 configs/structural_trend_indicators.yml
-已讀取 freshness / Taiwan news rules
-已讀取 source routing rules, SOURCE_LIBRARY_SPEC.md, and sources/，或明確揭露缺失
-已讀取 FreshRSS ingestion addendum when FreshRSS is available
-6 大核心領域皆有覆蓋
-每一核心領域包含 exactly 3 則大型訊號
-每一核心領域包含 exactly 3 則 qualified niche candidates
-每一核心領域包含 1–2 則台灣新聞，或明確標示台灣新聞不足
-每則新聞 / 訊號包含 evidence trace
-每則新聞 / 訊號包含今日新增點
-每則新聞 / 訊號標示是否重複歷史主題
-已完成 primary-domain de-dup check
-Retail fixed matrix 存在
-Crypto fixed matrix 存在
-Structural Trend Indicator Panel 存在
-Source-library coverage audit 存在或 material gaps 已揭露
-Feed stack audit 存在或 material feed gaps 已揭露 when relevant
-FreshRSS ingestion audit 存在或 FreshRSS unavailable 已揭露 when relevant
-Data Gaps and Retry Notes 存在
-Final Indicator Status and News Synthesis Panel 存在且放在最後
-Post-brief Review 存在
-指標狀態與結論不得計入新聞輸出槽位
-指標狀態與結論必須回指上方新聞 ID
-```
-
-Daily Push Brief must write:
-
-```text
-輸出模式：每日推播精簡版。
-精簡版狀態：complete concise brief / partial concise brief。
-完整正式閘門：未嘗試 / 未通過 / 另需分段研究版。
-結構閘門狀態：通過 / 未通過。
-新資訊密度狀態：通過 / 偏低 / 未通過。
-台灣新聞狀態：通過 / 不足 / 未完整。
-來源庫檢查狀態：通過 / partial / 未完成。
-Feed stack 狀態：通過 / partial / 未完成 / not_required。
-FreshRSS ingestion 狀態：通過 / partial / 未完成 / not_available。
-```
-
-If any structural, freshness, Taiwan-news, source-library, required feed-stack, required FreshRSS ingestion, daily quality gate, retail matrix, crypto matrix, or structural trend item is missing, mark `partial concise brief`.
-
----
-
-## 9. News Search Gate
-
-Completion requirements:
-
-```text
-topic identified
-source-library route checked or missing files disclosed
-feed-stack relevance checked or marked not_required
-FreshRSS candidate gate checked or marked not_available when relevant
-priority sources searched
-keyword fallback used only after source checks or disclosed as exception
-claims labelled
-major news and candidates separated
-today_new_information included for each news item
-historical duplication status included
-Taiwan news searched or Taiwan news insufficiency disclosed when relevant
-data gaps disclosed
-handoff suggestion included
-```
-
-If missing, mark:
-
-```text
-news search partial
-```
-
----
-
-## 10. Sync rule
-
-When radar scope, report format, retry rules, missed-case handling, template, report, workflow, agent map, active output mode, completion gate, freshness rule, source-library rule, feed-stack rule, FreshRSS ingestion rule, daily execution quality gate, structural indicator rule, source routing rule, Taiwan news rule, or Memory Trigger Check gate changes, check:
-
-```text
-PROJECT_MAP.md
-HIGH_LEVEL_INDEX.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-AGENTS.md
-AGENT_DEFINITION_MAP.md
-DEPENDENCY_MAP.md
-DEPENDENCY_MAP_FRESHRSS_INGESTION_GATE.md
-templates/
-configs/
-sources/
-SOURCE_LIBRARY_SPEC.md
-brain.manifest.yaml
-check_mount_integrity.sh
-```
+A caught drift should add or upgrade a machine-consumed sync edge.
