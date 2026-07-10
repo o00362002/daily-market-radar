@@ -1,12 +1,9 @@
 """AI evaluation provider protocol, bounded context, and output validation.
 
 The model is a semantic assistant, never the judge of facts. It only ever sees a
-bounded, provider-neutral context (structured facts, summaries, evidence
-snippets, event history, deltas, deterministic scores, counterevidence
-candidates) — never secrets, full HTML, full articles, duplicate content or
-unrelated history. Its output is always re-validated deterministically: it may
-not invent URLs, event/document/source ids or numeric facts, and score
-adjustments are bounded.
+bounded, provider-neutral context and must not invent URLs, ids or numeric facts.
+Natural-language enhancement is requested in Traditional Chinese while the
+original headline remains available for audit.
 """
 
 from __future__ import annotations
@@ -26,6 +23,8 @@ MAX_EXCERPT_CHARS = 280
 class BoundedEventContext:
     event_id: str
     primary_domain: str
+    original_language: str
+    original_headline: str
     summary: str
     delta_types: tuple[str, ...]
     measurement_metric_ids: tuple[str, ...]
@@ -50,6 +49,7 @@ class AiProposalRequest:
 class AiProposalItem:
     event_id: str
     headline: str = ""
+    today_delta: str = ""
     rationale: str = ""
     taiwan_implication: str = ""
     next_watch: str = ""
@@ -104,8 +104,9 @@ def build_bounded_context(events: list[Event], deterministic: EvaluationResult) 
 
     for event in events:
         item = scores_by_event.get(event.event_id)
-        if item is None:
+        if item is None or not event.documents:
             continue
+        primary_document = event.documents[0]
         allowed_event_ids.add(event.event_id)
         metric_ids: set[str] = set()
         source_ids: set[str] = set()
@@ -125,7 +126,9 @@ def build_bounded_context(events: list[Event], deterministic: EvaluationResult) 
             BoundedEventContext(
                 event_id=event.event_id,
                 primary_domain=item.primary_domain,
-                summary=(event.documents[0].summary or event.documents[0].title)[:MAX_SUMMARY_CHARS],
+                original_language=primary_document.language,
+                original_headline=primary_document.title,
+                summary=(primary_document.summary or primary_document.title)[:MAX_SUMMARY_CHARS],
                 delta_types=tuple(sorted({delta.delta_type for delta in event.deltas})),
                 measurement_metric_ids=tuple(sorted(metric_ids)),
                 source_ids=tuple(sorted(source_ids)),
