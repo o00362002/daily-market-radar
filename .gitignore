@@ -17,3 +17,6 @@ __pycache__/
 data/*.sqlite
 data/*.sqlite3
 data/*.db
+
+# Python build metadata
+*.egg-info/

@@ -12,6 +12,7 @@ from radar.contracts.report import (
     BacktestV1,
     CoverageCellV2,
     CoverageGapV2,
+    EventResolutionAuditV1,
     RadarReportV2,
     RejectionCountersV2,
     ReportItemV2,
@@ -19,10 +20,11 @@ from radar.contracts.report import (
 )
 from radar.contracts.runtime import RuntimeContract
 from radar.contracts.web import PublicationReceiptV1, WebArtifactV1
+from radar.domain.event_resolution import EventResolutionOutcome
 from radar.domain.models import Document, Event, stable_id
 from radar.pipeline.cluster import cluster_documents
 from radar.pipeline.deduplicate import deduplicate_documents
-from radar.pipeline.deltas import material_events, reconcile_cross_day_events
+from radar.pipeline.deltas import material_events, resolve_events
 from radar.reporting.contracts import validate_report_contract
 from radar.ports import (
     DocumentRepository,
@@ -31,10 +33,12 @@ from radar.ports import (
     IntelligenceEvaluator,
     ReportPublisher,
     ReportRepository,
+    RunPersistenceBatch,
     SourceAdapter,
     SourceFetchRequest,
     SourceFetchResult,
     StateStore,
+    UnitOfWork,
     WebArtifactStore,
 )
 
@@ -57,6 +61,7 @@ class ApplicationDependencies:
     indicator_repository: IndicatorRepository
     state_store: StateStore
     web_artifact_store: WebArtifactStore
+    unit_of_work: UnitOfWork
     publishers: tuple[ReportPublisher, ...]
 
 
@@ -90,18 +95,10 @@ class DailyRadarApplication:
         normalized = self._dependencies.source_adapter.normalize(source_result)
         documents = deduplicate_documents(normalized)
         duplicate_rejection_count = len(normalized) - len(documents)
-        self._dependencies.document_repository.save_documents(documents)
 
         prior_events = self._dependencies.event_repository.find_recent_events(self._event_history_since(request.date))
-        events = reconcile_cross_day_events(cluster_documents(documents), prior_events)
-        for event in events:
-            self._dependencies.event_repository.save_event(event)
-            self._dependencies.event_repository.attach_documents(
-                event.event_id,
-                [document.document_id for document in event.documents],
-            )
-            for delta in event.deltas:
-                self._dependencies.event_repository.save_event_delta(event.event_id, delta, started_at)
+        resolution = resolve_events(cluster_documents(documents), prior_events, observed_at=started_at)
+        events = resolution.events
 
         reportable_events = material_events(events)
         evaluation = self._dependencies.evaluator.evaluate(
@@ -190,6 +187,7 @@ class DailyRadarApplication:
             crypto_matrix=evaluation.crypto_matrix,
             structural_indicators=list(evaluation.structural_indicators),
             evaluation_audit=evaluation.audit,
+            event_resolution_audit=self._event_resolution_audit(resolution),
             backtest=BacktestV1(
                 status="complete" if report_status == "complete" else "partial",
                 findings=["provider-neutral application flow and report contract validated"],
@@ -199,14 +197,22 @@ class DailyRadarApplication:
         )
         validate_report_contract(report.model_dump(mode="json"), contract=contract)
 
-        # Mutating output ports happens only after typed and cross-field validation.
-        self._dependencies.report_repository.save_report(report)
-        for observation in evaluation.structural_indicators:
-            self._dependencies.indicator_repository.save_indicator_observation(observation)
-
+        # Persist the whole run atomically only after typed and cross-field validation.
+        # A failure here rolls the run back and never overwrites the last valid report.
         artifacts = self._project_web(report)
+        batch = RunPersistenceBatch(
+            report=report,
+            documents=tuple(documents),
+            events=tuple(events),
+            indicator_observations=tuple(evaluation.structural_indicators),
+            state_entries=((f"last-valid-report:{request.profile}", report.canonical_json_bytes()),),
+            match_records=tuple(resolution.match_records),
+            observed_at=started_at,
+        )
+        self._dependencies.unit_of_work.commit_run(batch)
+
+        # Web projection and publication happen only after the durable commit succeeds.
         self._dependencies.web_artifact_store.commit(artifacts)
-        self._dependencies.state_store.save(f"last-valid-report:{request.profile}", report.canonical_json_bytes())
         publications = tuple(
             publisher.publish(report, artifacts)
             for publisher in self._dependencies.publishers
@@ -403,6 +409,22 @@ class DailyRadarApplication:
         }
         serialized = json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         return stable_id("run", [serialized])
+
+    @staticmethod
+    def _event_resolution_audit(resolution: EventResolutionOutcome) -> EventResolutionAuditV1:
+        return EventResolutionAuditV1(
+            events_observed=resolution.events_observed,
+            new_events=resolution.new_events,
+            matched_existing_events=resolution.matched_existing_events,
+            material_events=resolution.material_events,
+            unchanged_events=resolution.unchanged_events,
+            duplicate_only_events=resolution.duplicate_only_events,
+            unresolved_matches=len(resolution.unresolved_matches),
+            match_strategy_counts=dict(resolution.match_strategy_counts),
+            delta_type_counts=dict(resolution.delta_type_counts),
+            title_only_changes_rejected=resolution.title_only_changes_rejected,
+            background_only_rejected=resolution.background_only_rejected,
+        )
 
     @staticmethod
     def _event_history_since(report_date: str, lookback_days: int = 30) -> str:

@@ -23,6 +23,7 @@ REQUIRED_REPORT_FIELDS = {
     "crypto_matrix",
     "structural_indicators",
     "evaluation_audit",
+    "event_resolution_audit",
     "backtest",
     "contract_version",
 }
@@ -90,6 +91,7 @@ def validate_report_contract(report: dict[str, Any], contract: RuntimeContract |
     for item in report["items"]:
         _validate_item(item, contract=contract)
     _validate_contract_sections(report, contract)
+    _validate_event_resolution_audit(report["event_resolution_audit"])
 
 
 def _validate_legacy_item(item: dict[str, Any]) -> None:
@@ -168,6 +170,29 @@ def _validate_slot_cap(items: list[dict[str, Any]], lane: str, cap: int) -> None
     exceeded = {domain: count for domain, count in counts.items() if count > cap}
     if exceeded:
         raise ValueError(f"{lane} slot cap exceeded: {exceeded}")
+
+
+def _validate_event_resolution_audit(audit: dict[str, Any]) -> None:
+    required = {
+        "events_observed",
+        "new_events",
+        "matched_existing_events",
+        "material_events",
+        "unchanged_events",
+        "duplicate_only_events",
+        "unresolved_matches",
+        "match_strategy_counts",
+        "delta_type_counts",
+        "title_only_changes_rejected",
+        "background_only_rejected",
+    }
+    missing = required - set(audit)
+    if missing:
+        raise ValueError(f"event_resolution_audit missing fields: {sorted(missing)}")
+    if audit["events_observed"] != audit["new_events"] + audit["matched_existing_events"]:
+        raise ValueError("event_resolution_audit: events_observed must equal new + matched events")
+    if audit["material_events"] + audit["unchanged_events"] != audit["events_observed"]:
+        raise ValueError("event_resolution_audit: material + unchanged must equal events_observed")
 
 
 def _validate_evidence_link(link: dict[str, Any]) -> None:

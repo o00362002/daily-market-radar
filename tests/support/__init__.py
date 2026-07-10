@@ -7,6 +7,7 @@ from tests.support.fakes import (
     InMemoryIndicatorRepository,
     InMemoryReportRepository,
     InMemoryStateStore,
+    InMemoryUnitOfWork,
     InMemoryWebArtifactStore,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "InMemoryIndicatorRepository",
     "InMemoryReportRepository",
     "InMemoryStateStore",
+    "InMemoryUnitOfWork",
     "InMemoryWebArtifactStore",
 ]

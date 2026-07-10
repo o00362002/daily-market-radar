@@ -5,10 +5,14 @@ import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from radar.contracts.report import RadarReportV2, StructuralIndicatorObservationV1
 from radar.domain.models import CanonicalFacts, Document, Event, EventDelta
+
+if TYPE_CHECKING:
+    from radar.domain.event_resolution import EventMatchRecord
+    from radar.ports.persistence import RunPersistenceBatch
 
 
 class SqliteRunRepository:
@@ -134,21 +138,30 @@ class SqliteRunRepository:
 
     def save_event_delta(self, event_id: str, delta: EventDelta, observed_at: str) -> None:
         self.initialize()
+        with sqlite3.connect(self.database_path) as connection:
+            self._save_event_delta_within(connection, event_id, delta, observed_at)
+            connection.commit()
+
+    def _save_event_delta_within(
+        self,
+        connection: sqlite3.Connection,
+        event_id: str,
+        delta: EventDelta,
+        observed_at: str,
+    ) -> None:
         payload = _event_delta_to_payload(delta)
         serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         delta_id = "delta:" + hashlib.sha256(f"{event_id}|{observed_at}|{serialized}".encode("utf-8")).hexdigest()[:16]
-        with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                insert into event_deltas(delta_id, event_id, observed_at, delta_json)
-                values(?, ?, ?, ?)
-                on conflict(delta_id) do update set
-                  observed_at=excluded.observed_at,
-                  delta_json=excluded.delta_json
-                """,
-                (delta_id, event_id, observed_at, serialized),
-            )
-            connection.commit()
+        connection.execute(
+            """
+            insert into event_deltas(delta_id, event_id, observed_at, delta_json)
+            values(?, ?, ?, ?)
+            on conflict(delta_id) do update set
+              observed_at=excluded.observed_at,
+              delta_json=excluded.delta_json
+            """,
+            (delta_id, event_id, observed_at, serialized),
+        )
 
     def list_event_deltas(self, event_id: str) -> list[EventDelta]:
         if not self.database_path.exists():
@@ -187,51 +200,147 @@ class SqliteRunRepository:
         typed_report = report if isinstance(report, RadarReportV2) else RadarReportV2.from_payload(report)
         payload = typed_report.model_dump(mode="json") if isinstance(report, RadarReportV2) else report
         self.initialize()
-        run_id = typed_report.run_id
-        status = typed_report.status
         with sqlite3.connect(self.database_path) as connection:
-            rendered_at = self._next_rendered_at(connection)
-            connection.execute(
-                """
-                insert into fetch_runs(run_id, started_at, finished_at, status)
-                values(?, datetime('now'), datetime('now'), ?)
-                on conflict(run_id) do update set
-                  finished_at=excluded.finished_at,
-                  status=excluded.status
-                """,
-                (run_id, status),
-            )
-            connection.execute(
-                """
-                insert into reports(report_id, run_id, profile, rendered_at)
-                values(?, ?, ?, ?)
-                on conflict(report_id) do update set
-                  run_id=excluded.run_id,
-                  profile=excluded.profile,
-                  rendered_at=excluded.rendered_at
-                """,
-                (f"report:{run_id}", run_id, typed_report.profile, rendered_at),
-            )
-            connection.execute(
-                """
-                insert into report_payloads(report_id, run_id, payload_json)
-                values(?, ?, ?)
-                on conflict(report_id) do update set
-                  run_id=excluded.run_id,
-                  payload_json=excluded.payload_json
-                """,
-                (f"report:{run_id}", run_id, json.dumps(payload, ensure_ascii=False, sort_keys=True)),
-            )
-            connection.execute("delete from coverage_gaps where run_id = ?", (run_id,))
-            for index, gap in enumerate(payload.get("coverage_gaps", [])):
-                connection.execute(
-                    """
-                    insert into coverage_gaps(gap_id, run_id, gap_json)
-                    values(?, ?, ?)
-                    """,
-                    (f"{run_id}:{index}", run_id, json.dumps(gap, ensure_ascii=False, sort_keys=True)),
-                )
+            self._save_report_within(connection, typed_report, payload)
             connection.commit()
+
+    def commit_run(self, batch: "RunPersistenceBatch") -> None:
+        """Persist an entire run in one transaction; roll back on any failure.
+
+        Nothing is written unless every element commits, so a failed run cannot
+        overwrite the last valid report or corrupt event history.
+        """
+
+        self.initialize()
+        connection = sqlite3.connect(self.database_path)
+        try:
+            connection.execute("begin")
+            for document in batch.documents:
+                self._upsert_document(connection, document)
+            for event in batch.events:
+                self._upsert_event(connection, event)
+                for document in event.documents:
+                    self._upsert_document(connection, document)
+                    self._attach_document(connection, event.event_id, document.document_id)
+                for delta in event.deltas:
+                    self._save_event_delta_within(connection, event.event_id, delta, batch.observed_at)
+            for record in batch.match_records:
+                self._save_match_record_within(connection, record)
+            self._save_report_within(
+                connection,
+                batch.report,
+                batch.report.model_dump(mode="json"),
+            )
+            for observation in batch.indicator_observations:
+                self._save_indicator_within(connection, observation)
+            for key, value in batch.state_entries:
+                self._save_state_within(connection, key, value)
+            connection.commit()
+        except BaseException:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+    def _save_report_within(
+        self,
+        connection: sqlite3.Connection,
+        typed_report: RadarReportV2,
+        payload: dict[str, Any],
+    ) -> None:
+        run_id = typed_report.run_id
+        rendered_at = self._next_rendered_at(connection)
+        connection.execute(
+            """
+            insert into fetch_runs(run_id, started_at, finished_at, status)
+            values(?, datetime('now'), datetime('now'), ?)
+            on conflict(run_id) do update set
+              finished_at=excluded.finished_at,
+              status=excluded.status
+            """,
+            (run_id, typed_report.status),
+        )
+        connection.execute(
+            """
+            insert into reports(report_id, run_id, profile, rendered_at)
+            values(?, ?, ?, ?)
+            on conflict(report_id) do update set
+              run_id=excluded.run_id,
+              profile=excluded.profile,
+              rendered_at=excluded.rendered_at
+            """,
+            (f"report:{run_id}", run_id, typed_report.profile, rendered_at),
+        )
+        connection.execute(
+            """
+            insert into report_payloads(report_id, run_id, payload_json)
+            values(?, ?, ?)
+            on conflict(report_id) do update set
+              run_id=excluded.run_id,
+              payload_json=excluded.payload_json
+            """,
+            (f"report:{run_id}", run_id, json.dumps(payload, ensure_ascii=False, sort_keys=True)),
+        )
+        connection.execute("delete from coverage_gaps where run_id = ?", (run_id,))
+        for index, gap in enumerate(payload.get("coverage_gaps", [])):
+            connection.execute(
+                """
+                insert into coverage_gaps(gap_id, run_id, gap_json)
+                values(?, ?, ?)
+                """,
+                (f"{run_id}:{index}", run_id, json.dumps(gap, ensure_ascii=False, sort_keys=True)),
+            )
+
+    def _save_match_record_within(self, connection: sqlite3.Connection, record: "EventMatchRecord") -> None:
+        payload = {
+            "strategy": record.strategy,
+            "confidence": record.confidence,
+            "reason": record.reason,
+            "prior_event_id": record.prior_event_id,
+            "current_event_id": record.current_event_id,
+            "matched_fields": list(record.matched_fields),
+            "unresolved_fields": list(record.unresolved_fields),
+            "observed_at": record.observed_at,
+        }
+        serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        match_id = "match:" + hashlib.sha256(
+            f"{record.current_event_id}|{record.prior_event_id}|{record.observed_at}|{serialized}".encode("utf-8")
+        ).hexdigest()[:16]
+        connection.execute(
+            """
+            insert into event_matches(match_id, current_event_id, prior_event_id, strategy, confidence, observed_at, match_json)
+            values(?, ?, ?, ?, ?, ?, ?)
+            on conflict(match_id) do update set
+              strategy=excluded.strategy,
+              confidence=excluded.confidence,
+              observed_at=excluded.observed_at,
+              match_json=excluded.match_json
+            """,
+            (
+                match_id,
+                record.current_event_id,
+                record.prior_event_id,
+                record.strategy,
+                record.confidence,
+                record.observed_at,
+                serialized,
+            ),
+        )
+
+    def list_match_records(self, current_event_id: str) -> list[dict[str, Any]]:
+        if not self.database_path.exists():
+            return []
+        with sqlite3.connect(self.database_path) as connection:
+            rows = connection.execute(
+                """
+                select match_json
+                from event_matches
+                where current_event_id = ?
+                order by observed_at asc, match_id asc
+                """,
+                (current_event_id,),
+            ).fetchall()
+        return [json.loads(row[0]) for row in rows]
 
     @staticmethod
     def _next_rendered_at(connection: sqlite3.Connection) -> str:
@@ -294,22 +403,29 @@ class SqliteRunRepository:
 
     def save_indicator_observation(self, observation: StructuralIndicatorObservationV1) -> None:
         self.initialize()
-        payload = observation.model_dump(mode="json")
         with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                insert into indicator_observations(indicator_id, observation_date, payload_json)
-                values(?, ?, ?)
-                on conflict(indicator_id, observation_date) do update set
-                  payload_json=excluded.payload_json
-                """,
-                (
-                    observation.indicator_id,
-                    observation.observation_date,
-                    json.dumps(payload, ensure_ascii=False, sort_keys=True),
-                ),
-            )
+            self._save_indicator_within(connection, observation)
             connection.commit()
+
+    def _save_indicator_within(
+        self,
+        connection: sqlite3.Connection,
+        observation: StructuralIndicatorObservationV1,
+    ) -> None:
+        payload = observation.model_dump(mode="json")
+        connection.execute(
+            """
+            insert into indicator_observations(indicator_id, observation_date, payload_json)
+            values(?, ?, ?)
+            on conflict(indicator_id, observation_date) do update set
+              payload_json=excluded.payload_json
+            """,
+            (
+                observation.indicator_id,
+                observation.observation_date,
+                json.dumps(payload, ensure_ascii=False, sort_keys=True),
+            ),
+        )
 
     def list_indicator_observations(self, indicator_id: str) -> list[StructuralIndicatorObservationV1]:
         if not self.database_path.exists():
@@ -344,17 +460,20 @@ class SqliteRunRepository:
     def save(self, key: str, value: bytes) -> None:
         self.initialize()
         with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                insert into state_entries(state_key, value_blob, updated_at)
-                values(?, ?, ?)
-                on conflict(state_key) do update set
-                  value_blob=excluded.value_blob,
-                  updated_at=excluded.updated_at
-                """,
-                (key, sqlite3.Binary(bytes(value)), datetime.now(timezone.utc).isoformat(timespec="microseconds")),
-            )
+            self._save_state_within(connection, key, value)
             connection.commit()
+
+    def _save_state_within(self, connection: sqlite3.Connection, key: str, value: bytes) -> None:
+        connection.execute(
+            """
+            insert into state_entries(state_key, value_blob, updated_at)
+            values(?, ?, ?)
+            on conflict(state_key) do update set
+              value_blob=excluded.value_blob,
+              updated_at=excluded.updated_at
+            """,
+            (key, sqlite3.Binary(bytes(value)), datetime.now(timezone.utc).isoformat(timespec="microseconds")),
+        )
 
     def _upsert_document(self, connection: sqlite3.Connection, document: Document) -> None:
         payload = _document_to_payload(document)

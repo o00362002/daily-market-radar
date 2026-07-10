@@ -15,6 +15,7 @@ from radar.repositories.memory import (
     InMemoryEventRepository,
     InMemoryIndicatorRepository,
     InMemoryReportRepository,
+    InMemoryUnitOfWork,
 )
 from radar.repositories.sqlite import SqliteRunRepository
 from radar.schemas.source import SourceRegistry
@@ -138,6 +139,36 @@ def compose_application(
     if config.web_artifact_store_backend != "memory":
         raise ValueError(f"unknown web artifact store backend: {config.web_artifact_store_backend}")
 
+    core_repositories = (
+        document_repository,
+        event_repository,
+        report_repository,
+        indicator_repository,
+        state_store,
+    )
+    if sqlite_repository is not None and all(repo is sqlite_repository for repo in core_repositories):
+        unit_of_work = sqlite_repository
+    elif all(
+        isinstance(repo, expected)
+        for repo, expected in (
+            (document_repository, InMemoryDocumentRepository),
+            (event_repository, InMemoryEventRepository),
+            (report_repository, InMemoryReportRepository),
+            (indicator_repository, InMemoryIndicatorRepository),
+        )
+    ):
+        unit_of_work = InMemoryUnitOfWork(
+            document_repository=document_repository,
+            event_repository=event_repository,
+            report_repository=report_repository,
+            indicator_repository=indicator_repository,
+            state_store=state_store,
+        )
+    else:
+        raise ValueError(
+            "atomic unit of work requires a uniform sqlite or in-memory persistence backend"
+        )
+
     publishers = []
     for publisher_backend in config.publisher_backends:
         if publisher_backend == "disabled":
@@ -154,6 +185,7 @@ def compose_application(
         indicator_repository=indicator_repository,
         state_store=state_store,
         web_artifact_store=InMemoryWebArtifactStore(),
+        unit_of_work=unit_of_work,
         publishers=tuple(publishers),
     )
     return ComposedApplication(

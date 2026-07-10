@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from radar.domain.enums import DeltaType
+from radar.domain.event_resolution import is_material_delta_type
 from radar.domain.models import Event, ReportItem, stable_id
 from radar.domain.scoring import explain_event_scores
 
@@ -49,9 +50,9 @@ def _today_delta(event: Event, action: str, obj: str) -> str:
     delta = event.deltas[0]
     if delta.delta_type == DeltaType.NEW_EVENT.value:
         return f"New event: first {action} evidence for {obj} in the lookback window."
-    if delta.delta_type == DeltaType.SAME_EVENT_NEW_DELTA.value:
+    if is_material_delta_type(delta.delta_type):
         changed = ", ".join(delta.changed_fields) if delta.changed_fields else "evidence"
-        return f"Material delta in {changed}: new {action} evidence for {obj}."
+        return f"Material delta in {changed} ({delta.delta_type}): new {action} evidence for {obj}."
     return f"No material delta: {delta.reason}."
 
 

@@ -83,7 +83,7 @@ class DedupAndDeltaTests(unittest.TestCase):
             facts={"flow_usd_m": 280},
         )
         delta = classify_event_delta(prior, current)
-        self.assertEqual(delta.delta_type, "same_event_new_delta")
+        self.assertEqual(delta.delta_type, "new_amount_or_metric")
         self.assertIn("flow_usd_m", delta.changed_fields)
 
     def test_cross_day_same_signature_preserves_first_seen_and_records_material_delta(self) -> None:
@@ -118,7 +118,7 @@ class DedupAndDeltaTests(unittest.TestCase):
         self.assertEqual(reconciled[0].event_id, prior_event.event_id)
         self.assertEqual(reconciled[0].first_seen_at, prior_event.first_seen_at)
         self.assertEqual(reconciled[0].last_material_delta_at, current_event.last_seen_at)
-        self.assertEqual(reconciled[0].deltas[0].delta_type, "same_event_new_delta")
+        self.assertEqual(reconciled[0].deltas[0].delta_type, "new_amount_or_metric")
         self.assertIn("flow_usd_m", reconciled[0].deltas[0].changed_fields)
         self.assertEqual(material_events(reconciled), reconciled)
 
