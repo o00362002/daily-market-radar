@@ -46,7 +46,7 @@ try {
     ? ls('git -c core.quotePath=false diff --cached --name-only')
     : ls('git -c core.quotePath=false ls-files');
 } catch { FILES = []; }
-FILES = FILES.filter((f) => /\.(md|ya?ml)$/.test(f) && !EXEMPT.some((e) => f.startsWith(e)) && fs.existsSync(path.join(repo, f)));
+FILES = FILES.filter((f) => /\.(md|ya?ml)$/.test(f) && !EXEMPT.some((e) => f.startsWith(e)) && !/(^|\/)(node_modules|dist|\.astro|\.venv)\//.test(f) && fs.existsSync(path.join(repo, f)));
 
 const roots = new Set(fs.readdirSync(repo).filter((d) => !d.startsWith('.')));
 
