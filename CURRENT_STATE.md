@@ -9,7 +9,8 @@
 定位：全球每日事件情報雷達＋多領域趨勢與潛力訊號掃描。
 Active contract：config/runtime_contract.json。
 Canonical source registry：config/source_registry.json。
-Runtime：src/radar/ modular monolith，具備 fixture 與 live RSS/Atom ingestion、URL normalization、dedup、event clustering、major/potential lane、coverage cells、report planning、contract validation、fixture replay 與 optional SQLite run-record persistence。
+Runtime：src/radar/ modular monolith；application 的所有可替換／外部 collaborator 都經九個 behavior Protocols 注入，並依賴 provider-neutral contracts/domain 與 pure deterministic pipeline/validation；concrete implementations 只由 composition root 選擇。
+Validated boundary：RadarReportV2 與 WebArtifactV1 為 strict typed contract；report persistence、web projection、state checkpoint 與 publisher 都只接收 validated canonical values。
 Profiles：daily_push 使用 slot caps；full 輸出 run budget 內所有 qualified items。數量不是完整性證明。
 Report domains：六個 canonical domains，由 runtime contract 定義；configs/radars.yml 是細雷達模組，不新增 report-domain quota。
 Source model：一個真實來源一個 source_id；RSS/API/web/RSSHub/social 為 adapters；FRESHRSS_SEEDS.opml 為 generated projection。
@@ -21,7 +22,7 @@ Scoring：importance、potential、confidence 分開。
 ## Production reality
 
 ```text
-目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite report/gap storage foundation、unit/integration/contract tests。
+目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite report/gap storage foundation、fake-only application flow、replaceability/import/cycle architecture gates。
 尚未完成：web/API/social/FreshRSS adapters、完整 source health、外部 discovery provider、歷史事件持久化與 material-delta 比對、semantic scorer、結構指標 evaluator、scheduler、production credentials。
 live-rss 只覆蓋 registry 內 RSS/Atom adapters；未執行來源必須成為 coverage gaps。
 因此 fixture 與目前 live-rss run 均不得宣稱完整全球新聞覆蓋。
@@ -46,7 +47,7 @@ schema/sync-matrix.json = 連動矩陣
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
 PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date YYYY-MM-DD
-PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD --database data/radar.sqlite3
+PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD --database <database-path>
 ```
 
 ## Frozen v1 behavior

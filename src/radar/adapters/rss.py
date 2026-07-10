@@ -9,6 +9,15 @@ from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 from radar.domain.models import Document
+from radar.contracts.report import CoverageGapV2, SourceFailureV1
+from radar.ports.sources import (
+    CredentialsStatusV1,
+    RateLimitPolicy,
+    RetryPolicy,
+    SourceFetchRequest,
+    SourceFetchResult,
+    SourceHealthV1,
+)
 from radar.schemas.source import Source, SourceRegistry
 
 
@@ -116,7 +125,7 @@ def _parse_feed(payload: bytes, *, source: Source, fetched_at: str, limit: int) 
                 primary_domain=source.domains[0],
                 lane=_lane_for_source(source),
                 summary=summary,
-                facts={"source_roles": source.source_roles, "adapter": "rss"},
+                facts={"source_roles": source.source_roles},
             )
         )
     return documents
@@ -200,3 +209,84 @@ def _lane_for_source(source: Source) -> str:
         "executive",
     }
     return "top_down" if top_down_roles.intersection(source.source_roles) else "bottom_up"
+
+
+@dataclass(frozen=True)
+class RegistryRssSourceAdapter:
+    registry: SourceRegistry
+    timeout_seconds: int = 12
+    per_feed_limit: int = 20
+    adapter_id: str = "rss_atom"
+    source_id: str = "source_registry"
+    retry_policy: RetryPolicy = RetryPolicy(max_attempts=2, backoff_seconds=0.5)
+    rate_limit_policy: RateLimitPolicy = RateLimitPolicy()
+
+    def credentials_status(self) -> CredentialsStatusV1:
+        return CredentialsStatusV1(available=True)
+
+    def health_check(self) -> SourceHealthV1:
+        return SourceHealthV1(status="healthy", message="public RSS/Atom adapter enabled")
+
+    def fetch(self, request: SourceFetchRequest) -> SourceFetchResult:
+        del request
+        documents, failures, checked_sources = fetch_registry_rss_documents(
+            self.registry,
+            timeout_seconds=self.timeout_seconds,
+            per_feed_limit=self.per_feed_limit,
+        )
+        non_rss_enabled = [
+            source.source_id
+            for source in self.registry.sources
+            if source.enabled and not any(adapter.kind == "rss" for adapter in source.adapters)
+        ]
+        degradation_reasons: list[str] = []
+        if failures:
+            degradation_reasons.append("rss_fetch_failures")
+        if non_rss_enabled:
+            degradation_reasons.append("web_api_social_adapters_not_executed")
+        if not documents:
+            degradation_reasons.append("no_live_documents_ingested")
+
+        gaps = tuple(
+            CoverageGapV2(
+                domain="unknown_until_source_mapping",
+                macro_region="source_registry",
+                language="source_defined",
+                source_role="rss",
+                channel=failure.adapter_url,
+                time_window="24h",
+                reason="feed_fetch_failed",
+                message=f"{failure.source_id}: {failure.reason}",
+            )
+            for failure in failures
+        )
+        taiwan_sources = tuple(
+            source.source_id
+            for source in self.registry.sources
+            if source.macro_region == "Taiwan" and any(adapter.kind == "rss" for adapter in source.adapters)
+        )
+        return SourceFetchResult(
+            documents=tuple(documents),
+            coverage_gaps=gaps,
+            degradation_reasons=tuple(degradation_reasons),
+            sources_checked=tuple(checked_sources),
+            failures=tuple(
+                SourceFailureV1(
+                    source_id=failure.source_id,
+                    reason=failure.reason,
+                    channel=failure.adapter_url,
+                )
+                for failure in failures
+            ),
+            sources_not_executed=tuple(non_rss_enabled),
+            registry_checked=True,
+            integration_status=(("external_discovery", "not_executed"),),
+            taiwan_direct_sources_checked=taiwan_sources,
+            remaining_gaps=(
+                "web/API/social adapters are not executed by the RSS composition",
+                "external discovery and collection inbox are not connected",
+            ),
+        )
+
+    def normalize(self, result: SourceFetchResult) -> list[Document]:
+        return list(result.documents)

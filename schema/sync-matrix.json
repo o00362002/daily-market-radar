@@ -1,12 +1,14 @@
 {
   "schema": "brain-sync-matrix/v1",
-  "version": "4",
+  "version": "5",
   "_note": "daily-market-radar machine sync edges. Keep derivable facts out of prose.",
   "byFile": {
     "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md", "CURRENT_STATE.md"],
     "AGENTS.md": ["CLAUDE.md", "README.md", "AGENT_DEFINITION_MAP.md"],
     "brain.manifest.yaml": ["AGENTS.md", "PROJECT_OS_MOUNT.md", "CURRENT_STATE.md"],
     "CURRENT_DECISIONS.md": ["CURRENT_STATE.md", "reports/execution_checks/"],
+    "Makefile": [".github/workflows/mount-check.yml", "tests/architecture/"],
+    "pyproject.toml": [".github/workflows/mount-check.yml", "tests/"],
     "config/runtime_contract.json": [
       "SYSTEM_PROMPT.md",
       "DEPENDENCY_MAP.md",
@@ -51,10 +53,46 @@
       "docs/operations.md"
     ],
     "src/radar/runtime/runs.py": [
+      "src/radar/composition.py",
       "src/radar/cli.py",
       "docs/operations.md",
       "tests/integration/",
       "tests/contracts/"
+    ],
+    "src/radar/ports/__init__.py": [
+      "src/radar/application/run_daily.py",
+      "src/radar/composition.py",
+      "tests/architecture/",
+      "tests/integration/test_fake_only_application.py",
+      "docs/architecture.md"
+    ],
+    "src/radar/application/run_daily.py": [
+      "src/radar/contracts/report.py",
+      "src/radar/contracts/evaluation.py",
+      "src/radar/contracts/web.py",
+      "src/radar/composition.py",
+      "src/radar/runtime/runs.py",
+      "tests/architecture/",
+      "tests/integration/test_fake_only_application.py"
+    ],
+    "src/radar/composition.py": [
+      "src/radar/adapters/",
+      "src/radar/evaluators/",
+      "src/radar/repositories/",
+      "src/radar/stores/",
+      "src/radar/publishers/",
+      "tests/unit/test_composition_root.py",
+      "docs/architecture.md"
+    ],
+    "src/radar/contracts/report.py": [
+      "src/radar/ports/",
+      "src/radar/application/run_daily.py",
+      "src/radar/reporting/contracts.py",
+      "src/radar/reporting/planner.py",
+      "src/radar/repositories/",
+      "src/radar/publishers/",
+      "schemas/report.schema.json",
+      "tests/contracts/test_canonical_models.py"
     ],
     "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md", "AGENT_DEFINITION_MAP.md"],
     "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
@@ -67,6 +105,8 @@
     "templates/": ["config/runtime_contract.json", "schemas/report.schema.json"],
     "config/": ["CURRENT_STATE.md", "docs/architecture.md"],
     "src/radar/": ["schemas/", "tests/", "docs/architecture.md", "docs/operations.md"],
+    "src/radar/ports/": ["src/radar/application/", "src/radar/composition.py", "tests/architecture/"],
+    "src/radar/application/": ["src/radar/ports/", "src/radar/contracts/", "tests/integration/", "tests/architecture/"],
     "schemas/": ["src/radar/reporting/contracts.py", "tests/contracts/"],
     "migrations/": ["src/radar/repositories/sqlite.py", "docs/architecture.md", "docs/migration-v1-to-v2.md"],
     "rules/": ["AGENTS.md", "README.md"],

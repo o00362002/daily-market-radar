@@ -1,7 +1,853 @@
 {
+  "$defs": {
+    "BacktestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "findings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "next_adjustments": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Next Adjustments",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "partial",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "findings",
+        "next_adjustments"
+      ],
+      "title": "BacktestV1",
+      "type": "object"
+    },
+    "CoverageCellV2": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "title": "Channel",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        },
+        "macro_region": {
+          "title": "Macro Region",
+          "type": "string"
+        },
+        "observed_count": {
+          "minimum": 0,
+          "title": "Observed Count",
+          "type": "integer"
+        },
+        "source_role": {
+          "title": "Source Role",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "time_window": {
+          "title": "Time Window",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "macro_region",
+        "language",
+        "source_role",
+        "channel",
+        "time_window",
+        "status",
+        "observed_count"
+      ],
+      "title": "CoverageCellV2",
+      "type": "object"
+    },
+    "CoverageGapV2": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "title": "Channel",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        },
+        "macro_region": {
+          "title": "Macro Region",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_role": {
+          "title": "Source Role",
+          "type": "string"
+        },
+        "time_window": {
+          "title": "Time Window",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "macro_region",
+        "language",
+        "source_role",
+        "channel",
+        "time_window",
+        "reason",
+        "message"
+      ],
+      "title": "CoverageGapV2",
+      "type": "object"
+    },
+    "EvaluationAuditV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_hits": {
+          "minimum": 0,
+          "title": "Cache Hits",
+          "type": "integer"
+        },
+        "degradation_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Degradation Reasons",
+          "type": "array"
+        },
+        "effective_mode": {
+          "title": "Effective Mode",
+          "type": "string"
+        },
+        "estimated_cost_usd": {
+          "minimum": 0,
+          "title": "Estimated Cost Usd",
+          "type": "number"
+        },
+        "evaluated_item_count": {
+          "minimum": 0,
+          "title": "Evaluated Item Count",
+          "type": "integer"
+        },
+        "evaluator": {
+          "title": "Evaluator",
+          "type": "string"
+        },
+        "failed_item_count": {
+          "minimum": 0,
+          "title": "Failed Item Count",
+          "type": "integer"
+        },
+        "finished_at": {
+          "title": "Finished At",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider"
+        },
+        "requested_mode": {
+          "title": "Requested Mode",
+          "type": "string"
+        },
+        "source_context_hash": {
+          "title": "Source Context Hash",
+          "type": "string"
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "string"
+        },
+        "token_usage": {
+          "$ref": "#/$defs/TokenUsageV1"
+        },
+        "validation_status": {
+          "title": "Validation Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requested_mode",
+        "effective_mode",
+        "evaluator",
+        "model",
+        "provider",
+        "started_at",
+        "finished_at",
+        "cache_hits",
+        "evaluated_item_count",
+        "failed_item_count",
+        "token_usage",
+        "estimated_cost_usd",
+        "source_context_hash",
+        "validation_status",
+        "degradation_reasons"
+      ],
+      "title": "EvaluationAuditV1",
+      "type": "object"
+    },
+    "EvidenceLinkV2": {
+      "additionalProperties": false,
+      "properties": {
+        "fetched_at": {
+          "title": "Fetched At",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "source_id",
+        "fetched_at"
+      ],
+      "title": "EvidenceLinkV2",
+      "type": "object"
+    },
+    "MatrixObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "data_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Checked",
+          "type": "array"
+        },
+        "gap": {
+          "title": "Gap",
+          "type": "string"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signal Ids",
+          "type": "array"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "signal_ids",
+        "data_checked",
+        "gap"
+      ],
+      "title": "MatrixObservationV1",
+      "type": "object"
+    },
+    "RejectionCountersV2": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_retry_paths_used": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidate Retry Paths Used",
+          "type": "array"
+        },
+        "duplicate_rejection_count": {
+          "minimum": 0,
+          "title": "Duplicate Rejection Count",
+          "type": "integer"
+        },
+        "field_overlap_rejection_count": {
+          "minimum": 0,
+          "title": "Field Overlap Rejection Count",
+          "type": "integer"
+        },
+        "niche_low_novelty_rejection_count": {
+          "minimum": 0,
+          "title": "Niche Low Novelty Rejection Count",
+          "type": "integer"
+        },
+        "taiwan_direct_sources_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Taiwan Direct Sources Checked",
+          "type": "array"
+        },
+        "taiwan_qualified_item_count_after_audit": {
+          "minimum": 0,
+          "title": "Taiwan Qualified Item Count After Audit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "duplicate_rejection_count",
+        "field_overlap_rejection_count",
+        "niche_low_novelty_rejection_count",
+        "candidate_retry_paths_used",
+        "taiwan_qualified_item_count_after_audit",
+        "taiwan_direct_sources_checked"
+      ],
+      "title": "RejectionCountersV2",
+      "type": "object"
+    },
+    "ReportItemV2": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Candidate Type"
+        },
+        "confidence_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Confidence Score",
+          "type": "integer"
+        },
+        "counterevidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Counterevidence",
+          "type": "array"
+        },
+        "direct_taiwan_evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceLinkV2"
+          },
+          "title": "Direct Taiwan Evidence",
+          "type": "array"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/EvidenceLinkV2"
+          },
+          "title": "Evidence Links",
+          "type": "array"
+        },
+        "first_seen_at": {
+          "title": "First Seen At",
+          "type": "string"
+        },
+        "formation_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Formation Level"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "importance_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Importance Score",
+          "type": "integer"
+        },
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "next_watch": {
+          "title": "Next Watch",
+          "type": "string"
+        },
+        "potential_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Potential Score",
+          "type": "integer"
+        },
+        "primary_domain": {
+          "title": "Primary Domain",
+          "type": "string"
+        },
+        "report_lane": {
+          "enum": [
+            "major",
+            "potential"
+          ],
+          "title": "Report Lane",
+          "type": "string"
+        },
+        "signal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signal Id"
+        },
+        "taiwan_implication": {
+          "title": "Taiwan Implication",
+          "type": "string"
+        },
+        "today_delta": {
+          "title": "Today Delta",
+          "type": "string"
+        },
+        "uncertainties": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainties",
+          "type": "array"
+        }
+      },
+      "required": [
+        "item_id",
+        "event_id",
+        "signal_id",
+        "primary_domain",
+        "report_lane",
+        "candidate_type",
+        "formation_level",
+        "headline",
+        "first_seen_at",
+        "today_delta",
+        "importance_score",
+        "potential_score",
+        "confidence_score",
+        "evidence_links",
+        "direct_taiwan_evidence",
+        "taiwan_implication",
+        "counterevidence",
+        "uncertainties",
+        "next_watch"
+      ],
+      "title": "ReportItemV2",
+      "type": "object"
+    },
+    "SignalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "lifecycle": {
+          "title": "Lifecycle",
+          "type": "string"
+        },
+        "next_check_at": {
+          "title": "Next Check At",
+          "type": "string"
+        },
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "what_would_confirm": {
+          "title": "What Would Confirm",
+          "type": "string"
+        },
+        "what_would_invalidate": {
+          "title": "What Would Invalidate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "signal_id",
+        "event_id",
+        "lifecycle",
+        "what_would_confirm",
+        "what_would_invalidate",
+        "next_check_at"
+      ],
+      "title": "SignalV1",
+      "type": "object"
+    },
+    "SourceAuditV2": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_retry_paths_used": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidate Retry Paths Used",
+          "type": "array"
+        },
+        "failures": {
+          "items": {
+            "$ref": "#/$defs/SourceFailureV1"
+          },
+          "title": "Failures",
+          "type": "array"
+        },
+        "ingestion_mode": {
+          "title": "Ingestion Mode",
+          "type": "string"
+        },
+        "integration_status": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Integration Status",
+          "type": "object"
+        },
+        "registry_checked": {
+          "title": "Registry Checked",
+          "type": "boolean"
+        },
+        "remaining_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Remaining Gaps",
+          "type": "array"
+        },
+        "sources_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sources Checked",
+          "type": "array"
+        },
+        "sources_not_executed": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sources Not Executed",
+          "type": "array"
+        },
+        "taiwan_direct_sources_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Taiwan Direct Sources Checked",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ingestion_mode",
+        "registry_checked",
+        "sources_checked",
+        "failures",
+        "sources_not_executed",
+        "integration_status",
+        "candidate_retry_paths_used",
+        "taiwan_direct_sources_checked",
+        "remaining_gaps"
+      ],
+      "title": "SourceAuditV2",
+      "type": "object"
+    },
+    "SourceFailureV1": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "default": "",
+          "title": "Channel",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "reason"
+      ],
+      "title": "SourceFailureV1",
+      "type": "object"
+    },
+    "StructuralIndicatorObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "const": "insufficient",
+              "type": "string"
+            }
+          ],
+          "title": "Confidence"
+        },
+        "counter_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Counter Score",
+          "type": "integer"
+        },
+        "counter_signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Counter Signal Ids",
+          "type": "array"
+        },
+        "direction": {
+          "title": "Direction",
+          "type": "string"
+        },
+        "evaluation_mode": {
+          "title": "Evaluation Mode",
+          "type": "string"
+        },
+        "indicator_id": {
+          "title": "Indicator Id",
+          "type": "string"
+        },
+        "missing_data": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Data",
+          "type": "array"
+        },
+        "next_verification": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Next Verification",
+          "type": "array"
+        },
+        "observation_date": {
+          "title": "Observation Date",
+          "type": "string"
+        },
+        "one_sentence_read": {
+          "title": "One Sentence Read",
+          "type": "string"
+        },
+        "support_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Support Score",
+          "type": "integer"
+        },
+        "supporting_signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "indicator_id",
+        "observation_date",
+        "direction",
+        "support_score",
+        "counter_score",
+        "confidence",
+        "supporting_signal_ids",
+        "counter_signal_ids",
+        "missing_data",
+        "one_sentence_read",
+        "next_verification",
+        "evaluation_mode"
+      ],
+      "title": "StructuralIndicatorObservationV1",
+      "type": "object"
+    },
+    "TokenUsageV1": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "total_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Total Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "TokenUsageV1",
+      "type": "object"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "RadarReportV2",
-  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "backtest": {
+      "$ref": "#/$defs/BacktestV1"
+    },
+    "contract_version": {
+      "const": "2.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "coverage_cells": {
+      "items": {
+        "$ref": "#/$defs/CoverageCellV2"
+      },
+      "title": "Coverage Cells",
+      "type": "array"
+    },
+    "coverage_gaps": {
+      "items": {
+        "$ref": "#/$defs/CoverageGapV2"
+      },
+      "title": "Coverage Gaps",
+      "type": "array"
+    },
+    "crypto_matrix": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MatrixObservationV1"
+      },
+      "title": "Crypto Matrix",
+      "type": "object"
+    },
+    "date": {
+      "title": "Date",
+      "type": "string"
+    },
+    "degradation_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Degradation Reasons",
+      "type": "array"
+    },
+    "evaluation_audit": {
+      "$ref": "#/$defs/EvaluationAuditV1"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/ReportItemV2"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "profile": {
+      "title": "Profile",
+      "type": "string"
+    },
+    "rejection_counters": {
+      "$ref": "#/$defs/RejectionCountersV2"
+    },
+    "retail_matrix": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MatrixObservationV1"
+      },
+      "title": "Retail Matrix",
+      "type": "object"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/SignalV1"
+      },
+      "title": "Signals",
+      "type": "array"
+    },
+    "source_audit": {
+      "$ref": "#/$defs/SourceAuditV2"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "structural_indicators": {
+      "items": {
+        "$ref": "#/$defs/StructuralIndicatorObservationV1"
+      },
+      "title": "Structural Indicators",
+      "type": "array"
+    }
+  },
   "required": [
     "run_id",
     "date",
@@ -11,65 +857,16 @@
     "items",
     "coverage_cells",
     "coverage_gaps",
+    "signals",
     "source_audit",
     "rejection_counters",
     "retail_matrix",
     "crypto_matrix",
     "structural_indicators",
+    "evaluation_audit",
     "backtest",
     "contract_version"
   ],
-  "properties": {
-    "run_id": {"type": "string", "minLength": 1},
-    "date": {"type": "string", "format": "date"},
-    "profile": {"enum": ["daily_push", "full"]},
-    "status": {"enum": ["complete", "partial", "failed"]},
-    "degradation_reasons": {"type": "array", "items": {"type": "string"}},
-    "contract_version": {"const": "2.0"},
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "item_id",
-          "event_id",
-          "signal_id",
-          "primary_domain",
-          "report_lane",
-          "candidate_type",
-          "formation_level",
-          "headline",
-          "first_seen_at",
-          "today_delta",
-          "importance_score",
-          "potential_score",
-          "confidence_score",
-          "evidence_links",
-          "direct_taiwan_evidence",
-          "taiwan_implication",
-          "counterevidence",
-          "uncertainties",
-          "next_watch"
-        ],
-        "properties": {
-          "report_lane": {"enum": ["major", "potential"]},
-          "candidate_type": {"type": ["string", "null"]},
-          "formation_level": {"type": ["string", "null"]},
-          "importance_score": {"type": "integer", "minimum": 0, "maximum": 100},
-          "potential_score": {"type": "integer", "minimum": 0, "maximum": 100},
-          "confidence_score": {"type": "integer", "minimum": 0, "maximum": 100},
-          "evidence_links": {"type": "array", "minItems": 1},
-          "direct_taiwan_evidence": {"type": "array"}
-        }
-      }
-    },
-    "coverage_cells": {"type": "array"},
-    "coverage_gaps": {"type": "array"},
-    "source_audit": {"type": "object"},
-    "rejection_counters": {"type": "object"},
-    "retail_matrix": {"type": "object"},
-    "crypto_matrix": {"type": "object"},
-    "structural_indicators": {"type": "array", "minItems": 3},
-    "backtest": {"type": "object"}
-  }
+  "title": "RadarReportV2",
+  "type": "object"
 }

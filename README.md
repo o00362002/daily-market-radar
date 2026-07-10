@@ -67,7 +67,7 @@ FreshRSS/RSSHub improve collection coverage only. Discovery providers locate sou
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
 PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date 2026-07-10
-PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 --database data/radar.sqlite3
+PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 --database <database-path>
 ```
 
 `live-rss` fetches enabled RSS/Atom adapters and can persist report payloads and coverage gaps to SQLite. It still reports partial when web/API/social/FreshRSS, external discovery or semantic evaluators are not executed.

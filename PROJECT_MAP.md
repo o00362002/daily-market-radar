@@ -18,13 +18,19 @@ schema/sync-matrix.json      machine-consumed change edges
 ## 2. Deterministic runtime
 
 ```text
-src/radar/domain/       document, event, signal, coverage and report types
-src/radar/schemas/      registry/config parsing
-src/radar/adapters/     fixture and live RSS/Atom adapters
-src/radar/repositories/ SQLite run-record persistence
-src/radar/pipeline/     ingest, normalize, deduplicate, cluster, classify, coverage
+src/radar/contracts/    strict report/web models plus typed frozen evaluation/runtime DTOs
+src/radar/domain/       provider-neutral document, event and signal values
+src/radar/ports/        nine stable behavior Protocols
+src/radar/application/  provider-neutral daily orchestration
+src/radar/pipeline/     pure deduplicate, cluster, classify and coverage functions
 src/radar/reporting/    planner and report-contract validation
-src/radar/runtime/      run orchestration and profile contract
+src/radar/adapters/     concrete fixture and live RSS/Atom adapters
+src/radar/evaluators/   concrete deterministic evaluator
+src/radar/repositories/ concrete memory and SQLite repositories
+src/radar/stores/       concrete state and web-artifact stores
+src/radar/publishers/   concrete report publishers
+src/radar/composition.py concrete selection / factory
+src/radar/runtime/      backward-compatible façade
 schemas/                JSON-schema payload contracts
 migrations/             persistence foundation
 ```
@@ -32,7 +38,7 @@ migrations/             persistence foundation
 Dependency direction:
 
 ```text
-domain/types → config/schemas → repositories/adapters → pipeline/services → reporting/runtime
+contracts/domain → ports → application → composition root → concrete infrastructure
 ```
 
 LLMs may assist semantic extraction, fuzzy matching, summaries and trend mapping. Fetching, source identity, URL safety, counts, coverage, evidence trace and contract validation remain deterministic.

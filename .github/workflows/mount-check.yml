@@ -16,44 +16,18 @@ jobs:
       PYTHONPATH: src
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
       - name: Show runtime versions
         run: |
           python3 --version
           node --version
-      - name: Unit tests
-        run: python3 -m unittest discover -s tests/unit -p 'test_*.py'
-      - name: Integration tests
-        id: integration_tests
-        continue-on-error: true
-        run: python3 -m unittest discover -s tests/integration -p 'test_*.py' > integration-tests.log 2>&1
-      - name: Upload integration test log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-log
-          path: integration-tests.log
-          retention-days: 3
-      - name: Print and enforce integration result
-        if: always()
-        run: |
-          cat integration-tests.log
-          test "${{ steps.integration_tests.outcome }}" = "success"
-      - name: Contract tests
-        id: contract_tests
-        continue-on-error: true
-        run: python3 -m unittest discover -s tests/contracts -p 'test_*.py' > contract-tests.log 2>&1
-      - name: Upload contract test log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: contract-test-log
-          path: contract-tests.log
-          retention-days: 3
-      - name: Print and enforce contract result
-        if: always()
-        run: |
-          cat contract-tests.log
-          test "${{ steps.contract_tests.outcome }}" = "success"
+      - name: Install project and test dependencies
+        run: python3 -m pip install --disable-pip-version-check -e '.[dev]'
+      - name: Unit, integration, contract and architecture tests
+        run: make test
       - name: Runtime contract validation
         run: make runtime-contract
       - name: Source registry and OPML validation

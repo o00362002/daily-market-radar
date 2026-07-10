@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
@@ -20,6 +21,33 @@ TRACKING_PARAMS = {
     "utm_term",
 }
 
+CANONICAL_METRIC_NAMESPACES = {
+    "adoption",
+    "amount",
+    "cost",
+    "count",
+    "demand",
+    "fees",
+    "flow",
+    "funding",
+    "hiring",
+    "index",
+    "inventory",
+    "margin",
+    "market",
+    "membership",
+    "oi",
+    "price",
+    "procurement",
+    "rate",
+    "ratio",
+    "revenue",
+    "sales",
+    "supply",
+    "traffic",
+    "tvl",
+    "volume",
+}
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -41,6 +69,66 @@ def canonicalize_url(url: str) -> str:
 def stable_id(prefix: str, parts: list[str]) -> str:
     key = "|".join(normalize_text(part) for part in parts if part)
     return f"{prefix}_{hashlib.sha256(key.encode('utf-8')).hexdigest()[:12]}"
+
+
+@dataclass(frozen=True)
+class MeasurementFact:
+    metric_id: str
+    value: int | float
+    unit: str = ""
+
+    def __post_init__(self) -> None:
+        if not re.fullmatch(r"[a-z][a-z0-9_]*", self.metric_id):
+            raise ValueError(f"invalid canonical metric_id: {self.metric_id}")
+        namespace = self.metric_id.split("_", 1)[0]
+        if namespace not in CANONICAL_METRIC_NAMESPACES:
+            raise ValueError(f"unknown canonical metric namespace: {namespace}")
+
+
+@dataclass(frozen=True)
+class CanonicalFacts:
+    """Allowlisted fact shape produced after provider normalization.
+
+    Dynamic metric names are values of ``MeasurementFact.metric_id`` rather than
+    provider-defined fields on a canonical model. Transport metadata and nested
+    provider payloads therefore cannot be assigned to ``Document.facts``.
+    """
+
+    source_roles: tuple[str, ...] = ()
+    measurements: tuple[MeasurementFact, ...] = ()
+
+    @classmethod
+    def from_mapping(cls, values: dict[str, Any]) -> "CanonicalFacts":
+        source_roles: tuple[str, ...] = ()
+        measurements: list[MeasurementFact] = []
+        for key, value in values.items():
+            if key == "source_roles":
+                if not isinstance(value, (list, tuple)) or not all(isinstance(role, str) for role in value):
+                    raise ValueError("source_roles must be a list of strings")
+                source_roles = tuple(sorted(set(value)))
+                continue
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(
+                    f"non-canonical document fact {key!r}; normalize it to source_roles or a numeric measurement"
+                )
+            measurements.append(MeasurementFact(metric_id=key, value=value))
+        return cls(
+            source_roles=source_roles,
+            measurements=tuple(sorted(measurements, key=lambda fact: fact.metric_id)),
+        )
+
+    def __iter__(self) -> Iterator[str]:
+        if self.source_roles:
+            yield "source_roles"
+        yield from (measurement.metric_id for measurement in self.measurements)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key == "source_roles" and self.source_roles:
+            return list(self.source_roles)
+        for measurement in self.measurements:
+            if measurement.metric_id == key:
+                return measurement.value
+        return default
 
 
 @dataclass(frozen=True)
@@ -69,8 +157,14 @@ class Document:
     location: str = ""
     primary_domain: str = "ai_agents_applications"
     lane: str = "top_down"
-    facts: dict[str, Any] = field(default_factory=dict)
+    facts: CanonicalFacts = field(default_factory=CanonicalFacts)
     summary: str = ""
+
+    def __post_init__(self) -> None:
+        if isinstance(self.facts, dict):
+            object.__setattr__(self, "facts", CanonicalFacts.from_mapping(self.facts))
+        elif not isinstance(self.facts, CanonicalFacts):
+            raise ValueError("facts must be CanonicalFacts or a compatible legacy mapping")
 
     @classmethod
     def fixture(cls, **kwargs: Any) -> "Document":

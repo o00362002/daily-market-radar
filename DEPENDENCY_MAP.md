@@ -170,16 +170,30 @@ schema exists != database persistence active
 The report must expose ingestion mode and cannot claim live completeness from fixture data.
 `live-rss` executes verified RSS/Atom adapters and persists optional SQLite run records, but remains partial until web/API/social, FreshRSS and external discovery adapters are connected.
 
-## 10. Runtime commands
+## 10. Replaceability boundary
+
+```text
+src/radar/contracts/     canonical provider-neutral values
+src/radar/ports/         stable behavior Protocols
+src/radar/application/   Protocol-injected external collaborators + pure deterministic orchestration
+src/radar/composition.py concrete implementation selection
+src/radar/runtime/       compatibility façade
+```
+
+Architecture tests reject direct application imports of concrete adapters, repositories,
+network/provider modules and filesystem APIs. A fake-only integration test blocks all external
+I/O while exercising report persistence, web artifact projection, state and publishing.
+
+## 11. Runtime commands
 
 ```bash
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
 PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date YYYY-MM-DD
-PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD --database data/radar.sqlite3
+PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD --database <database-path>
 ```
 
-## 11. Sync expectations
+## 12. Sync expectations
 
 `schema/sync-matrix.json` must link:
 
