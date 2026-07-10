@@ -46,8 +46,34 @@ REQUIRED_ITEM_FIELDS = {
     "next_watch",
 }
 
+LEGACY_REQUIRED_ITEM_FIELDS = {
+    "item_id",
+    "event_id",
+    "signal_id",
+    "primary_domain",
+    "headline",
+    "first_seen_at",
+    "today_delta",
+    "importance_score",
+    "potential_score",
+    "confidence_score",
+    "evidence_links",
+    "direct_taiwan_evidence",
+    "taiwan_implication",
+    "counterevidence",
+    "uncertainties",
+    "next_watch",
+}
+
 
 def validate_report_contract(report: dict[str, Any], contract: RuntimeContract | None = None) -> None:
+    if contract is None:
+        if "items" not in report or "coverage_gaps" not in report:
+            raise ValueError("report requires items and coverage_gaps")
+        for item in report["items"]:
+            _validate_legacy_item(item)
+        return
+
     missing_report_fields = REQUIRED_REPORT_FIELDS - set(report)
     if missing_report_fields:
         raise ValueError(f"report missing fields: {sorted(missing_report_fields)}")
@@ -58,25 +84,33 @@ def validate_report_contract(report: dict[str, Any], contract: RuntimeContract |
 
     for item in report["items"]:
         _validate_item(item, contract=contract)
-
-    if contract is not None:
-        _validate_contract_sections(report, contract)
+    _validate_contract_sections(report, contract)
 
 
-def _validate_item(item: dict[str, Any], contract: RuntimeContract | None) -> None:
+def _validate_legacy_item(item: dict[str, Any]) -> None:
+    missing = LEGACY_REQUIRED_ITEM_FIELDS - set(item)
+    if missing:
+        raise ValueError(f"report item missing fields: {sorted(missing)}")
+    _validate_common_item_fields(item)
+
+
+def _validate_item(item: dict[str, Any], contract: RuntimeContract) -> None:
     missing = REQUIRED_ITEM_FIELDS - set(item)
     if missing:
         raise ValueError(f"report item missing fields: {sorted(missing)}")
     if item["report_lane"] not in {"major", "potential"}:
         raise ValueError("report_lane must be major or potential")
-    if contract is not None and item["primary_domain"] not in contract.report_domains:
+    if item["primary_domain"] not in contract.report_domains:
         raise ValueError(f"unknown primary_domain: {item['primary_domain']}")
     if item["report_lane"] == "potential":
         if not item["candidate_type"] or not item["formation_level"]:
             raise ValueError(f"potential item lacks candidate metadata: {item['item_id']}")
     elif item["candidate_type"] is not None or item["formation_level"] is not None:
         raise ValueError(f"major item must not carry candidate metadata: {item['item_id']}")
+    _validate_common_item_fields(item)
 
+
+def _validate_common_item_fields(item: dict[str, Any]) -> None:
     for score_field in ("importance_score", "potential_score", "confidence_score"):
         score = item[score_field]
         if not isinstance(score, int) or not 0 <= score <= 100:
