@@ -1,22 +1,60 @@
 {
- "schema": "brain-sync-matrix/v1",
- "version": "2",
- "_note": "daily-market-radar 連動矩陣（機器版）。消費者：tools/brain/check-sync-matrix.js（commit 提醒，pre-commit hook 觸發）。保持短。",
- "byFile": {
-  "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md"],
-  "AGENTS.md": ["CLAUDE.md", "README.md"],
-  "brain.manifest.yaml": ["AGENTS.md", "PROJECT_OS_MOUNT.md"],
-  "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md"],
-  "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
-  "SOURCE_LIBRARY_SPEC.md": ["configs/source_routing_rules.yml", "sources/key_media_library.yml"],
-  "configs/edge_case_discovery.yml": ["memory/potential_pool.md", "configs/query_recipes.yml"],
-  "domains/README.md": ["SOURCE_LIBRARY_SPEC.md", "AGENT_DEFINITION_MAP.md"]
- },
- "byPrefix": {
-  "workflows/": ["AGENT_DEFINITION_MAP.md", "DEPENDENCY_MAP.md"],
-  "rules/": ["AGENTS.md", "README.md"],
-  "sources/": ["SOURCE_LIBRARY_SPEC.md"],
-  "domains/": ["domains/README.md"],
-  "tools/": ["AGENTS.md", "check_mount_integrity.sh"]
- }
+  "schema": "brain-sync-matrix/v1",
+  "version": "3",
+  "_note": "daily-market-radar machine sync edges. Keep derivable facts out of prose.",
+  "byFile": {
+    "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md", "CURRENT_STATE.md"],
+    "AGENTS.md": ["CLAUDE.md", "README.md", "AGENT_DEFINITION_MAP.md"],
+    "brain.manifest.yaml": ["AGENTS.md", "PROJECT_OS_MOUNT.md", "CURRENT_STATE.md"],
+    "CURRENT_DECISIONS.md": ["CURRENT_STATE.md", "reports/execution_checks/"],
+    "config/runtime_contract.json": [
+      "SYSTEM_PROMPT.md",
+      "DEPENDENCY_MAP.md",
+      "AGENT_DEFINITION_MAP.md",
+      "workflows/daily_push_brief_workflow.md",
+      "workflows/daily_radar_workflow.md",
+      "templates/daily_push_brief_template.md",
+      "templates/daily_report_template_v2.md",
+      "schemas/report.schema.json",
+      "src/radar/runtime/contract.py",
+      "src/radar/runtime/runs.py",
+      "src/radar/reporting/contracts.py"
+    ],
+    "config/source_registry.yaml": [
+      "FRESHRSS_SEEDS.opml",
+      "docs/source-policy.md",
+      "SOURCE_LIBRARY_SPEC.md",
+      "src/radar/schemas/source.py",
+      "tests/unit/test_source_registry.py"
+    ],
+    "src/radar/domain/models.py": [
+      "src/radar/reporting/planner.py",
+      "src/radar/reporting/contracts.py",
+      "schemas/report.schema.json",
+      "tests/"
+    ],
+    "src/radar/runtime/runs.py": [
+      "src/radar/cli.py",
+      "docs/operations.md",
+      "tests/integration/",
+      "tests/contracts/"
+    ],
+    "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md", "AGENT_DEFINITION_MAP.md"],
+    "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
+    "SOURCE_LIBRARY_SPEC.md": ["config/source_registry.yaml", "configs/source_routing_rules.yml"],
+    "configs/edge_case_discovery.yml": ["memory/potential_pool.md", "configs/query_recipes.yml"],
+    "domains/README.md": ["SOURCE_LIBRARY_SPEC.md", "AGENT_DEFINITION_MAP.md", "config/runtime_contract.json"]
+  },
+  "byPrefix": {
+    "workflows/": ["AGENT_DEFINITION_MAP.md", "DEPENDENCY_MAP.md", "config/runtime_contract.json"],
+    "templates/": ["config/runtime_contract.json", "schemas/report.schema.json"],
+    "config/": ["CURRENT_STATE.md", "docs/architecture.md"],
+    "src/radar/": ["schemas/", "tests/", "docs/architecture.md", "docs/operations.md"],
+    "schemas/": ["src/radar/reporting/contracts.py", "tests/contracts/"],
+    "migrations/": ["docs/architecture.md", "docs/migration-v1-to-v2.md"],
+    "rules/": ["AGENTS.md", "README.md"],
+    "sources/": ["SOURCE_LIBRARY_SPEC.md", "docs/source-policy.md"],
+    "domains/": ["domains/README.md", "config/runtime_contract.json"],
+    "tools/": ["AGENTS.md", "check_mount_integrity.sh", "Makefile"]
+  }
 }
