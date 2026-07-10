@@ -1,6 +1,7 @@
 import pathlib
 import unittest
 
+from radar.runtime.contract import RuntimeContract
 from radar.runtime.runs import run_daily_fixture
 
 
@@ -10,22 +11,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 class FixturePipelineTests(unittest.TestCase):
     def test_fixture_pipeline_covers_three_languages_regions_and_all_domains(self) -> None:
         result = run_daily_fixture(ROOT, date="2026-07-10", freshrss_available=False)
+        contract = RuntimeContract.from_file(ROOT / "config/runtime_contract.json")
         self.assertEqual(result.status, "partial")
         self.assertIn("freshrss_unavailable", result.degradation_reasons)
         self.assertGreaterEqual(len(result.languages_seen), 3)
         self.assertGreaterEqual(len(result.regions_seen), 3)
-        self.assertEqual(
-            set(result.domains_seen),
-            {
-                "global_markets_macro",
-                "policy_geopolitics",
-                "ai_agents_applications",
-                "science_technology_industry",
-                "crypto_rwa_agent_payments",
-                "retail_consumer_fashion",
-                "labor_demographics_consumption_pressure",
-            },
-        )
+        self.assertEqual(result.domains_seen, contract.report_domains)
         self.assertTrue(result.report["coverage_gaps"])
 
     def test_replay_is_deterministic(self) -> None:
