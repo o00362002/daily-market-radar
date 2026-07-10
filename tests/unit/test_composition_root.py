@@ -21,6 +21,7 @@ from radar.ports import (
     StateStore,
     WebArtifactStore,
 )
+from radar.schemas.source import SourceRegistry
 
 
 FORBIDDEN_OPTIONAL_MODULE_PREFIXES = (
@@ -96,6 +97,26 @@ class CompositionRootTests(unittest.TestCase):
             with self.subTest(port=port_name):
                 self.assertIsInstance(implementation, protocol)
 
+    def test_multi_source_composes_rss_and_optional_freshrss_without_network(self) -> None:
+        registry = SourceRegistry.from_file(ROOT / "config/source_registry.json")
+        composed = self.composition.compose_application(
+            self.composition.CompositionConfig(
+                source_backend="multi",
+                optional_integrations={
+                    "ai": False,
+                    "collection_aggregator": True,
+                    "filesystem_artifacts": False,
+                },
+                environment=lambda _key: None,
+            ),
+            source_registry=registry,
+        )
+
+        self.assertIsInstance(composed.dependencies.source_adapter, SourceAdapter)
+        self.assertEqual(composed.dependencies.source_adapter.adapter_id, "multi_source")
+        # Direct RSS remains available even when FreshRSS credentials are absent.
+        self.assertTrue(composed.dependencies.source_adapter.credentials_status().available)
+
     def test_sqlite_runtime_backend_can_be_selected_for_durable_ports(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             composed = self.composition.compose_application(
@@ -144,14 +165,11 @@ class CompositionRootTests(unittest.TestCase):
         base = self.composition.CompositionConfig()
         unavailable_configs = {
             "rss without registry": replace(base, source_backend="rss"),
+            "multi without registry": replace(base, source_backend="multi"),
             "sqlite without paths": replace(base, report_repository_backend="sqlite"),
             "ai implementation": replace(
                 base,
                 optional_integrations={**base.optional_integrations, "ai": True},
-            ),
-            "collection aggregator implementation": replace(
-                base,
-                optional_integrations={**base.optional_integrations, "collection_aggregator": True},
             ),
             "filesystem artifacts implementation": replace(
                 base,
