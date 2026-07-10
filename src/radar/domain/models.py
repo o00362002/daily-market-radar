@@ -160,6 +160,9 @@ class ReportItem:
     event_id: str
     signal_id: str | None
     primary_domain: str
+    report_lane: str
+    candidate_type: str | None
+    formation_level: str | None
     headline: str
     first_seen_at: str
     today_delta: str
@@ -180,6 +183,9 @@ class ReportItem:
             "event_id": "evt_fixture",
             "signal_id": None,
             "primary_domain": "ai_agents_applications",
+            "report_lane": "major",
+            "candidate_type": None,
+            "formation_level": None,
             "headline": "Fixture headline",
             "first_seen_at": "2026-07-10T08:00:00+08:00",
             "today_delta": "Fixture delta.",
@@ -212,6 +218,9 @@ class ReportItem:
             "event_id": self.event_id,
             "signal_id": self.signal_id,
             "primary_domain": self.primary_domain,
+            "report_lane": self.report_lane,
+            "candidate_type": self.candidate_type,
+            "formation_level": self.formation_level,
             "headline": self.headline,
             "first_seen_at": self.first_seen_at,
             "today_delta": self.today_delta,
