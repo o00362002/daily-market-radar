@@ -3,8 +3,8 @@ from __future__ import annotations
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
 from radar.domain.models import Event, ReportItem, stable_id
+from radar.domain.potential import assess_event
 from radar.domain.scoring import explain_event_scores
-from radar.pipeline.classify import assess_event
 
 
 def plan_daily_items(events: list[Event]) -> list[ReportItem]:
