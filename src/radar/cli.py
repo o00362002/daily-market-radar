@@ -46,11 +46,26 @@ def build_parser() -> argparse.ArgumentParser:
     run_daily.add_argument("--date", required=True)
     run_daily.add_argument("--profile", choices=["daily_push", "full"], default="daily_push")
     run_daily.add_argument("--mode", choices=["fixture", "live-rss"], default="fixture")
+    run_daily.add_argument(
+        "--evaluation-mode",
+        choices=["deterministic", "auto", "api-assisted", "chat-assisted"],
+        default="auto",
+    )
     run_daily.add_argument("--database", default="")
     run_daily.add_argument("--timeout-seconds", type=int, default=12)
     run_daily.add_argument("--per-feed-limit", type=int, default=20)
     run_daily.add_argument("--freshrss-available", action="store_true")
     run_daily.add_argument("--disable-external-discovery", action="store_true")
+
+    prepare_chat = sub.add_parser("prepare-chat")
+    prepare_chat.add_argument("--date", required=True)
+    prepare_chat.add_argument("--profile", choices=["daily_push", "full"], default="daily_push")
+    prepare_chat.add_argument("--output-root", default="")
+
+    import_chat = sub.add_parser("import-chat")
+    import_chat.add_argument("--package-dir", required=True)
+    import_chat.add_argument("--report", required=True)
+    import_chat.add_argument("--receipt", default="")
     return parser
 
 
@@ -92,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout_seconds,
                 per_feed_limit=args.per_feed_limit,
                 database_path=database_path,
+                evaluation_mode=args.evaluation_mode,
             )
         else:
             result = run_daily_fixture(
@@ -101,9 +117,41 @@ def main(argv: list[str] | None = None) -> int:
                 external_discovery_available=not args.disable_external_discovery,
                 profile_name=args.profile,
                 database_path=database_path,
+                evaluation_mode=args.evaluation_mode,
             )
         print(json.dumps(result.report, indent=2, ensure_ascii=False))
         return 0
+
+    if args.command == "prepare-chat":
+        from radar.chat.runtime import prepare_chat
+
+        output_root = Path(args.output_root).resolve() if args.output_root else None
+        package = prepare_chat(repo_root, date=args.date, profile=args.profile, output_root=output_root)
+        print(
+            json.dumps(
+                {
+                    "status": "prepared",
+                    "context_hash": package.context.context_hash,
+                    "package_dir": package.relative_dir,
+                    "files": sorted(package.files),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+
+    if args.command == "import-chat":
+        from radar.chat.runtime import import_chat
+
+        receipt = import_chat(
+            repo_root,
+            Path(args.package_dir).resolve(),
+            Path(args.report).resolve(),
+            receipt_path=Path(args.receipt).resolve() if args.receipt else None,
+        )
+        print(json.dumps(receipt.as_dict(), ensure_ascii=False, indent=2))
+        return 0 if receipt.valid else 1
 
     if args.command in {"ingest", "process", "coverage", "report", "trends", "backtest"}:
         print(

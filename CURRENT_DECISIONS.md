@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-07-10：optional AI and chat-assisted evaluation（PR D）
+
+### Decision
+
+```text
+1. Four evaluation modes (deterministic/auto/api-assisted/chat-assisted), default auto. Deterministic
+   never imports or calls AI; auto and api-assisted degrade to deterministic without a key.
+2. The model is a semantic assistant, not the judge of facts. It sees only a bounded, provider-neutral
+   context and may never invent URLs, event/document/source ids or numeric facts; score deltas are
+   bounded. Every AI output is re-validated deterministically; invalid output retries once then keeps
+   the deterministic result; provider errors never crash the run.
+3. Evaluation is cached (event state, evidence hashes, material delta, model, schema version, config) and
+   budget-limited; over budget stops new AI calls with degradation=ai_budget_exhausted.
+4. The chat package is deterministic, content-addressed, byte-stable, secret-free, and contains no full
+   articles or model-invented conclusions. Import re-validates the context hash and every allowed id /
+   url / numeric fact / matrix key / indicator id / Taiwan direct-evidence rule / Major-Potential
+   overlap; a failed import preserves the last valid report.
+```
+
+### Boundary
+
+```text
+No real API keys in tests; the OpenAI client path is not executed in CI (proven via a mock provider).
+The full secrets contract (.env.example, docs/secrets.md, redaction tests) lands in PR F.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_d_optional_ai_chat_assisted.md` · `docs/evaluation-modes.md` · `docs/chat-assisted-workflow.md` · `docs/cost-control.md`
+
+---
+
 ## 2026-07-10：source adapters and deterministic evaluation（PR C）
 
 ### Decision
