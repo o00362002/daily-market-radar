@@ -31,7 +31,7 @@ class ActiveRulesContractTests(unittest.TestCase):
         self.assertEqual(offenders, [])
 
     def test_source_registry_opml_projection_is_current(self) -> None:
-        registry = SourceRegistry.from_file(ROOT / "config/source_registry.yaml")
+        registry = SourceRegistry.from_file(ROOT / "config/source_registry.json")
         registry.validate()
         self.assertEqual(registry.to_opml(), (ROOT / "FRESHRSS_SEEDS.opml").read_text(encoding="utf-8"))
 
