@@ -92,15 +92,28 @@ jobs:
       - name: Persist durable state (atomic, checksummed, last-good backup)
         run: |
           set -e
+          # Committer identity must be global so plumbing (commit-tree) + commit work.
+          git config --global user.name "radar-bot"
+          git config --global user.email "radar-bot@users.noreply.github.com"
+          # Use a worktree bound to this repo so it shares the checkout's authenticated origin.
+          rm -rf .state
+          git worktree prune
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch -q origin radar-state
+            git worktree add -f .state origin/radar-state
+            git -C .state checkout -B radar-state
+          else
+            # First run: create an orphan radar-state branch via portable plumbing.
+            root_commit=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "init radar-state")
+            git branch -f radar-state "$root_commit"
+            git worktree add -f .state radar-state
+          fi
           PYTHONPATH=src python -m radar.cli state pack --database "$PWD/data/radar.db" \
             --state-root .state/state --run-id "${GITHUB_RUN_ID}"
-          cd .state
-          git config user.name "radar-bot"
-          git config user.email "radar-bot@users.noreply.github.com"
-          if [ ! -e .git ]; then git init -q && git checkout -q -b radar-state; fi
-          git add state
-          git commit -q -m "state: run ${GITHUB_RUN_ID}" || echo "no state change"
-          git push origin HEAD:radar-state
+          git -C .state add state
+          git -C .state commit -q -m "state: run ${GITHUB_RUN_ID}" || echo "no state change"
+          git -C .state push origin HEAD:radar-state \
+            || echo "::warning::durable state push failed — enable Actions read/write permissions to persist state across runs"
 
       - name: Build static site
         working-directory: web
