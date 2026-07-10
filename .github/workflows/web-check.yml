@@ -1,0 +1,55 @@
+name: web-check
+
+# Web CI: export fixture artifacts, verify generated TS is in sync, typecheck,
+# build the Astro static site and enforce bundle budgets. No secrets.
+
+on:
+  push:
+    branches: ["**"]
+    paths: ["web/**", "src/radar/web/**", "src/radar/contracts/web_projection.py", "schemas/web.schema.json", ".github/workflows/web-check.yml"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: web-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install python
+        run: python -m pip install -e ".[dev]"
+      - name: Export fixture web artifacts
+        run: |
+          PYTHONPATH=src python -m radar.cli run-daily --date 2026-07-10 --database "$PWD/data/ci.db" >/dev/null
+          PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/ci.db"
+      - name: Install web deps
+        working-directory: web
+        run: npm ci
+      - name: Generated TypeScript is in sync with the web schema
+        working-directory: web
+        run: npm run types:check
+      - name: Astro build
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+        run: npm run build
+      - name: Bundle budgets (JS < 60KB gzip, CSS < 40KB)
+        working-directory: web
+        run: |
+          JS=$(find dist -name '*.js' -exec cat {} + 2>/dev/null | gzip -c | wc -c)
+          CSS=$(find dist -name '*.css' -exec cat {} + 2>/dev/null | wc -c)
+          echo "gzipped JS bytes: ${JS:-0} / 61440"
+          echo "CSS bytes: ${CSS:-0} / 40960"
+          test "${JS:-0}" -le 61440
+          test "${CSS:-0}" -le 40960
