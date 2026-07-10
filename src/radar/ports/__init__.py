@@ -1,4 +1,5 @@
 from radar.ports.evaluation import IntelligenceEvaluator
+from radar.ports.persistence import RunPersistenceBatch, UnitOfWork
 from radar.ports.publishing import ReportPublisher, StateStore, WebArtifactStore
 from radar.ports.repositories import DocumentRepository, EventRepository, IndicatorRepository, ReportRepository
 from radar.ports.sources import (
@@ -21,10 +22,12 @@ __all__ = [
     "ReportPublisher",
     "ReportRepository",
     "RetryPolicy",
+    "RunPersistenceBatch",
     "SourceAdapter",
     "SourceFetchRequest",
     "SourceFetchResult",
     "SourceHealthV1",
     "StateStore",
+    "UnitOfWork",
     "WebArtifactStore",
 ]

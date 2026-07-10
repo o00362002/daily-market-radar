@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from radar.domain.enums import DeltaType
+from radar.domain.event_resolution import MATERIAL_DELTA_TYPES, is_material_delta_type
 from radar.domain.models import Event
 
 
@@ -54,14 +55,6 @@ class EventScoreExplanation:
         }
 
 
-MATERIAL_DELTA_TYPES = {
-    DeltaType.NEW_EVENT.value,
-    DeltaType.SAME_EVENT_NEW_DELTA.value,
-    DeltaType.RELATED_STORYLINE_NEW_EVENT.value,
-    DeltaType.TREND_EVIDENCE_ONLY.value,
-}
-
-
 OFFICIAL_OR_PRIMARY_SOURCES = {
     "bls",
     "federal_reserve",
@@ -73,7 +66,7 @@ OFFICIAL_OR_PRIMARY_SOURCES = {
 def event_has_material_delta(event: Event) -> bool:
     if not event.deltas:
         return True
-    return any(delta.delta_type in MATERIAL_DELTA_TYPES for delta in event.deltas)
+    return any(is_material_delta_type(delta.delta_type) for delta in event.deltas)
 
 
 def explain_event_scores(event: Event) -> EventScoreExplanation:

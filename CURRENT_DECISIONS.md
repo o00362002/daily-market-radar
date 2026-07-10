@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-07-10：event resolution precision（PR B）
+
+### Decision
+
+```text
+1. Cross-day event matching is a provider-neutral deterministic cascade (exact document id →
+   canonical URL → content hash → exact event signature → normalized entity/action/object/location →
+   source-independent structured fact overlap → bounded publication time window). No AI/embedding.
+2. Ambiguous fuzzy matches are never forced: a new event is created and an unresolved_match recorded.
+3. Material-delta taxonomy: title/summary rewrite alone is not material; numeric change must come from
+   canonical structured measurement facts; a new source confirms only when independent and of equal-or-
+   higher role; unclassifiable changes are left unresolved.
+4. EventResolutionAuditV1 is a required RadarReportV2 section with legacy migration.
+5. A UnitOfWork run-transaction port commits documents, events, relations, deltas, report, indicators,
+   state checkpoint and match provenance atomically; any failure rolls the run back and never overwrites
+   the last valid report. SQLite is the first implementation. The port set grows nine → ten; every port
+   remains a runtime-checkable Protocol and the application depends only on ports.
+```
+
+### Boundary
+
+```text
+This decision improves cross-day precision and durability only. It does not add source adapters,
+source health, AI/chat evaluation, web projection, Astro or the scheduler; those remain PR C–F.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_b_event_resolution_precision.md` · `docs/event-resolution.md`
+
+---
+
 ## 2026-07-10：modularity and replaceability acceptance gate
 
 ### Decision

@@ -158,6 +158,36 @@ class EvaluationAuditV1(CanonicalModel):
     degradation_reasons: list[str]
 
 
+class EventResolutionAuditV1(CanonicalModel):
+    events_observed: int = Field(ge=0)
+    new_events: int = Field(ge=0)
+    matched_existing_events: int = Field(ge=0)
+    material_events: int = Field(ge=0)
+    unchanged_events: int = Field(ge=0)
+    duplicate_only_events: int = Field(ge=0)
+    unresolved_matches: int = Field(ge=0)
+    match_strategy_counts: dict[str, int]
+    delta_type_counts: dict[str, int]
+    title_only_changes_rejected: int = Field(ge=0)
+    background_only_rejected: int = Field(ge=0)
+
+
+def _default_event_resolution_audit() -> dict[str, Any]:
+    return {
+        "events_observed": 0,
+        "new_events": 0,
+        "matched_existing_events": 0,
+        "material_events": 0,
+        "unchanged_events": 0,
+        "duplicate_only_events": 0,
+        "unresolved_matches": 0,
+        "match_strategy_counts": {},
+        "delta_type_counts": {},
+        "title_only_changes_rejected": 0,
+        "background_only_rejected": 0,
+    }
+
+
 class RadarReportV2(CanonicalModel):
     run_id: str
     date: str
@@ -174,6 +204,7 @@ class RadarReportV2(CanonicalModel):
     crypto_matrix: dict[str, MatrixObservationV1]
     structural_indicators: list[StructuralIndicatorObservationV1]
     evaluation_audit: EvaluationAuditV1
+    event_resolution_audit: EventResolutionAuditV1
     backtest: BacktestV1
     contract_version: Literal["2.0"]
 
@@ -188,6 +219,7 @@ class RadarReportV2(CanonicalModel):
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "RadarReportV2":
         payload = _with_item_score_explanations(payload)
+        payload = _with_event_resolution_audit(payload)
         source_audit = payload.get("source_audit", {})
         canonical_source_fields = {
             "ingestion_mode",
@@ -236,6 +268,7 @@ def _migrate_legacy_v2_payload(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("only legacy contract_version 2.0 payloads can be migrated")
     migrated = copy.deepcopy(payload)
     migrated = _with_item_score_explanations(migrated)
+    migrated = _with_event_resolution_audit(migrated)
     migrated.setdefault("signals", [])
 
     old_audit = migrated.get("source_audit", {})
@@ -304,6 +337,14 @@ def _migrate_legacy_v2_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "validation_status": "migrated_legacy",
             "degradation_reasons": ["legacy_evaluation_audit_unavailable"],
         }
+    return migrated
+
+
+def _with_event_resolution_audit(payload: dict[str, Any]) -> dict[str, Any]:
+    if "event_resolution_audit" in payload:
+        return payload
+    migrated = copy.deepcopy(payload)
+    migrated["event_resolution_audit"] = _default_event_resolution_audit()
     return migrated
 
 

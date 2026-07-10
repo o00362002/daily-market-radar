@@ -332,6 +332,47 @@ class InMemoryWebArtifactStore:
         self.artifacts.update({artifact.path: artifact for artifact in committed})
 
 
+class InMemoryUnitOfWork:
+    """Delegating atomic writer for the in-memory backend.
+
+    The application validates the report before assembling the batch, so this
+    fake writes each element to the injected repositories in order. It records
+    committed batches so tests can assert the run-transaction boundary was used.
+    """
+
+    def __init__(
+        self,
+        *,
+        document_repository: InMemoryDocumentRepository,
+        event_repository: InMemoryEventRepository,
+        report_repository: object,
+        indicator_repository: InMemoryIndicatorRepository,
+        state_store: object,
+    ) -> None:
+        self._document_repository = document_repository
+        self._event_repository = event_repository
+        self._report_repository = report_repository
+        self._indicator_repository = indicator_repository
+        self._state_store = state_store
+        self.committed_batches: list[object] = []
+
+    def commit_run(self, batch: object) -> None:
+        self._document_repository.save_documents(list(batch.documents))
+        for event in batch.events:
+            self._event_repository.save_event(event)
+            self._event_repository.attach_documents(
+                event.event_id, [document.document_id for document in event.documents]
+            )
+            for delta in event.deltas:
+                self._event_repository.save_event_delta(event.event_id, delta, batch.observed_at)
+        self._report_repository.save_report(batch.report)
+        for observation in batch.indicator_observations:
+            self._indicator_repository.save_indicator_observation(observation)
+        for key, value in batch.state_entries:
+            self._state_store.save(key, value)
+        self.committed_batches.append(batch)
+
+
 class FakePublisher:
     def __init__(self, *, publisher_id: str = "fake-publisher") -> None:
         self.publisher_id = publisher_id
@@ -364,5 +405,6 @@ __all__ = [
     "InMemoryIndicatorRepository",
     "InMemoryReportRepository",
     "InMemoryStateStore",
+    "InMemoryUnitOfWork",
     "InMemoryWebArtifactStore",
 ]

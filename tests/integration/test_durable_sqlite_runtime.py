@@ -59,6 +59,7 @@ class DurableSqliteRuntimeTests(unittest.TestCase):
             indicator_repository=self.repository,
             state_store=self.repository,
             web_artifact_store=artifacts,
+            unit_of_work=self.repository,
             publishers=(publisher,),
         )
         application = DailyRadarApplication(dependencies, clock=lambda: run_now)
@@ -126,7 +127,7 @@ class DurableSqliteRuntimeTests(unittest.TestCase):
         assert reloaded_event is not None
 
         self.assertEqual(second.events[0].first_seen_at, first.events[0].first_seen_at)
-        self.assertEqual(second.events[0].deltas[0].delta_type, "same_event_new_delta")
+        self.assertEqual(second.events[0].deltas[0].delta_type, "new_amount_or_metric")
         self.assertIn("flow_usd_m", second.events[0].deltas[0].changed_fields)
         self.assertIn("Material delta", second.report.items[0].today_delta)
         self.assertIn("score_explanation", second.report.items[0].model_dump(mode="json"))
@@ -134,5 +135,62 @@ class DurableSqliteRuntimeTests(unittest.TestCase):
         self.assertGreaterEqual(len(reloaded_event.documents), 3)
         self.assertEqual(
             [delta.delta_type for delta in self.repository.list_event_deltas(event_id)],
-            ["new_event", "same_event_new_delta", "duplicate_document"],
+            ["new_event", "new_amount_or_metric", "duplicate_document"],
+        )
+
+    def test_failed_persistence_rolls_back_and_preserves_last_valid_report(self) -> None:
+        from unittest import mock
+
+        day_1 = _document(
+            "https://example.tw/day-1",
+            "TWSE reports ETF flows",
+            200,
+            "2026-07-09T08:01:00+00:00",
+        )
+        day_2 = _document(
+            "https://example.tw/day-2",
+            "TWSE updates ETF flows to 280m",
+            280,
+            "2026-07-10T08:01:00+00:00",
+        )
+        first = self._run("2026-07-09", (day_1,))
+        first_report = self.repository.get_report(first.report.report_id)
+        last_valid_before = self.repository.load("last-valid-report:daily_push")
+
+        # Force a failure after the report row is written inside the same transaction.
+        with mock.patch.object(
+            SqliteRunRepository,
+            "_save_state_within",
+            side_effect=RuntimeError("simulated mid-transaction persistence failure"),
+        ):
+            with self.assertRaises(RuntimeError):
+                self._run("2026-07-10", (day_2,))
+
+        # The failed run is fully rolled back: no new report, last-valid preserved, history intact.
+        self.assertEqual(len(self.repository.list_reports("daily_push")), 1)
+        self.assertEqual(self.repository.get_latest_report("daily_push"), first_report)
+        self.assertEqual(self.repository.load("last-valid-report:daily_push"), last_valid_before)
+        event_id = first.events[0].event_id
+        self.assertEqual(
+            [delta.delta_type for delta in self.repository.list_event_deltas(event_id)],
+            ["new_event"],
+        )
+
+    def test_commit_run_is_all_or_nothing_for_documents_and_state(self) -> None:
+        document = _document(
+            "https://example.tw/only",
+            "TWSE reports ETF flows",
+            200,
+            "2026-07-09T08:01:00+00:00",
+        )
+        result = self._run("2026-07-09", (document,))
+        # The atomic batch persisted the document, report, indicators and state together.
+        self.assertIsNotNone(self.repository.get_document(document.document_id))
+        self.assertEqual(
+            self.repository.load("last-valid-report:daily_push"),
+            result.report.canonical_json_bytes(),
+        )
+        self.assertTrue(
+            self.repository.list_match_records(result.events[0].event_id),
+            "match provenance should be persisted with the run",
         )

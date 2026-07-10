@@ -38,6 +38,7 @@ from tests.support import (
     InMemoryIndicatorRepository,
     InMemoryReportRepository,
     InMemoryStateStore,
+    InMemoryUnitOfWork,
     InMemoryWebArtifactStore,
 )
 
@@ -335,6 +336,11 @@ class FakeOnlyApplicationTests(unittest.TestCase):
         web_artifact_store: WebArtifactStore | None = None,
         publishers: tuple[ReportPublisher, ...] | None = None,
     ) -> tuple[DailyRadarApplication, ApplicationDependencies]:
+        document_repository = InMemoryDocumentRepository()
+        event_repository = InMemoryEventRepository()
+        resolved_report_repository = report_repository if report_repository is not None else InMemoryReportRepository()
+        indicator_repository = InMemoryIndicatorRepository()
+        resolved_state_store = state_store if state_store is not None else InMemoryStateStore()
         dependencies = ApplicationDependencies(
             source_adapter=source_adapter if source_adapter is not None else FakeSourceAdapter(self.documents),
             evaluator=(
@@ -342,15 +348,20 @@ class FakeOnlyApplicationTests(unittest.TestCase):
                 if evaluator is not None
                 else FakeIntelligenceEvaluator(finished_at=FIXED_NOW.isoformat())
             ),
-            document_repository=InMemoryDocumentRepository(),
-            event_repository=InMemoryEventRepository(),
-            report_repository=(
-                report_repository if report_repository is not None else InMemoryReportRepository()
-            ),
-            indicator_repository=InMemoryIndicatorRepository(),
-            state_store=state_store if state_store is not None else InMemoryStateStore(),
+            document_repository=document_repository,
+            event_repository=event_repository,
+            report_repository=resolved_report_repository,
+            indicator_repository=indicator_repository,
+            state_store=resolved_state_store,
             web_artifact_store=(
                 web_artifact_store if web_artifact_store is not None else InMemoryWebArtifactStore()
+            ),
+            unit_of_work=InMemoryUnitOfWork(
+                document_repository=document_repository,
+                event_repository=event_repository,
+                report_repository=resolved_report_repository,
+                indicator_repository=indicator_repository,
+                state_store=resolved_state_store,
             ),
             publishers=publishers if publishers is not None else (FakePublisher(),),
         )

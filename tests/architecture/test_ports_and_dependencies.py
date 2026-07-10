@@ -68,6 +68,9 @@ PORT_METHODS: dict[str, dict[str, tuple[str, ...]]] = {
     "ReportPublisher": {
         "publish": ("self", "report", "artifacts"),
     },
+    "UnitOfWork": {
+        "commit_run": ("self", "batch"),
+    },
 }
 
 PORT_ATTRIBUTES: dict[str, set[str]] = {
@@ -80,6 +83,7 @@ PORT_ATTRIBUTES: dict[str, set[str]] = {
     "StateStore": set(),
     "WebArtifactStore": set(),
     "ReportPublisher": {"publisher_id"},
+    "UnitOfWork": set(),
 }
 
 APPLICATION_FORBIDDEN_IMPORT_PREFIXES = (
@@ -252,9 +256,11 @@ def _package_component(module_name: str) -> str:
 
 
 class PortContractTests(unittest.TestCase):
-    def test_all_nine_ports_are_runtime_checkable_protocols_with_stable_surfaces(self) -> None:
+    def test_all_ports_are_runtime_checkable_protocols_with_stable_surfaces(self) -> None:
         self.assertEqual(set(PORT_METHODS), set(PORT_ATTRIBUTES))
-        self.assertEqual(len(PORT_METHODS), 9)
+        # PR B extends the port set from nine to ten by adding the atomic UnitOfWork
+        # run-transaction boundary. Every port remains a runtime-checkable Protocol.
+        self.assertEqual(len(PORT_METHODS), 10)
 
         for port_name, required_methods in PORT_METHODS.items():
             with self.subTest(port=port_name):

@@ -239,6 +239,85 @@
       "title": "EvaluationAuditV1",
       "type": "object"
     },
+    "EventResolutionAuditV1": {
+      "additionalProperties": false,
+      "properties": {
+        "events_observed": {
+          "minimum": 0,
+          "title": "Events Observed",
+          "type": "integer"
+        },
+        "new_events": {
+          "minimum": 0,
+          "title": "New Events",
+          "type": "integer"
+        },
+        "matched_existing_events": {
+          "minimum": 0,
+          "title": "Matched Existing Events",
+          "type": "integer"
+        },
+        "material_events": {
+          "minimum": 0,
+          "title": "Material Events",
+          "type": "integer"
+        },
+        "unchanged_events": {
+          "minimum": 0,
+          "title": "Unchanged Events",
+          "type": "integer"
+        },
+        "duplicate_only_events": {
+          "minimum": 0,
+          "title": "Duplicate Only Events",
+          "type": "integer"
+        },
+        "unresolved_matches": {
+          "minimum": 0,
+          "title": "Unresolved Matches",
+          "type": "integer"
+        },
+        "match_strategy_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Match Strategy Counts",
+          "type": "object"
+        },
+        "delta_type_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Delta Type Counts",
+          "type": "object"
+        },
+        "title_only_changes_rejected": {
+          "minimum": 0,
+          "title": "Title Only Changes Rejected",
+          "type": "integer"
+        },
+        "background_only_rejected": {
+          "minimum": 0,
+          "title": "Background Only Rejected",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "events_observed",
+        "new_events",
+        "matched_existing_events",
+        "material_events",
+        "unchanged_events",
+        "duplicate_only_events",
+        "unresolved_matches",
+        "match_strategy_counts",
+        "delta_type_counts",
+        "title_only_changes_rejected",
+        "background_only_rejected"
+      ],
+      "title": "EventResolutionAuditV1",
+      "type": "object"
+    },
     "EvidenceLinkV2": {
       "additionalProperties": false,
       "properties": {
@@ -881,6 +960,9 @@
     "evaluation_audit": {
       "$ref": "#/$defs/EvaluationAuditV1"
     },
+    "event_resolution_audit": {
+      "$ref": "#/$defs/EventResolutionAuditV1"
+    },
     "backtest": {
       "$ref": "#/$defs/BacktestV1"
     },
@@ -906,6 +988,7 @@
     "crypto_matrix",
     "structural_indicators",
     "evaluation_audit",
+    "event_resolution_audit",
     "backtest",
     "contract_version"
   ],
