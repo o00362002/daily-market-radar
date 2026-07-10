@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import BadgeList from '../components/BadgeList.astro';
+import { getLatestReport, getManifest } from '../lib/data';
+import { evaluationBadge, statusBadge, fixtureBadge, EVIDENCE_BADGES } from '../lib/format';
+
+const manifest = getManifest();
+const report: any = getLatestReport();
+const items: any[] = report?.items ?? [];
+const major = items.filter((i) => i.report_lane === 'major');
+const potential = items.filter((i) => i.report_lane === 'potential');
+const taiwan = items.filter((i) => (i.direct_taiwan_evidence ?? []).length > 0);
+const gaps: any[] = report?.coverage_gaps ?? [];
+const evalMode = report?.evaluation_audit?.effective_mode ?? 'deterministic';
+const isFixture = report?.source_audit?.ingestion_mode === 'fixture';
+const retail = report?.retail_matrix ?? {};
+const crypto = report?.crypto_matrix ?? {};
+const structural: any[] = report?.structural_indicators ?? [];
+---
+<Base>
+  {!report && <p class="empty">尚無報告。請先執行 <code>radar run-daily</code> 並 <code>radar export-web</code>。</p>}
+  {report && (
+    <>
+      <h1>今日情報 · {report.date}</h1>
+      <div class="row">
+        <BadgeList badges={[statusBadge(report.status), evaluationBadge(evalMode), fixtureBadge(isFixture)]} />
+      </div>
+      {isFixture && <p class="badge fixture"><span class="sym">⚠</span> 目前為示例資料（fixture），非真實全球覆蓋。</p>}
+      {(report.degradation_reasons ?? []).length > 0 && (
+        <p class="muted">降級：{report.degradation_reasons.join('、')}</p>
+      )}
+
+      <div class="grid">
+        <div class="kpi"><div class="n">{major.length}</div><div class="l">重大 Major</div></div>
+        <div class="kpi"><div class="n">{potential.length}</div><div class="l">潛力 Potential</div></div>
+        <div class="kpi"><div class="n">{taiwan.length}</div><div class="l">台灣直接證據</div></div>
+        <div class="kpi"><div class="n">{gaps.length}</div><div class="l">覆蓋缺口 Gaps</div></div>
+      </div>
+
+      <h2>重大 Major</h2>
+      {major.length === 0 && <p class="empty">今日無重大項目。</p>}
+      {major.map((item) => (
+        <article class="card">
+          <div class="row">
+            <strong>{item.headline}</strong>
+            <span class="badge deterministic">重要 {item.importance_score}</span>
+            <span class="badge auto">信心 {item.confidence_score}</span>
+          </div>
+          <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
+          {(item.counterevidence ?? []).length > 0 && (
+            <p><span class="badge counter"><span class="sym">⚑</span> 反證</span> {item.counterevidence.join('；')}</p>
+          )}
+          {(item.uncertainties ?? []).length > 0 && (
+            <p><span class="badge uncertainty"><span class="sym">?</span> 不確定</span> {item.uncertainties.join('；')}</p>
+          )}
+          <div class="row muted">
+            {(item.evidence_links ?? []).map((l: any) => <a href={l.url}>{l.source_id} ↗</a>)}
+          </div>
+        </article>
+      ))}
+
+      <h2>潛力 Potential</h2>
+      {potential.length === 0 && <p class="empty">今日無潛力項目。</p>}
+      {potential.map((item) => (
+        <article class="card">
+          <div class="row"><strong>{item.headline}</strong>
+            <span class="badge inference">{item.candidate_type ?? '弱訊號'} · {item.formation_level ?? ''}</span>
+            <span class="badge auto">潛力 {item.potential_score}</span>
+          </div>
+          <p>{item.today_delta}</p>
+        </article>
+      ))}
+
+      <h2>台灣 Taiwan（直接證據）</h2>
+      {taiwan.length === 0 && <p class="empty">今日無台灣直接證據項目；「台灣可能受影響」屬推論，不計入。</p>}
+      {taiwan.map((item) => (
+        <article class="card"><strong>{item.headline}</strong><p>{item.taiwan_implication || item.today_delta}</p></article>
+      ))}
+
+      <h2>零售矩陣 Retail</h2>
+      <table><tbody>
+        {Object.entries(retail).map(([key, cell]: any) => (
+          <tr><td>{key}</td><td>
+            {cell.status === 'observed'
+              ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
+              : <span class="badge gap"><span class="sym">▽</span> 資料不足</span>}
+          </td></tr>
+        ))}
+      </tbody></table>
+
+      <h2>加密矩陣 Crypto</h2>
+      <table><tbody>
+        {Object.entries(crypto).map(([key, cell]: any) => (
+          <tr><td>{key}</td><td>
+            {cell.status === 'observed'
+              ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
+              : <span class="badge gap"><span class="sym">▽</span> 資料不足</span>}
+          </td></tr>
+        ))}
+      </tbody></table>
+
+      <h2>結構趨勢指標 Structural Indicators</h2>
+      {structural.map((row) => (
+        <div class="card row">
+          <strong>{row.indicator_id}</strong>
+          {row.direction === 'insufficient'
+            ? <span class="badge gap"><span class="sym">▽</span> 證據不足，不生成趨勢</span>
+            : <span class="badge inference"><span class="sym">≈</span> {row.direction} · 支持{row.support_score}/反{row.counter_score}</span>}
+        </div>
+      ))}
+
+      <h2>覆蓋缺口 Coverage Gaps</h2>
+      <ul class="tight">
+        {gaps.map((g: any) => <li class="muted">{g.domain}/{g.macro_region}: {g.message}</li>)}
+      </ul>
+      <p class="muted">最新 {manifest?.report_count ?? 0} 份報告 · 完整報告 JSON 可於 artifacts/web/v1 取得。</p>
+    </>
+  )}
+</Base>

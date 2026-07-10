@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getManifest, getTrend } from '../../lib/data';
+import { sparklinePath } from '../../lib/format';
+
+const manifest = getManifest();
+const series = (manifest?.indicator_ids ?? []).map((id) => getTrend(id)).filter(Boolean) as any[];
+---
+<Base title="結構趨勢 Trends">
+  <h1>結構趨勢指標</h1>
+  {series.length === 0 && <p class="empty">尚無趨勢資料。</p>}
+  {series.map((s) => {
+    const support = s.points.map((p: any) => p.support_score);
+    const latest = s.points[s.points.length - 1];
+    return (
+      <div class="card">
+        <div class="row">
+          <strong>{s.indicator_id}</strong>
+          {latest && latest.direction === 'insufficient'
+            ? <span class="badge gap"><span class="sym">▽</span> 證據不足</span>
+            : <span class="badge inference"><span class="sym">≈</span> {latest?.direction}</span>}
+        </div>
+        <svg class="sparkline" width="120" height="28" viewBox="0 0 120 28" role="img" aria-label="support sparkline">
+          <path d={sparklinePath(support)} fill="none" stroke="#6ea8fe" stroke-width="1.5" />
+        </svg>
+        <span class="muted">{s.points.length} 個觀察點（僅真實觀察，空窗不捏造）</span>
+      </div>
+    );
+  })}
+</Base>

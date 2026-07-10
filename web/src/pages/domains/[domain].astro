@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getManifest, getDomainIndex, listDomainDirs } from '../../lib/data';
+
+export function getStaticPaths() {
+  return listDomainDirs().map((domain) => ({ params: { domain }, props: { domain } }));
+}
+const { domain } = Astro.props as any;
+const manifest = getManifest();
+const entries = (manifest?.years ?? []).flatMap((year) => getDomainIndex(domain, year)?.entries ?? []);
+const base = import.meta.env.BASE_URL;
+const reportHref = (date: string) => `${base}${base.endsWith('/') ? '' : '/'}reports/${date}`;
+---
+<Base title={`領域 ${domain}`}>
+  <h1>領域 · {domain}</h1>
+  {entries.length === 0 && <p class="empty">此領域尚無報告。</p>}
+  <table>
+    <thead><tr><th>日期</th><th>重大</th><th>潛力</th></tr></thead>
+    <tbody>
+      {entries.sort((a, b) => (a.date < b.date ? 1 : -1)).map((e: any) => (
+        <tr><td><a href={reportHref(e.date)}>{e.date}</a></td><td>{e.major_count}</td><td>{e.potential_count}</td></tr>
+      ))}
+    </tbody>
+  </table>
+</Base>

@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-07-10：projection-first Astro dashboard（PR E）
+
+### Decision
+
+```text
+1. The web layer is a projection of validated RadarReportV2 only. Typed web read-models are strict and
+   provider-neutral; schemas/web.schema.json is generated from them and web/src/generated/web-types.ts is
+   generated from that schema (drift-checked in CI).
+2. Web artifacts are immutable and content-addressed. Export is atomic (stage-then-replace), skips
+   unchanged artifacts by content hash, rebuilds indexes incrementally, and never leaves half-written
+   artifacts on failure.
+3. The Astro site is static, zero-JS-first, native CSS, GitHub Pages compatible (site/base from env, never
+   hardcoded), 繁體中文預設. Evidence quality and provenance are shown as text+symbol badges, never colour
+   alone. The homepage never loads full history; history is paginated; structural empty windows render
+   insufficient, never a fabricated trend.
+```
+
+### Boundary
+
+```text
+The Astro npm build passes locally (14 pages, zero client JS). Web CI (npm build + bundle budgets) and the
+GitHub Pages deploy workflow land in PR F. Multi-adapter collection integration remains follow-up.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_e_projection_first_dashboard.md` · `docs/web-architecture.md` · `web/README.md`
+
+---
+
 ## 2026-07-10：optional AI and chat-assisted evaluation（PR D）
 
 ### Decision
@@ -27,7 +57,7 @@
 
 ```text
 No real API keys in tests; the OpenAI client path is not executed in CI (proven via a mock provider).
-The full secrets contract (.env.example, docs/secrets.md, redaction tests) lands in PR F.
+The full secrets contract (.env.example, docs/secrets.md, redaction tests) is planned for PR F.
 ```
 
 ### Evidence
