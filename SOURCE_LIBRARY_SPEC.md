@@ -62,7 +62,7 @@ Adapter fields:
 
 ```text
 kind: rss / api / web / rsshub / social
-aurl
+url
 route_status
 enabled_for_opml
 opml_category
