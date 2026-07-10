@@ -1,6 +1,6 @@
 {
   "schema": "brain-sync-matrix/v1",
-  "version": "5",
+  "version": "6",
   "_note": "daily-market-radar machine sync edges. Keep derivable facts out of prose.",
   "byFile": {
     "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md", "CURRENT_STATE.md"],
@@ -39,6 +39,19 @@
       "schemas/report.schema.json",
       "tests/"
     ],
+    "src/radar/domain/scoring.py": [
+      "src/radar/reporting/planner.py",
+      "src/radar/contracts/report.py",
+      "schemas/report.schema.json",
+      "tests/unit/test_dedup_and_delta.py",
+      "tests/integration/test_durable_sqlite_runtime.py"
+    ],
+    "src/radar/pipeline/deltas.py": [
+      "src/radar/application/run_daily.py",
+      "src/radar/domain/scoring.py",
+      "tests/unit/test_dedup_and_delta.py",
+      "tests/integration/test_durable_sqlite_runtime.py"
+    ],
     "src/radar/adapters/rss.py": [
       "src/radar/runtime/runs.py",
       "config/source_registry.json",
@@ -48,8 +61,10 @@
     "src/radar/repositories/sqlite.py": [
       "migrations/0001_runtime_foundation.sql",
       "migrations/0002_report_payloads.sql",
+      "migrations/0003_durable_runtime_repositories.sql",
       "src/radar/runtime/runs.py",
       "tests/integration/test_runtime_v2.py",
+      "tests/integration/test_durable_sqlite_runtime.py",
       "docs/operations.md"
     ],
     "src/radar/runtime/runs.py": [
@@ -108,7 +123,7 @@
     "src/radar/ports/": ["src/radar/application/", "src/radar/composition.py", "tests/architecture/"],
     "src/radar/application/": ["src/radar/ports/", "src/radar/contracts/", "tests/integration/", "tests/architecture/"],
     "schemas/": ["src/radar/reporting/contracts.py", "tests/contracts/"],
-    "migrations/": ["src/radar/repositories/sqlite.py", "docs/architecture.md", "docs/migration-v1-to-v2.md"],
+    "migrations/": ["src/radar/repositories/sqlite.py", "tests/integration/", "docs/architecture.md", "docs/migration-v1-to-v2.md", "docs/operations.md"],
     "rules/": ["AGENTS.md", "README.md"],
     "sources/": ["SOURCE_LIBRARY_SPEC.md", "docs/source-policy.md"],
     "domains/": ["domains/README.md", "config/runtime_contract.json"],

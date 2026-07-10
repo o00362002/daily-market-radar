@@ -13,7 +13,7 @@ Runtime contract: config/runtime_contract.json
 Canonical source registry: config/source_registry.json
 Deterministic runtime: src/radar/
 Report schema: schemas/report.schema.json
-Database foundation: migrations/0001_runtime_foundation.sql + migrations/0002_report_payloads.sql
+Database foundation: migrations/0001_runtime_foundation.sql + migrations/0002_report_payloads.sql + migrations/0003_durable_runtime_repositories.sql
 Sync edges: schema/sync-matrix.json
 ```
 
@@ -29,7 +29,7 @@ AGENT_DAILY_PUSH_BRIEF
 → config/runtime_contract.json profile=daily_push
 → config/source_registry.json
 → source health / ingest adapters
-→ normalize / deduplicate / event clustering / material delta
+→ normalize / deduplicate / event clustering / cross-day material delta
 → evidence verification / independent scores
 → coverage cells and gap discovery
 → report planner with slot caps
@@ -168,7 +168,9 @@ schema exists != database persistence active
 ```
 
 The report must expose ingestion mode and cannot claim live completeness from fixture data.
-`live-rss` executes verified RSS/Atom adapters and persists optional SQLite run records, but remains partial until web/API/social, FreshRSS and external discovery adapters are connected.
+`live-rss` executes verified RSS/Atom adapters and can persist optional SQLite document, event, delta,
+report, indicator and state records, but remains partial until web/API/social, FreshRSS and external
+discovery adapters are connected.
 
 ## 10. Replaceability boundary
 

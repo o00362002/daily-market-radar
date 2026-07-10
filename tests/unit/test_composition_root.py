@@ -4,8 +4,10 @@ import builtins
 import importlib
 import os
 import sys
+import tempfile
 import unittest
 from dataclasses import replace
+from pathlib import Path
 from unittest.mock import patch
 
 from radar.ports import (
@@ -30,6 +32,7 @@ FORBIDDEN_OPTIONAL_MODULE_PREFIXES = (
     "radar.repositories.filesystem",
     "radar.stores.filesystem",
 )
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class CompositionRootTests(unittest.TestCase):
@@ -93,12 +96,36 @@ class CompositionRootTests(unittest.TestCase):
             with self.subTest(port=port_name):
                 self.assertIsInstance(implementation, protocol)
 
+    def test_sqlite_runtime_backend_can_be_selected_for_durable_ports(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            composed = self.composition.compose_application(
+                self.composition.CompositionConfig(
+                    document_repository_backend="sqlite",
+                    event_repository_backend="sqlite",
+                    report_repository_backend="sqlite",
+                    indicator_repository_backend="sqlite",
+                    state_store_backend="sqlite",
+                    database_path=Path(tempdir) / "radar.db",
+                    migrations_dir=ROOT / "migrations",
+                )
+            )
+
+        dependencies = composed.dependencies
+        self.assertIsInstance(dependencies.document_repository, DocumentRepository)
+        self.assertIsInstance(dependencies.event_repository, EventRepository)
+        self.assertIsInstance(dependencies.report_repository, ReportRepository)
+        self.assertIsInstance(dependencies.indicator_repository, IndicatorRepository)
+        self.assertIsInstance(dependencies.state_store, StateStore)
+
     def test_unknown_backends_and_integrations_fail_closed(self) -> None:
         base = self.composition.CompositionConfig()
         invalid_configs = {
             "source": replace(base, source_backend="freshrss"),
             "evaluator": replace(base, evaluator_backend="remote-ai"),
+            "document repository": replace(base, document_repository_backend="filesystem"),
+            "event repository": replace(base, event_repository_backend="postgres"),
             "report repository": replace(base, report_repository_backend="postgres"),
+            "indicator repository": replace(base, indicator_repository_backend="timeseries"),
             "state store": replace(base, state_store_backend="state-branch"),
             "web artifact store": replace(base, web_artifact_store_backend="filesystem"),
             "publisher": replace(base, publisher_backends=("github-pages",)),

@@ -22,8 +22,8 @@ Scoring：importance、potential、confidence 分開。
 ## Production reality
 
 ```text
-目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite report/gap storage foundation、fake-only application flow、replaceability/import/cycle architecture gates。
-尚未完成：web/API/social/FreshRSS adapters、完整 source health、外部 discovery provider、歷史事件持久化與 material-delta 比對、semantic scorer、結構指標 evaluator、scheduler、production credentials。
+目前可驗證：deterministic fixture runtime、live RSS/Atom adapter、source registry validation、OPML drift、report contract、CLI smoke、SQLite durable document/event/delta/report/indicator/state storage、cross-day material-delta filtering、fake-only application flow、replaceability/import/cycle architecture gates。
+尚未完成：web/API/social/FreshRSS adapters、完整 source health、外部 discovery provider、AI-assisted semantic scorer、結構指標 evaluator、scheduler、production credentials。
 live-rss 只覆蓋 registry 內 RSS/Atom adapters；未執行來源必須成為 coverage gaps。
 因此 fixture 與目前 live-rss run 均不得宣稱完整全球新聞覆蓋。
 ```

@@ -33,12 +33,19 @@ See `archive/v1-spec/README.md`.
 - Optional SQLite persistence for run records, report payloads and coverage gaps.
 - Runtime-v2 sync-matrix edges.
 
+## Added in durable runtime repair
+
+- Optional SQLite persistence for canonical document payloads, event-document links, event delta history,
+  structural-indicator observations and state checkpoints.
+- Cross-day event matching by stable event identity over a 30-day lookback.
+- Deterministic material-delta filtering so replayed events do not fill report slots.
+- Deterministic score explanations for importance, potential and confidence components.
+
 ## Still incomplete
 
 - Web, API, social and FreshRSS adapters.
 - External discovery providers.
-- Historical event persistence and material-delta comparison against prior runs.
-- Semantic scoring, counterevidence extraction and structural-indicator evaluators.
+- AI-assisted semantic scoring, counterevidence extraction and structural-indicator evaluators.
 - Production scheduler, PostgreSQL/pgvector and credential management.
 - Regeneration of every legacy source projection from the canonical registry.
 

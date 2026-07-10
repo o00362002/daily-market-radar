@@ -25,7 +25,10 @@ from radar.stores.memory import InMemoryStateStore, InMemoryWebArtifactStore
 class CompositionConfig:
     source_backend: str = "fixture"
     evaluator_backend: str = "deterministic"
+    document_repository_backend: str = "memory"
+    event_repository_backend: str = "memory"
     report_repository_backend: str = "memory"
+    indicator_repository_backend: str = "memory"
     state_store_backend: str = "memory"
     web_artifact_store_backend: str = "memory"
     publisher_backends: tuple[str, ...] = ("disabled",)
@@ -80,17 +83,58 @@ def compose_application(
     else:
         raise ValueError(f"unknown evaluator backend: {config.evaluator_backend}")
 
+    sqlite_repository: SqliteRunRepository | None = None
+    if "sqlite" in {
+        config.document_repository_backend,
+        config.event_repository_backend,
+        config.report_repository_backend,
+        config.indicator_repository_backend,
+        config.state_store_backend,
+    }:
+        if config.database_path is None or config.migrations_dir is None:
+            raise ValueError("database_path and migrations_dir are required for sqlite")
+        sqlite_repository = SqliteRunRepository(config.database_path, config.migrations_dir)
+
+    if config.document_repository_backend == "memory":
+        document_repository = InMemoryDocumentRepository()
+    elif config.document_repository_backend == "sqlite":
+        assert sqlite_repository is not None
+        document_repository = sqlite_repository
+    else:
+        raise ValueError(f"unknown document repository backend: {config.document_repository_backend}")
+
+    if config.event_repository_backend == "memory":
+        event_repository = InMemoryEventRepository()
+    elif config.event_repository_backend == "sqlite":
+        assert sqlite_repository is not None
+        event_repository = sqlite_repository
+    else:
+        raise ValueError(f"unknown event repository backend: {config.event_repository_backend}")
+
     if config.report_repository_backend == "memory":
         report_repository = InMemoryReportRepository()
     elif config.report_repository_backend == "sqlite":
-        if config.database_path is None or config.migrations_dir is None:
-            raise ValueError("database_path and migrations_dir are required for sqlite")
-        report_repository = SqliteRunRepository(config.database_path, config.migrations_dir)
+        assert sqlite_repository is not None
+        report_repository = sqlite_repository
     else:
         raise ValueError(f"unknown report repository backend: {config.report_repository_backend}")
 
-    if config.state_store_backend != "memory":
+    if config.indicator_repository_backend == "memory":
+        indicator_repository = InMemoryIndicatorRepository()
+    elif config.indicator_repository_backend == "sqlite":
+        assert sqlite_repository is not None
+        indicator_repository = sqlite_repository
+    else:
+        raise ValueError(f"unknown indicator repository backend: {config.indicator_repository_backend}")
+
+    if config.state_store_backend == "memory":
+        state_store = InMemoryStateStore()
+    elif config.state_store_backend == "sqlite":
+        assert sqlite_repository is not None
+        state_store = sqlite_repository
+    else:
         raise ValueError(f"unknown state store backend: {config.state_store_backend}")
+
     if config.web_artifact_store_backend != "memory":
         raise ValueError(f"unknown web artifact store backend: {config.web_artifact_store_backend}")
 
@@ -104,11 +148,11 @@ def compose_application(
     dependencies = ApplicationDependencies(
         source_adapter=source_adapter,
         evaluator=evaluator,
-        document_repository=InMemoryDocumentRepository(),
-        event_repository=InMemoryEventRepository(),
+        document_repository=document_repository,
+        event_repository=event_repository,
         report_repository=report_repository,
-        indicator_repository=InMemoryIndicatorRepository(),
-        state_store=InMemoryStateStore(),
+        indicator_repository=indicator_repository,
+        state_store=state_store,
         web_artifact_store=InMemoryWebArtifactStore(),
         publishers=tuple(publishers),
     )
