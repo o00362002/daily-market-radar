@@ -9,7 +9,7 @@ All search and radar routes use:
 
 ```text
 config/runtime_contract.json
-config/source_registry.yaml
+config/source_registry.json
 configs/news_freshness_and_taiwan_news.yml
 configs/evidence.yml
 configs/technology_development.yml
@@ -67,7 +67,7 @@ Historical phrases such as `48-signal`, `60-signal`, `3+3` or `5+5` do not defin
 AGENT_DAILY_PUSH_BRIEF
 → workflows/daily_push_brief_workflow.md
 → config/runtime_contract.json profile=daily_push
-→ config/source_registry.yaml
+→ config/source_registry.json
 → src/radar pipeline
 → templates/daily_push_brief_template.md
 → schemas/report.schema.json + Python validator
@@ -80,7 +80,7 @@ AGENT_DAILY_PUSH_BRIEF
 AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
 → config/runtime_contract.json profile=full
-→ config/source_registry.yaml
+→ config/source_registry.json
 → src/radar pipeline
 → templates/daily_report_template_v2.md
 → report validation
