@@ -49,7 +49,7 @@ number of items != proof of completeness
 coverage and evidence contract = proof of completeness
 ```
 
-Do not require or claim historical `5+5`, `48-signal` or `60-signal` counts.
+Do not require or claim historical fixed-count totals.
 If a domain lacks qualified signals, show the coverage and retry gap. If many qualified signals exist, include all within the declared run budget.
 
 ## Canonical report domains
