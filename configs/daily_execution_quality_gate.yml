@@ -1,10 +1,10 @@
-version: 1.0
-last_updated: 2026-07-09
+version: 2.0
+last_updated: 2026-07-10
 status: active
 purpose: >
-  Hard pre-output gate for Daily Push Brief and Full Daily Radar. This file prevents
-  repeated mainstream items, cross-domain duplication, low-novelty niche candidates,
-  Taiwan implication substitution, and missing structural trend indicators.
+  Semantic pre-output and post-output quality rules consumed with config/runtime_contract.json.
+  This file judges freshness, duplication, potential-signal quality, Taiwan evidence and fixed panels;
+  it does not define fixed-count completion.
 
 applies_to:
   - AGENT_DAILY_PUSH_BRIEF
@@ -12,73 +12,72 @@ applies_to:
   - AGENT_NEWS_SEARCH
 
 must_read_with:
+  - config/runtime_contract.json
+  - config/source_registry.json
   - SYSTEM_PROMPT.md
   - DEPENDENCY_MAP.md
-  - workflows/daily_push_brief_workflow.md
-  - workflows/daily_radar_workflow.md
-  - templates/daily_push_brief_template.md
-  - templates/daily_report_template_v2.md
   - configs/niche_candidate_policy.yml
   - configs/structural_trend_indicators.yml
   - configs/source_routing_rules.yml
-  - configs/feed_discovery_stack.yml
   - SOURCE_LIBRARY_SPEC.md
-  - sources/key_media_library.yml
-  - sources/official_and_data_sources.yml
 
 pre_draft_gate:
   required: true
   steps:
-    - run_source_audit_before_drafting
-    - run_recent_reports_dedup_or_disclose_gap
-    - assign_primary_domain_for_each_candidate_event
-    - build_major_signal_pool
-    - build_niche_candidate_pool_separately
-    - reject_invalid_major_signals
-    - reject_invalid_niche_candidates
-    - run_candidate_retry_paths_when_quota_or_novelty_low
+    - validate_runtime_contract
+    - validate_source_registry_and_health
+    - declare_ingestion_mode
+    - run_recent_event_dedup_or_disclose_gap
+    - assign_one_primary_domain_per_event
+    - build_major_and_potential_lanes_separately
+    - reject_invalid_major_items
+    - reject_invalid_potential_items
+    - run_retry_paths_for_material_coverage_or_novelty_gaps
     - run_taiwan_direct_source_audit
     - run_retail_fixed_matrix
     - run_crypto_fixed_matrix
     - run_structural_trend_indicator_panel
     - record_rejection_and_retry_counts
 
-major_signal_gate:
+major_item_gate:
   reject_when:
-    - no_today_new_information
+    - no_today_material_delta
     - old_background_only
     - historical_replay_without_new_data_or_action
-    - same_event_already_counted_in_another_domain
-    - synthesis_or_indicator_without_news_anchor
-    - generic_taiwan_implication_used_as_taiwan_news
+    - same_event_already_selected_in_another_domain
+    - same_event_already_selected_in_potential_lane
+    - synthesis_or_indicator_without_event_anchor
+    - generic_taiwan_implication_used_as_direct_evidence
   primary_domain_rule: >
-    One news event can count toward only one primary domain quota. Other affected domains may
-    reference it in cross-domain mapping, indicator panel, or synthesis, but cannot count it again.
+    One event has one primary report domain. Other domains may reference consequences in mappings,
+    indicators or synthesis but may not create another report item for the same event.
   required_fields:
-    - id
+    - event_id
     - primary_domain
-    - event
-    - today_new_information
-    - source_and_time
-    - evidence_level
-    - historical_duplicate_status
-    - counted_or_rejected_reason
+    - report_lane
+    - first_seen_at
+    - today_delta
+    - importance_score
+    - potential_score
+    - confidence_score
+    - evidence_links
+    - counterevidence
+    - uncertainties
+    - next_watch
 
-niche_candidate_gate:
+potential_item_gate:
   reject_when:
+    - same_event_already_selected_in_major_lane
     - no_fresh_concrete_anchor
-    - only_rephrased_major_signal
+    - only_rephrased_major_event
     - generic_trend_commentary
     - old_research_without_new_relevance
     - unsupported_prediction
-    - vague_variable_statement
+    - no_confirmation_or_invalidation_condition
     - no_next_verification
-  freshness_requirement: >
-    Candidate must have a fresh concrete anchor or a clearly new data / product / company / social / market /
-    policy / research / on-chain / hiring / patent / assortment change. If only an old concept exists, reject.
   retry_required_when:
-    - fewer_than_required_candidates
-    - candidate_pool_low_novelty
+    - potential_lane_below_slot_cap_due_to_low_novelty
+    - material_potential_coverage_cell_empty_or_stale
     - candidates_are_mostly_mainstream_rewrites
   retry_paths_order:
     - startup_funding_product_launch_sources
@@ -91,111 +90,95 @@ niche_candidate_gate:
     - patents_clinical_trials_regulatory_pilots
     - fashion_brand_merchandising_assortment_sources
     - Taiwan_direct_sources
+    - external_discovery
   required_fields:
-    - id
+    - signal_id
+    - event_id
+    - primary_domain
     - candidate_type
     - formation_level
-    - concrete_anchor
-    - today_new_information
-    - why_niche_or_early
-    - why_it_could_scale
+    - fresh_concrete_anchor
+    - today_delta
+    - importance_score
+    - potential_score
+    - confidence_score
+    - what_would_confirm
+    - what_would_invalidate
     - cannot_conclude
     - next_verification
-    - rejection_status_if_not_counted
 
 Taiwan_direct_source_gate:
   rule: >
-    Taiwan implication is not Taiwan news. If Taiwan direct sources are not checked, output Taiwan status as
-    insufficient / not checked. Do not fill Taiwan quota with generic mapping.
+    Taiwan implication is not Taiwan direct evidence. If direct sources are not checked, expose
+    an insufficient or unverified coverage cell. Do not fill a slot with generic mapping.
   required_audit_fields:
-    - Taiwan_qualified_item_count_after_audit
-    - Taiwan_direct_sources_checked
-    - Taiwan_source_hits
-    - Taiwan_source_misses
-    - Taiwan_keyword_fallback_used
-    - Taiwan_remaining_gap
-  required_source_types:
-    - Taiwan_official_data_or_policy
-    - Taiwan_company_action_or_IR
-    - Taiwan_business_or_industry_media
-    - Taiwan_retail_mall_department_store_brand_official
-    - Taiwan_social_or_channel_first_sources_when_relevant
-    - Taiwan_crypto_fixed_sources_when_crypto_relevant
+    - taiwan_qualified_item_count_after_audit
+    - taiwan_direct_sources_checked
+    - taiwan_source_hits
+    - taiwan_source_misses
+    - taiwan_keyword_fallback_used
+    - taiwan_remaining_gap
+  required_source_roles:
+    - official_or_data
+    - company_or_ir
+    - business_or_industry_media
+    - retail_mall_department_store_brand_official
+    - social_or_channel_first_when_relevant
+    - crypto_fixed_sources_when_relevant
 
 retail_fixed_matrix:
+  source: config/runtime_contract.json
   required: true
-  sections:
-    - cost_pressure
-    - channel_offline_department_store_mall_street
-    - channel_online_marketplace_social_commerce
-    - product_fashion_style_assortment_material_fit_category
-    - inventory_markdown_mid_price_pressure
-    - membership_CRM_loyalty_retail_media
-    - social_commerce_content_discovery_AI_referral
-    - true_vs_fake_segmentation
-    - Taiwan_retail_commercial_district_department_store_brand
   rule: >
-    Retail / fashion output must not only cover mall or e-commerce headlines. It must check cost,
-    channels, product/fashion, inventory, membership, social/AI discovery, segmentation quality,
-    and Taiwan local retail signals. If evidence is missing, disclose the gap.
+    Render every configured Retail key. Missing evidence is status=insufficient with a gap and
+    next verification; do not omit the key.
 
 crypto_fixed_matrix:
+  source: config/runtime_contract.json
   required: true
-  sections:
-    - BTC_ETH_SOL_market_structure
-    - ETF_flows
-    - stablecoin_supply_and_dry_powder
-    - RWA_tokenized_assets
-    - Perp_DEX_volume_OI_funding
-    - TVL_fees_revenue
-    - regulation_policy
-    - Taiwan_crypto_fixed_sources
   data_source_preferences:
-    - official_exchange_or_ETF_data_when_available
-    - DeFiLlama
+    - official_exchange_or_ETF_data
+    - DefiLlama
     - Token_Terminal
     - Dune_or_transparent_dashboards
-    - CoinGecko_or_CoinMarketCap_for_market_data
-    - trusted_crypto_media_for_event_context
+    - trusted_market_data_provider
+    - trusted_crypto_media_for_context
   rule: >
-    Crypto section must not rely only on price headlines. If quantitative data is not checked,
-    mark crypto indicator coverage partial.
+    Render every configured Crypto key. Price headlines alone are insufficient; quantitative
+    checks or an explicit data gap are required.
 
 structural_trend_indicator_gate:
+  source: config/runtime_contract.json
+  detail_policy: configs/structural_trend_indicators.yml
   required: true
-  source_file: configs/structural_trend_indicators.yml
-  required_theses:
-    - 生產力便車無法共享的_K型經濟
-    - AI泡沫_過度投資趨勢
-    - 品牌大者更大_小眾存活_中間層萎縮_真分眾假分眾
-  each_thesis_requires:
-    - current_direction
+  each_indicator_requires:
+    - indicator_id
+    - direction
     - confidence
     - supporting_signal_ids
-    - counter_signal_ids_or_none
+    - counter_signal_ids
     - missing_data
     - one_sentence_read
     - next_verification
   rule: >
-    Structural theses are cumulative direction meters, not single-day conclusions. A daily report should state
-    whether today's evidence strengthens, weakens, or does not change each thesis.
+    Structural indicators are cumulative direction meters. Do not force a daily direction when
+    supporting and counterevidence are insufficient.
 
-post_output_backtest_required_fields:
-  - duplicate_rejection_count
-  - field_overlap_rejection_count
-  - niche_low_novelty_rejection_count
-  - candidate_retry_paths_used
-  - Taiwan_qualified_item_count_after_audit
-  - Taiwan_direct_sources_checked
-  - retail_matrix_gaps
-  - crypto_matrix_gaps
-  - structural_thesis_evidence_change
-  - true_vs_fake_segmentation_status
+post_output_backtest:
+  required_fields_source: config/runtime_contract.json
+  additional_fields:
+    - retail_matrix_gaps
+    - crypto_matrix_gaps
+    - structural_thesis_evidence_change
+    - true_vs_fake_segmentation_status
+    - source_health_failures
+    - unexecuted_adapters
 
 completion_effect:
-  if_missing_pre_draft_gate: partial_or_failed_gate
-  if_missing_retail_fixed_matrix: partial
-  if_missing_crypto_fixed_matrix: partial
-  if_missing_structural_trend_panel: partial
-  if_no_taiwan_direct_source_check: Taiwan_status_insufficient
-  if_candidate_retry_not_run_when_needed: partial
+  if_runtime_contract_invalid: failed
+  if_report_contract_invalid: failed
+  if_required_gate_skipped: partial_or_failed
+  if_material_coverage_gap_remains: partial
+  if_taiwan_direct_check_missing: partial_and_taiwan_insufficient
+  if_retry_not_run_for_material_gap: partial
+  if_fixture_mode: partial_for_real_world_completeness
