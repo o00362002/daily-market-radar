@@ -20,6 +20,11 @@ cp .env.example .env
 docker compose up -d
 ```
 
+Images are pinned through `.env` variables rather than `latest`. Before changing
+an image tag or digest, check the upstream release notes, update `.env.example`,
+run `docker compose pull && docker compose up -d`, and record the validation in a
+new `reports/execution_checks/` note.
+
 Default local URLs:
 
 ```text
@@ -72,7 +77,9 @@ Import it in FreshRSS:
 FreshRSS → Subscription management → Import / Export → Import OPML
 ```
 
-Only entries marked as both `route_status = verified` and `enabled_for_opml = true` in `sources/channel_feed_sources.json` should appear in the OPML seed file.
+Only entries enabled in `config/source_registry.yaml` should appear in the OPML seed file.
+The older `sources/channel_feed_sources.json` view is a v1 projection/reference and
+must not be edited as the canonical registry.
 
 Route templates and unverified candidates must not be imported.
 

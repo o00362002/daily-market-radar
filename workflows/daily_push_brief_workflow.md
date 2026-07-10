@@ -306,7 +306,7 @@ Each thesis must include current direction, confidence, supporting signal IDs, c
 
 ## final indicator and synthesis panel rule
 
-Fixed indicator tracking is required at the end and must not count toward the per-domain 3+3 quota.
+Fixed indicator tracking is required at the end and must not count toward per-domain news output slots.
 
 ## output status wording
 

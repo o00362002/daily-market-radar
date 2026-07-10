@@ -43,7 +43,7 @@ Governance posture: core depth by default; mother depth by trigger
 ```text
 固定來源庫與固定查詢配方先跑，generic search 只是 fallback，且要在 coverage audit 揭露。
 台灣新聞必須 source-backed；「台灣可能受影響」是推論，不得計入台灣新聞。
-每則計數訊號必須有今日新增點；歷史重播無新增資料不計入 5+3。
+每則輸出訊號必須有今日新增點；歷史重播無新增資料不計入槽位。
 social-first 來源必須 direct channel check；generic search 不算已檢查。
 蒐集階段不預篩：新概念/新應用/新趨勢/新組合一律入 potential_pool；取捨只在輸出階段。
 政策/法規/市場重大 claim 必須回查官方或數據來源；生成者 ≠ 判官 ≠ 簽核人。
@@ -63,7 +63,7 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 
 想加規則？先答「誰、在什麼時點、用什麼機器消費它？」
 答不出 → 它是說明不是規則，寫進 CURRENT_DECISIONS.md 的 why 即可。
-提出新增檔案、新規則、新語彙、新檢查器、schema、workflow 或本地架構標籤前，先檢查既有本地檔案、route、checker、schema、workflow 或 evidence location 是否能承接；能承接就改既有。
+新增檔案、規則、語彙、檢查器、schema、workflow 前，先看既有路徑能否承接；能承接就改既有。
 
 ## 繼承核心＋本專案目標｜Inherited governance + own goal（掛 brain-core）
 
@@ -71,6 +71,6 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 light=檢查器綠／standard=動 state/decisions 附 reports/／full=重大變更人終審＋具名第二訊號（Class C）；未認領決策→full。
 **本專案目標＝本專案回測/架構調整的量尺，由人 owner 定、AI 不自產（目標即量尺，不可自訂衡量自己的尺）：**
 
-本專案目標｜This project's goal: 蒐集全世界重要訊息與新趨勢/新應用/新話題的**潛力訊息**，並藉此了解現在與未來方向的可能發展。（owner 定 2026-07-08）｜Surface the world's important information and potential signals of new trends / applications / topics, to understand the present and where things may head.
+本專案目標｜This project's goal: 蒐集全世界重要訊息與新趨勢/新應用/新話題的**潛力訊息**，藉此了解現在與未來方向。（owner 2026-07-08）｜Surface important information and potential signals to understand where things may head.
 
 安裝關口（一次性）：`bash tools/install_hooks.sh`｜體檢：`bash check_mount_integrity.sh`

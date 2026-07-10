@@ -23,8 +23,8 @@ Full reports must enforce:
 ```text
 台灣段必須優先放台灣新聞，不得只用台灣影響或台灣推論補位。
 每則大型訊號與小眾候選都必須標示今日新增點。
-歷史重複主題只有在有新數據、新公司動作、新政策、新市場反應、新鏈上數據或新台灣新聞時，才能計入正式 5+5。
-只有背景概念或歷史重播，不得計入 5+5。
+歷史重複主題只有在有新數據、新公司動作、新政策、新市場反應、新鏈上數據或新台灣新聞時，才能進入正式輸出槽位。
+只有背景概念或歷史重播，不得計入輸出槽位。
 固定來源庫必須先於 generic keyword search 檢查。
 小眾候選必須是具體早期弱訊號，不得用空泛趨勢句補位。
 小眾候選必須分類 candidate_type 與 formation_level。
@@ -43,7 +43,7 @@ explicit full daily radar report request
 scheduled full daily radar run
 manual full market radar generation
 formal archive report request
-5+5 hard-gate report request
+full-report quality-gate request
 60-signal report request
 archive output request
 ```
@@ -91,7 +91,7 @@ Non-trigger phrases route to `AGENT_DAILY_PUSH_BRIEF` unless the user explicitly
 19. Check candidate_type, formation_level, concrete anchor, why early, scale path, cannot-conclude and next verification.
 20. Check Taiwan news validity by domain.
 21. Check coverage and historical duplicates.
-22. Remove background-only / historical-replay items from 5+5 count.
+22. Remove background-only / historical-replay items from output slots.
 23. Enforce Technology anti-AI-overcapture rule and non-AI scan.
 24. Format with the full daily report template.
 25. Output source-library coverage matrix and retry notes.
@@ -177,7 +177,7 @@ Do not call something a trend just because it has many articles. Many articles w
 
 ## Taiwan news rule
 
-Allowed Taiwan news includes Taiwan official data/policy/statistics, Taiwan company actions, local industry events, retail/channel/fashion news, market/labor/consumption data, or international news explicitly involving Taiwan entities.
+Allowed Taiwan news includes Taiwan official data, policy, statistics, Taiwan company actions, local industry events, retail/channel/fashion news, market/labor/consumption data, or international news explicitly involving Taiwan entities.
 
 Generic implications are not Taiwan news. If Taiwan news is not found, disclose checked sources, keywords and next retry. Taiwan crypto must obey the fixed-source and legislative-trigger audit in `configs/source_routing_rules.yml`.
 
@@ -207,7 +207,7 @@ cannot_conclude
 next_verification
 ```
 
-Items without new information must not count toward 5+5.
+Items without new information must not count toward output slots.
 
 ## technology rule
 
@@ -262,4 +262,4 @@ reports/backtests/ when needed
 
 ## completion_rule
 
-The report can be marked `complete` only when required source-library checks, 5+5 equality target, candidate quality checks, formation-level checks, technology checks, freshness, Taiwan news and backtest checks are complete. If any required check is skipped, mark `partial full report`.
+The report can be marked `complete` only when required source-library checks, slot-cap quality gates, candidate quality checks, formation-level checks, technology checks, freshness, Taiwan news and backtest checks are complete. If any required check is skipped, mark `partial full report`.

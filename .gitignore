@@ -1,3 +1,14 @@
 
 # Obsidian workspace (viewer layer; settings stay local)
 .obsidian/
+
+# Local OS/editor/runtime state
+.DS_Store
+**/.DS_Store
+.env
+**/.env
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

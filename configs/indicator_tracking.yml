@@ -8,7 +8,7 @@ indicator_tracking:
   output_position:
     full_daily_radar: "放在今日雷達覆蓋表之後、今日必看訊號之前。"
     daily_push_brief: "放在報告最後的 Final Indicator Status and News Synthesis Panel。"
-  rule: "Daily Push Brief 中，固定指標只輸出濃縮狀態，不逐段展開；每一桶至少列出指標領域、今日狀態、方向、支撐新聞 ID、資料缺口。指標與結論不得計入每領域 3+1 新聞數量。"
+  rule: "Daily Push Brief 中，固定指標只輸出濃縮狀態，不逐段展開；每一桶至少列出指標領域、今日狀態、方向、支撐新聞 ID、資料缺口。指標與結論不得計入每領域新聞輸出槽位。"
 
   crypto_blockchain:
     name: 區塊鏈 / 加密貨幣固定指標
@@ -147,4 +147,4 @@ indicator_tracking:
       - 是否區分「查無重大更新」與「未完整查證」？
       - 是否將社群討論放入候選訊號並附原始連結與未證實標記？
       - 是否把上次漏抓事件回測到固定指標中？
-      - 是否確認指標與結論未計入每領域 3+1 新聞數量？
+      - 是否確認指標與結論未計入每領域新聞輸出槽位？

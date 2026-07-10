@@ -1,18 +1,41 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-07-09
+最後更新：2026-07-10
 
 ---
 
-## 2026-07-09：同步修正 active gate / templates / structural indicators
+## 2026-07-10：intelligence runtime v2 成為 active contract
+
+### Decision
+
+```text
+1. active 完成定義改為 source registry / run record / coverage cell / report contract / fixture replay。
+2. Daily Push Brief 與 Full Daily Radar 的數量是版面上限，不是 completeness proof；不足輸出 gap card。
+3. major signal、potential signal、evidence confidence 分開評分，不壓成單一分數。
+4. Taiwan direct news 與 Taiwan implication 分離；推論不得計入 direct Taiwan evidence。
+5. config/source_registry.yaml 是 canonical registry；FRESHRSS_SEEDS.opml 是 generated projection。
+6. LLM 只做語意抽取與摘要；抓取、去重、計數、coverage gate、時間判斷與 citation trace 由 runtime 驗證。
+```
+
+### Runtime entrypoints
+
+```text
+make validate
+radar sources validate
+radar run-daily --date YYYY-MM-DD
+```
+
+---
+
+## 2026-07-09：同步修正 active gate / templates / structural indicators（v1 frozen）
 
 ### Decision
 
 ```text
 1. Daily Push Brief 與 Full Daily Radar 的 active templates 必須同步 daily_execution_quality_gate。
 2. 每次每日播報前必須先跑 source audit、7 日去重、primary-domain assignment、major rejection gate、niche fresh-anchor gate、Taiwan direct-source audit、Retail fixed matrix、Crypto fixed matrix、Structural Trend Indicator Panel。
-3. 大眾訊號若沒有 concrete today_new_information / fresh delta，不得計入 quota。
-4. 同一新聞只能有一個 primary_domain；其他領域只能引用，不得重複計 quota。
+3. 大眾訊號若沒有 concrete today_new_information / fresh delta，不得進入輸出槽位。
+4. 同一新聞只能有一個 primary_domain；其他領域只能引用，不得重複佔槽。
 5. 小眾候選必須有 fresh concrete anchor，不能只是大型新聞改寫、舊背景概念或趨勢感想。
 6. 小眾候選不足或新奇度低時，必須 retry / external discovery；仍不足才標 gap。
 7. 台灣新聞不足時不可用台灣映射補位，只能標 insufficient / not checked。
@@ -98,15 +121,15 @@ true_vs_fake_segmentation_status
 
 ---
 
-## 2026-07-07：小眾候選與大型訊號等量；精簡 3+3、完整 5+5
+## 2026-07-07：小眾候選與大型訊號等量（v1 frozen）
 
 ### Decision
 
 ```text
-1. 小眾候選數量必須與大型訊號數量相同。
-2. Daily Push Brief：每領域 3 大型訊號 + 3 小眾候選。
-3. Full Daily Radar：每領域至少 5 大型訊號 + 至少 5 小眾候選（when available）。
-4. 舊 3+1 與 5+3 規則退役。
+1. 小眾候選與大型訊號都要保留獨立槽位。
+2. Daily Push Brief：每領域 major / potential 各自有版面上限，不代表完整性。
+3. Full Daily Radar：每領域 major / potential 可輸出所有超過品質門檻者。
+4. 舊固定篇數完成規則退役。
 5. 小眾候選必須是具體早期弱訊號，不得用空泛趨勢句、模型感想或大型新聞改寫補位。
 6. 候選不足時必須先 retry / external discovery；仍不足才標 gap，不得捏造。
 ```
@@ -182,4 +205,4 @@ Runtime validation still pending:
 
 ## Older active decisions
 
-詳見 git history before 2026-07-07。舊 `3+1` / `5+3` quota 決策已由 2026-07-07 的 `3+3` / `5+5` 決策取代。
+詳見 git history before 2026-07-07。舊固定篇數 quota 決策已由 v2 slot cap + coverage gate 取代。

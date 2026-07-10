@@ -18,7 +18,7 @@
 潛力池：蒐集階段不預篩（configs/edge_case_discovery.yml capture_no_prefilter），
   新概念/新應用/新趨勢/新組合一律入 memory/potential_pool.md；取捨只在輸出階段。
 台灣新聞：必須 source-backed；推論不得計入。social-first 來源必須 direct channel check。
-每日輸出：預設 Daily Push Brief；正式版走 5+3 硬閘門（edge_case_discovery）。
+每日輸出：預設 Daily Push Brief；v2 走 slot cap + coverage gate，不用固定篇數證明完整。
 ```
 
 ## 入口邊界

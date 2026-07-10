@@ -2,7 +2,7 @@ name: daily-market-radar-rss-stack
 
 services:
   rsshub:
-    image: diygod/rsshub:latest
+    image: ${RSSHUB_IMAGE:?Set RSSHUB_IMAGE to a verified RSSHub tag or digest}
     container_name: daily-market-radar-rsshub
     restart: unless-stopped
     ports:
@@ -24,7 +24,7 @@ services:
       retries: 3
 
   browserless:
-    image: browserless/chrome:latest
+    image: ${BROWSERLESS_IMAGE:?Set BROWSERLESS_IMAGE to a verified Browserless tag or digest}
     container_name: daily-market-radar-browserless
     restart: unless-stopped
     ulimits:
@@ -38,7 +38,7 @@ services:
       retries: 3
 
   redis:
-    image: redis:alpine
+    image: ${REDIS_IMAGE:?Set REDIS_IMAGE to a verified Redis tag or digest}
     container_name: daily-market-radar-rsshub-redis
     restart: unless-stopped
     volumes:
@@ -51,7 +51,7 @@ services:
       start_period: 5s
 
   freshrss:
-    image: freshrss/freshrss:latest
+    image: ${FRESHRSS_IMAGE:?Set FRESHRSS_IMAGE to a verified FreshRSS tag or digest}
     container_name: daily-market-radar-freshrss
     restart: unless-stopped
     ports:

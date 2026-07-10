@@ -194,7 +194,7 @@ completion_gate_patch:
     must_include:
       - Feed Stack Coverage Audit
       - RSSHub/FreshRSS route status when channel-first sources are used
-      - GDELT/Media Cloud discovery note when 5+3 is not met
+      - GDELT/Media Cloud discovery note when quality gates leave material gaps
       - potential_pool capture note
   news_search_output:
     must_include_or_disclose:

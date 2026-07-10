@@ -90,7 +90,7 @@ complete report
 archival report
 48-signal report
 完整 48 則
-5+3
+v2 slot-cap report
 完整硬閘門
 產出 reports/YYYY/YYYY-MM-DD.md
 完整寫入 reports

@@ -100,13 +100,13 @@ If route, workflow, template, config, and gate disagree, mark:
 
 ---
 
-## 3. Active quotas
+## 3. Active output caps
 
 ```text
-Daily Push Brief = exactly 3 major signals + exactly 3 qualified niche candidates per domain.
-Full Daily Radar = at least 5 major signals + at least 5 qualified niche candidates per domain when available.
-Candidate target equals major-signal target.
-Old 3+1 and 5+3 rules are retired.
+Daily Push Brief = major and potential slots are layout caps, not completeness proof.
+Full Daily Radar = output all items above quality gates or explicit gap cards.
+Candidate and major lanes stay independent through collection and only meet at event level.
+Old fixed-count completion rules are retired.
 ```
 
 If any active file still contains old quota wording, the run must mark dependency drift and follow SYSTEM_PROMPT + niche_candidate_policy + current templates.
@@ -308,7 +308,7 @@ FreshRSS ingestion audit 存在或 FreshRSS unavailable 已揭露 when relevant
 Data Gaps and Retry Notes 存在
 Final Indicator Status and News Synthesis Panel 存在且放在最後
 Post-brief Review 存在
-指標狀態與結論不得計入 3+3 新聞數量
+指標狀態與結論不得計入新聞輸出槽位
 指標狀態與結論必須回指上方新聞 ID
 ```
 
