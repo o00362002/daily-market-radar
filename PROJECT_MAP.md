@@ -9,7 +9,7 @@ AGENTS.md                    first entry and route selection
 CURRENT_STATE.md             current facts
 CURRENT_DECISIONS.md         accepted decisions
 config/runtime_contract.json machine execution and output contract
-config/source_registry.yaml  canonical source registry
+config/source_registry.json  canonical source registry
 AGENT_DEFINITION_MAP.md      route mapping
 DEPENDENCY_MAP.md            dependency and degradation map
 schema/sync-matrix.json      machine-consumed change edges
@@ -20,6 +20,8 @@ schema/sync-matrix.json      machine-consumed change edges
 ```text
 src/radar/domain/       document, event, signal, coverage and report types
 src/radar/schemas/      registry/config parsing
+src/radar/adapters/     fixture and live RSS/Atom adapters
+src/radar/repositories/ SQLite run-record persistence
 src/radar/pipeline/     ingest, normalize, deduplicate, cluster, classify, coverage
 src/radar/reporting/    planner and report-contract validation
 src/radar/runtime/      run orchestration and profile contract
@@ -38,7 +40,7 @@ LLMs may assist semantic extraction, fuzzy matching, summaries and trend mapping
 ## 3. Source architecture
 
 ```text
-config/source_registry.yaml = canonical identity and adapter registry
+config/source_registry.json = canonical identity and adapter registry
 FRESHRSS_SEEDS.opml         = generated projection
 sources/                    = legacy / compatibility inputs pending regeneration
 configs/query_recipes.yml   = fixed query recipes
@@ -98,8 +100,29 @@ Evidence does not become Memory without approval.
 
 ## 8. Runtime boundary
 
-Current runtime foundation supports deterministic fixture replay and contract checks.
-Live network ingestion, durable database persistence, scheduler and provider integrations must be explicitly validated before the system claims production operation.
+Implemented:
+
+```text
+fixture replay
+live RSS/Atom ingestion
+source registry validation
+OPML drift validation
+URL normalization and de-duplication
+event clustering and lane separation
+coverage gaps
+report contract validation
+optional SQLite report and gap persistence
+```
+
+Still incomplete for production completeness:
+
+```text
+web/API/social/FreshRSS adapters
+external discovery providers
+historical event repository and material-delta comparison
+semantic scoring and structural-indicator evaluators
+scheduler and production credentials
+```
 
 ## 9. Frozen history
 
