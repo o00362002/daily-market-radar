@@ -11,9 +11,6 @@ Agent entry: AGENTS.md
 Governance posture: core depth by default; mother depth by trigger
 ```
 
-核心治理薄核：[brain-core](https://github.com/o00362002/brain-core)（蒸餾核；P1–P5 見其 DECISIONS.md）。
-舊母腦 Human-AI-Collaboration-Brain 掛載檔＝凍結歷史，不再是現行規則。
-
 ## 讀取路由（按需，沒有必讀清單）
 
 ```text
