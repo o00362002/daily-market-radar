@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Iterable
+from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
@@ -35,7 +36,7 @@ class RssAdapter:
         documents: list[Document] = []
         for item in root.findall(".//item"):
             title = item.findtext("title") or "Untitled"
-            link = item.findtext("link") or self.feed_url
+            link = urljoin(self.feed_url, item.findtext("link") or self.feed_url)
             documents.append(Document.fixture(source_id=self.source_id, url=link, title=title))
         return documents
 
@@ -93,7 +94,8 @@ def _parse_feed(payload: bytes, *, source: Source, fetched_at: str, limit: int) 
     documents: list[Document] = []
     for entry in entries[:limit]:
         title = entry.get("title", "").strip()
-        link = entry.get("link", "").strip()
+        raw_link = entry.get("link", "").strip()
+        link = urljoin(source.canonical_url, raw_link)
         if not title or not link:
             continue
         published_at = _normalize_date(entry.get("published", ""), fallback=fetched_at)
