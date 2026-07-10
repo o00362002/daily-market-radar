@@ -160,9 +160,6 @@ class ReportItem:
     event_id: str
     signal_id: str | None
     primary_domain: str
-    report_lane: str
-    candidate_type: str | None
-    formation_level: str | None
     headline: str
     first_seen_at: str
     today_delta: str
@@ -175,6 +172,9 @@ class ReportItem:
     counterevidence: list[str]
     uncertainties: list[str]
     next_watch: str
+    report_lane: str = "major"
+    candidate_type: str | None = None
+    formation_level: str | None = None
 
     @classmethod
     def fixture(cls, **kwargs: Any) -> "ReportItem":
@@ -183,9 +183,6 @@ class ReportItem:
             "event_id": "evt_fixture",
             "signal_id": None,
             "primary_domain": "ai_agents_applications",
-            "report_lane": "major",
-            "candidate_type": None,
-            "formation_level": None,
             "headline": "Fixture headline",
             "first_seen_at": "2026-07-10T08:00:00+08:00",
             "today_delta": "Fixture delta.",
@@ -204,6 +201,9 @@ class ReportItem:
             "counterevidence": [],
             "uncertainties": [],
             "next_watch": "Watch next update.",
+            "report_lane": "major",
+            "candidate_type": None,
+            "formation_level": None,
         }
         data.update(kwargs)
         return cls(**data)
