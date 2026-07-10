@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install -e ".[dev]"
-      - name: Run tests and report tail
+      - name: Run tests and report failures
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -26,9 +26,11 @@ jobs:
           PYTHONPATH=src python -m unittest discover -s tests -v > test-output.txt 2>&1
           code=$?
           {
-            echo '### Temporary test diagnostics'
+            echo '### Temporary failure diagnostics'
             echo '```text'
-            tail -n 140 test-output.txt
+            grep -n -E 'FAIL|ERROR|Traceback|AssertionError|FAILED|Ran [0-9]+ tests' test-output.txt || true
+            echo '--- final 45 lines ---'
+            tail -n 45 test-output.txt
             echo '```'
           } > comment.md
           gh pr comment 20 --body-file comment.md
