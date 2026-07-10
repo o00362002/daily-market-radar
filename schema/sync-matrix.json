@@ -1,6 +1,6 @@
 {
   "schema": "brain-sync-matrix/v1",
-  "version": "3",
+  "version": "4",
   "_note": "daily-market-radar machine sync edges. Keep derivable facts out of prose.",
   "byFile": {
     "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md", "CURRENT_STATE.md"],
@@ -18,20 +18,37 @@
       "schemas/report.schema.json",
       "src/radar/runtime/contract.py",
       "src/radar/runtime/runs.py",
-      "src/radar/reporting/contracts.py"
+      "src/radar/reporting/contracts.py",
+      "tests/unit/test_runtime_contract.py",
+      "tests/contracts/test_runtime_v2_report_contract.py"
     ],
-    "config/source_registry.yaml": [
+    "config/source_registry.json": [
       "FRESHRSS_SEEDS.opml",
       "docs/source-policy.md",
       "SOURCE_LIBRARY_SPEC.md",
       "src/radar/schemas/source.py",
-      "tests/unit/test_source_registry.py"
+      "src/radar/adapters/rss.py",
+      "tests/unit/test_source_registry.py",
+      "tests/unit/test_rss_adapter.py"
     ],
     "src/radar/domain/models.py": [
       "src/radar/reporting/planner.py",
       "src/radar/reporting/contracts.py",
       "schemas/report.schema.json",
       "tests/"
+    ],
+    "src/radar/adapters/rss.py": [
+      "src/radar/runtime/runs.py",
+      "config/source_registry.json",
+      "tests/unit/test_rss_adapter.py",
+      "docs/operations.md"
+    ],
+    "src/radar/repositories/sqlite.py": [
+      "migrations/0001_runtime_foundation.sql",
+      "migrations/0002_report_payloads.sql",
+      "src/radar/runtime/runs.py",
+      "tests/integration/test_runtime_v2.py",
+      "docs/operations.md"
     ],
     "src/radar/runtime/runs.py": [
       "src/radar/cli.py",
@@ -41,7 +58,7 @@
     ],
     "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md", "AGENT_DEFINITION_MAP.md"],
     "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
-    "SOURCE_LIBRARY_SPEC.md": ["config/source_registry.yaml", "configs/source_routing_rules.yml"],
+    "SOURCE_LIBRARY_SPEC.md": ["config/source_registry.json", "configs/source_routing_rules.yml"],
     "configs/edge_case_discovery.yml": ["memory/potential_pool.md", "configs/query_recipes.yml"],
     "domains/README.md": ["SOURCE_LIBRARY_SPEC.md", "AGENT_DEFINITION_MAP.md", "config/runtime_contract.json"]
   },
@@ -51,7 +68,7 @@
     "config/": ["CURRENT_STATE.md", "docs/architecture.md"],
     "src/radar/": ["schemas/", "tests/", "docs/architecture.md", "docs/operations.md"],
     "schemas/": ["src/radar/reporting/contracts.py", "tests/contracts/"],
-    "migrations/": ["docs/architecture.md", "docs/migration-v1-to-v2.md"],
+    "migrations/": ["src/radar/repositories/sqlite.py", "docs/architecture.md", "docs/migration-v1-to-v2.md"],
     "rules/": ["AGENTS.md", "README.md"],
     "sources/": ["SOURCE_LIBRARY_SPEC.md", "docs/source-policy.md"],
     "domains/": ["domains/README.md", "config/runtime_contract.json"],
