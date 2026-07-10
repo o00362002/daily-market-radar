@@ -1,79 +1,71 @@
-version: 1.1
-last_updated: 2026-07-07
+version: 2.0
+last_updated: 2026-07-10
 status: active
 purpose: >
-  Define niche / potential candidate signals as early weak-signal reconnaissance,
-  not generic trend commentary, and keep candidate quota equal to major-signal quota
-  in both concise and full daily modes. Also classify candidate type and formation level.
+  Define the potential-signal lane as source-backed early reconnaissance. Potential signals are
+  independent from major signals and are selected by future option value, not by a fixed-count quota.
 
-quota_policy:
-  principle: "小眾候選數量必須與大型訊號數量相同。"
-  daily_push_brief:
-    major_signals_per_domain: 3
-    niche_candidates_per_domain: 3
-    quota_name: 3_plus_3
-  full_daily_radar:
-    major_signals_per_domain_minimum_when_available: 5
-    niche_candidates_per_domain_minimum_when_available: 5
-    quota_name: 5_plus_5
-  equality_rule: >
-    For every domain, the target niche-candidate count equals the target major-signal count.
-    If evidence or source access is insufficient, do not fabricate candidates; mark the
-    candidate gap, execute retry / external discovery, and downgrade report status as required.
+lane_policy:
+  major_lane: important_now
+  potential_lane: future_option_value
+  confidence_dimension: independent_evidence_strength
+  rules:
+    - one_event_cannot_fill_both_major_and_potential_lanes
+    - one_event_has_one_primary_report_domain
+    - slot_caps_are_readability_limits_not_completeness_proof
+    - missing_qualified_potential_signal_creates_gap_card
+    - never_fabricate_or_rephrase_major_news_to_fill_a_slot
+  profile_caps_source: config/runtime_contract.json
 
 candidate_definition:
   summary: >
-    小眾候選訊號是尚未成為主流大新聞、但可能擴大的早期弱訊號。
-    它不是模型感想、空泛趨勢句、主流新聞換句話說，也不是沒有事件依據的預測。
-  must_have_at_least_one_concrete_anchor:
+    A potential signal is not yet a mainstream major event but has a concrete early anchor and
+    measurable path by which it could scale. It is not model opinion, generic trend commentary,
+    unsupported prediction, old background knowledge or a rewrite of a major event.
+  fresh_concrete_anchor_required: true
+  accepted_anchor_types:
     - specific_company_action
     - product_launch_or_experiment
     - research_paper_or_dataset
     - startup_funding_or_hiring_shift
     - developer_tool_or_open_source_adoption
     - onchain_metric_or_usage_change
-    - niche_industry_media_event
+    - niche_industry_event
     - social_or_community_signal
     - regulatory_pilot_or_local_policy_test
     - supply_chain_or_procurement_anomaly
     - patent_clinical_trial_prototype_or_pilot
     - fashion_or_style_microtrend_signal
     - brand_merchandising_or_assortment_shift
-  preferred_properties:
-    - not_yet_mainstream_headline
-    - cross_domain_amplification_potential
-    - observable_next_step_metric
-    - asymmetric_upside_or_structural_change_potential
-    - early_stage_uncertainty_explicitly_disclosed
+  required_properties:
+    - today_material_delta
+    - source_and_time
+    - candidate_type
+    - formation_level
+    - why_niche_or_early
+    - why_it_could_scale
+    - uncertainty
+    - what_would_confirm
+    - what_would_invalidate
+    - cannot_conclude
+    - next_verification
 
 candidate_taxonomy:
   required: true
+  allow_multiple_types: true
   candidate_type:
     new_domain:
       label: 新領域
-      definition: >
-        A new or newly important market / technology / consumer / regulatory arena is emerging.
-        Example: a new market category, new asset class, new retail format, new fashion channel,
-        new consumer occasion, or new institutional activity space.
+      definition: A newly important market, technology, consumer, regulatory or institutional arena.
     new_application:
       label: 新應用
-      definition: >
-        Existing technology, product, platform, capital, retail format or consumer behavior is being
-        applied to a new workflow, scene, product category, store format, fashion use case or business process.
+      definition: Existing technology, product, platform or behavior applied to a new workflow or scene.
     new_concept:
       label: 新概念
-      definition: >
-        A new narrative, framing, vocabulary, design language, consumption logic, operating model,
-        fashion/style concept or investment thesis is appearing before widespread adoption.
+      definition: A new framing, vocabulary, design language, operating model or consumption logic.
     new_trend:
       label: 新趨勢
-      definition: >
-        Multiple signals are starting to point in the same direction across companies, markets,
-        consumers, sources, social channels, funding, product launches or data.
-  allow_multiple_types: true
-  output_rule: >
-    Each candidate must include candidate_type. Multiple types are allowed when appropriate,
-    e.g. 新應用 + 新趨勢, or 新概念 + 新領域.
+      definition: Multiple independent adoption or behavior signals begin pointing in one direction.
 
 formation_level:
   required: true
@@ -85,82 +77,42 @@ formation_level:
         - limited_reporting
         - early_discussion_or_experiment
         - evidence_low_to_medium
-      output_note: "只能列候選，不得寫成趨勢已形成。"
+      cannot_claim: trend_has_formed
     topic_formation:
       label: 話題形成
       criteria:
         - multiple_reports_or_social_discussions
-        - repeated_mentions_across_sources
-        - still_more_talk_than_application
-        - evidence_medium_or_mixed
-      output_note: "若很多報導或討論都指向同一現象，註明為話題形成。"
+        - vocabulary_or_narrative_spreading
+        - more_talk_than_application
+      cannot_claim: broad_real_adoption
     trend_formation:
       label: 趨勢形成
       criteria:
-        - multiple_companies_or_regions_start_applying
-        - product_launches_or_pilots_are_repeated
-        - funding_hiring_supply_chain_or_usage_data_start_to_align
-        - evidence_medium_to_high
-      output_note: "若很多開始應用、試點、投資、招聘或數據同步出現，註明為趨勢形成。"
+        - multiple_companies_regions_or_categories_applying
+        - repeated_pilots_or_product_launches
+        - funding_hiring_usage_or_supply_chain_data_align
+      cannot_claim: mature_or_universal_adoption
     mainstreaming:
       label: 主流化中
       criteria:
-        - covered_by_major_media_and_industry_media
-        - clear_commercialization_or_policy_adoption
+        - broad_commercial_or_policy_adoption
         - repeated_real_world_usage
         - measurable_data_available
-      output_note: "若已主流化，應考慮升級為大型訊號，而不是保留為小眾候選。"
+      action: consider_major_lane
   escalation_rule: >
-    A candidate can move from 弱訊號 → 話題形成 → 趨勢形成 → 大型訊號.
-    Many reports alone usually indicate 話題形成. Many actual applications, pilots,
-    company actions, investment, hiring, usage or supply-chain changes indicate 趨勢形成.
+    Many articles usually mean topic formation. Repeated applications, company actions, hiring,
+    usage or supply-chain evidence support trend formation. Broad measurable adoption may move the
+    event into the major lane, but the same event cannot occupy both lanes in one report.
 
 invalid_candidates:
   - generic_trend_statement_without_event
   - model_opinion_without_source
-  - mainstream_major_signal_rephrased_as_candidate
-  - old_background_concept_without_today_new_information
-  - Taiwan_implication_without_Taiwan_event
+  - mainstream_major_event_rephrased
+  - old_background_without_today_material_delta
+  - Taiwan_implication_without_Taiwan_direct_evidence
   - unsupported_prediction
-  - vague_statement_such_as_regulation_remains_a_variable
-
-required_candidate_fields:
-  - id
-  - candidate_signal
-  - candidate_type
-  - formation_level
-  - concrete_anchor
-  - today_new_information
-  - source_and_time
-  - why_niche_or_early
-  - why_it_could_scale
-  - evidence_level
-  - historical_duplication_status
-  - uncertainty
-  - cannot_conclude
-  - next_verification
-  - Taiwan_news_or_mapping_when_relevant
-
-formation_evidence_rules:
-  topic_formation:
-    must_note_when:
-      - many_reports_related
-      - repeated_media_or_social_mentions
-      - narrative_or_keyword_is_spreading
-    cannot_claim:
-      - real_adoption_is_broad
-      - trend_has_formed
-      - business_impact_is_confirmed
-  trend_formation:
-    must_note_when:
-      - many_applications_or_pilots
-      - repeated_company_actions
-      - funding_hiring_usage_or_supply_chain_data_aligns
-      - multi_region_or_multi_category_development
-    cannot_claim:
-      - mature_market_without_hard_data
-      - universal_adoption
-      - profitability_or_roi_without_evidence
+  - vague_regulation_or_market_commentary
+  - same_event_already_selected_in_major_lane
 
 source_expansion:
   required_source_types:
@@ -177,30 +129,38 @@ source_expansion:
     - fashion_media_and_style_platforms
     - brand_official_channels
     - runway_trend_reports_and_retail_assortment_sources
-  rule: >
-    Mainstream wires alone are insufficient for niche-candidate completion.
-    Candidate search must expand beyond Reuters/AP-style headline coverage.
+  rule: Mainstream wires alone are insufficient for potential-signal discovery.
 
 retry_rule:
-  when_candidate_quota_not_met:
-    - check_fixed_niche_sources
-    - check_non_English_and_regional_sources
-    - check_research_and_product_sources
-    - check_social_first_sources_when_required
-    - check_fashion_style_brand_and_retail_assortment_sources_when_relevant
-    - run_cross_domain_trigger_search
-    - run_external_discovery
-    - record_remaining_gap
+  trigger_when:
+    - potential_lane_below_slot_cap_due_to_low_novelty
+    - potential_coverage_cell_empty_or_stale
+    - source_role_or_region_gap_material
+  paths:
+    - fixed_niche_sources
+    - non_English_and_regional_sources
+    - research_and_product_sources
+    - developer_and_open_source_sources
+    - social_first_sources_when_required
+    - hiring_procurement_patent_and_clinical_sources
+    - fashion_style_brand_and_assortment_sources
+    - onchain_and_market_microstructure_data
+    - external_discovery
+  after_retry:
+    - keep_only_qualified_items
+    - record_retry_paths
+    - disclose_remaining_gap
   no_fabrication: true
 
 quality_gate:
-  - candidate_count_equals_major_target_or_gap_disclosed
-  - each_candidate_has_concrete_anchor
-  - each_candidate_has_candidate_type
-  - each_candidate_has_formation_level
-  - each_candidate_explains_why_niche_or_early
-  - each_candidate_explains_why_it_could_scale
-  - each_candidate_states_cannot_conclude
-  - each_candidate_has_next_verification
-  - topic_formation_vs_trend_formation_distinguished
-  - mainstream_headline_rephrasing_rejected
+  - event_not_in_major_lane
+  - fresh_concrete_anchor_present
+  - today_material_delta_present
+  - candidate_type_present
+  - formation_level_present
+  - source_and_evidence_trace_present
+  - why_early_and_scale_path_present
+  - confirmation_and_invalidation_conditions_present
+  - cannot_conclude_and_next_verification_present
+  - topic_vs_trend_formation_distinguished
+  - low_novelty_rephrasing_rejected

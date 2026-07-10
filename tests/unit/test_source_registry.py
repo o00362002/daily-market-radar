@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 class SourceRegistryTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.registry = SourceRegistry.from_file(ROOT / "config/source_registry.yaml")
+        self.registry = SourceRegistry.from_file(ROOT / "config/source_registry.json")
 
     def test_registry_requires_unique_source_and_canonical_urls(self) -> None:
         self.registry.validate()
@@ -28,10 +28,15 @@ class SourceRegistryTests(unittest.TestCase):
         expected = (ROOT / "FRESHRSS_SEEDS.opml").read_text(encoding="utf-8")
         self.assertEqual(self.registry.to_opml(), expected)
 
-    def test_disabled_sources_are_not_exported_to_opml(self) -> None:
+    def test_non_feed_sources_do_not_change_opml_projection(self) -> None:
         opml = self.registry.to_opml()
-        self.assertNotIn("Anthropic News Web Watch", opml)
+        self.assertNotIn("Anthropic News", opml)
+        self.assertNotIn("金融監督管理委員會", opml)
         self.assertIn("OpenAI News RSS", opml)
+
+    def test_taiwan_and_niche_sources_are_registered(self) -> None:
+        for source_id in ("twse", "fsc_tw", "dgbas_tw", "vogue_taiwan", "cryptocity_tw", "blocktrend_tw"):
+            self.assertEqual(self.registry.get(source_id).macro_region, "Taiwan")
 
 
 if __name__ == "__main__":

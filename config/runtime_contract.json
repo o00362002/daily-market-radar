@@ -1,0 +1,76 @@
+{
+  "version": "2.0",
+  "report_domains": [
+    "global_markets_macro",
+    "ai_agents_applications",
+    "crypto_rwa_agent_payments",
+    "retail_consumer_fashion",
+    "science_technology_industry",
+    "labor_demographics_consumption_pressure"
+  ],
+  "domain_aliases": {
+    "policy_geopolitics": "global_markets_macro"
+  },
+  "profiles": {
+    "daily_push": {
+      "major_slot_cap_per_domain": 3,
+      "potential_slot_cap_per_domain": 3,
+      "slot_caps_are_completeness_proof": false
+    },
+    "full": {
+      "major_slot_cap_per_domain": null,
+      "potential_slot_cap_per_domain": null,
+      "slot_caps_are_completeness_proof": false
+    }
+  },
+  "completion_requires": [
+    "source_health",
+    "run_budget",
+    "coverage_cells",
+    "evidence_trace",
+    "fresh_delta_check",
+    "primary_domain_dedup",
+    "rejection_counters",
+    "retry_audit",
+    "taiwan_direct_evidence_audit",
+    "retail_fixed_matrix",
+    "crypto_fixed_matrix",
+    "structural_trend_indicators",
+    "report_contract_validation",
+    "post_run_backtest"
+  ],
+  "structural_indicator_ids": [
+    "k_shaped_ai_productivity_economy",
+    "ai_bubble_overinvestment",
+    "brand_market_polarization_and_true_vs_fake_segmentation"
+  ],
+  "retail_matrix_keys": [
+    "cost_pressure",
+    "channel_offline_department_store_mall_street",
+    "channel_online_marketplace_social_commerce",
+    "product_fashion_style_assortment_material_fit_category",
+    "inventory_markdown_mid_price_pressure",
+    "membership_crm_loyalty_retail_media",
+    "social_commerce_content_discovery_ai_referral",
+    "true_vs_fake_segmentation",
+    "taiwan_retail_commercial_district_department_store_brand"
+  ],
+  "crypto_matrix_keys": [
+    "btc_eth_sol_market_structure",
+    "etf_flows",
+    "stablecoin_supply_and_dry_powder",
+    "rwa_tokenized_assets",
+    "perp_dex_volume_oi_funding",
+    "tvl_fees_revenue",
+    "regulation_policy",
+    "taiwan_crypto_fixed_sources"
+  ],
+  "required_backtest_counters": [
+    "duplicate_rejection_count",
+    "field_overlap_rejection_count",
+    "niche_low_novelty_rejection_count",
+    "candidate_retry_paths_used",
+    "taiwan_qualified_item_count_after_audit",
+    "taiwan_direct_sources_checked"
+  ]
+}

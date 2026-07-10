@@ -2,44 +2,48 @@
 
 ## Preserved
 
-- `brain-core` child-mount files and checks remain active.
-- Historical reports, backtests, missed cases, and frozen history remain in place.
-- Existing source-library seed files remain as compatibility references.
+- `brain-core` child-mount governance remains active.
+- Historical reports, backtests, missed cases and frozen history remain evidence.
+- Legacy source files under `sources/` remain compatibility inputs until regenerated.
 
-## Archived / Frozen
+## Frozen v1 behavior
 
-- Fixed-count completion language is frozen as v1 behavior.
-- v1 source registry fragments are no longer canonical.
-- v1 Markdown templates remain available but now point to slot caps and coverage
-  gates rather than fixed-count completeness.
+- Fixed-count completion rules such as `3+3`, `5+5`, `48-signal` and `60-signal` are historical only.
+- Markdown templates no longer define machine completeness.
+- Split source identity across media, official/data and channel files is no longer canonical.
 
 See `archive/v1-spec/README.md`.
 
-## Replaced
+## Replaced by v2
 
-- `config/source_registry.yaml` replaces split source identity across media,
-  official/data, and channel feed files.
-- `FRESHRSS_SEEDS.opml` is treated as a generated projection.
-- `src/radar/` provides deterministic source validation, OPML drift checking,
-  URL safety, dedup/event clustering, coverage gaps, report contracts, and fixture
-  replay.
+- `config/runtime_contract.json` defines canonical report domains, profiles, slot caps, matrices and completion requirements.
+- `config/source_registry.json` defines source identity and adapters.
+- `FRESHRSS_SEEDS.opml` is a generated projection.
+- `src/radar/` provides deterministic source validation, URL normalization, de-duplication, event clustering, lane separation, coverage gaps, report planning and contract validation.
+- `schemas/report.schema.json` and the Python validator enforce report structure.
 - `make validate` is the local validation entrypoint.
 
-## Not Complete Yet
+## Added in contract-sync repair
 
-- Live RSS/http ingestion, SQLAlchemy/Alembic, PostgreSQL/pgvector, APScheduler,
-  and provider integrations are scaffolded but not production connected.
-- `pytest`, `ruff`, and `mypy` are declared in `pyproject.toml`; this local run
-  used standard-library `unittest` because those tools were not installed in the
-  provided environment.
-- Docker image tags in `.env.example` must be validated by the owner before
-  production use.
-- Existing legacy source files have not all been regenerated from the canonical
-  registry.
+- Six canonical report domains with policy/geopolitics mapped into global markets/macro.
+- Major and potential lanes with independent importance, potential and confidence scores.
+- Retail, Crypto and Structural Trend panels in the executable report contract.
+- Expanded Taiwan, official, research and niche source registry.
+- Standard-library live RSS/Atom ingestion.
+- Optional SQLite persistence for run records, report payloads and coverage gaps.
+- Runtime-v2 sync-matrix edges.
 
-## External Credential Action
+## Still incomplete
 
-`infra/rss-stack/.env` was removed from Git tracking and `.gitignore` now blocks
-future local env files. If any value from that file was ever used outside local
-testing, the owner must rotate it in the external service. This migration does not
-read or operate external credentials.
+- Web, API, social and FreshRSS adapters.
+- External discovery providers.
+- Historical event persistence and material-delta comparison against prior runs.
+- Semantic scoring, counterevidence extraction and structural-indicator evaluators.
+- Production scheduler, PostgreSQL/pgvector and credential management.
+- Regeneration of every legacy source projection from the canonical registry.
+
+A `live-rss` run is real network collection for RSS/Atom adapters, but it remains partial whenever other required adapter families or coverage cells are unexecuted.
+
+## External credential action
+
+`infra/rss-stack/.env` remains outside Git. Any credential that was previously used externally must be rotated by the owner; this migration does not read or operate external credentials.

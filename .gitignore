@@ -12,3 +12,8 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+# Local radar runtime data
+data/*.sqlite
+data/*.sqlite3
+data/*.db

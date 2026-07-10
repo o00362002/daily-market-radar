@@ -1,9 +1,10 @@
-version: 0.1
-last_updated: 2026-07-04
-status: active_draft
+version: 2.0
+last_updated: 2026-07-10
+status: active
 purpose: >
-  Source-first routing rules for Daily Push Brief, Full Daily Radar, and News Search Output.
-  This config makes fixed source-library checks mandatory before broad keyword fallback.
+  Semantic source-routing policy for radar collection. Source identity and adapters are canonical
+  in config/source_registry.json; this file defines ordering, fallback, direct-channel triggers,
+  Taiwan overlays and coverage-audit behavior.
 
 applies_to:
   - AGENT_RADAR_REPORT
@@ -11,325 +12,210 @@ applies_to:
   - AGENT_NEWS_SEARCH
 
 required_files:
+  - config/runtime_contract.json
+  - config/source_registry.json
   - SOURCE_LIBRARY_SPEC.md
-  - sources/key_media_library.yml
-  - sources/official_and_data_sources.yml
-  - configs/source_strategy.md
+  - configs/query_recipes.yml
   - configs/news_freshness_and_taiwan_news.yml
 
 source_first_rule:
-  summary: >
-    Before generic web search, load relevant source-library files and check priority sources
-    for the requested domain, region, and language.
   order:
-    - identify_route_and_domain
-    - load_source_routing_rules
-    - load_relevant_source_library
-    - collect_priority_sources
-    - classify_source_hits
-    - run_source_scoped_keyword_filter
-    - cross_check_with_official_or_data_sources
-    - run_generic_keyword_fallback_if_needed
-    - run_external_discovery_if_coverage_gap_remains
-    - output_or_record_coverage_audit
+    - identify_route_profile_and_canonical_domain
+    - load_runtime_contract
+    - validate_canonical_source_registry
+    - check_source_and_adapter_health
+    - collect_top_down_sources
+    - collect_bottom_up_sources
+    - run_fixed_query_recipes
+    - cross_check_high_risk_claims
+    - build_coverage_cells
+    - run_generic_keyword_fallback_for_gaps_only
+    - run_external_discovery_for_material_gaps
+    - resolve_discovery_to_original_evidence
+    - output_coverage_audit_and_gap_cards
 
 keyword_search_role:
   allowed:
     - source_scoped_filtering
     - event_expansion
-    - taiwan_news_gap_retry
+    - taiwan_direct_news_retry
     - historical_duplicate_check
     - new_source_discovery
-    - fallback_when_priority_sources_are_empty
+    - failed_coverage_cell_retry
   disallowed:
-    - replacing_priority_source_checks
-    - replacing_taiwan_news_with_taiwan_implications
-    - using_search_results_without_source_type_labels
-    - marking_coverage_complete_without_source_audit
+    - replacing_registry_source_checks
+    - replacing_direct_channel_checks
+    - replacing_taiwan_news_with_implications
+    - marking_coverage_complete_without_source_health
+    - treating_search_result_snippets_as_final_evidence
 
 fetch_priority:
   - official_api
   - official_rss_or_atom
   - official_newsroom_or_release_page
   - verified_media_rss_or_section_page
+  - verified_data_provider
+  - required_direct_social_or_channel_check
   - trusted_news_database_or_aggregator
-  - official_social_channel_or_public_post
+  - external_discovery_provider
   - generic_web_search
-  - social_or_community_candidate
+  - unverified_community_candidate
 
-per_domain_minimum_source_mix:
-  daily_push_brief:
-    global_media_minimum: 3
-    taiwan_media_minimum: 1
-    official_or_data_source_minimum: 1
-    keyword_fallback_required_when_hits_below_target: true
-  full_daily_radar:
-    global_media_minimum: 5
-    taiwan_media_minimum: 2
-    official_or_data_source_minimum: 2
-    keyword_fallback_required_when_hits_below_target: true
-    external_discovery_required_when_5_plus_3_not_met: true
-  news_search_output:
-    global_media_minimum: 2
-    taiwan_media_minimum_when_relevant: 1
-    official_or_data_source_minimum_when_high_risk: 1
-    keyword_fallback_required_when_hits_below_target: true
+coverage_gate:
+  rule: >
+    No fixed source count or news count proves completeness. Completeness is determined by
+    coverage cells, source health, run budget, evidence trace, retry audit and report-contract validation.
+  cells:
+    - report_domain
+    - macro_region
+    - language
+    - source_role
+    - channel
+    - time_window
+  failure_statuses:
+    - empty
+    - silent_zero
+    - stale
+    - failing
+    - policy_blocked
+    - inaccessible
+  on_failure:
+    - run_retry_when_budget_allows
+    - create_gap_card
+    - mark_run_partial_when_material
+    - never_translate_gap_to_no_news
 
 coverage_audit_fields:
   required:
-    - source_library_checked
-    - priority_sources_checked
+    - registry_checked
+    - source_health_checked
+    - top_down_sources_checked
+    - bottom_up_sources_checked
     - source_hits
     - source_misses
+    - adapter_failures
     - keyword_fallback_used
-    - official_or_data_crosscheck_used
-    - taiwan_sources_checked_when_relevant
-    - external_discovery_used_when_needed
+    - external_discovery_used
+    - original_source_resolution_status
+    - taiwan_direct_sources_checked
     - social_channels_checked_when_required
-    - remaining_source_gap
-  allowed_values:
-    source_library_checked: [yes, partial, no]
-    keyword_fallback_used: [yes, no]
-    official_or_data_crosscheck_used: [yes, partial, no, not_required]
-    social_channels_checked_when_required: [yes, partial, no, not_required]
-    remaining_source_gap: [none, partial, material]
+    - remaining_coverage_gaps
 
 source_health_rules:
-  track_after_execution:
+  track:
     - last_success_at
+    - last_failure_at
     - last_empty_at
-    - fail_count
+    - failure_count
+    - freshness_age
     - hit_rate_by_domain
     - duplicate_rate
     - false_positive_notes
-    - usage_policy_notes
-    - social_channel_access_status
-  storage_candidates:  # path-ok；規劃中尚未建立
-    - memory/source_health_log.json  # path-ok
-    - memory/topic_coverage_log.json  # path-ok
-    - reports/backtests/
-  escalation:
-    demote_source_when:
-      - repeated_fetch_failure
-      - repeated_low_quality_hits
-      - unclear_usage_policy_for_automation
-      - content_farm_or_low_originality_pattern
-    promote_source_when:
-      - repeated_early_signal_hits
-      - high_original_reporting_rate
-      - strong_taiwan_direct_news_coverage
-      - reliable_official_or_data_trace
-
-completion_gate_patch:
-  daily_push_brief:
-    must_include_or_internally_satisfy:
-      - source_library_checked
-      - six_domains_checked_against_source_library
-      - keyword_fallback_disclosed_when_used
-      - material_source_gap_disclosed
-      - social_channels_checked_when_required
-  full_daily_radar:
-    must_include:
-      - source_library_coverage_matrix
-      - priority_source_check_summary
-      - source_gap_and_retry_notes
-      - external_discovery_note_when_5_plus_3_not_met
-      - social_channel_check_summary_when_required
-  news_search_output:
-    must_include_or_disclose:
-      - relevant_source_library_checked
-      - checked_sources_or_source_types
-      - checked_keywords
-      - remaining_gap
+    - policy_or_access_status
+  actions:
+    - promote
+    - demote
+    - disable
+    - discovery_only
+    - require_runtime_reverification
 
 hard_boundaries:
-  - Indicator status and synthesis do not count as news.
-  - Taiwan implications do not count as Taiwan news.
-  - Social signals are candidates only unless verified by stronger source types.
-  - Paid or restricted sources can be listed as watchlist items, but automated use requires policy check.
-  - Generic web search is fallback, not the primary evidence base.
-  - Instagram, Threads, Facebook, LINE, and other social posts may not be indexed by generic search; when a source is defined as social-first, direct channel checks or user-provided links/screenshots are required.
+  - Taiwan implication does not count as Taiwan direct evidence.
+  - Indicator status and synthesis do not count as news events.
+  - Social signals remain low or medium-low evidence until verified.
+  - RSSHub and FreshRSS are collection adapters, not evidence stores.
+  - External discovery results must resolve to original evidence.
+  - Generic search does not count as a direct social-channel check.
+  - Unavailable or blocked sources create coverage gaps, not no-news claims.
 
 mandatory_source_overlays:
   taiwan_crypto_legislative_trigger:
     applies_when:
       - domain_is_crypto_rwa_agent_payments
-      - taiwan_news_required_or_taiwan_mapping_relevant
-      - any_taiwan_crypto_policy_or_regulation_term_detected
-      - crypto_segment_has_taiwan_gap
-    rule: >
-      Taiwan crypto policy coverage must check legislative and regulator sources before
-      declaring Taiwan crypto news insufficient. Crypto media checks are not enough.
-      If a law name, bill name, VASP, virtual asset, stablecoin, exchange regulation,
-      AML, or third-party payment term appears, trigger official legislative search.
+      - taiwan_crypto_policy_term_detected
+      - taiwan_crypto_coverage_gap_exists
     priority: highest_for_taiwan_crypto_policy
-    required_official_sources:
-      - source_id: legislative_yuan
-        name: 立法院
-        source_type: legislature_official
-        evidence_default: high
-        fetch_method: official_site_or_bill_system_search
-        use_for: [third_reading, bill_progress, committee_review, legislative_agenda, floor_vote]
-      - source_id: legislative_yuan_bills
-        name: 立法院議案系統
-        source_type: legislature_bill_database
-        evidence_default: high
-        fetch_method: bill_system_search
-        use_for: [bill_text, bill_status, proposer, third_reading_status]
-      - source_id: fsc_tw
-        name: 金融監督管理委員會
-        source_type: regulator_official
-        evidence_default: high
-        fetch_method: official_newsroom_or_site_search
-        use_for: [regulator_response, vasp_rules, registration, sublaw, enforcement]
-      - source_id: executive_yuan_tw
-        name: 行政院
-        source_type: executive_official
-        evidence_default: high
-        fetch_method: official_newsroom_or_site_search
-        use_for: [cabinet_bill, policy_context, promulgation_followup]
-      - source_id: president_office_tw
-        name: 總統府
-        source_type: government_official
-        evidence_default: high
-        fetch_method: official_newsroom_or_site_search
-        use_for: [promulgation]
-      - source_id: laws_moj_tw
-        name: 全國法規資料庫
-        source_type: law_database
-        evidence_default: high
-        fetch_method: law_database_search
-        use_for: [promulgated_law_text, effective_date, amended_articles]
-      - source_id: cna_tw_policy
-        name: 中央社政治 / 財經
-        source_type: news_agency
-        evidence_default: high
-        fetch_method: site_or_news_search
-        use_for: [legislative_news, policy_summary]
+    required_source_ids:
+      - legislative_yuan
+      - fsc_tw
+      - executive_yuan_tw
+      - laws_moj_tw
+      - cna_tw
+    additional_sources_to_register_when_verified:
+      - legislative_yuan_bills
+      - president_office_tw
     hard_keywords:
       - 虛擬資產服務法
       - 虛擬資產專法
-      - 虛擬資產服務
-      - 虛擬資產服務業
       - VASP
       - 三讀
-      - 三讀通過
-      - 立法院
-      - 立法院議案系統
       - 金管會
       - 交易所監管
-      - 幣商
       - 穩定幣
       - 代幣化
       - 反洗錢
-      - 洗錢防制法
       - 第三方支付
       - 登記
-      - 登錄
       - 施行日期
       - 子法
     audit_requirement: >
-      If Taiwan crypto news is marked insufficient, the report must state whether
-      the legislative trigger was executed. If not executed, write:
-      Taiwan crypto legislative trigger not checked.
-    reporting_rule: >
-      If a Taiwan crypto law or bill passes third reading, classify it as a Major Signal,
-      not a candidate. Distinguish third_reading_passed, presidential_promulgation,
-      effective_date, and sublaw_stage.
+      If Taiwan crypto policy coverage is insufficient, state whether this trigger ran,
+      which official sources were checked and which were unavailable.
+    classification_rule: >
+      Third-reading passage is a major event. Keep third reading, promulgation, effective date
+      and subordinate-rule stages as distinct event deltas.
 
-  taiwan_crypto_sources:
+  taiwan_crypto_fixed_sources:
     applies_when:
       - domain_is_crypto_rwa_agent_payments
-      - taiwan_news_required_or_taiwan_mapping_relevant
-      - crypto_segment_has_taiwan_gap
-    rule: >
-      Taiwan crypto coverage must not rely only on global crypto media or generic search.
-      These Taiwan-focused crypto sources must be checked as fixed-source probes before
-      declaring Taiwan crypto news insufficient. For policy/law events, these sources are
-      secondary and must be cross-checked with the legislative trigger above.
-    sources:
+      - taiwan_news_relevant
+      - taiwan_crypto_coverage_gap_exists
+    registry_source_ids:
+      - cryptocity_tw
+      - blocktrend_tw
+    social_first_probes_pending_verified_canonical_urls:
       - source_id: da_trader_alliance_tw
         name: DA 交易者聯盟
-        source_type: taiwan_crypto_community_media
+        direct_channel_required: true
         evidence_default: medium_low
-        use_for: [trader_sentiment, taiwan_crypto_discussion, market_narrative, education, fast_policy_repost]
-        verification_rule: cross_check_with_official_or_data_sources_for_major_claims
-        fetch_method: fixed_source_direct_check
-        channel_priority: [instagram, facebook_or_threads_if_available, website_or_linktree_if_available, generic_search_fallback]
-        social_check_required: true
-        notes: >
-          DA 交易者聯盟 may publish timely crypto/regulation posts on Instagram that are not indexed by generic search.
-          When Taiwan crypto policy is in scope, check the official IG/channel directly or mark social_channel_unchecked.
       - source_id: bonnie_blockchain_tw
         name: 邦妮區塊鏈
-        source_type: taiwan_crypto_media_or_education
+        direct_channel_required: true
         evidence_default: medium_low
-        use_for: [taiwan_crypto_education, market_events, exchange_discussion, community_topics]
-        verification_rule: cross_check_with_official_or_data_sources_for_major_claims
-        fetch_method: fixed_source_direct_check
-        channel_priority: [instagram_or_youtube_if_available, website_or_linktree_if_available, generic_search_fallback]
-        social_check_required: true
-      - source_id: cryptocity_tw
-        name: 加密城市
-        source_type: taiwan_crypto_media
-        evidence_default: medium
-        use_for: [crypto_news, taiwan_crypto_market, regulation, exchanges, projects]
-        verification_rule: cross_check_with_fsc_exchange_project_or_company_official_sources
-        fetch_method: fixed_source_direct_check
-      - source_id: blocktrend_tw
-        name: 區塊勢
-        source_type: taiwan_crypto_analysis_media
-        evidence_default: medium
-        use_for: [web3_trends, policy_context, crypto_business_models, structural_analysis]
-        verification_rule: treat_analysis_as_context_unless_original_sources_are_cited
-        fetch_method: fixed_source_direct_check
-    audit_requirement: >
-      If Taiwan crypto news is marked insufficient, coverage audit must say whether these
-      four sources were checked. If not checked, write: Taiwan crypto fixed sources not checked.
-      If DA 交易者聯盟 or 邦妮區塊鏈 are checked only by generic web search, write:
-      Taiwan crypto social channels not directly checked.
-
-  taiwan_crypto_social_channel_trigger:
-    applies_when:
-      - domain_is_crypto_rwa_agent_payments
-      - source_is_social_first_or_user_named_social_source
-      - taiwan_news_required_or_taiwan_mapping_relevant
     rule: >
-      If a Taiwan crypto source is known or user-specified to publish on Instagram, Facebook,
-      Threads, LINE, YouTube, or other social channels, generic web search does not count as a
-      complete source check. Direct channel access, a post URL, screenshot, or explicit
-      inaccessible-status note is required.
-    required_output_when_unchecked: >
-      Social source not checked directly; generic search may miss Instagram/Facebook/Threads/LINE posts.
-    evidence_rule: >
-      Social posts are usually medium_low evidence and must be verified with official or data sources
-      for major policy, law, market, or investment claims.
+      CryptoCity and Blocktrend use canonical registry identities. DA and Bonnie remain mandatory
+      semantic probes but must not be added to the canonical registry until exact official public
+      channel URLs are verified. Generic search alone does not count as a direct check.
+    audit_requirement: >
+      Report checked, unavailable and unverified fixed probes separately. Do not claim no Taiwan
+      crypto news when a required direct channel was not checked.
 
   taiwan_brand_management_sources:
     applies_when:
-      - domain_is_retail_consumer_social_fashion
+      - domain_is_retail_consumer_fashion
       - taiwan_brand_or_management_context_relevant
-      - brand_sources_required
+      - official_brand_or_mall_sources_insufficient
+    required_probes:
+      - business_weekly_tw_brand
+      - hbr_tw_brand_management
     rule: >
-      Taiwan brand coverage must include management and business media sources when official
-      brand, mall, or department store sources are insufficient. These sources are not substitutes
-      for official brand announcements, but they are required probes for brand strategy,
-      consumer insight, retail cases, and management interpretation.
-    sources:
-      - source_id: business_weekly_tw_brand
-        name: 商業周刊 / Business Weekly Taiwan
-        source_type: taiwan_business_media
-        evidence_default: medium
-        use_for: [brand_strategy, retail_cases, consumer_trends, taiwan_business_context]
-        verification_rule: commentary_or_case_analysis_not_standalone_fact
-        fetch_method: fixed_source_direct_check
-      - source_id: hbr_tw_brand_management
-        name: HBR 哈佛商業評論繁體中文版
-        source_type: taiwan_management_media
-        evidence_default: medium
-        use_for: [brand_management, retail_strategy, ai_adoption, consumer_behavior, management_framework]
-        verification_rule: management_opinion_or_case_requires_original_data_for_high_evidence
-        fetch_method: fixed_source_direct_check
+      Management media are context and case-analysis probes, not substitutes for brand, mall,
+      department-store or official company evidence. Add them to the canonical registry only after
+      canonical URL and usage-policy verification.
     audit_requirement: >
-      If Retail / Brand Sources are marked insufficient, coverage audit must say whether
-      商業周刊 and HBR 哈佛商業評論 were checked as Taiwan brand-management probes.
+      When Taiwan retail/brand coverage remains insufficient, state whether these probes and the
+      currently registered Taiwan business/fashion sources were checked.
+
+  taiwan_retail_direct_sources:
+    applies_when:
+      - domain_is_retail_consumer_fashion
+    registered_source_ids:
+      - dgbas_tw
+      - moea_tw
+      - cna_tw
+      - economic_daily_tw
+      - commercial_times_tw
+      - vogue_taiwan
+    rule: >
+      These sources improve baseline Taiwan coverage but do not replace direct brand, department-store,
+      mall, LINE OA, Instagram or other channel-first checks when the event is channel-native.

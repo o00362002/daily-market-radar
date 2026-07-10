@@ -172,6 +172,9 @@ class ReportItem:
     counterevidence: list[str]
     uncertainties: list[str]
     next_watch: str
+    report_lane: str = "major"
+    candidate_type: str | None = None
+    formation_level: str | None = None
 
     @classmethod
     def fixture(cls, **kwargs: Any) -> "ReportItem":
@@ -198,6 +201,9 @@ class ReportItem:
             "counterevidence": [],
             "uncertainties": [],
             "next_watch": "Watch next update.",
+            "report_lane": "major",
+            "candidate_type": None,
+            "formation_level": None,
         }
         data.update(kwargs)
         return cls(**data)
@@ -212,6 +218,9 @@ class ReportItem:
             "event_id": self.event_id,
             "signal_id": self.signal_id,
             "primary_domain": self.primary_domain,
+            "report_lane": self.report_lane,
+            "candidate_type": self.candidate_type,
+            "formation_level": self.formation_level,
             "headline": self.headline,
             "first_seen_at": self.first_seen_at,
             "today_delta": self.today_delta,

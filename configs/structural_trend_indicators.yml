@@ -1,196 +1,140 @@
-version: 1.1
-last_updated: 2026-07-09
+version: 2.0
+last_updated: 2026-07-10
 status: active
+canonical_ids_source: config/runtime_contract.json
 purpose: >
-  Add long-term structural trend indicators that every Daily Push Brief and Full Daily Radar
-  should evaluate when relevant. These indicators track whether current news points toward
-  productivity gains being unevenly shared, AI bubble dynamics, and brand/retail polarization.
-  Brand polarization now includes the true segmentation vs fake segmentation thesis.
+  Define evidence inputs and counterevidence for the three cumulative structural direction meters.
+  These indicators are evaluated from report items and dedicated data checks; they are not single-day conclusions.
 
-applies_to:
-  - AGENT_DAILY_PUSH_BRIEF
-  - AGENT_RADAR_REPORT
-  - AGENT_NEWS_SEARCH
-
-required_output_block:
-  name: Structural Trend Indicator Panel
-  location: before Final / Post-brief Review panel
-  required_in_daily_push: true
-  required_in_full_radar: true
-  rule: >
-    The report must evaluate each structural thesis as: toward / against / mixed / insufficient.
-    Do not force a direction when evidence is weak. Cite supporting signal IDs and list missing indicators.
-
-structural_theses:
-  productivity_free_ride_k_shaped_economy:
+structural_indicators:
+  k_shaped_ai_productivity_economy:
     label: 生產力便車無法共享的 K 型經濟
     thesis: >
-      AI / automation raises productivity for capital owners, top firms, high-skill workers,
-      and distribution platforms, but the gains are not broadly shared with workers,
-      small businesses, middle-skill roles, or consumers. This produces a K-shaped economy.
+      AI and automation productivity gains accrue mainly to capital owners, dominant platforms,
+      large firms and high-skill workers while wages, entry-level jobs, SMEs and middle-income
+      consumers receive less benefit.
     direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
       - labor_productivity_up_but_real_wages_flat_or_down
       - corporate_margin_expansion_without_wage_growth
-      - layoffs_or_hiring_freeze_while_AI_capex_rises
+      - layoffs_or_hiring_freeze_while_ai_capex_rises
       - junior_or_middle_skill_jobs_decline
-      - AI_tooling_benefits_accrue_to_large_firms_first
+      - ai_adoption_and_productivity_gain_concentrated_in_large_firms
       - platform_take_rates_or_data_moats_expand
       - asset_prices_rise_faster_than_labor_income
-      - low_income_consumption_weakens_while_high_income_consumption_resilient
-      - automation_reduces_headcount_or_hours_without_price_sharing
+      - premium_and_value_consumption_resilient_while_middle_weakens
+      - automation_reduces_headcount_without_price_or_wage_sharing
     counter_indicators:
-      - real_wage_growth_broad_based
-      - SME_AI_adoption_improves_survival_or_margin
-      - consumer_prices_decline_from_productivity_gains
-      - hiring_broadens_in_AI_augmented_roles
+      - broad_based_real_wage_growth
+      - sme_ai_adoption_improves_margin_or_survival
+      - consumer_prices_fall_from_productivity_gains
+      - entry_level_and_ai_augmented_hiring_broadens
       - productivity_tools_become_cheap_and_widely_accessible
     evidence_to_seek:
-      - productivity_data
-      - real_wage_data
-      - margins_by_company_size
-      - layoff_and_hiring_data
+      - productivity_vs_real_wages
+      - labor_share_of_income
+      - margins_and_ai_adoption_by_firm_size
+      - entry_level_job_postings
       - small_business_surveys
-      - consumer_price_changes
-      - job_posting_skill_shift
-      - income_segment_consumption_data
+      - income_segment_consumption
+      - consumer_credit_stress
 
-  ai_bubble_trend:
-    label: AI 泡沫趨勢
+  ai_bubble_overinvestment:
+    label: AI 泡沫 / 過度投資趨勢
     thesis: >
-      AI investment, valuations, data-center capex, model spending, and related infrastructure
-      may be running ahead of monetization, cash flow, and durable productivity gains.
-      The bubble thesis strengthens when capital intensity rises faster than proven revenue,
-      and weakens when adoption, margins, and pricing power are validated.
+      AI valuations, infrastructure, data-center capex and financing may be running ahead of
+      durable revenue, cash flow, utilization and broad productivity outcomes.
     direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
-      - AI_capex_growth_faster_than_AI_revenue
+      - ai_capex_growth_faster_than_ai_revenue
       - data_center_debt_or_project_finance_rises
-      - GPU_or_memory_orders_pull_forward
-      - AI_stock_multiples_expand_despite_uncertain_cash_flow
-      - hyperscaler_depreciation_or_power_cost_pressure_rises
+      - gpu_hbm_or_power_orders_are_pulled_forward
+      - ai_equity_multiples_expand_without_cash_flow_visibility
+      - depreciation_power_or_cooling_cost_pressure_rises
       - model_price_competition_compresses_margins
-      - customers_report_unclear_ROI_or_pilot_fatigue
-      - AI_winner_trade_crowding_and_foreign_outflows
-      - regulators_or_central_banks_warn_about_AI_financial_stability
+      - pilot_fatigue_or_unclear_enterprise_roi
+      - ai_winner_trade_crowding
+      - central_bank_or_regulator_financial_stability_warning
     counter_indicators:
-      - AI_revenue_growth_matches_or_exceeds_capex
-      - clear_enterprise_ROI_and_retention
-      - operating_margin_expands_from_AI_products
-      - data_center_utilization_strong
-      - broad_customer_paid_adoption
-      - AI_capex_funded_by_operating_cash_flow_without_leverage_stress
+      - ai_revenue_growth_matches_or_exceeds_capex
+      - clear_enterprise_roi_retention_and_paid_adoption
+      - operating_margin_expands_from_ai_products
+      - data_center_utilization_remains_high
+      - capex_is_funded_by_operating_cash_flow_without_leverage_stress
     evidence_to_seek:
-      - hyperscaler_capex_and_AI_revenue
+      - hyperscaler_capex_and_ai_revenue
       - data_center_financing_terms
-      - GPU_HBM_memory_orders_and_inventory
-      - AI_stock_valuation_multiples
-      - enterprise_AI_ROI_surveys
-      - cloud_AI_usage_and_pricing
-      - central_bank_or_regulator_warnings
-      - ETF_and_factor_flow_data
+      - gpu_hbm_inventory_orders_and_cancellations
+      - power_contracts_and_utilization
+      - ai_equity_valuation_and_flow_data
+      - enterprise_roi_and_renewal_data
+      - inference_margin_and_pricing
 
-  brand_polarization_big_get_bigger_niche_survives_middle_shrinks_and_fake_segmentation:
+  brand_market_polarization_and_true_vs_fake_segmentation:
     label: 品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾
     thesis: >
-      Consumer brands and retail channels polarize. Large platforms and large brands gain scale,
-      data, traffic, bargaining power, retail-media power, AI tooling and structured catalog advantages;
-      small niche brands survive through strong identity, community, scarcity, creator-led demand,
-      local culture, subculture, or premium specialization; mid-market undifferentiated brands lose
-      pricing power, shelf space, traffic and margin. At the same time, AI and algorithms may create
-      fake segmentation: brands appear personalized through ads, prompts, recommendations, landing pages,
-      or micro-copy, but the underlying product, assortment, pricing, supply chain and community identity
-      remain generic. True segmentation means differentiated product, audience, channel, use case,
-      identity, merchandising and repeat behavior.
+      Large brands and platforms gain scale, data, traffic and structured-catalog advantages;
+      distinctive niche brands survive through identity and community; generic mid-market brands
+      lose pricing power. AI may create fake segmentation when only copy, ads or recommendations
+      change while product, assortment, channel and repeat behavior remain generic.
     direction_values: [toward, against, mixed, insufficient]
     supporting_indicators:
-      - large_platform_market_share_increases
-      - top_brands_gain_share_or_margin
+      - top_brands_or_platforms_gain_share_and_margin
       - mid_price_brands_discount_more_or_close_stores
-      - department_store_tenant_mix_shifts_to_luxury_value_experience_or_destination_tenants
-      - creator_or_niche_brands_gain_high_engagement_without_mass_distribution
-      - marketplace_rules_or_AI_search_favor_large_structured_catalogs
+      - tenant_mix_shifts_to_luxury_value_experience_or_destination_concepts
+      - distinctive_niche_brands_show_sell_through_or_repeat_strength
+      - ai_search_marketplaces_or_social_algorithms_concentrate_attention
       - private_label_or_ultra_low_price_pressure_mid_market
-      - premium_luxury_resilient_while_middle_weak
-      - small_distinctive_brands_sell_through_better_than_generic_middle
-      - AI_generated_personalized_ads_without_product_or_assortment_difference
-      - same_product_repackaged_as_many_micro_segments
-      - algorithmic_targeting_replaces_real_customer_understanding
-      - AI_search_or_social_recommendations_concentrate_attention_on_big_or_highly_distinctive_brands
-      - mid_market_brands_use_pseudo_personalization_but_discount_rate_stays_high
+      - premium_and_value_outperform_the_middle
+      - pseudo_personalization_rises_without_retention_or_full_price_sales
     counter_indicators:
-      - mid_market_brands_gain_share
-      - broad_based_consumer_recovery
-      - marketplaces_reduce_large_brand_advantage
-      - discovery_tools_help_small_brands_scale_affordably
-      - department_stores_add_more_middle_market_brands_successfully
-      - personalization_improves_repeat_rate_without_margin_or_identity_dilution
-      - brands_create_real_segmented_products_with_distinct_sell_through_and_loyalty
+      - mid_market_brands_regain_share_and_full_price_sell_through
+      - discovery_tools_reduce_customer_acquisition_cost_for_mid_sized_brands
+      - department_stores_successfully_expand_middle_market_tenants
+      - personalization_improves_repeat_rate_and_margin
+      - real_segmented_products_build_distinct_loyalty
     true_segmentation_indicators:
-      - distinct_product_design_or_material_or_fit_by_segment
+      - distinct_product_design_material_fit_or_category
       - distinct_use_case_or_occasion
       - clear_community_or_subculture_identity
-      - separate_assortment_or_merchandising_logic
+      - separate_assortment_merchandising_or_channel_logic
       - different_full_price_sell_through_by_segment
-      - repeat_purchase_or_membership_behavior_differs_by_segment
+      - repeat_purchase_or_membership_behavior_differs
       - brand_language_matches_product_and_customer_behavior
-      - channel_strategy_differs_by_segment
     fake_segmentation_indicators:
-      - same_product_with_AI_generated_copy_for_many_personas
-      - only_ads_prompts_or_landing_pages_change
-      - personalization_lifts_clicks_but_not_repeat_or_full_price_sell_through
-      - micro_segment_names_without_operational_or_product_difference
-      - high_CAC_and_high_discounting_despite_personalization
-      - AI_recommendation_creates_attention_but_not_retention
-      - brand_claims_niche_identity_but_assortment_is_generic
+      - same_product_with_ai_generated_copy_for_many_personas
+      - only_ads_prompts_recommendations_or_landing_pages_change
+      - click_lift_without_repeat_or_full_price_sell_through
+      - micro_segment_names_without_operational_difference
+      - high_cac_and_discounting_despite_personalization
+      - claimed_niche_identity_with_generic_assortment
     evidence_to_seek:
-      - brand_market_share_by_tier
-      - gross_margin_and_discount_rate_by_tier
-      - store_opening_closure_by_segment
-      - marketplace_search_visibility
-      - AI_recommendation_visibility
-      - social_engagement_to_sales_conversion
-      - department_store_tenant_mix
-      - sell_through_and_inventory_age_by_brand_type
-      - repeat_purchase_by_segment
-      - full_price_sell_through_by_segment
+      - market_share_margin_and_discount_rate_by_brand_tier
+      - store_opening_closure_and_tenant_mix
+      - ai_search_social_and_marketplace_visibility
+      - sell_through_inventory_age_and_repeat_by_brand_type
       - product_assortment_difference_by_segment
-      - CAC_and_retention_by_segment
+      - cac_retention_and_full_price_sales_by_segment
 
-output_schema:
-  fields:
-    - thesis_label
-    - current_direction
+output_contract:
+  required_fields:
+    - indicator_id
+    - direction
     - confidence
     - supporting_signal_ids
     - counter_signal_ids
     - missing_data
     - one_sentence_read
     - next_verification
-  confidence_values:
-    - high
-    - medium
-    - low
-    - insufficient
+  confidence_values: [high, medium, low, insufficient]
+  rule: >
+    All indicator IDs in config/runtime_contract.json must be present. If evidence is inadequate,
+    direction and confidence are insufficient; the indicator is not omitted.
 
 quality_gate:
-  - all_three_structural_theses_evaluated
+  - all_runtime_indicator_ids_evaluated
   - direction_not_forced_without_evidence
-  - supporting_signal_ids_or_gap_disclosed
-  - counter_indicators_considered
-  - true_vs_fake_segmentation_checked_inside_brand_polarization
-  - next_verification_listed
-
-next_run_hard_checks:
-  - run_source_audit_before_drafting
-  - reject_major_signal_without_fresh_delta_or_today_new_information
-  - reject_niche_candidate_without_fresh_concrete_anchor
-  - reject_niche_candidate_that_is_only_major_signal_rephrasing
-  - reject_old_background_concept_as_today_news
-  - do_not_replace_taiwan_news_with_taiwan_implication
-  - output_structural_trend_indicator_panel
-  - include_true_vs_fake_segmentation_check_under_brand_polarization
-  - disclose_taiwan_direct_source_gap_if_not_checked
-  - record_duplicate_rejection_count
-  - record_niche_low_novelty_rejection_count
-  - record_candidate_retry_paths_used
+  - supporting_and_counterevidence_considered
+  - missing_data_and_next_verification_present
+  - true_vs_fake_segmentation_evaluated_inside_brand_indicator
+  - single_event_does_not_create_multiple_independent_supporting_signals

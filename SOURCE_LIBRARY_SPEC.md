@@ -1,280 +1,170 @@
-# SOURCE_LIBRARY_SPEC
+# SOURCE_LIBRARY_SPEC v2
 
-本檔定義 `daily-market-radar` 的來源庫優先搜尋方法。
+This file explains the source-first method. Machine source identity lives in `config/source_registry.json`.
 
-Active order:
-
-```text
-Source Library first
-→ Query recipes second
-→ Verified feed stack third when relevant
-→ External discovery fourth when gaps remain
-→ Coverage audit before output
-```
-
----
-
-## 1. Decision summary
-
-每日市場雷達與指定主題新聞搜尋，不應只依賴即時關鍵字搜尋。
+## 1. Canonical model
 
 ```text
-1. 固定來源庫提高速度、穩定性、可追溯性與回測能力。
-2. 固定 query recipes 讓弱模型照抄執行，不依賴模型自行發明查詢。
-3. Feed stack 讓公開 channel-first 來源變成可重複檢查的 feed inbox。
-4. External discovery providers 只負責發現缺口，不取代原始來源驗證。
-5. 每日報告要能回答：已檢查哪些來源、feeds、routes、providers，以及剩下哪些缺口。
+one real-world source = one source_id
+RSS / Atom / API / web / RSSHub / social = adapters under the source
+FRESHRSS_SEEDS.opml = generated projection
+legacy sources/ files = compatibility inputs, not canonical identity
 ```
 
----
+Do not maintain the same source independently in several registries.
 
-## 2. Primary flow
+## 2. Collection order
 
 ```text
-1. Read task route and topic scope.
-2. Load configs/source_routing_rules.yml.
-3. Load configs/query_recipes.yml and relevant domain-pack query_recipes.
-4. Load SOURCE_LIBRARY_SPEC.md and relevant sources/ files.
-5. Fetch priority sources by domain and region.
-6. If feed stack is relevant, load configs/feed_discovery_stack.yml and sources/channel_feed_sources.json.
-7. Check verified RSSHub routes, direct RSS feeds, and FreshRSS categories when available.
-8. Search/filter inside collected source and feed items.
-9. Use keyword search only as fallback, enrichment, or discovery.
-10. Use GDELT / Media Cloud only when source-library and feed-stack coverage still leave a material gap.
-11. Cross-check important claims with official / data / trusted media sources.
-12. Output source/feed/discovery coverage audit.
+1. Load route and canonical report domain.
+2. Load config/runtime_contract.json.
+3. Validate config/source_registry.json.
+4. Check source and adapter health.
+5. Ingest top-down official/data/company/national sources.
+6. Ingest bottom-up research, local, startup, developer, social and niche sources.
+7. Use fixed query recipes to filter or expand collected items.
+8. Use external discovery only for failed coverage cells.
+9. Resolve discovery results to original evidence.
+10. Normalize, de-duplicate and event-cluster.
+11. Emit coverage audit and explicit gaps.
 ```
 
-Keyword search remains active, but it is not the first move.
+Generic web search is fallback and discovery. It does not prove source-library or direct-channel coverage.
 
-Allowed:
+## 3. Source record fields
 
-```text
-- Search within collected source results.
-- Search within collected feed results.
-- Expand a confirmed event into related coverage.
-- Check if Taiwan has direct source-backed news.
-- Discover new sources outside the current source library.
-- Retry a domain when fixed sources return insufficient coverage.
-```
-
-Not allowed:
-
-```text
-- Using generic search as complete coverage.
-- Replacing Taiwan news with generic Taiwan implications.
-- Filling source gaps with synthesis only.
-- Marking source coverage complete when only keywords were searched.
-- Treating an unverified RSSHub route template as a checked feed.
-```
-
----
-
-## 3. Active source and feed files
-
-```text
-sources/key_media_library.yml
-= global and Taiwan key media library by domain.
-
-sources/official_and_data_sources.yml
-= official, regulator, company, exchange, macro, market, chain, and research/data sources.
-
-configs/source_routing_rules.yml
-= execution rules for source-first routing, fallback, source health, and coverage audit.
-
-configs/feed_discovery_stack.yml
-= RSSHub + FreshRSS + GDELT + Media Cloud execution boundary and audit fields.
-
-sources/channel_feed_sources.json
-= direct RSS and RSSHub route registry. Only verified + enabled entries count as checked feeds.
-
-sources/discovery_providers.yml
-= GDELT and Media Cloud provider registry. Discovery only, not final evidence.
-
-FRESHRSS_SEEDS.opml
-= seed OPML file for verified starter feeds.
-```
-
----
-
-## 4. Source record schema
-
-Required fields:
+Canonical source fields:
 
 ```text
 source_id
 name
-region
+canonical_url
+publisher_country
+macro_region
 languages
-source_type
+source_roles
 domains
+ownership_profile
+evidence_profile
 priority
-evidence_default
-fetch_method
+adapters
+fetch_interval_minutes
+freshness_slo_minutes
 usage_policy
-freshness_expectation
+fulltext_policy
+enabled
+verification_status
+last_verified_at
+aliases
 ```
 
-Recommended fields:
+Adapter fields:
 
 ```text
-feed_url
-homepage_url
-api_url
-paywall
-health_status
-last_success_at
-fail_count
-bias_note
-notes
-publishing_channels
-channel_priority
-social_first
-channel_check_required
-channel_access_status
+kind: rss / api / web / rsshub / social
+url
+route_status
+enabled_for_opml
+opml_category
 ```
 
-Feed/channel rule:
+The actual schema is enforced by `src/radar/schemas/source.py` and tests.
+
+## 4. Evidence boundary
 
 ```text
-source metadata
-→ publishing_channels
-→ channel_priority
-→ if social_first = true or channel_check_required = true
-→ check verified RSSHub route / direct RSS / FreshRSS category when configured
-→ mark unchecked / inaccessible / partial when no usable feed route exists
-→ generic search must not be treated as direct channel check
-→ major claims still require official / data / trusted source verification
+adapter success != factual verification
+FreshRSS item != evidence store
+RSSHub route != source identity
+GDELT / Media Cloud / Event Registry / NewsCatcher result != final claim
+social post != high evidence by default
 ```
 
----
+Important claims should resolve to official/data sources, company releases, regulators, exchanges, research methods or credible original reporting.
 
-## 5. Domain coverage buckets
+## 5. Taiwan boundary
 
-The active source library should support at least these six domains:
+Taiwan coverage must distinguish:
 
 ```text
-1. AI models / agents / workflow replacement
-2. Crypto / RWA / agent payments
-3. Retail / consumer / social / fashion
-4. Global markets / capital flows / geopolitics
-5. Technology development / robotics / biotech / energy / semiconductor
-6. Labor / consumption pressure / Taiwan local signals
+direct_taiwan_evidence
+taiwan_implication
 ```
 
-### 5.1 Domain extension
+Generic implications do not satisfy Taiwan coverage. Social-first Taiwan sources require a direct channel check or an explicit inaccessible/unverified status.
+
+Taiwan crypto fixed-source probes and legislative triggers remain semantic policy under `configs/source_routing_rules.yml`; their real source identities should be promoted into the canonical registry only when exact canonical URLs or public channel URLs are verified.
+
+## 6. Coverage dimensions
+
+Coverage is audited by cells, not by a single source count:
 
 ```text
-Scan domain list = six core domains + domains/ packs.
-New domain = copy domains/_template/ and fill domain_pack.json + sources.json.
-Completeness is checked by tools/brain/check-domain-packs.js.
-Domain-pack query_recipes follow the same rule as configs/query_recipes.yml.
+report domain
+macro region
+language
+source role
+channel / adapter kind
+time window
+health status
+observed count
 ```
 
-### 5.2 Feed stack extension
+Statuses such as `empty`, `stale`, `failing`, `silent_zero` or `policy_blocked` create gap cards. They do not mean there was no news.
+
+## 7. Report-domain coverage
+
+Canonical report domains are read from `config/runtime_contract.json`.
+Fine-grained entries in `configs/radars.yml` and `domains/` packs expand search coverage but must map to a canonical report domain unless the runtime contract itself changes.
+
+## 8. OPML projection
+
+Only enabled RSS/Atom adapters with `enabled_for_opml=true` are projected to `FRESHRSS_SEEDS.opml`.
+
+Validation:
+
+```bash
+make source-opml
+```
+
+Changing the canonical registry without regenerating OPML is contract drift.
+
+## 9. Source health
+
+Track at adapter and source level:
 
 ```text
-RSSHub = public channel-to-feed adapter.
-FreshRSS = self-hosted feed inbox / aggregator.
-GDELT = global multilingual discovery provider.
-Media Cloud = media ecosystem / source discovery provider.
+last success
+last failure
+last empty
+failure count
+freshness age
+hit rate by domain
+duplicate rate
+policy/access status
+content originality / false-positive notes
 ```
 
-Rules:
+Sources may be promoted, demoted, disabled or moved to discovery-only based on repeated evidence.
+
+## 10. Current runtime support
+
+Implemented:
 
 ```text
-1. RSSHub route must be verified in sources/channel_feed_sources.json before it counts as checked.
-2. Direct RSS feeds can be enabled for OPML only after feed URL and usage policy are verified.
-3. FreshRSS inbox items are collection traces, not final factual proof.
-4. GDELT / Media Cloud discoveries must be traced back to original sources before factual use.
-5. New concepts, applications, combinations, or trend seeds found through feeds/discovery go into memory/potential_pool.md before output filtering.
+registry validation
+RSS/Atom live adapter
+OPML projection validation
+fixture ingestion
+coverage gaps for failed feeds
 ```
 
----
-
-## 6. Fetch method priority
-
-Preferred order:
+Not yet connected:
 
 ```text
-1. official API
-2. official RSS / Atom
-3. official newsroom / release page
-4. verified media RSS / section page
-5. verified RSSHub route or FreshRSS collected feed
-6. trusted news database / aggregator
-7. required direct channel check for channel-first sources
-8. GDELT / Media Cloud discovery when material gaps remain
-9. generic web search
-10. unverified community candidates
+web/API/social/FreshRSS adapters
+external discovery providers
+full source-health persistence
 ```
 
-Collection routes are discovery mechanisms, not automatic high evidence.
-
----
-
-## 7. Coverage audit requirement
-
-Every Daily Push Brief, Full Daily Radar, and News Search Output should include or internally satisfy:
-
-```text
-source_library_checked: yes / partial / no
-priority_sources_checked: count or list
-keyword_fallback_used: yes / no
-feed_stack_loaded: yes / partial / no
-freshrss_checked: yes / partial / no / not_required
-rsshub_routes_checked: yes / partial / no / not_required
-rsshub_route_gaps: none / list
-direct_rss_feeds_checked: yes / partial / no / not_required
-external_discovery_used: yes / no
-gdelt_used_when_gap: yes / no / not_required
-media_cloud_used_when_gap: yes / no / not_required
-taiwan_sources_checked: yes / partial / no
-social_channels_checked_when_required: yes / partial / no / not_required
-potential_pool_capture_done: yes / partial / no
-channel_gaps: none / list
-source_gap: none / partial / material
-```
-
-If the output is user-facing, disclose source/feed/discovery gaps when material.
-
----
-
-## 8. Source health loop
-
-Track:
-
-```text
-last_success_at
-last_empty_at
-fail_count
-duplicate_rate
-hit_rate_by_domain
-false_positive_notes
-usage_policy_notes
-channel_access_status
-channel_hit_rate
-channel_last_success_at
-feed_last_success_at
-rsshub_route_status
-freshrss_category_health
-discovery_provider_hit_rate
-```
-
-Recommended storage（path-ok；規劃中尚未建立，需要時再建）:
-
-```text
-memory/source_health_log.json
-memory/topic_coverage_log.json
-reports/backtests/
-```
-
----
-
-## 9. Governance boundary
-
-This source library is a local child-repo execution module.
-
-It does not change the mother Brain architecture unless it introduces cross-repo governance, reusable source-routing policy, or a new universal memory rule.
-
-Durable source-of-truth changes must be recorded through `CURRENT_DECISIONS.md` and dependency checks.
+These unexecuted routes must be disclosed as degradation reasons.
