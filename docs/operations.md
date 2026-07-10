@@ -63,9 +63,16 @@ When `--database` is supplied, the runtime initializes migrations and stores:
 
 ```text
 fetch_runs
+documents
+document_payloads
+events
+event_documents
+event_deltas
 reports
 report_payloads
 coverage_gaps
+indicator_observations
+state_entries
 ```
 
 Local database files under `data/` are ignored by Git.

@@ -47,6 +47,7 @@ REQUIRED_ITEM_FIELDS = {
     "counterevidence",
     "uncertainties",
     "next_watch",
+    "score_explanation",
 }
 
 LEGACY_REQUIRED_ITEM_FIELDS = {
@@ -112,6 +113,7 @@ def _validate_item(item: dict[str, Any], contract: RuntimeContract) -> None:
     elif item["candidate_type"] is not None or item["formation_level"] is not None:
         raise ValueError(f"major item must not carry candidate metadata: {item['item_id']}")
     _validate_common_item_fields(item)
+    _validate_score_explanation(item)
 
 
 def _validate_common_item_fields(item: dict[str, Any]) -> None:
@@ -175,3 +177,20 @@ def _validate_evidence_link(link: dict[str, Any]) -> None:
     parts = urlsplit(link["url"])
     if parts.scheme not in {"http", "https"} or not parts.netloc:
         raise ValueError(f"invalid evidence URL: {link['url']}")
+
+
+def _validate_score_explanation(item: dict[str, Any]) -> None:
+    explanation = item.get("score_explanation")
+    if not isinstance(explanation, dict):
+        raise ValueError(f"report item lacks score_explanation: {item['item_id']}")
+    for score_name in ("importance", "potential", "confidence"):
+        components = explanation.get(score_name)
+        if not isinstance(components, dict) or not components:
+            raise ValueError(f"report item score_explanation lacks {score_name}: {item['item_id']}")
+        for component_name, value in components.items():
+            if not isinstance(component_name, str) or not isinstance(value, int) or not 0 <= value <= 100:
+                raise ValueError(
+                    f"report item score_explanation has invalid {score_name} component: {item['item_id']}"
+                )
+    if not isinstance(explanation.get("rationale"), str) or not explanation["rationale"]:
+        raise ValueError(f"report item score_explanation lacks rationale: {item['item_id']}")

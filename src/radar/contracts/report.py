@@ -18,6 +18,13 @@ class EvidenceLinkV2(CanonicalModel):
     fetched_at: str
 
 
+class ScoreExplanationV1(CanonicalModel):
+    importance: dict[str, int]
+    potential: dict[str, int]
+    confidence: dict[str, int]
+    rationale: str
+
+
 class ReportItemV2(CanonicalModel):
     item_id: str
     event_id: str
@@ -38,6 +45,7 @@ class ReportItemV2(CanonicalModel):
     counterevidence: list[str]
     uncertainties: list[str]
     next_watch: str
+    score_explanation: ScoreExplanationV1
 
 
 class CoverageCellV2(CanonicalModel):
@@ -179,6 +187,7 @@ class RadarReportV2(CanonicalModel):
 
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "RadarReportV2":
+        payload = _with_item_score_explanations(payload)
         source_audit = payload.get("source_audit", {})
         canonical_source_fields = {
             "ingestion_mode",
@@ -226,6 +235,7 @@ def _migrate_legacy_v2_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if payload.get("contract_version") != "2.0":
         raise ValueError("only legacy contract_version 2.0 payloads can be migrated")
     migrated = copy.deepcopy(payload)
+    migrated = _with_item_score_explanations(migrated)
     migrated.setdefault("signals", [])
 
     old_audit = migrated.get("source_audit", {})
@@ -295,3 +305,31 @@ def _migrate_legacy_v2_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "degradation_reasons": ["legacy_evaluation_audit_unavailable"],
         }
     return migrated
+
+
+def _with_item_score_explanations(payload: dict[str, Any]) -> dict[str, Any]:
+    items = payload.get("items")
+    if not isinstance(items, list):
+        return payload
+    if all(isinstance(item, dict) and "score_explanation" in item for item in items):
+        return payload
+    migrated = copy.deepcopy(payload)
+    migrated["items"] = [
+        _with_item_score_explanation(item) if isinstance(item, dict) else item
+        for item in items
+    ]
+    return migrated
+
+
+def _with_item_score_explanation(item: dict[str, Any]) -> dict[str, Any]:
+    if "score_explanation" in item:
+        return item
+    return {
+        **item,
+        "score_explanation": {
+            "importance": {"legacy_score": int(item.get("importance_score", 0))},
+            "potential": {"legacy_score": int(item.get("potential_score", 0))},
+            "confidence": {"legacy_score": int(item.get("confidence_score", 0))},
+            "rationale": "Legacy item migrated without deterministic component details.",
+        },
+    }

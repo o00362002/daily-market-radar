@@ -217,6 +217,7 @@ class Event:
     last_seen_at: str
     last_material_delta_at: str
     status: str = "active"
+    deltas: list["EventDelta"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -266,6 +267,7 @@ class ReportItem:
     counterevidence: list[str]
     uncertainties: list[str]
     next_watch: str
+    score_explanation: dict[str, Any] = field(default_factory=dict)
     report_lane: str = "major"
     candidate_type: str | None = None
     formation_level: str | None = None
@@ -295,6 +297,12 @@ class ReportItem:
             "counterevidence": [],
             "uncertainties": [],
             "next_watch": "Watch next update.",
+            "score_explanation": {
+                "importance": {"base": 60},
+                "potential": {"base": 50},
+                "confidence": {"base": 80},
+                "rationale": "Fixture scoring uses fixed deterministic defaults.",
+            },
             "report_lane": "major",
             "candidate_type": None,
             "formation_level": None,
@@ -327,6 +335,7 @@ class ReportItem:
             "counterevidence": self.counterevidence,
             "uncertainties": self.uncertainties,
             "next_watch": self.next_watch,
+            "score_explanation": self.score_explanation,
         }
 
 

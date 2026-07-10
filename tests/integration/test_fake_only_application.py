@@ -384,7 +384,7 @@ class FakeOnlyApplicationTests(unittest.TestCase):
         document_repository = dependencies.document_repository
         self.assertEqual(set(document_repository.documents), {document.document_id for document in self.documents})
         event_repository = dependencies.event_repository
-        self.assertEqual(event_repository.recent_queries, [REPORT_DATE])
+        self.assertEqual(event_repository.recent_queries, ["2026-06-10T00:00:00+00:00"])
         self.assertEqual(set(event_repository.events), {event.event_id for event in result.events})
         self.assertTrue(all(event_repository.event_documents[event.event_id] for event in result.events))
 

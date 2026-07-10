@@ -14,6 +14,7 @@ class FeedHealth(str, Enum):
 
 
 class DeltaType(str, Enum):
+    NEW_EVENT = "new_event"
     DUPLICATE_DOCUMENT = "duplicate_document"
     SAME_EVENT_SAME_FACTS = "same_event_same_facts"
     SAME_EVENT_NEW_DELTA = "same_event_new_delta"

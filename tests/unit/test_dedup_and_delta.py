@@ -2,7 +2,7 @@ import unittest
 
 from radar.domain.models import Document
 from radar.pipeline.cluster import cluster_documents
-from radar.pipeline.deltas import classify_event_delta
+from radar.pipeline.deltas import classify_event_delta, material_events, reconcile_cross_day_events
 
 
 class DedupAndDeltaTests(unittest.TestCase):
@@ -85,6 +85,71 @@ class DedupAndDeltaTests(unittest.TestCase):
         delta = classify_event_delta(prior, current)
         self.assertEqual(delta.delta_type, "same_event_new_delta")
         self.assertIn("flow_usd_m", delta.changed_fields)
+
+    def test_cross_day_same_signature_preserves_first_seen_and_records_material_delta(self) -> None:
+        prior = Document.fixture(
+            source_id="twse",
+            url="https://example.tw/old",
+            title="TWSE reports ETF flows",
+            entities=["TWSE"],
+            action="reports",
+            object="ETF flows",
+            location="Taiwan",
+            facts={"flow_usd_m": 200},
+            fetched_at="2026-07-09T08:01:00+00:00",
+        )
+        current = Document.fixture(
+            source_id="twse",
+            url="https://example.tw/new",
+            title="TWSE updates ETF flows to 280m",
+            entities=["TWSE"],
+            action="reports",
+            object="ETF flows",
+            location="Taiwan",
+            facts={"flow_usd_m": 280},
+            fetched_at="2026-07-10T08:01:00+00:00",
+        )
+        prior_event = cluster_documents([prior])[0]
+        current_event = cluster_documents([current])[0]
+
+        reconciled = reconcile_cross_day_events([current_event], [prior_event])
+
+        self.assertEqual(len(reconciled), 1)
+        self.assertEqual(reconciled[0].event_id, prior_event.event_id)
+        self.assertEqual(reconciled[0].first_seen_at, prior_event.first_seen_at)
+        self.assertEqual(reconciled[0].last_material_delta_at, current_event.last_seen_at)
+        self.assertEqual(reconciled[0].deltas[0].delta_type, "same_event_new_delta")
+        self.assertIn("flow_usd_m", reconciled[0].deltas[0].changed_fields)
+        self.assertEqual(material_events(reconciled), reconciled)
+
+    def test_cross_day_replay_is_not_reportable_material_event(self) -> None:
+        prior = Document.fixture(
+            source_id="twse",
+            url="https://example.tw/old",
+            title="TWSE reports ETF flows",
+            entities=["TWSE"],
+            action="reports",
+            object="ETF flows",
+            location="Taiwan",
+            facts={"flow_usd_m": 200},
+            fetched_at="2026-07-09T08:01:00+00:00",
+        )
+        replay = Document.fixture(
+            source_id="twse",
+            url="https://example.tw/replay",
+            title="TWSE reports ETF flows",
+            entities=["TWSE"],
+            action="reports",
+            object="ETF flows",
+            location="Taiwan",
+            facts={"flow_usd_m": 200},
+            fetched_at="2026-07-10T08:01:00+00:00",
+        )
+
+        reconciled = reconcile_cross_day_events(cluster_documents([replay]), cluster_documents([prior]))
+
+        self.assertEqual(reconciled[0].deltas[0].delta_type, "duplicate_document")
+        self.assertEqual(material_events(reconciled), [])
 
 
 if __name__ == "__main__":

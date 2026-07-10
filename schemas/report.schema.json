@@ -1,8 +1,18 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
     "BacktestV1": {
       "additionalProperties": false,
       "properties": {
+        "status": {
+          "enum": [
+            "complete",
+            "partial",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
         "findings": {
           "items": {
             "type": "string"
@@ -16,15 +26,6 @@
           },
           "title": "Next Adjustments",
           "type": "array"
-        },
-        "status": {
-          "enum": [
-            "complete",
-            "partial",
-            "failed"
-          ],
-          "title": "Status",
-          "type": "string"
         }
       },
       "required": [
@@ -38,38 +39,38 @@
     "CoverageCellV2": {
       "additionalProperties": false,
       "properties": {
-        "channel": {
-          "title": "Channel",
-          "type": "string"
-        },
         "domain": {
           "title": "Domain",
-          "type": "string"
-        },
-        "language": {
-          "title": "Language",
           "type": "string"
         },
         "macro_region": {
           "title": "Macro Region",
           "type": "string"
         },
-        "observed_count": {
-          "minimum": 0,
-          "title": "Observed Count",
-          "type": "integer"
+        "language": {
+          "title": "Language",
+          "type": "string"
         },
         "source_role": {
           "title": "Source Role",
+          "type": "string"
+        },
+        "channel": {
+          "title": "Channel",
+          "type": "string"
+        },
+        "time_window": {
+          "title": "Time Window",
           "type": "string"
         },
         "status": {
           "title": "Status",
           "type": "string"
         },
-        "time_window": {
-          "title": "Time Window",
-          "type": "string"
+        "observed_count": {
+          "minimum": 0,
+          "title": "Observed Count",
+          "type": "integer"
         }
       },
       "required": [
@@ -88,36 +89,36 @@
     "CoverageGapV2": {
       "additionalProperties": false,
       "properties": {
-        "channel": {
-          "title": "Channel",
-          "type": "string"
-        },
         "domain": {
           "title": "Domain",
-          "type": "string"
-        },
-        "language": {
-          "title": "Language",
           "type": "string"
         },
         "macro_region": {
           "title": "Macro Region",
           "type": "string"
         },
-        "message": {
-          "title": "Message",
-          "type": "string"
-        },
-        "reason": {
-          "title": "Reason",
+        "language": {
+          "title": "Language",
           "type": "string"
         },
         "source_role": {
           "title": "Source Role",
           "type": "string"
         },
+        "channel": {
+          "title": "Channel",
+          "type": "string"
+        },
         "time_window": {
           "title": "Time Window",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
           "type": "string"
         }
       },
@@ -137,43 +138,16 @@
     "EvaluationAuditV1": {
       "additionalProperties": false,
       "properties": {
-        "cache_hits": {
-          "minimum": 0,
-          "title": "Cache Hits",
-          "type": "integer"
-        },
-        "degradation_reasons": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Degradation Reasons",
-          "type": "array"
+        "requested_mode": {
+          "title": "Requested Mode",
+          "type": "string"
         },
         "effective_mode": {
           "title": "Effective Mode",
           "type": "string"
         },
-        "estimated_cost_usd": {
-          "minimum": 0,
-          "title": "Estimated Cost Usd",
-          "type": "number"
-        },
-        "evaluated_item_count": {
-          "minimum": 0,
-          "title": "Evaluated Item Count",
-          "type": "integer"
-        },
         "evaluator": {
           "title": "Evaluator",
-          "type": "string"
-        },
-        "failed_item_count": {
-          "minimum": 0,
-          "title": "Failed Item Count",
-          "type": "integer"
-        },
-        "finished_at": {
-          "title": "Finished At",
           "type": "string"
         },
         "model": {
@@ -198,24 +172,51 @@
           ],
           "title": "Provider"
         },
-        "requested_mode": {
-          "title": "Requested Mode",
+        "started_at": {
+          "title": "Started At",
           "type": "string"
+        },
+        "finished_at": {
+          "title": "Finished At",
+          "type": "string"
+        },
+        "cache_hits": {
+          "minimum": 0,
+          "title": "Cache Hits",
+          "type": "integer"
+        },
+        "evaluated_item_count": {
+          "minimum": 0,
+          "title": "Evaluated Item Count",
+          "type": "integer"
+        },
+        "failed_item_count": {
+          "minimum": 0,
+          "title": "Failed Item Count",
+          "type": "integer"
+        },
+        "token_usage": {
+          "$ref": "#/$defs/TokenUsageV1"
+        },
+        "estimated_cost_usd": {
+          "minimum": 0,
+          "title": "Estimated Cost Usd",
+          "type": "number"
         },
         "source_context_hash": {
           "title": "Source Context Hash",
           "type": "string"
         },
-        "started_at": {
-          "title": "Started At",
-          "type": "string"
-        },
-        "token_usage": {
-          "$ref": "#/$defs/TokenUsageV1"
-        },
         "validation_status": {
           "title": "Validation Status",
           "type": "string"
+        },
+        "degradation_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Degradation Reasons",
+          "type": "array"
         }
       },
       "required": [
@@ -241,16 +242,16 @@
     "EvidenceLinkV2": {
       "additionalProperties": false,
       "properties": {
-        "fetched_at": {
-          "title": "Fetched At",
+        "url": {
+          "title": "Url",
           "type": "string"
         },
         "source_id": {
           "title": "Source Id",
           "type": "string"
         },
-        "url": {
-          "title": "Url",
+        "fetched_at": {
+          "title": "Fetched At",
           "type": "string"
         }
       },
@@ -265,15 +266,8 @@
     "MatrixObservationV1": {
       "additionalProperties": false,
       "properties": {
-        "data_checked": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Data Checked",
-          "type": "array"
-        },
-        "gap": {
-          "title": "Gap",
+        "status": {
+          "title": "Status",
           "type": "string"
         },
         "signal_ids": {
@@ -283,8 +277,15 @@
           "title": "Signal Ids",
           "type": "array"
         },
-        "status": {
-          "title": "Status",
+        "data_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Checked",
+          "type": "array"
+        },
+        "gap": {
+          "title": "Gap",
           "type": "string"
         }
       },
@@ -300,13 +301,6 @@
     "RejectionCountersV2": {
       "additionalProperties": false,
       "properties": {
-        "candidate_retry_paths_used": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Candidate Retry Paths Used",
-          "type": "array"
-        },
         "duplicate_rejection_count": {
           "minimum": 0,
           "title": "Duplicate Rejection Count",
@@ -322,17 +316,24 @@
           "title": "Niche Low Novelty Rejection Count",
           "type": "integer"
         },
-        "taiwan_direct_sources_checked": {
+        "candidate_retry_paths_used": {
           "items": {
             "type": "string"
           },
-          "title": "Taiwan Direct Sources Checked",
+          "title": "Candidate Retry Paths Used",
           "type": "array"
         },
         "taiwan_qualified_item_count_after_audit": {
           "minimum": 0,
           "title": "Taiwan Qualified Item Count After Audit",
           "type": "integer"
+        },
+        "taiwan_direct_sources_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Taiwan Direct Sources Checked",
+          "type": "array"
         }
       },
       "required": [
@@ -349,6 +350,37 @@
     "ReportItemV2": {
       "additionalProperties": false,
       "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "signal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Signal Id"
+        },
+        "primary_domain": {
+          "title": "Primary Domain",
+          "type": "string"
+        },
+        "report_lane": {
+          "enum": [
+            "major",
+            "potential"
+          ],
+          "title": "Report Lane",
+          "type": "string"
+        },
         "candidate_type": {
           "anyOf": [
             {
@@ -359,41 +391,6 @@
             }
           ],
           "title": "Candidate Type"
-        },
-        "confidence_score": {
-          "maximum": 100,
-          "minimum": 0,
-          "title": "Confidence Score",
-          "type": "integer"
-        },
-        "counterevidence": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Counterevidence",
-          "type": "array"
-        },
-        "direct_taiwan_evidence": {
-          "items": {
-            "$ref": "#/$defs/EvidenceLinkV2"
-          },
-          "title": "Direct Taiwan Evidence",
-          "type": "array"
-        },
-        "event_id": {
-          "title": "Event Id",
-          "type": "string"
-        },
-        "evidence_links": {
-          "items": {
-            "$ref": "#/$defs/EvidenceLinkV2"
-          },
-          "title": "Evidence Links",
-          "type": "array"
-        },
-        "first_seen_at": {
-          "title": "First Seen At",
-          "type": "string"
         },
         "formation_level": {
           "anyOf": [
@@ -410,19 +407,19 @@
           "title": "Headline",
           "type": "string"
         },
+        "first_seen_at": {
+          "title": "First Seen At",
+          "type": "string"
+        },
+        "today_delta": {
+          "title": "Today Delta",
+          "type": "string"
+        },
         "importance_score": {
           "maximum": 100,
           "minimum": 0,
           "title": "Importance Score",
           "type": "integer"
-        },
-        "item_id": {
-          "title": "Item Id",
-          "type": "string"
-        },
-        "next_watch": {
-          "title": "Next Watch",
-          "type": "string"
         },
         "potential_score": {
           "maximum": 100,
@@ -430,36 +427,36 @@
           "title": "Potential Score",
           "type": "integer"
         },
-        "primary_domain": {
-          "title": "Primary Domain",
-          "type": "string"
+        "confidence_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Confidence Score",
+          "type": "integer"
         },
-        "report_lane": {
-          "enum": [
-            "major",
-            "potential"
-          ],
-          "title": "Report Lane",
-          "type": "string"
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/EvidenceLinkV2"
+          },
+          "title": "Evidence Links",
+          "type": "array"
         },
-        "signal_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Signal Id"
+        "direct_taiwan_evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceLinkV2"
+          },
+          "title": "Direct Taiwan Evidence",
+          "type": "array"
         },
         "taiwan_implication": {
           "title": "Taiwan Implication",
           "type": "string"
         },
-        "today_delta": {
-          "title": "Today Delta",
-          "type": "string"
+        "counterevidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Counterevidence",
+          "type": "array"
         },
         "uncertainties": {
           "items": {
@@ -467,6 +464,13 @@
           },
           "title": "Uncertainties",
           "type": "array"
+        },
+        "next_watch": {
+          "title": "Next Watch",
+          "type": "string"
+        },
+        "score_explanation": {
+          "$ref": "#/$defs/ScoreExplanationV1"
         }
       },
       "required": [
@@ -488,14 +492,57 @@
         "taiwan_implication",
         "counterevidence",
         "uncertainties",
-        "next_watch"
+        "next_watch",
+        "score_explanation"
       ],
       "title": "ReportItemV2",
+      "type": "object"
+    },
+    "ScoreExplanationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "importance": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Importance",
+          "type": "object"
+        },
+        "potential": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Potential",
+          "type": "object"
+        },
+        "confidence": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Confidence",
+          "type": "object"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "importance",
+        "potential",
+        "confidence",
+        "rationale"
+      ],
+      "title": "ScoreExplanationV1",
       "type": "object"
     },
     "SignalV1": {
       "additionalProperties": false,
       "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
         "event_id": {
           "title": "Event Id",
           "type": "string"
@@ -504,20 +551,16 @@
           "title": "Lifecycle",
           "type": "string"
         },
-        "next_check_at": {
-          "title": "Next Check At",
-          "type": "string"
-        },
-        "signal_id": {
-          "title": "Signal Id",
-          "type": "string"
-        },
         "what_would_confirm": {
           "title": "What Would Confirm",
           "type": "string"
         },
         "what_would_invalidate": {
           "title": "What Would Invalidate",
+          "type": "string"
+        },
+        "next_check_at": {
+          "title": "Next Check At",
           "type": "string"
         }
       },
@@ -535,11 +578,19 @@
     "SourceAuditV2": {
       "additionalProperties": false,
       "properties": {
-        "candidate_retry_paths_used": {
+        "ingestion_mode": {
+          "title": "Ingestion Mode",
+          "type": "string"
+        },
+        "registry_checked": {
+          "title": "Registry Checked",
+          "type": "boolean"
+        },
+        "sources_checked": {
           "items": {
             "type": "string"
           },
-          "title": "Candidate Retry Paths Used",
+          "title": "Sources Checked",
           "type": "array"
         },
         "failures": {
@@ -549,9 +600,12 @@
           "title": "Failures",
           "type": "array"
         },
-        "ingestion_mode": {
-          "title": "Ingestion Mode",
-          "type": "string"
+        "sources_not_executed": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sources Not Executed",
+          "type": "array"
         },
         "integration_status": {
           "additionalProperties": {
@@ -560,29 +614,11 @@
           "title": "Integration Status",
           "type": "object"
         },
-        "registry_checked": {
-          "title": "Registry Checked",
-          "type": "boolean"
-        },
-        "remaining_gaps": {
+        "candidate_retry_paths_used": {
           "items": {
             "type": "string"
           },
-          "title": "Remaining Gaps",
-          "type": "array"
-        },
-        "sources_checked": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Sources Checked",
-          "type": "array"
-        },
-        "sources_not_executed": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Sources Not Executed",
+          "title": "Candidate Retry Paths Used",
           "type": "array"
         },
         "taiwan_direct_sources_checked": {
@@ -590,6 +626,13 @@
             "type": "string"
           },
           "title": "Taiwan Direct Sources Checked",
+          "type": "array"
+        },
+        "remaining_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Remaining Gaps",
           "type": "array"
         }
       },
@@ -610,17 +653,17 @@
     "SourceFailureV1": {
       "additionalProperties": false,
       "properties": {
-        "channel": {
-          "default": "",
-          "title": "Channel",
+        "source_id": {
+          "title": "Source Id",
           "type": "string"
         },
         "reason": {
           "title": "Reason",
           "type": "string"
         },
-        "source_id": {
-          "title": "Source Id",
+        "channel": {
+          "default": "",
+          "title": "Channel",
           "type": "string"
         }
       },
@@ -634,6 +677,30 @@
     "StructuralIndicatorObservationV1": {
       "additionalProperties": false,
       "properties": {
+        "indicator_id": {
+          "title": "Indicator Id",
+          "type": "string"
+        },
+        "observation_date": {
+          "title": "Observation Date",
+          "type": "string"
+        },
+        "direction": {
+          "title": "Direction",
+          "type": "string"
+        },
+        "support_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Support Score",
+          "type": "integer"
+        },
+        "counter_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Counter Score",
+          "type": "integer"
+        },
         "confidence": {
           "anyOf": [
             {
@@ -646,11 +713,12 @@
           ],
           "title": "Confidence"
         },
-        "counter_score": {
-          "maximum": 100,
-          "minimum": 0,
-          "title": "Counter Score",
-          "type": "integer"
+        "supporting_signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Signal Ids",
+          "type": "array"
         },
         "counter_signal_ids": {
           "items": {
@@ -659,24 +727,16 @@
           "title": "Counter Signal Ids",
           "type": "array"
         },
-        "direction": {
-          "title": "Direction",
-          "type": "string"
-        },
-        "evaluation_mode": {
-          "title": "Evaluation Mode",
-          "type": "string"
-        },
-        "indicator_id": {
-          "title": "Indicator Id",
-          "type": "string"
-        },
         "missing_data": {
           "items": {
             "type": "string"
           },
           "title": "Missing Data",
           "type": "array"
+        },
+        "one_sentence_read": {
+          "title": "One Sentence Read",
+          "type": "string"
         },
         "next_verification": {
           "items": {
@@ -685,26 +745,9 @@
           "title": "Next Verification",
           "type": "array"
         },
-        "observation_date": {
-          "title": "Observation Date",
+        "evaluation_mode": {
+          "title": "Evaluation Mode",
           "type": "string"
-        },
-        "one_sentence_read": {
-          "title": "One Sentence Read",
-          "type": "string"
-        },
-        "support_score": {
-          "maximum": 100,
-          "minimum": 0,
-          "title": "Support Score",
-          "type": "integer"
-        },
-        "supporting_signal_ids": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Supporting Signal Ids",
-          "type": "array"
         }
       },
       "required": [
@@ -750,16 +793,42 @@
       "type": "object"
     }
   },
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "backtest": {
-      "$ref": "#/$defs/BacktestV1"
-    },
-    "contract_version": {
-      "const": "2.0",
-      "title": "Contract Version",
+    "run_id": {
+      "title": "Run Id",
       "type": "string"
+    },
+    "date": {
+      "title": "Date",
+      "type": "string"
+    },
+    "profile": {
+      "title": "Profile",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "degradation_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Degradation Reasons",
+      "type": "array"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/ReportItemV2"
+      },
+      "title": "Items",
+      "type": "array"
     },
     "coverage_cells": {
       "items": {
@@ -775,37 +844,15 @@
       "title": "Coverage Gaps",
       "type": "array"
     },
-    "crypto_matrix": {
-      "additionalProperties": {
-        "$ref": "#/$defs/MatrixObservationV1"
-      },
-      "title": "Crypto Matrix",
-      "type": "object"
-    },
-    "date": {
-      "title": "Date",
-      "type": "string"
-    },
-    "degradation_reasons": {
+    "signals": {
       "items": {
-        "type": "string"
+        "$ref": "#/$defs/SignalV1"
       },
-      "title": "Degradation Reasons",
+      "title": "Signals",
       "type": "array"
     },
-    "evaluation_audit": {
-      "$ref": "#/$defs/EvaluationAuditV1"
-    },
-    "items": {
-      "items": {
-        "$ref": "#/$defs/ReportItemV2"
-      },
-      "title": "Items",
-      "type": "array"
-    },
-    "profile": {
-      "title": "Profile",
-      "type": "string"
+    "source_audit": {
+      "$ref": "#/$defs/SourceAuditV2"
     },
     "rejection_counters": {
       "$ref": "#/$defs/RejectionCountersV2"
@@ -817,28 +864,12 @@
       "title": "Retail Matrix",
       "type": "object"
     },
-    "run_id": {
-      "title": "Run Id",
-      "type": "string"
-    },
-    "signals": {
-      "items": {
-        "$ref": "#/$defs/SignalV1"
+    "crypto_matrix": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MatrixObservationV1"
       },
-      "title": "Signals",
-      "type": "array"
-    },
-    "source_audit": {
-      "$ref": "#/$defs/SourceAuditV2"
-    },
-    "status": {
-      "enum": [
-        "complete",
-        "partial",
-        "failed"
-      ],
-      "title": "Status",
-      "type": "string"
+      "title": "Crypto Matrix",
+      "type": "object"
     },
     "structural_indicators": {
       "items": {
@@ -846,6 +877,17 @@
       },
       "title": "Structural Indicators",
       "type": "array"
+    },
+    "evaluation_audit": {
+      "$ref": "#/$defs/EvaluationAuditV1"
+    },
+    "backtest": {
+      "$ref": "#/$defs/BacktestV1"
+    },
+    "contract_version": {
+      "const": "2.0",
+      "title": "Contract Version",
+      "type": "string"
     }
   },
   "required": [

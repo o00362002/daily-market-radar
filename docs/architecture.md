@@ -77,18 +77,17 @@ that network access, SQLite, OpenAI and filesystem writes are not application-la
 ```text
 sources: fixture, public RSS/Atom registry
 evaluation: deterministic rules
-reports: memory, optional SQLite
-documents/events/indicators: memory foundation
-state/web artifacts: memory foundation
+documents/events/reports/indicators/state: memory, optional SQLite
+web artifacts: memory foundation
 publisher: disabled no-op
 ```
 
-SQLite migrations remain the local report/run foundation. A later backend can implement the repository
-Protocols without changing application services.
+SQLite migrations are the local durable runtime foundation for documents, cross-day events, material
+deltas, reports, structural-indicator observations and state checkpoints. A later backend can implement
+the same repository Protocols without changing application services.
 
 ## Current limits
 
-Historical material-delta persistence, web/API/social/FreshRSS adapters, external discovery, production-grade
-semantic scoring, API-assisted evaluation, filesystem projection, production publishers, the Astro dashboard
-and scheduling are not connected. Their absence remains a degradation or later implementation boundary, not
-a simulated capability.
+Web/API/social/FreshRSS adapters, external discovery, production-grade semantic scoring, API-assisted
+evaluation, filesystem projection, production publishers, the Astro dashboard and scheduling are not
+connected. Their absence remains a degradation or later implementation boundary, not a simulated capability.

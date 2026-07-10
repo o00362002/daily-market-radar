@@ -4,7 +4,7 @@ import hashlib
 import json
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 
 from radar.contracts.evaluation import EvaluationRequest, EvaluationResult
@@ -22,6 +22,7 @@ from radar.contracts.web import PublicationReceiptV1, WebArtifactV1
 from radar.domain.models import Document, Event, stable_id
 from radar.pipeline.cluster import cluster_documents
 from radar.pipeline.deduplicate import deduplicate_documents
+from radar.pipeline.deltas import material_events, reconcile_cross_day_events
 from radar.reporting.contracts import validate_report_contract
 from radar.ports import (
     DocumentRepository,
@@ -91,23 +92,24 @@ class DailyRadarApplication:
         duplicate_rejection_count = len(normalized) - len(documents)
         self._dependencies.document_repository.save_documents(documents)
 
-        # Looking up prior events is deliberately repository-driven. The current
-        # deterministic matcher keeps event identity stable without knowing the backend.
-        self._dependencies.event_repository.find_recent_events(request.date)
-        events = cluster_documents(documents)
+        prior_events = self._dependencies.event_repository.find_recent_events(self._event_history_since(request.date))
+        events = reconcile_cross_day_events(cluster_documents(documents), prior_events)
         for event in events:
             self._dependencies.event_repository.save_event(event)
             self._dependencies.event_repository.attach_documents(
                 event.event_id,
                 [document.document_id for document in event.documents],
             )
+            for delta in event.deltas:
+                self._dependencies.event_repository.save_event_delta(event.event_id, delta, started_at)
 
+        reportable_events = material_events(events)
         evaluation = self._dependencies.evaluator.evaluate(
             EvaluationRequest(
                 date=request.date,
                 profile=request.profile,
                 requested_mode=request.evaluation_mode,
-                events=tuple(events),
+                events=tuple(reportable_events),
                 contract=contract,
                 started_at=started_at,
             )
@@ -141,6 +143,7 @@ class DailyRadarApplication:
         run_id = self._run_id(
             request,
             documents,
+            events,
             source_result,
             evaluation,
             items,
@@ -339,6 +342,7 @@ class DailyRadarApplication:
     def _run_id(
         request: DailyRunRequest,
         documents: list[Document],
+        events: list[Event],
         source_result: SourceFetchResult,
         evaluation: EvaluationResult,
         items: list[ReportItemV2],
@@ -355,6 +359,16 @@ class DailyRadarApplication:
                 "evaluation_mode": request.evaluation_mode,
             },
             "documents": sorted(document.content_hash for document in documents),
+            "events": [
+                {
+                    "event_id": event.event_id,
+                    "first_seen_at": event.first_seen_at,
+                    "last_seen_at": event.last_seen_at,
+                    "last_material_delta_at": event.last_material_delta_at,
+                    "deltas": [delta.__dict__ for delta in event.deltas],
+                }
+                for event in sorted(events, key=lambda event: event.event_id)
+            ],
             "source": {
                 "coverage_gaps": [gap.model_dump(mode="json") for gap in source_result.coverage_gaps],
                 "degradation_reasons": list(source_result.degradation_reasons),
@@ -389,6 +403,11 @@ class DailyRadarApplication:
         }
         serialized = json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         return stable_id("run", [serialized])
+
+    @staticmethod
+    def _event_history_since(report_date: str, lookback_days: int = 30) -> str:
+        start = datetime.fromisoformat(report_date).replace(tzinfo=timezone.utc) - timedelta(days=lookback_days)
+        return start.isoformat(timespec="seconds")
 
     @staticmethod
     def _project_web(report: RadarReportV2) -> tuple[WebArtifactV1, ...]:

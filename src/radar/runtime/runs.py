@@ -83,7 +83,11 @@ def run_daily_fixture(
     composed = compose_application(
         CompositionConfig(
             source_backend="fixture",
+            document_repository_backend="sqlite" if database_path is not None else "memory",
+            event_repository_backend="sqlite" if database_path is not None else "memory",
             report_repository_backend="sqlite" if database_path is not None else "memory",
+            indicator_repository_backend="sqlite" if database_path is not None else "memory",
+            state_store_backend="sqlite" if database_path is not None else "memory",
             database_path=database_path,
             migrations_dir=repo_root / "migrations" if database_path is not None else None,
             optional_integrations={
@@ -122,7 +126,11 @@ def run_daily_live_rss(
     composed = compose_application(
         CompositionConfig(
             source_backend="rss",
+            document_repository_backend="sqlite" if database_path is not None else "memory",
+            event_repository_backend="sqlite" if database_path is not None else "memory",
             report_repository_backend="sqlite" if database_path is not None else "memory",
+            indicator_repository_backend="sqlite" if database_path is not None else "memory",
+            state_store_backend="sqlite" if database_path is not None else "memory",
             database_path=database_path,
             migrations_dir=repo_root / "migrations" if database_path is not None else None,
             timeout_seconds=timeout_seconds,
