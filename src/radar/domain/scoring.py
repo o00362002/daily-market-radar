@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
 from radar.domain.models import Event
-from radar.pipeline.classify import assess_event
+from radar.domain.potential import assess_event
 
 
 @dataclass(frozen=True)
@@ -75,7 +75,6 @@ def explain_event_scores(event: Event) -> EventScoreExplanation:
         empty = ScoreBreakdown(0, {"evidence": 0}, "事件沒有附加文件。", [])
         return EventScoreExplanation(empty, empty, empty)
 
-    primary_document = event.documents[0]
     source_ids = {document.source_id for document in event.documents}
     regions = {document.macro_region for document in event.documents}
     material_delta = event_has_material_delta(event)
