@@ -33,17 +33,18 @@ class WorkflowContractTests(unittest.TestCase):
         for name in REQUIRED:
             self.assertIsInstance(self._load(name), dict)
 
-    def test_daily_pipeline_has_utc_cron_and_concurrency(self) -> None:
+    def test_daily_pipeline_has_utc_cron_concurrency_and_multi_source_mode(self) -> None:
         doc = self._load("daily-intelligence.yml")
         on = doc.get("on", doc.get(True))
         crons = [entry["cron"] for entry in on["schedule"]]
         self.assertIn("0 23 * * *", crons)  # 07:00 Asia/Taipei
         self.assertEqual(doc["concurrency"]["group"], "radar-daily")
         self.assertFalse(doc["concurrency"]["cancel-in-progress"])
-        # State is persisted to radar-state, never main.
         text = (WORKFLOWS / "daily-intelligence.yml").read_text(encoding="utf-8")
         self.assertIn("radar-state", text)
         self.assertNotIn("HEAD:main", text)
+        self.assertIn("run-daily --mode live", text)
+        self.assertIn("FRESHRSS_BASE_URL", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")

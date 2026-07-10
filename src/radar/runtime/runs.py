@@ -143,12 +143,72 @@ def run_daily_live_rss(
     database_path: Path | None = None,
     evaluation_mode: str = "deterministic",
 ) -> RunResult:
+    """Compatibility entrypoint that executes only direct registry RSS/Atom feeds."""
+
+    return _run_daily_registry(
+        repo_root,
+        date,
+        source_backend="rss",
+        ingestion_mode="live_rss",
+        collection_aggregator=False,
+        profile_name=profile_name,
+        timeout_seconds=timeout_seconds,
+        per_feed_limit=per_feed_limit,
+        database_path=database_path,
+        evaluation_mode=evaluation_mode,
+    )
+
+
+def run_daily_live(
+    repo_root: Path,
+    date: str,
+    *,
+    profile_name: str = "daily_push",
+    timeout_seconds: int = 12,
+    per_feed_limit: int = 20,
+    database_path: Path | None = None,
+    evaluation_mode: str = "deterministic",
+) -> RunResult:
+    """Execute direct RSS/Atom plus the optional FreshRSS collection inbox.
+
+    Missing FreshRSS credentials degrade explicitly and never stop direct RSS.
+    Web/API/social/GDELT remain visible as unexecuted until their registry entries
+    carry executable, source-specific extraction configuration.
+    """
+
+    return _run_daily_registry(
+        repo_root,
+        date,
+        source_backend="multi",
+        ingestion_mode="live_multi",
+        collection_aggregator=True,
+        profile_name=profile_name,
+        timeout_seconds=timeout_seconds,
+        per_feed_limit=per_feed_limit,
+        database_path=database_path,
+        evaluation_mode=evaluation_mode,
+    )
+
+
+def _run_daily_registry(
+    repo_root: Path,
+    date: str,
+    *,
+    source_backend: str,
+    ingestion_mode: str,
+    collection_aggregator: bool,
+    profile_name: str,
+    timeout_seconds: int,
+    per_feed_limit: int,
+    database_path: Path | None,
+    evaluation_mode: str,
+) -> RunResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     registry = SourceRegistry.from_file(repo_root / "config/source_registry.json")
     registry.validate()
     composed = compose_application(
         CompositionConfig(
-            source_backend="rss",
+            source_backend=source_backend,
             document_repository_backend="sqlite" if database_path is not None else "memory",
             event_repository_backend="sqlite" if database_path is not None else "memory",
             report_repository_backend="sqlite" if database_path is not None else "memory",
@@ -158,6 +218,11 @@ def run_daily_live_rss(
             migrations_dir=repo_root / "migrations" if database_path is not None else None,
             timeout_seconds=timeout_seconds,
             per_feed_limit=per_feed_limit,
+            optional_integrations={
+                "ai": False,
+                "collection_aggregator": collection_aggregator,
+                "filesystem_artifacts": False,
+            },
             **_evaluator_config(evaluation_mode),  # type: ignore[arg-type]
         ),
         source_registry=registry,
@@ -166,7 +231,7 @@ def run_daily_live_rss(
         DailyRunRequest(
             date=date,
             profile=profile_name,
-            ingestion_mode="live_rss",
+            ingestion_mode=ingestion_mode,
             evaluation_mode=evaluation_mode,
         ),
         contract,

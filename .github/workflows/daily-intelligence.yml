@@ -68,7 +68,7 @@ jobs:
         run: |
           DATE=$(TZ=Asia/Taipei date +%F)
           echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
-          PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date "$DATE" \
+          PYTHONPATH=src python -m radar.cli run-daily --mode live --date "$DATE" \
             --database "$PWD/data/radar.db" --evaluation-mode "$RADAR_EVALUATION_MODE" \
             --timeout-seconds 12 --per-feed-limit 20 > /tmp/report.json
 

@@ -1,38 +1,83 @@
-# Source Adapters & Deterministic Evaluation (PR C)
+# Source Adapters & Deterministic Evaluation
 
-Every network adapter depends on the `HttpTransport` seam (`radar/adapters/transport.py`),
-never on urllib/requests directly, so all adapters are fully unit-testable offline with a fake
-transport. The real `UrllibHttpTransport` enforces a bounded response size, an SSRF allow/deny policy
-on the initial URL and on every redirect hop, a hard redirect cap, and conditional requests.
+Every network adapter depends on the `HttpTransport` seam (`radar/adapters/transport.py`), never on urllib/requests directly, so adapters are unit-testable offline. The real `UrllibHttpTransport` enforces bounded response size, SSRF policy on the initial URL and every redirect hop, a redirect cap and conditional request support.
 
-## Adapters
+## Runtime collection modes
 
-| Adapter | Module | Notes |
-|---------|--------|-------|
-| RSS/Atom (hardened) | `adapters/rss_client.py` | ETag / Last-Modified conditional fetch, deterministic exponential backoff + injectable jitter, per-feed retry isolation. Legacy `adapters/rss.py` remains for the live-rss composition. |
-| FreshRSS | `adapters/freshrss.py` | Google Reader API (ClientLogin, reading-list pagination). Credential-gated via `FRESHRSS_BASE_URL` / `FRESHRSS_USERNAME` / `FRESHRSS_API_PASSWORD`; **missing creds → unavailable, never crashes**. |
-| Safe Web | `adapters/safe_web.py` | Registry allowlist only; blocks localhost / private / link-local / cloud-metadata IPs / disallowed schemes / excessive redirects / oversized responses / disallowed content types. Bounded excerpt + canonical URL + content hash. Never bypasses paywalls/logins, never stores full articles, never becomes an arbitrary crawler. |
-| Generic JSON API | `adapters/json_api.py` | Registry-driven: endpoint, GET, query params, secret env, page + cursor pagination, item path, field mapping, bearer/query token. Missing credential → graceful degradation. |
-| GDELT discovery | `adapters/gdelt_discovery.py` | **Discovery only.** Every entry resolves to original publisher + URL + a registry/temporary identity + a verification status. Never final evidence (`is_final_evidence` is always `False`). |
-| Social direct channels | `adapters/social_channels.py` | Public RSS/Atom/YouTube are direct-checked. X / Meta / Threads / Instagram get an official-API adapter **interface** only; without credentials they are unavailable. A generic web result is never marked `direct_checked`. |
+| Mode | Connected adapters |
+|------|--------------------|
+| `fixture` | deterministic fixtures only |
+| `live-rss` | direct registry RSS / Atom only |
+| `live` | direct registry RSS / Atom + optional FreshRSS reading-list inbox |
+
+`live` uses `CompositeSourceAdapter` to isolate child failures and merge canonical `SourceFetchResult` values. One provider failure never stops the other configured providers.
+
+## Adapter inventory
+
+| Adapter | Module | Runtime status |
+|---------|--------|----------------|
+| RSS/Atom | `adapters/rss.py`, `adapters/rss_client.py` | Connected to `live-rss` and `live`. |
+| FreshRSS | `adapters/freshrss.py`, `adapters/freshrss_source.py` | Connected to `live`; credential-gated. Items map from `origin.streamId` to canonical registry RSS URLs. Missing credentials, fetch failures and unknown streams become explicit gaps. |
+| Composite | `adapters/composite.py` | Connected to `live`; fans out, isolates failures and merges documents/audit/gaps. |
+| Safe Web | `adapters/safe_web.py` | Lower-level implementation complete; not generically connected because each site still needs source-specific list/detail extraction rules. |
+| Generic JSON API | `adapters/json_api.py` | Lower-level implementation complete; not generically connected because current registry API entries do not yet carry executable endpoint, item path, pagination and field mappings. |
+| GDELT discovery | `adapters/gdelt_discovery.py` | Discovery-only implementation complete; not connected until bounded coverage queries and original-publisher verification are defined. Never final evidence. |
+| Social direct channels | `adapters/social_channels.py` | Public-channel and official-API interfaces exist; authenticated X/Meta/Threads/Instagram clients and credentials remain unconnected. Generic web results never count as direct checks. |
+
+## FreshRSS contract
+
+Environment:
+
+```text
+FRESHRSS_BASE_URL
+FRESHRSS_USERNAME
+FRESHRSS_API_PASSWORD
+```
+
+Behavior:
+
+```text
+credentials missing
+→ collection_aggregator=credential_unavailable
+→ direct RSS continues
+
+known origin.streamId
+→ map feed URL to source_registry source_id
+→ emit canonical Document
+
+unknown origin.streamId
+→ do not invent source_id
+→ emit freshrss_stream_unmapped coverage gap
+```
+
+Direct RSS and FreshRSS can observe the same article. Downstream canonical URL/content de-duplication removes the duplicate before event resolution.
+
+## Safe Web policy
+
+`adapters/safe_web.py` is registry-allowlist only. It blocks localhost, private/link-local/cloud-metadata IPs, unsupported schemes, excessive redirects, oversized responses and disallowed content types. It stores only bounded metadata/excerpts, never bypasses paywalls or logins, and never becomes an arbitrary crawler.
 
 ## Source health
 
-`radar/domain/source_health.py` is a pure, deterministic state machine over the eight statuses
-(`healthy`, `stale`, `empty`, `silent_zero`, `failing`, `policy_blocked`, `credential_unavailable`,
-`rate_limited`). It records `checked_at`, `last_success_at`, `last_item_at`, `consecutive_failures`,
-`response_count`, `latency_ms`, `failure_reason` and `retry_at` (exponential backoff on failure/rate
-limit). `SqliteSourceHealthRepository` persists one row per source (migration `0005_source_health.sql`).
+`radar/domain/source_health.py` is a deterministic state machine over:
 
-## Deterministic evaluators (wired into the live pipeline)
+```text
+healthy
+stale
+empty
+silent_zero
+failing
+policy_blocked
+credential_unavailable
+rate_limited
+```
 
-`radar/evaluators/matrices.py` replaces the previous always-`insufficient` matrices with
-**feature-traced** evaluation, wired into `DeterministicIntelligenceEvaluator`:
+It records `checked_at`, `last_success_at`, `last_item_at`, `consecutive_failures`, `response_count`, `latency_ms`, `failure_reason` and `retry_at`. `SqliteSourceHealthRepository` persists source health.
 
-- Retail and Crypto matrix cells are `observed` only when a canonical measurement metric or a keyword
-  trigger is found in the run's events; the `data_checked` trace records exactly which features fired.
-  Otherwise the cell is `insufficient` with an explanatory gap. **No cell ever gets a fixed score.**
-- Structural indicators score support/counter from keyword evidence with a feature trace; with no
-  evidence they are `insufficient` — **no fabricated trend**.
-- `rolling_summary(...)` aggregates stored observations into current / 7d / 30d / 90d windows using only
-  real observations; an empty window is `insufficient`, not invented.
+## Deterministic evaluators
+
+`radar/evaluators/matrices.py` provides feature-traced Retail, Crypto and structural evaluation:
+
+- Matrix cells become `observed` only when canonical measurements or defined evidence features are present.
+- Otherwise they remain `insufficient` with an explicit gap.
+- Structural indicators use only real supporting/counter evidence.
+- Rolling current/7d/30d/90d windows aggregate stored observations only; empty windows never become fabricated trends.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,6 +50,7 @@ class CompositionConfig:
     per_feed_limit: int = 20
     external_discovery_available: bool = True
     fixture_collection_aggregator_available: bool = False
+    environment: Callable[[str], str | None] = os.environ.get
     ai_api_key: str = ""
     ai_model: str = "gpt-4.1-mini"
     ai_effective_mode: str = "auto"
@@ -85,6 +87,32 @@ def compose_application(
             timeout_seconds=config.timeout_seconds,
             per_feed_limit=config.per_feed_limit,
         )
+    elif config.source_backend == "multi":
+        if source_registry is None:
+            raise ValueError("source_registry is required for the multi source backend")
+        # Optional provider implementations stay lazy. A deterministic RSS-only
+        # composition therefore imports no credential-gated adapter modules.
+        from radar.adapters.composite import CompositeSourceAdapter
+
+        children = [
+            RegistryRssSourceAdapter(
+                registry=source_registry,
+                timeout_seconds=config.timeout_seconds,
+                per_feed_limit=config.per_feed_limit,
+            )
+        ]
+        if config.optional_integrations.get("collection_aggregator", False):
+            from radar.adapters.freshrss_source import FreshRssRegistrySourceAdapter
+            from radar.adapters.transport import UrllibHttpTransport
+
+            children.append(
+                FreshRssRegistrySourceAdapter(
+                    registry=source_registry,
+                    transport=UrllibHttpTransport(),
+                    env=config.environment,
+                )
+            )
+        source_adapter = CompositeSourceAdapter(tuple(children))
     else:
         raise ValueError(f"unknown source backend: {config.source_backend}")
 
@@ -228,7 +256,7 @@ def _validate_optional_integrations(config: CompositionConfig) -> None:
         raise ValueError(f"unknown optional integrations: {sorted(unknown)}")
     unavailable_enabled = [
         name
-        for name in ("ai", "collection_aggregator", "filesystem_artifacts")
+        for name in ("ai", "filesystem_artifacts")
         if config.optional_integrations.get(name, False)
     ]
     if unavailable_enabled:
