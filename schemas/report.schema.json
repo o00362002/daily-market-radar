@@ -1,10 +1,75 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "RadarReport",
+  "title": "RadarReportV2",
   "type": "object",
-  "required": ["items", "coverage_gaps"],
+  "required": [
+    "run_id",
+    "date",
+    "profile",
+    "status",
+    "degradation_reasons",
+    "items",
+    "coverage_cells",
+    "coverage_gaps",
+    "source_audit",
+    "rejection_counters",
+    "retail_matrix",
+    "crypto_matrix",
+    "structural_indicators",
+    "backtest",
+    "contract_version"
+  ],
   "properties": {
-    "items": {"type": "array"},
-    "coverage_gaps": {"type": "array"}
+    "run_id": {"type": "string", "minLength": 1},
+    "date": {"type": "string", "format": "date"},
+    "profile": {"enum": ["daily_push", "full"]},
+    "status": {"enum": ["complete", "partial", "failed"]},
+    "degradation_reasons": {"type": "array", "items": {"type": "string"}},
+    "contract_version": {"const": "2.0"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "event_id",
+          "signal_id",
+          "primary_domain",
+          "report_lane",
+          "candidate_type",
+          "formation_level",
+          "headline",
+          "first_seen_at",
+          "today_delta",
+          "importance_score",
+          "potential_score",
+          "confidence_score",
+          "evidence_links",
+          "direct_taiwan_evidence",
+          "taiwan_implication",
+          "counterevidence",
+          "uncertainties",
+          "next_watch"
+        ],
+        "properties": {
+          "report_lane": {"enum": ["major", "potential"]},
+          "candidate_type": {"type": ["string", "null"]},
+          "formation_level": {"type": ["string", "null"]},
+          "importance_score": {"type": "integer", "minimum": 0, "maximum": 100},
+          "potential_score": {"type": "integer", "minimum": 0, "maximum": 100},
+          "confidence_score": {"type": "integer", "minimum": 0, "maximum": 100},
+          "evidence_links": {"type": "array", "minItems": 1},
+          "direct_taiwan_evidence": {"type": "array"}
+        }
+      }
+    },
+    "coverage_cells": {"type": "array"},
+    "coverage_gaps": {"type": "array"},
+    "source_audit": {"type": "object"},
+    "rejection_counters": {"type": "object"},
+    "retail_matrix": {"type": "object"},
+    "crypto_matrix": {"type": "object"},
+    "structural_indicators": {"type": "array", "minItems": 3},
+    "backtest": {"type": "object"}
   }
 }
