@@ -1,298 +1,169 @@
 # AGENT_DEFINITION_MAP
 
-Route map for `daily-market-radar`.
+Select exactly one primary route before execution.
+Machine execution profiles and domain definitions come from `config/runtime_contract.json`.
 
-Select exactly one primary `AGENT_` route before execution.
+## Shared boundaries
 
-All routes that output news, search results, or content must apply:
+All search and radar routes use:
 
 ```text
+config/runtime_contract.json
+config/source_registry.yaml
 configs/news_freshness_and_taiwan_news.yml
+configs/evidence.yml
+configs/technology_development.yml
+configs/structural_trend_indicators.yml
+src/radar/ deterministic pipeline
+schemas/report.schema.json
 ```
 
-Routes that perform search or radar collection must also apply:
+Rules:
 
 ```text
-configs/source_routing_rules.yml
-configs/feed_discovery_stack.yml
-SOURCE_LIBRARY_SPEC.md
-sources/key_media_library.yml
-sources/official_and_data_sources.yml
-sources/channel_feed_sources.json
-sources/discovery_providers.yml
+source registry before generic search
+one event = one primary report domain
+major and potential lanes remain separate
+importance, potential and confidence are independent
+Taiwan direct evidence != Taiwan implication
+slot caps are readability limits, not completeness proof
+fixture mode cannot claim live-news completeness
 ```
 
-These rules prevent four recurring failures:
+## Routes
+
+| Route | Use when | Runtime profile |
+|---|---|---|
+| `AGENT_DAILY_PUSH_BRIEF` | ordinary daily news, morning brief, concise radar | `daily_push` |
+| `AGENT_RADAR_REPORT` | explicit full, formal, archive or research report | `full` |
+| `AGENT_NEWS_SEARCH` | one specified topic or entity | topic scope |
+| `AGENT_NEWS_CONTENT` | rewrite already validated report items | no search profile |
+| `AGENT_COVERAGE_BACKTEST` | gaps, misses, duplication, source health, model adjustment | backtest |
+| `AGENT_RADAR_CONFIG` | source registry, runtime contract, radar, schema, workflow or policy changes | config |
+| `AGENT_SOCIAL_CHANNEL_READER` | direct checks of public social/channel-first sources | specialist sub-route |
+
+## Route selection
+
+Use `AGENT_DAILY_PUSH_BRIEF` for:
 
 ```text
-1. Repeating historical concepts as if they are new daily news.
-2. Replacing Taiwan news with generic Taiwan implications.
-3. Starting from broad keyword search while skipping the fixed source library.
-4. Treating channel-native sources as checked when RSSHub/FreshRSS routes were not verified.
+每日播報 / 每日新聞 / 今日市場雷達 / 今天新聞
+morning brief / daily news / concise brief / quick radar
 ```
 
----
-
-## AGENT_ routes
-
-| Route id | Use when |
-|---|---|
-| `AGENT_RADAR_REPORT` | explicit full daily market radar report / formal archive report |
-| `AGENT_DAILY_PUSH_BRIEF` | default daily news broadcast / concise daily push brief / chat daily news push |
-| `AGENT_NEWS_SEARCH` | specific topic news search |
-| `AGENT_NEWS_CONTENT` | rewrite checked signals into content |
-| `AGENT_COVERAGE_BACKTEST` | missed case, gap, coverage, or adjustment review |
-| `AGENT_RADAR_CONFIG` | config, trigger, evidence, retry, freshness, Taiwan news, source library, feed stack, RSSHub/FreshRSS, discovery provider, or watchlist change |
-| `AGENT_SOCIAL_CHANNEL_READER` | specialist sub-agent for public Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree and other channel-first source checks |
-
----
-
-## Route selection rules
-
-Default daily output is lightweight.
-
-Route to `AGENT_DAILY_PUSH_BRIEF` when the user asks:
+Use `AGENT_RADAR_REPORT` only for explicit:
 
 ```text
-今天播報
-每日播報
-每日新聞
-今天的每日新聞
-播報今天的每日新聞
-每日推播
-今日市場雷達
-今天市場雷達
-今天新聞
-先看今天重點
-讀 repo 播報今天
-不靠記憶讀 repo 播報今天
-quick daily market brief
-morning brief
-daily news
-daily push
-concise brief
-簡版
-輕量版
+完整版 / 正式版 / 完整研究 / 歸檔版 / full report / archival report
 ```
 
-Do not route to `AGENT_RADAR_REPORT` unless the user explicitly asks:
+Historical phrases such as `48-signal`, `60-signal`, `3+3` or `5+5` do not define active completeness. If the user uses them, interpret them as a request for a broader report but still apply runtime v2 coverage gates.
+
+## Dependency chains
+
+### Daily Push
 
 ```text
-正式版
-完整版
-完整正式版
-完整研究歸檔版
-正式每日雷達
-完整每日雷達
-Full Daily Radar
-full report
-complete report
-archival report
-48-signal report
-完整 48 則
-v2 slot-cap report
-完整硬閘門
-產出 reports/YYYY/YYYY-MM-DD.md
-完整寫入 reports
-歸檔版
+AGENT_DAILY_PUSH_BRIEF
+→ workflows/daily_push_brief_workflow.md
+→ config/runtime_contract.json profile=daily_push
+→ config/source_registry.yaml
+→ src/radar pipeline
+→ templates/daily_push_brief_template.md
+→ schemas/report.schema.json + Python validator
+→ post-run backtest
 ```
 
-If user wording is ambiguous between daily push and full archive, choose `AGENT_DAILY_PUSH_BRIEF` and disclose:
-
-```text
-輸出模式：每日推播精簡版。
-完整 48 則正式閘門：未嘗試 / 另需分段研究版。
-```
-
-General words such as 每日 / 播報 / 新聞 / 市場雷達 / today / brief do not upgrade the route to the full archive workflow.
-
-Route to `AGENT_SOCIAL_CHANNEL_READER` as a specialist sub-agent, not the primary daily output route, when the task requires:
-
-```text
-Instagram / IG
-X / Twitter
-Facebook / FB
-Threads
-YouTube
-TikTok
-LINE OA
-Newsletter
-Website / Linktree / bio link
-Discord
-Telegram
-Podcast
-社群帳號直查
-社群來源讀取
-channel-first source check
-social-first source check
-RSSHub route check
-FreshRSS feed check
-```
-
-For daily reports, the primary route remains `AGENT_DAILY_PUSH_BRIEF` or `AGENT_RADAR_REPORT`; these routes may invoke `AGENT_SOCIAL_CHANNEL_READER` when channel-aware checks are required.
-
----
-
-## Dependency chain
-
-Each route must follow the active output-mode chain in `DEPENDENCY_MAP.md`.
+### Full Radar
 
 ```text
 AGENT_RADAR_REPORT
 → workflows/daily_radar_workflow.md
-→ templates/daily_report_template.md or templates/daily_report_template_v2.md
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
-→ SOURCE_LIBRARY_SPEC.md + sources/
-→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
-→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
-→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
-→ DEPENDENCY_MAP.md / Full Daily Radar Gate
+→ config/runtime_contract.json profile=full
+→ config/source_registry.yaml
+→ src/radar pipeline
+→ templates/daily_report_template_v2.md
+→ report validation
+→ reports/ archive + backtest
+```
 
-AGENT_DAILY_PUSH_BRIEF
-→ workflows/daily_push_brief_workflow.md
-→ templates/daily_push_brief_template.md
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
-→ SOURCE_LIBRARY_SPEC.md + sources/
-→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
-→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
-→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
-→ DEPENDENCY_MAP.md / Daily Push Brief Gate
+### Topic Search
 
+```text
 AGENT_NEWS_SEARCH
-→ workflows/news_search_content_workflow.md
-→ templates/news_search_content_template.md or templates/news_search_content_template_v2.md
-→ configs/news_freshness_and_taiwan_news.yml
-→ configs/source_routing_rules.yml
-→ configs/feed_discovery_stack.yml when feed/channel/discovery stack is relevant
-→ SOURCE_LIBRARY_SPEC.md + sources/
-→ sources/channel_feed_sources.json + sources/discovery_providers.yml when feed/channel/discovery stack is relevant
-→ skill_specs/social_channel_reading_skill.md when social/channel-first sources are required
-→ agent_specs/social_channel_reader_agent.md when delegated channel checks are required
+→ source registry routing
+→ source health / ingest / gap discovery
+→ event and evidence validation
+→ topic-search template
+```
 
+### Content Rewrite
+
+```text
 AGENT_NEWS_CONTENT
-→ workflows/news_content_workflow.md
-→ templates/news_content_template.md or templates/news_content_template_v2.md
-→ configs/news_freshness_and_taiwan_news.yml
-
-AGENT_SOCIAL_CHANNEL_READER
-→ agent_specs/social_channel_reader_agent.md
-→ skill_specs/social_channel_reading_skill.md
-→ tools/social_channel_reader_tool.md
-→ configs/source_routing_rules.yml
-→ configs/feed_discovery_stack.yml when RSSHub/FreshRSS/GDELT/Media Cloud is used
-→ SOURCE_LIBRARY_SPEC.md
-→ sources/channel_feed_sources.json when RSSHub/FreshRSS routes are used
-→ claim-risk verification through skill_specs/claim_risk_check_skill.md when needed
+→ validated items only
+→ content template
 ```
 
-Route, workflow, template, config, and gate must match. If they do not match, mark the output as:
+`AGENT_NEWS_CONTENT` cannot upgrade evidence, invent a fresh delta or replace a radar/search run.
+
+## Social-channel specialist
+
+Invoke `AGENT_SOCIAL_CHANNEL_READER` when direct checks are required for:
 
 ```text
-依賴鏈不一致：partial / blocked
+Instagram / Threads / X / Facebook / YouTube / TikTok
+LINE OA / Newsletter / Website / Linktree
+Discord / Telegram / Podcast / public community channels
 ```
 
-Do not use a separate active daily execution-gate file for route completion rules. Daily output completion gates live in `DEPENDENCY_MAP.md`.
+Generic search is not a direct social check. RSSHub and FreshRSS are collection adapters, not factual verification.
 
----
-
-## Source-library search boundary
-
-For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, and `AGENT_NEWS_SEARCH`:
+## Source and discovery boundary
 
 ```text
-- Fixed source library must be checked before generic keyword fallback.
-- Keyword search can filter, expand, retry, or discover sources, but must not replace source-library coverage.
-- Fixed query recipes (configs/query_recipes.yml; domains/<id>/sources.json query_recipes) run before free-form queries; free-form queries are supplements and must be disclosed in coverage audit.
-- When channel-first sources are relevant, load configs/feed_discovery_stack.yml and sources/channel_feed_sources.json before claiming channel coverage.
-- RSSHub/FreshRSS improve collection coverage, not evidence strength.
-- GDELT/Media Cloud discover sources and event clusters, but original sources still need verification.
-- Material source gaps must be disclosed in the output or final status panel.
-- Official / data sources should be used to verify high-risk claims and indicator changes.
-- If a source is social-first or channel-first, invoke `AGENT_SOCIAL_CHANNEL_READER` or explicitly mark channel check gaps.
+one real-world source = one source_id
+RSS / API / web / RSSHub / social = adapters
+unavailable adapter = coverage gap
+external discovery = source discovery only
+final claim = original source or verified credible evidence
 ```
 
-## Domain extension boundary
+## Domain boundary
 
-For all scan routes:
+Canonical report domains come only from `config/runtime_contract.json`.
+Fine-grained entries in `configs/radars.yml` are radar modules, triggers and indicators; they do not create extra report-domain slots.
+
+New extensible subject packs under `domains/` can add source/query coverage, but must map to a canonical report domain unless the runtime contract is intentionally changed and validated.
+
+## Freshness and event identity
+
+Every report item requires a material `today_delta`. Background knowledge, historical replay or article rephrasing does not create a new event item.
+
+The same event cannot:
 
 ```text
-- Scan domain list = six core domains + every pack under domains/ (spec: domains/README.md).
-- Adding a new domain = copy domains/_template/, fill domain_pack.json + sources.json; no workflow or entry file changes needed. check-domain-packs validates completeness at commit.
-- Capture stage has no prefiltering: any 新概念 / 新應用 / 新趨勢 / 新組合 signal goes into memory/potential_pool.md (configs/edge_case_discovery.yml capture_no_prefilter). Selection happens only at output stage and is recorded.
-- Route domain-pack changes through AGENT_RADAR_CONFIG.
+occupy major and potential lanes together
+occupy multiple primary report domains
+be repeated because several publishers covered it
 ```
 
----
+Cross-domain consequences belong in indicator panels and synthesis.
 
-## News freshness and Taiwan news boundary
+## Taiwan boundary
 
-For `AGENT_RADAR_REPORT`, `AGENT_DAILY_PUSH_BRIEF`, `AGENT_NEWS_SEARCH`, and `AGENT_NEWS_CONTENT`:
+Direct Taiwan evidence is counted separately from Taiwan implication. If direct sources or channels were not checked, expose the coverage gap and do not say `Taiwan has no news`.
 
-```text
-- Every news item must include 今日新增點.
-- Every news item must mark whether it repeats a historical theme.
-- Repeated themes need new data / company action / policy / market reaction / chain metric / Taiwan news to count as current news.
-- Taiwan news must be source-backed Taiwan event / data / company action / policy / market news.
-- Taiwan implication is model inference and must not be counted as Taiwan news.
-```
+## Multi-agent handoff
 
----
-
-## Social channel reading boundary
-
-For `AGENT_SOCIAL_CHANNEL_READER` and any route invoking it:
+Agents hand off externalized state only:
 
 ```text
-- Baseline channel coverage: Instagram, X / Twitter, Facebook, Threads, YouTube, TikTok, LINE OA, Newsletter, Website / Linktree.
-- Optional channels: Discord, Telegram, Podcast, Forum / community board, App push / member message when user-provided or officially accessible.
-- Generic search does not count as direct social-channel check.
-- RSSHub route templates do not count as checked channels until route_status = verified and enabled_for_opml = true in sources/channel_feed_sources.json.
-- FreshRSS unread/feed inbox is collection evidence only; it does not prove factual claims.
-- Public social posts are discovery signals, usually medium_low evidence.
-- Policy, law, finance, market, and investment claims must be verified with official / data / trusted-media sources.
-- Restricted/private access is outside this repo's allowed collection scope.
-```
-
-Required audit fields:
-
-```text
-social_channels_checked_when_required: yes / partial / no / not_required
-baseline_channels_checked: Instagram / X / Facebook / Threads / YouTube / TikTok / LINE OA / Newsletter / Website-Linktree = yes / partial / no
-rsshub_routes_checked: yes / partial / no / not_required
-freshrss_checked: yes / partial / no / not_required
-channel_gaps: none / list
-social_tool_mode_used: official_api / public_url / RSSHub_verified_route / FreshRSS_feed_inbox / screenshot / generic_search_fallback / none
-policy_or_access_blockers: none / list
-```
-
----
-
-## Multi-agent handoff rule
-
-Agents do not share hidden reasoning.
-
-Agents hand off through externalized repo state:
-
-```text
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-AGENT_DEFINITION_MAP.md
-DEPENDENCY_MAP.md
+run_id / event_id / signal_id
+report JSON contract
+coverage gaps
 reports/backtests/
-Post-Execution Record
-Memory Patch Candidate
+CURRENT_STATE.md / CURRENT_DECISIONS.md when approved
 ```
 
-Select exactly one primary route before execution.
-
-After execution, use the Post-Execution Backtest-to-Memory Gate when the task affects files, state, decisions, routes, evidence, dependency gates, radar corrections, or reusable workflow behavior.
-
----
-
-## Boundary
-
-Agent owns a complete task goal. Workflow orders steps. Skill judges. Tool operates. Loop reviews and improves.
+Agents do not share hidden reasoning and cannot approve their own evidence or structural changes.
