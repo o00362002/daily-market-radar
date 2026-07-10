@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: daily-market-radar
+Version: 0.2.0
+Summary: Event intelligence runtime for daily-market-radar
+Requires-Python: >=3.12
+Requires-Dist: pydantic>=2
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: respx>=0.21; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+Requires-Dist: jsonschema>=4.23; extra == "dev"

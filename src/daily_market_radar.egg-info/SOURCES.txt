@@ -1,0 +1,121 @@
+README.md
+pyproject.toml
+src/daily_market_radar.egg-info/PKG-INFO
+src/daily_market_radar.egg-info/SOURCES.txt
+src/daily_market_radar.egg-info/dependency_links.txt
+src/daily_market_radar.egg-info/entry_points.txt
+src/daily_market_radar.egg-info/requires.txt
+src/daily_market_radar.egg-info/top_level.txt
+src/radar/__init__ 2.py
+src/radar/__init__.py
+src/radar/cli 2.py
+src/radar/cli.py
+src/radar/composition.py
+src/radar/settings 2.py
+src/radar/settings.py
+src/radar/adapters/__init__ 2.py
+src/radar/adapters/__init__.py
+src/radar/adapters/base 2.py
+src/radar/adapters/base.py
+src/radar/adapters/event_registry 2.py
+src/radar/adapters/event_registry.py
+src/radar/adapters/fixture.py
+src/radar/adapters/gdelt 2.py
+src/radar/adapters/gdelt.py
+src/radar/adapters/mediacloud 2.py
+src/radar/adapters/mediacloud.py
+src/radar/adapters/newscatcher 2.py
+src/radar/adapters/newscatcher.py
+src/radar/adapters/official_api 2.py
+src/radar/adapters/official_api.py
+src/radar/adapters/rss 2.py
+src/radar/adapters/rss.py
+src/radar/adapters/rsshub 2.py
+src/radar/adapters/rsshub.py
+src/radar/application/__init__.py
+src/radar/application/run_daily.py
+src/radar/contracts/__init__.py
+src/radar/contracts/evaluation.py
+src/radar/contracts/report.py
+src/radar/contracts/runtime.py
+src/radar/contracts/web.py
+src/radar/domain/__init__ 2.py
+src/radar/domain/__init__.py
+src/radar/domain/enums 2.py
+src/radar/domain/enums.py
+src/radar/domain/models 2.py
+src/radar/domain/models.py
+src/radar/domain/scoring 2.py
+src/radar/domain/scoring.py
+src/radar/evaluators/__init__.py
+src/radar/evaluators/deterministic.py
+src/radar/pipeline/__init__ 2.py
+src/radar/pipeline/__init__.py
+src/radar/pipeline/classify 2.py
+src/radar/pipeline/classify.py
+src/radar/pipeline/cluster 2.py
+src/radar/pipeline/cluster.py
+src/radar/pipeline/coverage 2.py
+src/radar/pipeline/coverage.py
+src/radar/pipeline/deduplicate 2.py
+src/radar/pipeline/deduplicate.py
+src/radar/pipeline/deltas 2.py
+src/radar/pipeline/deltas.py
+src/radar/pipeline/enrich 2.py
+src/radar/pipeline/enrich.py
+src/radar/pipeline/ingest 2.py
+src/radar/pipeline/ingest.py
+src/radar/pipeline/normalize 2.py
+src/radar/pipeline/normalize.py
+src/radar/pipeline/trends 2.py
+src/radar/pipeline/trends.py
+src/radar/pipeline/verify 2.py
+src/radar/pipeline/verify.py
+src/radar/ports/__init__.py
+src/radar/ports/evaluation.py
+src/radar/ports/publishing.py
+src/radar/ports/repositories.py
+src/radar/ports/sources.py
+src/radar/publishers/__init__.py
+src/radar/publishers/noop.py
+src/radar/reporting/__init__ 2.py
+src/radar/reporting/__init__.py
+src/radar/reporting/contracts 2.py
+src/radar/reporting/contracts.py
+src/radar/reporting/planner 2.py
+src/radar/reporting/planner.py
+src/radar/reporting/renderer 2.py
+src/radar/reporting/renderer.py
+src/radar/repositories/__init__ 2.py
+src/radar/repositories/__init__.py
+src/radar/repositories/base 2.py
+src/radar/repositories/base.py
+src/radar/repositories/memory.py
+src/radar/repositories/sql 2.py
+src/radar/repositories/sql.py
+src/radar/repositories/sqlite.py
+src/radar/runtime/__init__ 2.py
+src/radar/runtime/__init__.py
+src/radar/runtime/contract.py
+src/radar/runtime/health 2.py
+src/radar/runtime/health.py
+src/radar/runtime/runs 2.py
+src/radar/runtime/runs.py
+src/radar/runtime/scheduler 2.py
+src/radar/runtime/scheduler.py
+src/radar/schemas/__init__ 2.py
+src/radar/schemas/__init__.py
+src/radar/schemas/coverage 2.py
+src/radar/schemas/coverage.py
+src/radar/schemas/document 2.py
+src/radar/schemas/document.py
+src/radar/schemas/event 2.py
+src/radar/schemas/event.py
+src/radar/schemas/report 2.py
+src/radar/schemas/report.py
+src/radar/schemas/signal 2.py
+src/radar/schemas/signal.py
+src/radar/schemas/source 2.py
+src/radar/schemas/source.py
+src/radar/stores/__init__.py
+src/radar/stores/memory.py
