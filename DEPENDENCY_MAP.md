@@ -169,7 +169,7 @@ schema exists != database persistence active
 
 The report must expose ingestion mode and cannot claim live completeness from fixture data.
 `live-rss` executes verified RSS/Atom adapters and can persist optional SQLite document, event, delta,
-report, indicator and state records, but remains partial until web/API/social, FreshRSS and external
+report, indicator and state records, but remains partial until web, API, social, FreshRSS and external
 discovery adapters are connected.
 
 ## 10. Replaceability boundary

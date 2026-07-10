@@ -71,7 +71,7 @@ PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 -
 ```
 
 `live-rss` fetches enabled RSS/Atom adapters and can persist documents, events, material deltas, reports,
-indicator observations and state to SQLite. It still reports partial when web/API/social/FreshRSS,
+indicator observations and state to SQLite. It still reports partial when web, API, social, FreshRSS,
 external discovery or semantic evaluators are not executed.
 
 ## Current boundary
@@ -91,7 +91,7 @@ optional SQLite report persistence
 Not production-complete:
 
 ```text
-web/API/social/FreshRSS adapters
+web, API, social and FreshRSS adapters
 external discovery providers
 historical material-delta repository
 semantic scoring and structural indicator evaluators

@@ -66,6 +66,27 @@ def build_parser() -> argparse.ArgumentParser:
     import_chat.add_argument("--package-dir", required=True)
     import_chat.add_argument("--report", required=True)
     import_chat.add_argument("--receipt", default="")
+
+    export_web = sub.add_parser("export-web")
+    export_web.add_argument("--out-dir", default=".")
+    export_web.add_argument("--database", default="")
+    export_web.add_argument("--input", default="")
+    export_web.add_argument("--reports-dir", default="")
+    export_web.add_argument("--latest", action="store_true")
+    export_web.add_argument("--full-rebuild", action="store_true", help="disable incremental unchanged-skip")
+
+    state = sub.add_parser("state")
+    state_sub = state.add_subparsers(dest="state_command", required=True)
+    state_pack = state_sub.add_parser("pack")
+    state_pack.add_argument("--database", required=True)
+    state_pack.add_argument("--state-root", required=True)
+    state_pack.add_argument("--run-id", default="scheduled")
+    state_pack.add_argument("--created-at", default="")
+    state_restore = state_sub.add_parser("restore")
+    state_restore.add_argument("--state-root", required=True)
+    state_restore.add_argument("--database", required=True)
+    state_verify = state_sub.add_parser("verify")
+    state_verify.add_argument("--state-root", required=True)
     return parser
 
 
@@ -152,6 +173,82 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(json.dumps(receipt.as_dict(), ensure_ascii=False, indent=2))
         return 0 if receipt.valid else 1
+
+    if args.command == "export-web":
+        from radar.web.runtime import export_web
+
+        result = export_web(
+            repo_root,
+            Path(args.out_dir).resolve(),
+            database=Path(args.database).resolve() if args.database else None,
+            input_report=Path(args.input).resolve() if args.input else None,
+            reports_dir=Path(args.reports_dir).resolve() if args.reports_dir else None,
+            latest=args.latest,
+            incremental=not args.full_rebuild,
+        )
+        print(
+            json.dumps(
+                {"status": "exported", "written": len(result.written), "skipped": len(result.skipped)},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+
+    if args.command == "state":
+        from datetime import datetime, timezone
+
+        from radar.state.branch_store import (
+            MANIFEST_ARTIFACT,
+            StateManifest,
+            pack_state,
+            restore_last_good,
+            unpack_state,
+            verify_state,
+            write_state_tree,
+        )
+
+        if args.state_command == "pack":
+            created_at = args.created_at or datetime.now(timezone.utc).isoformat()
+            compressed, manifest = pack_state(
+                Path(args.database).resolve(), run_id=args.run_id, created_at=created_at
+            )
+            written = write_state_tree(Path(args.state_root).resolve(), compressed, manifest)
+            print(json.dumps({"status": "packed", "written": written, "run_id": manifest.run_id}, ensure_ascii=False))
+            return 0
+
+        state_root = Path(args.state_root).resolve()
+        manifest_path = state_root / MANIFEST_ARTIFACT
+        if args.state_command == "verify":
+            if not manifest_path.exists():
+                print(json.dumps({"status": "empty"}, ensure_ascii=False))
+                return 0
+            manifest = StateManifest.from_dict(json.loads(manifest_path.read_text(encoding="utf-8")))
+            try:
+                verify_state((state_root / "radar.db.gz").read_bytes(), manifest)
+                print(json.dumps({"status": "valid", "run_id": manifest.run_id}, ensure_ascii=False))
+                return 0
+            except Exception as exc:  # noqa: BLE001
+                print(json.dumps({"status": "corrupt", "reason": str(exc)}, ensure_ascii=False))
+                return 1
+
+        if args.state_command == "restore":
+            database = Path(args.database).resolve()
+            if not manifest_path.exists():
+                print(json.dumps({"status": "no_state"}, ensure_ascii=False))
+                return 0
+            manifest = StateManifest.from_dict(json.loads(manifest_path.read_text(encoding="utf-8")))
+            try:
+                unpack_state((state_root / "radar.db.gz").read_bytes(), manifest, database)
+                print(json.dumps({"status": "restored", "run_id": manifest.run_id}, ensure_ascii=False))
+                return 0
+            except Exception:  # noqa: BLE001 - corruption rollback to last good
+                restored = restore_last_good(state_root, database)
+                if restored is None:
+                    print(json.dumps({"status": "unrecoverable"}, ensure_ascii=False))
+                    return 1
+                print(json.dumps({"status": "rolled_back", "run_id": restored.run_id}, ensure_ascii=False))
+                return 0
 
     if args.command in {"ingest", "process", "coverage", "report", "trends", "backtest"}:
         print(

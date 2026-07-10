@@ -101,3 +101,15 @@ invalid report contract → failed run
 fixture mode → partial
 unexecuted adapter family → degradation reason
 ```
+
+## Daily automation (PR F)
+
+```text
+Workflows: runtime-check, web-check, daily-intelligence, prepare-chat, import-chat, pages-deploy, mount-check.
+Schedule: daily-intelligence cron '0 23 * * *' UTC == 07:00 Asia/Taipei, deployed before 09:00 TW.
+Mode: RADAR_EVALUATION_MODE (default auto). No secrets → deterministic, site + Pages still produced.
+Durable state: radar-state branch (compressed + checksummed SQLite, last-good backup, atomic, concurrency lock,
+  corruption rollback). See docs/state-persistence.md.
+Pages: deploy only validated site artifact; failed report not deployed; fixture is preview-only; base from env.
+Secrets: all optional; redaction scrubs credentials from logs. See docs/secrets.md.
+```

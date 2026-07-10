@@ -1,0 +1,38 @@
+name: prepare-chat
+
+# Build a deterministic, secret-free chat context package for a given date and
+# upload it as a workflow artifact. Makes no API call and uses no secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Report date (YYYY-MM-DD); defaults to today (Taiwan)"
+        required: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Assert no OpenAI SDK is importable during prepare-chat
+        run: |
+          python - <<'PY'
+          import sys, subprocess, os
+          env = dict(os.environ); env["PYTHONPATH"] = "src"; env["OPENAI_API_KEY"] = ""
+          date = os.environ.get("INPUT_DATE") or subprocess.check_output(["date", "+%F"], env={"TZ": "Asia/Taipei", **os.environ}).decode().strip()
+          out = subprocess.check_output([sys.executable, "-m", "radar.cli", "prepare-chat", "--date", date, "--output-root", "."], env=env)
+          print(out.decode())
+          assert "openai" not in sys.modules
+          PY
+        env:
+          INPUT_DATE: ${{ github.event.inputs.date }}
+      - name: Upload chat package
+        uses: actions/upload-artifact@v4
+        with:
+          name: chat-package
+          path: artifacts/chat/v1/**

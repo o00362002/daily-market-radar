@@ -1,0 +1,73 @@
+name: pages-deploy
+
+# Manual redeploy of the validated static site (e.g. after import-chat). Deploys
+# only the built site artifact — it never fetches live data — and skips deployment
+# when the latest report is failed or fixture-only.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: radar-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deployable: ${{ steps.gate.outputs.deployable }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: python -m pip install -e ".[dev]"
+      - name: Restore state and export the latest validated artifacts
+        run: |
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore --state-root .state/state --database "$PWD/data/radar.db"
+            PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db"
+          else
+            echo "no durable state to deploy"; exit 1
+          fi
+      - name: Deploy gate
+        id: gate
+        run: |
+          STATUS=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['status'])")
+          MODE=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['source_audit']['ingestion_mode'])")
+          if [ "$STATUS" = "failed" ] || [ "$MODE" = "fixture" ]; then echo "deployable=false" >> "$GITHUB_OUTPUT"; else echo "deployable=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Build site
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: npm ci && npm run build
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.gate.outputs.deployable == 'true'
+        with:
+          path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.deployable == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { getLatestReport, getManifest, getTaiwan } from '../lib/data';
+const report: any = getLatestReport();
+const items: any[] = (report?.items ?? []).filter((i: any) => (i.direct_taiwan_evidence ?? []).length > 0);
+const manifest = getManifest();
+const history = (manifest?.years ?? []).flatMap((y) => getTaiwan(y)?.entries ?? []);
+---
+<Base title="台灣 Taiwan">
+  <h1>台灣 · 直接證據</h1>
+  <p class="muted">「台灣可能受影響」是推論，不計入直接台灣證據。</p>
+  {items.length === 0 && <p class="empty">今日無台灣直接證據項目。</p>}
+  {items.map((item) => (
+    <article class="card">
+      <strong>{item.headline}</strong>
+      <p>{item.taiwan_implication || item.today_delta}</p>
+      <div class="row muted">{(item.direct_taiwan_evidence ?? []).map((l: any) => <a href={l.url}>{l.source_id} ↗</a>)}</div>
+    </article>
+  ))}
+  <h2>歷史台灣覆蓋</h2>
+  <table><thead><tr><th>日期</th><th>台灣項目</th></tr></thead><tbody>
+    {history.sort((a, b) => (a.date < b.date ? 1 : -1)).map((e: any) => <tr><td>{e.date}</td><td>{e.taiwan_count}</td></tr>)}
+  </tbody></table>
+</Base>

@@ -123,7 +123,7 @@ optional SQLite report and gap persistence
 Still incomplete for production completeness:
 
 ```text
-web/API/social/FreshRSS adapters
+web, API, social and FreshRSS adapters
 external discovery providers
 historical event repository and material-delta comparison
 semantic scoring and structural-indicator evaluators

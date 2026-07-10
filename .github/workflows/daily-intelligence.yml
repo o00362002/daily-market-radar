@@ -1,0 +1,131 @@
+name: daily-intelligence
+
+# Daily pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
+# cron is UTC: '0 23 * * *' == 07:00 Asia/Taipei, leaving ample margin before 09:00 TW.
+# Indicative local timeline: 07:30 collection, 07:50 resolution, 08:10 evaluation,
+# 08:30 validation, 08:40 web export, 08:50 Astro build, 09:00 deployment.
+
+on:
+  schedule:
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+    inputs:
+      evaluation_mode:
+        description: "deterministic | auto | api-assisted"
+        default: "auto"
+
+concurrency:
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  intelligence:
+    runs-on: ubuntu-latest
+    outputs:
+      deployable: ${{ steps.gate.outputs.deployable }}
+      status: ${{ steps.gate.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: python -m pip install -e ".[dev]"
+
+      - name: Restore durable state (radar-state branch; never main)
+        run: |
+          set -e
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore --state-root .state/state --database "$PWD/data/radar.db" || echo "state restore reported no usable state"
+          else
+            echo "no radar-state branch yet; first run starts empty"
+            mkdir -p .state/state
+          fi
+
+      - name: Run daily intelligence
+        env:
+          RADAR_EVALUATION_MODE: ${{ github.event.inputs.evaluation_mode || vars.RADAR_EVALUATION_MODE || 'auto' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          OPENAI_MAX_DAILY_COST_USD: ${{ vars.OPENAI_MAX_DAILY_COST_USD }}
+          OPENAI_MAX_ITEMS_PER_RUN: ${{ vars.OPENAI_MAX_ITEMS_PER_RUN }}
+          OPENAI_MAX_INPUT_TOKENS_PER_RUN: ${{ vars.OPENAI_MAX_INPUT_TOKENS_PER_RUN }}
+          FRESHRSS_BASE_URL: ${{ secrets.FRESHRSS_BASE_URL }}
+          FRESHRSS_USERNAME: ${{ secrets.FRESHRSS_USERNAME }}
+          FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
+        run: |
+          DATE=$(TZ=Asia/Taipei date +%F)
+          echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
+          PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date "$DATE" \
+            --database "$PWD/data/radar.db" --evaluation-mode "$RADAR_EVALUATION_MODE" \
+            --timeout-seconds 12 --per-feed-limit 20 > /tmp/report.json
+
+      - name: Export web artifacts
+        run: PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db"
+
+      - name: Deploy gate (failed reports are not deployed; fixture is preview-only)
+        id: gate
+        run: |
+          STATUS=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['status'])")
+          MODE=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['source_audit']['ingestion_mode'])")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$STATUS" = "failed" ]; then
+            echo "deployable=false" >> "$GITHUB_OUTPUT"
+          elif [ "$MODE" = "fixture" ]; then
+            echo "fixture run — preview only, not deployed"; echo "deployable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Persist durable state (atomic, checksummed, last-good backup)
+        run: |
+          set -e
+          PYTHONPATH=src python -m radar.cli state pack --database "$PWD/data/radar.db" \
+            --state-root .state/state --run-id "${GITHUB_RUN_ID}"
+          cd .state
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          if [ ! -e .git ]; then git init -q && git checkout -q -b radar-state; fi
+          git add state
+          git commit -q -m "state: run ${GITHUB_RUN_ID}" || echo "no state change"
+          git push origin HEAD:radar-state
+
+      - name: Build static site
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: |
+          npm ci
+          npm run types:check
+          npm run build
+
+      - name: Upload Pages artifact
+        if: steps.gate.outputs.deployable == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
+
+  deploy:
+    needs: intelligence
+    if: needs.intelligence.outputs.deployable == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
