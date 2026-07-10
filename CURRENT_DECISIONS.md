@@ -12,7 +12,7 @@
 1. config/runtime_contract.json is the canonical machine execution/output contract.
 2. config/source_registry.json is the canonical source identity and adapter registry.
 3. Daily Push slot caps are readability limits; Full profile outputs qualified items within run budget.
-4. Fixed-count completion rules (3+3 / 5+5 / 48-signal / 60-signal) are frozen v1 behavior.
+4. Historical fixed-count completion rules are frozen v1 behavior.
 5. Completeness is determined by source health, coverage cells, evidence trace, fresh material delta,
    de-duplication, rejection/retry audit, Taiwan direct evidence, fixed matrices, structural indicators,
    report-contract validation and backtest.
