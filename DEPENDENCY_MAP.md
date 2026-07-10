@@ -10,10 +10,10 @@ Execution entry: AGENTS.md
 Current facts: CURRENT_STATE.md
 Accepted decisions: CURRENT_DECISIONS.md
 Runtime contract: config/runtime_contract.json
-Canonical source registry: config/source_registry.yaml
+Canonical source registry: config/source_registry.json
 Deterministic runtime: src/radar/
 Report schema: schemas/report.schema.json
-Database foundation: migrations/0001_runtime_foundation.sql
+Database foundation: migrations/0001_runtime_foundation.sql + migrations/0002_report_payloads.sql
 Sync edges: schema/sync-matrix.json
 ```
 
@@ -27,7 +27,7 @@ If prose conflicts with the runtime contract, mark dependency drift and follow t
 ```text
 AGENT_DAILY_PUSH_BRIEF
 → config/runtime_contract.json profile=daily_push
-→ config/source_registry.yaml
+→ config/source_registry.json
 → source health / ingest adapters
 → normalize / deduplicate / event clustering / material delta
 → evidence verification / independent scores
@@ -108,7 +108,7 @@ Otherwise status is `partial` or `failed`, with explicit degradation reasons.
 
 ## 5. Source and feed gate
 
-Canonical source identity lives in `config/source_registry.yaml`.
+Canonical source identity lives in `config/source_registry.json`.
 
 ```text
 one real source = one source_id
@@ -128,7 +128,7 @@ direct_taiwan_evidence != taiwan_implication
 ```
 
 Taiwan direct evidence must resolve to a Taiwan source or an event explicitly involving a Taiwan entity.
-Generic implications do not satisfy Taiwan coverage. Social-first channels require direct checks.
+Generic implications do not satisfy Taiwan coverage. Social-first sources require direct checks.
 Taiwan crypto fixed-source failures must be disclosed as source gaps.
 
 ## 7. Major and potential lanes
@@ -168,16 +168,16 @@ schema exists != database persistence active
 ```
 
 The report must expose ingestion mode and cannot claim live completeness from fixture data.
+`live-rss` executes verified RSS/Atom adapters and persists optional SQLite run records, but remains partial until web/API/social, FreshRSS and external discovery adapters are connected.
 
 ## 10. Runtime commands
 
 ```bash
 make validate
 PYTHONPATH=src python -m radar.cli sources validate
-PYTHONPATH=src python -m radar.cli run-daily --date YYYY-MM-DD
+PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date YYYY-MM-DD
+PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date YYYY-MM-DD --database data/radar.sqlite3
 ```
-
-`run-daily` remains partial until live adapters, source health and persistence are enabled and validated.
 
 ## 11. Sync expectations
 
