@@ -10,7 +10,7 @@ AGENTS.md
 CURRENT_STATE.md
 CURRENT_DECISIONS.md
 config/runtime_contract.json
-config/source_registry.yaml
+config/source_registry.json
 AGENT_DEFINITION_MAP.md
 DEPENDENCY_MAP.md
 schema/sync-matrix.json
@@ -21,7 +21,7 @@ schema/sync-matrix.json
 ```text
 src/radar/                     deterministic event-intelligence runtime
 config/runtime_contract.json   report domains, profiles, matrices and completion contract
-config/source_registry.yaml    canonical source identity and adapters
+config/source_registry.json    canonical source identity and adapters
 schemas/                       stable payload contracts
 migrations/                    durable storage foundation
 Makefile                       validation entrypoint
