@@ -6,7 +6,7 @@ Purpose: produce the formal full research and archive output from Event Intellig
 owner: AGENT_RADAR_REPORT
 profile: full
 runtime contract: config/runtime_contract.json
-canonical source registry: config/source_registry.yaml
+canonical source registry: config/source_registry.json
 archive path: reports/YYYY/YYYY-MM-DD.md
 ```
 
