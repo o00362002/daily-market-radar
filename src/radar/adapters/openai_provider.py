@@ -19,7 +19,6 @@ from radar.evaluators.ai_provider import (
     MAX_SCORE_DELTA,
 )
 
-# Rough public pricing (USD per 1K tokens); only used for cost estimation/budgeting.
 _PRICE_PER_1K = {"input": 0.005, "output": 0.015}
 
 
@@ -49,7 +48,9 @@ class OpenAiEvaluationProvider:
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 estimated_cost_usd=round(
-                    input_tokens / 1000 * _PRICE_PER_1K["input"] + output_tokens / 1000 * _PRICE_PER_1K["output"], 6
+                    input_tokens / 1000 * _PRICE_PER_1K["input"]
+                    + output_tokens / 1000 * _PRICE_PER_1K["output"],
+                    6,
                 ),
             ),
         )
@@ -64,10 +65,13 @@ def _request_payload(request: AiProposalRequest) -> dict[str, object]:
     return {
         "date": request.date,
         "profile": request.profile,
+        "output_language": "zh-Hant-TW",
         "events": [
             {
                 "event_id": event.event_id,
                 "primary_domain": event.primary_domain,
+                "original_language": event.original_language,
+                "original_headline": event.original_headline,
                 "summary": event.summary,
                 "delta_types": list(event.delta_types),
                 "metric_ids": list(event.measurement_metric_ids),
@@ -92,6 +96,7 @@ def _parse_items(content: str) -> tuple[AiProposalItem, ...]:
             AiProposalItem(
                 event_id=str(row.get("event_id", "")),
                 headline=str(row.get("headline", "")),
+                today_delta=str(row.get("today_delta", "")),
                 rationale=str(row.get("rationale", "")),
                 taiwan_implication=str(row.get("taiwan_implication", "")),
                 next_watch=str(row.get("next_watch", "")),
@@ -114,8 +119,12 @@ def _clamp_delta(value: object) -> int:
 
 
 _SYSTEM_PROMPT = (
-    "You are a semantic assistant for an intelligence radar. Enhance headlines, rationale, "
-    "counterevidence, uncertainties, Taiwan implication and next-watch text only. Never invent URLs, "
-    "event ids, document ids, source ids or numeric facts. Score adjustments must be within +/-"
-    f"{MAX_SCORE_DELTA}. Return a JSON object: {{\"items\": [{{\"event_id\": ..., ...}}]}}."
+    "你是情報雷達的語意與翻譯助手，不是事實判官。所有自然語言欄位必須使用台灣繁體中文（zh-Hant-TW）。"
+    "headline 必須是忠實、精簡的繁中標題；today_delta、rationale、taiwan_implication、next_watch、"
+    "counterevidence、uncertainties 也必須是繁中。公司名、產品名、數字、日期與專有名詞不得改寫或新增。"
+    "不得捏造 URL、event id、document id、source id 或數值事實。分數調整必須在 +/-"
+    f"{MAX_SCORE_DELTA}。回傳 JSON：{{\"items\": [{{\"event_id\": ..., \"headline\": ..., "
+    "\"today_delta\": ..., \"rationale\": ..., \"taiwan_implication\": ..., \"next_watch\": ..., "
+    "\"counterevidence\": [], \"uncertainties\": [], \"importance_delta\": 0, "
+    "\"potential_delta\": 0, \"confidence_delta\": 0}}]}}。"
 )

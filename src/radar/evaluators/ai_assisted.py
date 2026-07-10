@@ -2,8 +2,8 @@
 
 Deterministic evaluation always runs first and is the fallback. AI output is
 revalidated deterministically; on invalid output it retries once and then keeps
-the deterministic result (partial). Over budget, AI is skipped and the run stays
-deterministic. The evaluator never crashes on provider failure.
+the deterministic result. The original source headline is preserved in the
+uncertainty/audit text whenever a translated headline replaces it.
 """
 
 from __future__ import annotations
@@ -80,7 +80,7 @@ class AiAssistedEvaluator:
             proposal = _decode_proposal(cached.payload_json)
         else:
             call_context = replace(context, profile=request.profile, model=self._provider.model)
-            for attempt in range(2):  # initial attempt + one retry
+            for attempt in range(2):
                 try:
                     candidate = self._provider.propose(call_context)
                 except Exception:  # noqa: BLE001 - provider failure must not crash the run
@@ -169,6 +169,7 @@ def _apply_proposal(
     proposal: AiProposalResult,
     allowed: AllowedFacts,
 ) -> tuple[ReportItemV2, ...]:
+    del allowed  # validation has already completed before this point
     by_event = {item.event_id: item for item in proposal.items}
     enhanced: list[ReportItemV2] = []
     for item in items:
@@ -176,23 +177,32 @@ def _apply_proposal(
         if change is None:
             enhanced.append(item)
             continue
+
         update: dict[str, object] = {}
+        uncertainties = list(item.uncertainties)
         if change.headline:
+            if change.headline.strip() != item.headline.strip():
+                original_note = f"原文標題：{item.headline}"
+                if original_note not in uncertainties:
+                    uncertainties.append(original_note)
             update["headline"] = change.headline
+        if change.today_delta:
+            update["today_delta"] = change.today_delta
         if change.taiwan_implication:
             update["taiwan_implication"] = change.taiwan_implication
         if change.next_watch:
             update["next_watch"] = change.next_watch
         if change.counterevidence:
-            update["counterevidence"] = [*item.counterevidence, *change.counterevidence]
+            update["counterevidence"] = list(dict.fromkeys([*item.counterevidence, *change.counterevidence]))
         if change.uncertainties:
-            update["uncertainties"] = [*item.uncertainties, *change.uncertainties]
+            uncertainties.extend(change.uncertainties)
+        update["uncertainties"] = list(dict.fromkeys(uncertainties))
         update["importance_score"] = _clamp(item.importance_score + _bounded(change.importance_delta))
         update["potential_score"] = _clamp(item.potential_score + _bounded(change.potential_delta))
         update["confidence_score"] = _clamp(item.confidence_score + _bounded(change.confidence_delta))
         if change.rationale:
             explanation = dict(item.score_explanation.model_dump())
-            explanation["rationale"] = f"{explanation['rationale']} AI note: {change.rationale}".strip()
+            explanation["rationale"] = f"{explanation['rationale']} AI 補充：{change.rationale}".strip()
             update["score_explanation"] = explanation
         enhanced.append(item.model_copy(update=update))
     return tuple(enhanced)
@@ -216,10 +226,16 @@ def _context_payload(context: object) -> dict[str, object]:
         "events": [
             {
                 "event_id": event.event_id,
+                "original_language": event.original_language,
+                "original_headline": event.original_headline,
                 "summary": event.summary,
                 "delta_types": list(event.delta_types),
                 "metrics": list(event.measurement_metric_ids),
-                "scores": [event.deterministic_importance, event.deterministic_potential, event.deterministic_confidence],
+                "scores": [
+                    event.deterministic_importance,
+                    event.deterministic_potential,
+                    event.deterministic_confidence,
+                ],
             }
             for event in context.events
         ],
@@ -237,6 +253,7 @@ def _encode_proposal(proposal: AiProposalResult) -> str:
                 {
                     "event_id": item.event_id,
                     "headline": item.headline,
+                    "today_delta": item.today_delta,
                     "rationale": item.rationale,
                     "taiwan_implication": item.taiwan_implication,
                     "next_watch": item.next_watch,
@@ -263,6 +280,7 @@ def _decode_proposal(payload_json: str) -> AiProposalResult:
         AiProposalItem(
             event_id=item["event_id"],
             headline=item.get("headline", ""),
+            today_delta=item.get("today_delta", ""),
             rationale=item.get("rationale", ""),
             taiwan_implication=item.get("taiwan_implication", ""),
             next_watch=item.get("next_watch", ""),

@@ -14,7 +14,7 @@
   "profiles": {
     "daily_push": {
       "major_slot_cap_per_domain": 3,
-      "potential_slot_cap_per_domain": 3,
+      "potential_slot_cap_per_domain": null,
       "slot_caps_are_completeness_proof": false
     },
     "full": {
