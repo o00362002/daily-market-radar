@@ -8,7 +8,7 @@ AGENTS.md = first entry and route selection
 CURRENT_STATE.md = current facts
 CURRENT_DECISIONS.md = accepted decisions
 config/runtime_contract.json = canonical runtime/output contract
-config/source_registry.yaml = canonical source registry
+config/source_registry.json = canonical source registry
 src/radar/ = deterministic execution runtime
 DEPENDENCY_MAP.md = human-readable dependency and degradation map
 workflows/ = ordered execution guidance
@@ -87,7 +87,7 @@ anchor, scale path, invalidation condition and next check.
 
 ## 4. Source-first collection
 
-Use `config/source_registry.yaml` as the source identity registry.
+Use `config/source_registry.json` as the source identity registry.
 RSS, API, web, RSSHub and social routes are adapters under a source, not separate sources.
 
 Collection order:
