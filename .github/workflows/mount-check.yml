@@ -39,7 +39,21 @@ jobs:
           cat integration-tests.log
           test "${{ steps.integration_tests.outcome }}" = "success"
       - name: Contract tests
-        run: python3 -m unittest discover -s tests/contracts -p 'test_*.py'
+        id: contract_tests
+        continue-on-error: true
+        run: python3 -m unittest discover -s tests/contracts -p 'test_*.py' > contract-tests.log 2>&1
+      - name: Upload contract test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-log
+          path: contract-tests.log
+          retention-days: 3
+      - name: Print and enforce contract result
+        if: always()
+        run: |
+          cat contract-tests.log
+          test "${{ steps.contract_tests.outcome }}" = "success"
       - name: Runtime contract validation
         run: make runtime-contract
       - name: Source registry and OPML validation
