@@ -7,11 +7,14 @@ from typing import Callable
 from radar.contracts.evaluation import EvaluationRequest, EvaluationResult
 from radar.contracts.report import (
     EvaluationAuditV1,
-    MatrixObservationV1,
     ReportItemV2,
     SignalV1,
-    StructuralIndicatorObservationV1,
     TokenUsageV1,
+)
+from radar.evaluators.matrices import (
+    evaluate_crypto_matrix,
+    evaluate_retail_matrix,
+    evaluate_structural_indicators,
 )
 from radar.pipeline.classify import classify_potential_signals
 from radar.reporting.planner import plan_daily_items
@@ -43,40 +46,14 @@ class DeterministicIntelligenceEvaluator:
         return EvaluationResult(
             items=items,
             signals=signals,
-            retail_matrix={
-                key: MatrixObservationV1(
-                    status="insufficient",
-                    signal_ids=[],
-                    data_checked=[],
-                    gap="deterministic evidence is insufficient for this matrix cell",
-                )
-                for key in request.contract.retail_matrix_keys
-            },
-            crypto_matrix={
-                key: MatrixObservationV1(
-                    status="insufficient",
-                    signal_ids=[],
-                    data_checked=[],
-                    gap="deterministic data is unavailable for this matrix cell",
-                )
-                for key in request.contract.crypto_matrix_keys
-            },
+            retail_matrix=evaluate_retail_matrix(events, request.contract.retail_matrix_keys),
+            crypto_matrix=evaluate_crypto_matrix(events, request.contract.crypto_matrix_keys),
             structural_indicators=tuple(
-                StructuralIndicatorObservationV1(
-                    indicator_id=indicator_id,
+                evaluate_structural_indicators(
+                    events,
+                    request.contract.structural_indicator_ids,
                     observation_date=request.date,
-                    direction="insufficient",
-                    support_score=0,
-                    counter_score=0,
-                    confidence="insufficient",
-                    supporting_signal_ids=[],
-                    counter_signal_ids=[],
-                    missing_data=["indicator-specific evidence is unavailable"],
-                    one_sentence_read="Insufficient verified evidence for a directional update.",
-                    next_verification=["run indicator-specific evidence checks"],
-                    evaluation_mode="deterministic",
                 )
-                for indicator_id in request.contract.structural_indicator_ids
             ),
             audit=EvaluationAuditV1(
                 requested_mode=request.requested_mode,

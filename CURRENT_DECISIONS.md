@@ -4,6 +4,72 @@
 
 ---
 
+## 2026-07-10：optional AI and chat-assisted evaluation（PR D）
+
+### Decision
+
+```text
+1. Four evaluation modes (deterministic/auto/api-assisted/chat-assisted), default auto. Deterministic
+   never imports or calls AI; auto and api-assisted degrade to deterministic without a key.
+2. The model is a semantic assistant, not the judge of facts. It sees only a bounded, provider-neutral
+   context and may never invent URLs, event/document/source ids or numeric facts; score deltas are
+   bounded. Every AI output is re-validated deterministically; invalid output retries once then keeps
+   the deterministic result; provider errors never crash the run.
+3. Evaluation is cached (event state, evidence hashes, material delta, model, schema version, config) and
+   budget-limited; over budget stops new AI calls with degradation=ai_budget_exhausted.
+4. The chat package is deterministic, content-addressed, byte-stable, secret-free, and contains no full
+   articles or model-invented conclusions. Import re-validates the context hash and every allowed id /
+   url / numeric fact / matrix key / indicator id / Taiwan direct-evidence rule / Major-Potential
+   overlap; a failed import preserves the last valid report.
+```
+
+### Boundary
+
+```text
+No real API keys in tests; the OpenAI client path is not executed in CI (proven via a mock provider).
+The full secrets contract (.env.example, docs/secrets.md, redaction tests) lands in PR F.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_d_optional_ai_chat_assisted.md` · `docs/evaluation-modes.md` · `docs/chat-assisted-workflow.md` · `docs/cost-control.md`
+
+---
+
+## 2026-07-10：source adapters and deterministic evaluation（PR C）
+
+### Decision
+
+```text
+1. Every network source adapter depends on a shared HttpTransport seam, never on urllib/requests
+   directly, so adapters are fully unit-testable offline and SSRF/redirect/size policy is enforced in
+   one place.
+2. Safe Web fetches registry-allowlisted URLs only, blocks localhost/private/link-local/metadata IPs,
+   disallowed schemes/content-types, excessive redirects and oversized responses; it never bypasses
+   paywalls or logins, never stores full copyrighted articles, and never becomes an arbitrary crawler.
+3. GDELT is discovery-only and must resolve to an original publisher/URL with a verification status;
+   it is never final evidence. Generic web results are never marked as social direct-channel checks.
+4. Credential-gated adapters (FreshRSS, JSON API auth, official social APIs) degrade to unavailable
+   without credentials and never crash the deterministic pipeline.
+5. Deterministic matrix and structural-indicator scores are feature-traced and never fixed; absent
+   evidence yields insufficient and no fabricated trend. Rolling windows use only real observations.
+6. Source health is a deterministic state machine over eight statuses, persisted durably.
+```
+
+### Boundary
+
+```text
+The deterministic evaluator upgrade is wired into the live pipeline. The new adapters and source-health
+repository are tested building blocks; composing them into a single multi-adapter collection stage inside
+run-daily is follow-up integration. No real API keys are used in tests.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_c_source_adapters_deterministic_evaluation.md` · `docs/source-adapters.md`
+
+---
+
 ## 2026-07-10：event resolution precision（PR B）
 
 ### Decision

@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "RadarDocument",
-  "type": "object",
-  "required": ["document_id", "source_id", "url", "title", "published_at", "fetched_at"]
-}
