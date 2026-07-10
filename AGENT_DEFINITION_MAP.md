@@ -57,7 +57,7 @@ Use `AGENT_RADAR_REPORT` only for explicit:
 完整版 / 正式版 / 完整研究 / 歸檔版 / full report / archival report
 ```
 
-Historical phrases such as `48-signal`, `60-signal`, `3+3` or `5+5` do not define active completeness. If the user uses them, interpret them as a request for a broader report but still apply runtime v2 coverage gates.
+Historical fixed-count phrases do not define active completeness. Interpret them only as a request for a broader report and still apply runtime-v2 coverage gates.
 
 ## Dependency chains
 
