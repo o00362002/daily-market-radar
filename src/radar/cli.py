@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from radar.runtime.runs import run_daily_fixture, run_daily_live_rss
+from radar.runtime.runs import run_daily_fixture, run_daily_live, run_daily_live_rss
 from radar.schemas.source import SourceRegistry
 
 
@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ingest = sub.add_parser("ingest")
     ingest.add_argument("--since", default="24h")
-    ingest.add_argument("--mode", choices=["fixture", "live-rss"], default="fixture")
+    ingest.add_argument("--mode", choices=["fixture", "live", "live-rss"], default="fixture")
 
     process = sub.add_parser("process")
     process.add_argument("--since", default="72h")
@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_daily = sub.add_parser("run-daily")
     run_daily.add_argument("--date", required=True)
     run_daily.add_argument("--profile", choices=["daily_push", "full"], default="daily_push")
-    run_daily.add_argument("--mode", choices=["fixture", "live-rss"], default="fixture")
+    run_daily.add_argument("--mode", choices=["fixture", "live", "live-rss"], default="fixture")
     run_daily.add_argument(
         "--evaluation-mode",
         choices=["deterministic", "auto", "api-assisted", "chat-assisted"],
@@ -120,16 +120,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "run-daily":
         database_path = Path(args.database).resolve() if args.database else None
-        if args.mode == "live-rss":
-            result = run_daily_live_rss(
-                repo_root,
-                date=args.date,
-                profile_name=args.profile,
-                timeout_seconds=args.timeout_seconds,
-                per_feed_limit=args.per_feed_limit,
-                database_path=database_path,
-                evaluation_mode=args.evaluation_mode,
-            )
+        common = {
+            "profile_name": args.profile,
+            "timeout_seconds": args.timeout_seconds,
+            "per_feed_limit": args.per_feed_limit,
+            "database_path": database_path,
+            "evaluation_mode": args.evaluation_mode,
+        }
+        if args.mode == "live":
+            result = run_daily_live(repo_root, date=args.date, **common)
+        elif args.mode == "live-rss":
+            result = run_daily_live_rss(repo_root, date=args.date, **common)
         else:
             result = run_daily_fixture(
                 repo_root,
