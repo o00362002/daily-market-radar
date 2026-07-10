@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from radar.schemas.source import SourceRegistry
+from radar.schemas.source import SourceAdapter, SourceAdapterConfig, SourceRegistry
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -17,6 +17,9 @@ class SourceRegistryTests(unittest.TestCase):
         canonical_urls = [source.canonical_url for source in self.registry.sources]
         self.assertEqual(len(source_ids), len(set(source_ids)))
         self.assertEqual(len(canonical_urls), len(set(canonical_urls)))
+
+    def test_legacy_source_adapter_config_import_remains_available(self) -> None:
+        self.assertIs(SourceAdapter, SourceAdapterConfig)
 
     def test_adapters_are_nested_under_entity_sources(self) -> None:
         openai = self.registry.get("openai_news")

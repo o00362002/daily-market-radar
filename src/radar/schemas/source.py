@@ -8,12 +8,17 @@ from urllib.parse import urlsplit
 
 
 @dataclass(frozen=True)
-class SourceAdapter:
+class SourceAdapterConfig:
     kind: str
     url: str
     enabled_for_opml: bool = False
     opml_category: str = ""
     route_status: str = ""
+
+
+# Backward-compatible configuration DTO import. The behavior Protocol is
+# intentionally namespaced as ``radar.ports.SourceAdapter``.
+SourceAdapter = SourceAdapterConfig
 
 
 @dataclass(frozen=True)
@@ -29,7 +34,7 @@ class Source:
     ownership_profile: str
     evidence_profile: str
     priority: str
-    adapters: list[SourceAdapter]
+    adapters: list[SourceAdapterConfig]
     fetch_interval_minutes: int
     freshness_slo_minutes: int
     usage_policy: str
@@ -49,7 +54,7 @@ class SourceRegistry:
         data = json.loads(path.read_text(encoding="utf-8"))
         sources = []
         for row in data["sources"]:
-            adapters = [SourceAdapter(**adapter) for adapter in row.get("adapters", [])]
+            adapters = [SourceAdapterConfig(**adapter) for adapter in row.get("adapters", [])]
             sources.append(Source(**{**row, "adapters": adapters}))
         return cls(sources)
 

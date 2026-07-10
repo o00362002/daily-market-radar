@@ -28,6 +28,24 @@ class RuntimeV2ReportContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_report_contract(broken, contract=self.contract)
 
+    def test_missing_signals_fails(self) -> None:
+        broken = copy.deepcopy(self.report)
+        broken.pop("signals")
+        with self.assertRaises(ValueError):
+            validate_report_contract(broken, contract=self.contract)
+
+    def test_missing_evaluation_audit_fails(self) -> None:
+        broken = copy.deepcopy(self.report)
+        broken.pop("evaluation_audit")
+        with self.assertRaises(ValueError):
+            validate_report_contract(broken, contract=self.contract)
+
+    def test_missing_contract_version_fails(self) -> None:
+        broken = copy.deepcopy(self.report)
+        broken.pop("contract_version")
+        with self.assertRaises(ValueError):
+            validate_report_contract(broken, contract=self.contract)
+
     def test_same_event_in_major_and_potential_fails(self) -> None:
         broken = copy.deepcopy(self.report)
         major = next(item for item in broken["items"] if item["report_lane"] == "major")

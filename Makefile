@@ -1,7 +1,7 @@
 PYTHON ?= python3
 PYTHONPATH := src
 
-.PHONY: validate test unit integration contracts runtime-contract source-opml cli-smoke live-rss-smoke
+.PHONY: validate test unit integration contracts architecture runtime-contract source-opml cli-smoke live-rss-smoke
 
 validate: test runtime-contract source-opml cli-smoke
 	node tools/brain/check-doc-paths.js
@@ -10,7 +10,7 @@ validate: test runtime-contract source-opml cli-smoke
 	node tools/brain/check-sync-matrix.js
 
 
-test: unit integration contracts
+test: unit integration contracts architecture
 
 unit:
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests/unit -p 'test_*.py'
@@ -20,6 +20,9 @@ integration:
 
 contracts:
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests/contracts -p 'test_*.py'
+
+architecture:
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests/architecture -p 'test_*.py'
 
 runtime-contract:
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -c "from pathlib import Path; from radar.runtime.contract import RuntimeContract; RuntimeContract.from_file(Path('config/runtime_contract.json')); print('runtime contract valid')"

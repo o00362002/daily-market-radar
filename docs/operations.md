@@ -30,10 +30,10 @@ PYTHONPATH=src python -m radar.cli run-daily \
   --date 2026-07-10 \
   --timeout-seconds 12 \
   --per-feed-limit 20 \
-  --database data/radar.sqlite3
+  --database <database-path>
 ```
 
-`live-rss` executes enabled RSS/Atom adapters in `config/source_registry.json`. It does not execute web, API, social, FreshRSS or external-discovery adapters. Those sources are listed in `source_audit.web_api_social_sources_not_executed` and keep the run partial when material.
+`live-rss` executes enabled RSS/Atom adapters in `config/source_registry.json`. It does not execute web, API, social, FreshRSS or external-discovery adapters. Unavailable integrations are exposed through the generic `source_audit.integration_status` and `source_audit.remaining_gaps` fields and keep the run partial when material.
 
 ## Daily order
 

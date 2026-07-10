@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-07-10：modularity and replaceability acceptance gate
+
+### Decision
+
+```text
+1. Every replaceable/external application collaborator is injected through SourceAdapter, IntelligenceEvaluator,
+   DocumentRepository, EventRepository, ReportRepository, IndicatorRepository,
+   StateStore, WebArtifactStore and ReportPublisher Protocols. Provider-neutral contracts/domain and
+   pure deterministic pipeline/validation functions remain direct code dependencies.
+2. src/radar/composition.py is the only selection point for concrete source,
+   evaluator, storage and publisher implementations.
+3. RadarReportV2 is validated before report persistence, indicator persistence,
+   web artifact commit, state checkpoint or publication.
+4. Provider-specific payload fields stay inside adapters/evaluators; canonical models
+   are strict and reject unknown fields.
+5. runtime/runs.py remains a backward-compatible façade, not an application service.
+6. AST import and cycle tests plus a no-network/no-SQLite/no-filesystem fake flow are
+   mandatory acceptance gates.
+```
+
+### Boundary
+
+```text
+This decision proves replaceability for the currently implemented deterministic flow.
+It does not claim that FreshRSS, API-assisted evaluation, filesystem web export,
+production publishers, durable cross-day events, the Astro dashboard or scheduler exist.
+Those remain explicit later implementation work.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_modularity_replaceability_gate.md`
+
+---
+
 ## 2026-07-10：runtime v2 contract sync repair
 
 ### Decision

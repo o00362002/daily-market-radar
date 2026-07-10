@@ -39,7 +39,7 @@ See `archive/v1-spec/README.md`.
 
 ## External Credential Action
 
-`infra/rss-stack/.env` was removed from Git tracking and `.gitignore` now blocks
+`infra/rss-stack/.env` was removed from Git tracking (historical path; path-ok) and `.gitignore` now blocks
 future local env files. If any value from that file was ever used outside local
 testing, the owner must rotate it in the external service. This migration does not
 read or operate external credentials.

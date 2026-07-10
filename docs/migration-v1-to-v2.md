@@ -46,4 +46,4 @@ A `live-rss` run is real network collection for RSS/Atom adapters, but it remain
 
 ## External credential action
 
-`infra/rss-stack/.env` remains outside Git. Any credential that was previously used externally must be rotated by the owner; this migration does not read or operate external credentials.
+`infra/rss-stack/.env` remains outside Git (historical path; path-ok). Any credential that was previously used externally must be rotated by the owner; this migration does not read or operate external credentials.

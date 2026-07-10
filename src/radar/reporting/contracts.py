@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import urlsplit
 
-from radar.runtime.contract import RuntimeContract
+from radar.contracts.report import RadarReportV2
+from radar.contracts.runtime import RuntimeContract
 
 
 REQUIRED_REPORT_FIELDS = {
@@ -15,11 +16,13 @@ REQUIRED_REPORT_FIELDS = {
     "items",
     "coverage_cells",
     "coverage_gaps",
+    "signals",
     "source_audit",
     "rejection_counters",
     "retail_matrix",
     "crypto_matrix",
     "structural_indicators",
+    "evaluation_audit",
     "backtest",
     "contract_version",
 }
@@ -74,6 +77,7 @@ def validate_report_contract(report: dict[str, Any], contract: RuntimeContract |
             _validate_legacy_item(item)
         return
 
+    report = RadarReportV2.from_payload(report).model_dump(mode="json")
     missing_report_fields = REQUIRED_REPORT_FIELDS - set(report)
     if missing_report_fields:
         raise ValueError(f"report missing fields: {sorted(missing_report_fields)}")
