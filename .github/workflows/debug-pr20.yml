@@ -1,0 +1,35 @@
+name: debug-pr20
+
+on:
+  push:
+    branches: ["feat/potential-pool-zh-hant-output"]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Run tests and report tail
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          PYTHONPATH=src python -m unittest discover -s tests -v > test-output.txt 2>&1
+          code=$?
+          {
+            echo '### Temporary test diagnostics'
+            echo '```text'
+            tail -n 140 test-output.txt
+            echo '```'
+          } > comment.md
+          gh pr comment 20 --body-file comment.md
+          exit "$code"
