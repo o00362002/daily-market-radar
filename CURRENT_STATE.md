@@ -1,70 +1,58 @@
 # daily-market-radar｜CURRENT_STATE
 
-<!-- 頭部摘要 ≤8000 字元（check-core 驗）。輪替規則：dated 段每季搬 archive/，
-     頭部永遠只留「現在正在成立的事實」。歷史不是現況。 -->
+<!-- 頭部只保留現在成立的事實；歷史移至 reports/ 或 archive/。 -->
 
-## 現況摘要（讀這裡就夠）
+## 現況摘要
 
 ```text
-掛載：brain-core child mount（2026-07-06 起）。舊母腦 Human-AI-Collaboration-Brain 已退役。
-定位：每日市場情報雷達（recurring intelligence workflow）＋ 多領域新聞趨勢掃描。
-機器層：5 條不變式全數有檢查器（check-core / check-sync-matrix / check-doc-paths /
-  check-domain-packs ＋ process gate）；hook 由 tools/install_hooks.sh 安裝；
-  CI 與人工共用 check_mount_integrity.sh。
-領域：六大核心領域住 configs/radars.yml ＋ sources/key_media_library.yml（canonical）；
-  新領域用 domains/<id>/ 領域包（複製 _template 填完，檢查器驗完整性）。
-搜尋方法：source-first ＋ 固定查詢配方（configs/query_recipes.yml），
-  generic search 只是 fallback 且需在 coverage audit 揭露。
-潛力池：蒐集階段不預篩（configs/edge_case_discovery.yml capture_no_prefilter），
-  新概念/新應用/新趨勢/新組合一律入 memory/potential_pool.md；取捨只在輸出階段。
-台灣新聞：必須 source-backed；推論不得計入。social-first 來源必須 direct channel check。
-每日輸出：預設 Daily Push Brief；v2 走 slot cap + coverage gate，不用固定篇數證明完整。
+掛載：brain-core child mount。
+定位：全球每日事件情報雷達＋多領域趨勢與潛力訊號掃描。
+Active contract：config/runtime_contract.json。
+Canonical source registry：config/source_registry.yaml。
+Runtime：src/radar/ modular monolith，具備 fixture ingestion、URL normalization、dedup、event clustering、major/potential lane、coverage cells、report planning、contract validation 與 fixture replay。
+Profiles：daily_push 使用 slot caps；full 輸出 run budget 內所有 qualified items。數量不是完整性證明。
+Report domains：六個 canonical domains，由 runtime contract 定義；configs/radars.yml 是細雷達模組，不新增 report-domain quota。
+Source model：一個真實來源一個 source_id；RSS/API/web/RSSHub/social 為 adapters；FRESHRSS_SEEDS.opml 為 generated projection。
+Taiwan：direct evidence 與 implication 分離，推論不得計入直接台灣證據。
+Scoring：importance、potential、confidence 分開。
+固定輸出：Retail matrix、Crypto matrix、三個 Structural Trend Indicators、coverage gaps、rejection counters、backtest。
 ```
 
-## 入口邊界
+## Production reality
 
 ```text
-AGENTS.md = 第一入口（按需路由）
-brain.manifest.yaml = 掛載宣告
-CURRENT_STATE.md / CURRENT_DECISIONS.md = 記憶層
+目前可驗證：deterministic fixture runtime、source registry validation、OPML drift、report contract、CLI smoke、unit/integration/contract tests。
+尚未完成：正式 live RSS/HTTP ingestion、FreshRSS API ingestion、完整 source health、外部 discovery provider、durable database repository、scheduler、production credentials、完整台灣與小眾來源 registry。
+因此 fixture run 只能標 partial，不能宣稱正式全球新聞覆蓋完成。
+```
+
+## 入口與權威
+
+```text
+AGENTS.md = 第一入口
+CURRENT_STATE.md = 現況
+CURRENT_DECISIONS.md = 已接受決策
+config/runtime_contract.json = machine execution/output contract
+config/source_registry.yaml = source identity contract
 AGENT_DEFINITION_MAP.md = 任務路由
-DEPENDENCY_MAP.md = 依賴與完成閘門
-SYSTEM_PROMPT.md = 每日雷達品質政策（不取代 AGENTS.md）
+DEPENDENCY_MAP.md = 人類可讀依賴與降級說明
+schema/sync-matrix.json = 連動矩陣
 ```
 
-## Frozen History
-
-以下舊過渡檔已凍結，只保留歷史脈絡，不再作為 current routing / source of truth / active rule：
+## Validation entrypoints
 
 ```text
-AI_PROJECT_OS_ADOPTION_PLAN.md
-AI_AGENT_MODEL_ADOPTION_PLAN.md
-POST_CHANGE_SYNC_ADOPTION.md
-README_AGENT_MODEL_NOTE.md
-CURRENT_DECISIONS_APPEND.md
-ADOPTION_LEVELS.md
+make validate
+PYTHONPATH=src python -m radar.cli sources validate
+PYTHONPATH=src python -m radar.cli run-daily --date YYYY-MM-DD
 ```
 
-## 歷程（季度輪替區）
-
-### 2026-07-06 換掛 brain-core ＋ 多領域擴充機制
+## Frozen v1 behavior
 
 ```text
-掛載：brain.manifest.yaml / AGENTS.md / CLAUDE.md / PROJECT_OS_MOUNT.md / README /
-  PROJECT_MAP / HIGH_LEVEL_INDEX / CONTEXT_ROUTING 全部改為 brain-core child mount；
-  check_mount_integrity.sh 改為薄包裝（CI 不用改）；新增 check-core.js /
-  check-domain-packs.js / install_hooks.sh。
-擴充：新增 domains/ 領域包機制（_template ＋ README spec）、configs/query_recipes.yml
-  固定查詢配方、memory/potential_pool.md 潛力池（蒐集不預篩）、
-  edge_case_discovery.yml capture_no_prefilter 規則。
-依據：research/global_news_trend_projects_2026-07-06.md（GDELT/Event Registry/RSSHub/
-  DEFRA horizon scanning/structured-output 小模型研究）。
-證據：reports/execution_checks/2026-07-06_brain_core_mount_and_domain_extension.md
+固定 3+3 / 5+5 / 48-signal / 60-signal completion rules
+split legacy source files as canonical identity
+Markdown prompt as sole execution contract
 ```
 
-### 2026-07-05 mother-brain v2 sync（已被 2026-07-06 換掛取代，superseded）
-
-```text
-當時同步至母腦 v2.0-draft mount depth 模型（Level 2 alias）。
-此掛載已於 2026-07-06 退役，僅留此紀錄。
-```
+These remain historical references only. Active completeness is coverage and contract based.
