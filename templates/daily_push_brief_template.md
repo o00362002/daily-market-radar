@@ -278,7 +278,7 @@ structural trend summary:
 post-brief review:
 ```
 
-This panel does not count toward 3+3.
+This panel does not count toward news output slots.
 
 ## Completion Gate
 

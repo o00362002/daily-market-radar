@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RadarReport",
+  "type": "object",
+  "required": ["items", "coverage_gaps"],
+  "properties": {
+    "items": {"type": "array"},
+    "coverage_gaps": {"type": "array"}
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RadarEvent",
+  "type": "object",
+  "required": ["event_id", "documents", "first_seen_at", "last_seen_at"]
+}

@@ -94,8 +94,8 @@ Rules:
 
 ```text
 Taiwan implication cannot replace Taiwan news.
-Historical replay without today-new information does not count toward 5+5.
-One event can count toward only one primary domain quota.
+Historical replay without today-new information does not count toward output slots.
+One event can count toward only one primary domain slot.
 Other affected domains may reference it in cross-domain mapping / indicator / synthesis, but cannot count it again.
 ```
 

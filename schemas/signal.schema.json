@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RadarSignal",
+  "type": "object",
+  "required": ["signal_id", "event_id", "lifecycle", "what_would_confirm", "what_would_invalidate", "next_check_at"]
+}
