@@ -2,7 +2,7 @@
 
 Date: 2026-07-10
 Branch: `fix/runtime-v2-contract-sync`
-Status: implementation complete on branch; automated validation pending
+Status: implementation complete; automated validation passed
 
 ## Why
 
@@ -27,6 +27,8 @@ The repository had a valid runtime-v2 direction but active Markdown policies sti
 11. Expanded schema/sync-matrix.json with runtime-contract, registry, adapter and repository edges.
 12. Made Makefile portable with PYTHON ?= python3.
 13. Added runtime-contract, RSS/Atom, report-contract and SQLite persistence tests.
+14. Extended GitHub Actions to run unit, integration, contract, runtime-contract, OPML,
+    CLI-smoke and mount-integrity validation.
 ```
 
 ## Canonical files after repair
@@ -53,17 +55,23 @@ scheduler and production credentials
 
 `live-rss` is a real network adapter for RSS/Atom sources, but a run remains partial when other required adapter families or coverage cells are unexecuted.
 
-## Validation plan
+## Automated validation
+
+GitHub Actions workflow `mount-check`, run `343`, completed successfully on branch head `64f6d144b013fb7e7132a56652ce95548b26e8b9` before this receipt update.
+
+Passed steps:
 
 ```text
-make validate
-PYTHONPATH=src python -m radar.cli sources validate
-PYTHONPATH=src python -m radar.cli run-daily --mode fixture --date 2026-07-10 --database /tmp/radar.sqlite3
-optional network smoke:
-PYTHONPATH=src python -m radar.cli run-daily --mode live-rss --date 2026-07-10 --per-feed-limit 1 --timeout-seconds 5
+unit tests
+integration tests
+contract tests
+runtime contract validation
+source registry and OPML projection validation
+CLI fixture smoke
+mount integrity check
 ```
 
-At record creation time these commands had not yet been executed in a checked-out branch environment. Do not describe them as passing until CI or a local checkout confirms them.
+The optional live-network RSS smoke was not run as a required CI step because external feeds can be unavailable or rate-limited. Live adapter failures are designed to become explicit coverage gaps.
 
 ## Affected users
 
@@ -72,12 +80,12 @@ At record creation time these commands had not yet been executed in a checked-ou
 - Taiwan and niche gaps become explicit coverage failures.
 - Operators can run fixture or live-RSS mode and optionally persist report payloads locally.
 
-## Verification receipt target
+## Verification receipt
 
 ```text
 changed: runtime contract, source registry, runtime, schemas, policies, workflows, templates, tests and docs
-machine checks: pending
+machine checks: passed in GitHub Actions
 not done: production web/API/social/FreshRSS/discovery integrations
 impact: all daily-push, full-radar, source-health and backtest runs
-owner verification: review PR diff and run make validate
+owner verification: review PR #6 before or after merge
 ```
