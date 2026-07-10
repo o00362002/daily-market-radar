@@ -9,7 +9,7 @@ Concise means fewer rendered items, not weaker collection or validation.
 owner: AGENT_DAILY_PUSH_BRIEF
 profile: daily_push
 runtime contract: config/runtime_contract.json
-canonical source registry: config/source_registry.yaml
+canonical source registry: config/source_registry.json
 ```
 
 Use for ordinary daily-news, morning-brief and market-radar requests. Full/archive requests use `workflows/daily_radar_workflow.md`.
@@ -19,7 +19,7 @@ Use for ordinary daily-news, morning-brief and market-radar requests. Full/archi
 ```text
 1. Read AGENTS.md and select AGENT_DAILY_PUSH_BRIEF.
 2. Load config/runtime_contract.json profile=daily_push.
-3. Validate config/source_registry.yaml and source health.
+3. Validate config/source_registry.json and source health.
 4. Determine live / degraded / fixture ingest mode.
 5. Ingest top-down sources.
 6. Ingest bottom-up and weak-signal sources.
