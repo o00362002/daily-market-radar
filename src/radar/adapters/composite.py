@@ -9,6 +9,7 @@ application layer.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypeVar
 
 from radar.contracts.report import CoverageGapV2, SourceFailureV1
 from radar.domain.models import Document
@@ -21,6 +22,8 @@ from radar.ports.sources import (
     SourceFetchResult,
     SourceHealthV1,
 )
+
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
@@ -145,5 +148,9 @@ class CompositeSourceAdapter:
         return list(result.documents)
 
 
-def _unique(values):  # type: ignore[no-untyped-def]
-    return list(dict.fromkeys(values))
+def _unique(values: list[T]) -> list[T]:
+    result: list[T] = []
+    for value in values:
+        if value not in result:
+            result.append(value)
+    return result
