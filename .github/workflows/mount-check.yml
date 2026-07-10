@@ -14,5 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run runtime and contract validation
+        run: make validate
       - name: Run mount integrity check
         run: bash check_mount_integrity.sh
