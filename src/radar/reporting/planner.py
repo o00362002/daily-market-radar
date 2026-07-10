@@ -8,10 +8,12 @@ def plan_daily_items(events: list[Event]) -> list[ReportItem]:
     for event in events:
         doc = event.documents[0]
         report_lane = "major" if doc.lane == "top_down" else "potential"
+        signal_id = stable_id("sig", [event.event_id, "potential"]) if report_lane == "potential" else None
         items.append(
             ReportItem.fixture(
                 item_id=stable_id("item", [event.event_id, doc.primary_domain, report_lane]),
                 event_id=event.event_id,
+                signal_id=signal_id,
                 primary_domain=doc.primary_domain,
                 report_lane=report_lane,
                 candidate_type="新應用" if report_lane == "potential" else None,
