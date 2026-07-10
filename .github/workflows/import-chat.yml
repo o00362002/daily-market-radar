@@ -1,0 +1,49 @@
+name: import-chat
+
+# Validate a human-produced (ChatGPT) report against a prepared context package.
+# A failed import produces a validation receipt and does NOT deploy or overwrite
+# the site. A valid import is a chat-assisted result that can be redeployed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_dir:
+        description: "Path (in the repo) to the prepared package directory"
+        required: true
+      report_path:
+        description: "Path (in the repo) to the ChatGPT-produced RadarReportV2 JSON"
+        required: true
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.import.outputs.valid }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Validate chat import
+        id: import
+        run: |
+          set +e
+          PYTHONPATH=src python -m radar.cli import-chat \
+            --package-dir "${{ github.event.inputs.package_dir }}" \
+            --report "${{ github.event.inputs.report_path }}" \
+            --receipt import-receipt.json
+          CODE=$?
+          set -e
+          cat import-receipt.json || true
+          if [ "$CODE" -eq 0 ]; then echo "valid=true" >> "$GITHUB_OUTPUT"; else echo "valid=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Upload validation receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-receipt
+          path: import-receipt.json
+      - name: Fail the run on invalid import (site untouched)
+        if: steps.import.outputs.valid != 'true'
+        run: |
+          echo "Chat import rejected — last valid report and site are preserved."
+          exit 1

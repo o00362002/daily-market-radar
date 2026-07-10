@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-07-10：scheduler, durable state and Pages（PR F）
+
+### Decision
+
+```text
+1. Six workflows automate the pipeline; the daily job's cron is UTC ('0 23 * * *' == 07:00 Asia/Taipei)
+   and documented, deploying before 09:00 Taiwan. RADAR_EVALUATION_MODE defaults to auto.
+2. Durable state lives on a dedicated radar-state branch (never main): compressed + checksummed SQLite,
+   a state manifest, last-good backup with retention, atomic update, a concurrency lock and corruption
+   rollback. An external DATABASE_URL backend is the documented alternative.
+3. Pages deploys only the validated site artifact — never live data. Failed reports are not deployed,
+   fixture runs are preview-only, and the site base comes from the environment (no hardcoded hostname).
+4. Every secret is optional. With none configured, deterministic mode runs, the site is generated, Pages
+   deploys, and unavailable integrations are disclosed. Passwords, API keys, auth headers and database
+   credentials are never logged (redaction).
+```
+
+### Boundary / owner-required UI setup
+
+```text
+Workflows are pushed and parse-valid, but only the owner can enable them in the GitHub UI: Pages source =
+GitHub Actions; Actions read/write permission (to push radar-state); optional Secrets (OPENAI_API_KEY,
+FRESHRSS_*, DATABASE_URL) and Variables (RADAR_EVALUATION_MODE, OPENAI_MODEL, OPENAI_MAX_*). Live Actions
+runs and Pages deployment execute on GitHub, not in this environment.
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-10_pr_f_daily_scheduler_pages.md` · `docs/state-persistence.md` · `docs/secrets.md` · `docs/operations.md`
+
+---
+
 ## 2026-07-10：projection-first Astro dashboard（PR E）
 
 ### Decision

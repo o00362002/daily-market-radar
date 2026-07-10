@@ -74,8 +74,8 @@ for (const f of FILES) {
       const first = t.split('/')[0];
       if (!roots.has(first)) continue;                    // 錨定：第一段必須是根目錄現存項目
       if (/^\d+$/.test(first)) continue;                  // 日期樣式 2026/07/06
-      // 證據/歷史/產出層的內容本來就來去（檔名模板、輪替紀錄），token 不驗
-      if (['reports', 'archive', 'research', 'outputs', 'examples'].includes(first)) continue;
+      // 證據/歷史/產出層＋執行期產物（generated artifacts、runtime DB）本來就來去，token 不驗
+      if (['reports', 'archive', 'research', 'outputs', 'examples', 'artifacts', 'data'].includes(first)) continue;
       checked++;
       const rel = t.replace(/\/$/, '');
       const abs = path.join(repo, rel);
