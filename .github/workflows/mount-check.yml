@@ -12,12 +12,25 @@ permissions:
 jobs:
   mount-check:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Run runtime and contract validation
-        run: make validate
+      - name: Show runtime versions
+        run: |
+          python3 --version
+          node --version
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests/unit -p 'test_*.py'
+      - name: Integration tests
+        run: python3 -m unittest discover -s tests/integration -p 'test_*.py'
+      - name: Contract tests
+        run: python3 -m unittest discover -s tests/contracts -p 'test_*.py'
+      - name: Runtime contract validation
+        run: make runtime-contract
+      - name: Source registry and OPML validation
+        run: make source-opml
+      - name: CLI smoke
+        run: make cli-smoke
       - name: Run mount integrity check
         run: bash check_mount_integrity.sh
