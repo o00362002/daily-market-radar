@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RadarCoverageCell",
+  "type": "object",
+  "required": ["domain", "macro_region", "language", "source_role", "channel", "time_window", "status"]
+}

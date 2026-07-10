@@ -1,0 +1,18 @@
+{
+  "daily_push": {
+    "major_item_cap_per_domain": 3,
+    "potential_item_cap_per_domain": 3,
+    "empty_slot_policy": "render_gap_card",
+    "requires": ["coverage_audit", "source_health", "today_delta", "evidence_links", "taiwan_direct_inference_split"]
+  },
+  "full": {
+    "major_item_cap_per_domain": 5,
+    "potential_item_cap_per_domain": 5,
+    "empty_slot_policy": "render_gap_card",
+    "requires": ["coverage_ledger", "query_trace", "rejection_counters", "post_run_backtest"]
+  },
+  "weekly_trend_review": {
+    "clusters": "potential_signals",
+    "requires": ["emergence_stage", "diffusion", "counterevidence", "next_verification"]
+  }
+}

@@ -1,0 +1,396 @@
+{
+  "version": "2.0",
+  "generated_projection": "FRESHRSS_SEEDS.opml",
+  "sources": [
+    {
+      "source_id": "openai_news",
+      "name": "OpenAI News RSS",
+      "canonical_url": "https://openai.com/news/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["company", "official"],
+      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://openai.com/news/rss.xml",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "verified_official_link"
+        }
+      ],
+      "fetch_interval_minutes": 30,
+      "freshness_slo_minutes": 180,
+      "usage_policy": "official_feed_allowed_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "verified",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["openai_news_rss"]
+    },
+    {
+      "source_id": "nvidia_blog",
+      "name": "NVIDIA Blog RSS",
+      "canonical_url": "https://blogs.nvidia.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["company", "official"],
+      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://blogs.nvidia.com/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 30,
+      "freshness_slo_minutes": 240,
+      "usage_policy": "check_before_fulltext",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["nvidia_blog_rss"]
+    },
+    {
+      "source_id": "nvidia_developer_blog",
+      "name": "NVIDIA Developer Blog RSS",
+      "canonical_url": "https://developer.nvidia.com/blog/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["company", "research"],
+      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "ownership_profile": "company_developer",
+      "evidence_profile": "primary_technical_source",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://developer.nvidia.com/blog/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "check_before_fulltext",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["nvidia_developer_blog_rss"]
+    },
+    {
+      "source_id": "google_ai_blog",
+      "name": "Google AI Blog RSS",
+      "canonical_url": "https://blog.google/technology/ai/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["company", "official"],
+      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://blog.google/technology/ai/rss/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 30,
+      "freshness_slo_minutes": 240,
+      "usage_policy": "check_before_fulltext",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["google_ai_blog_rss"]
+    },
+    {
+      "source_id": "techcrunch_ai",
+      "name": "TechCrunch AI RSS",
+      "canonical_url": "https://techcrunch.com/category/artificial-intelligence/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["trade", "community"],
+      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "ownership_profile": "media",
+      "evidence_profile": "discovery_only",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["techcrunch_ai_rss"]
+    },
+    {
+      "source_id": "venturebeat_ai",
+      "name": "VentureBeat AI RSS",
+      "canonical_url": "https://venturebeat.com/category/ai/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["trade"],
+      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "ownership_profile": "media",
+      "evidence_profile": "discovery_only",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://venturebeat.com/category/ai/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["venturebeat_ai_rss"]
+    },
+    {
+      "source_id": "theverge_ai",
+      "name": "The Verge AI RSS",
+      "canonical_url": "https://www.theverge.com/ai-artificial-intelligence",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["national", "trade"],
+      "domains": ["ai_agents_applications", "retail_consumer_fashion"],
+      "ownership_profile": "media",
+      "evidence_profile": "discovery_only",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["theverge_ai_rss"]
+    },
+    {
+      "source_id": "coindesk",
+      "name": "CoinDesk RSS",
+      "canonical_url": "https://www.coindesk.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["trade"],
+      "domains": ["crypto_rwa_agent_payments", "global_markets_macro"],
+      "ownership_profile": "media",
+      "evidence_profile": "discovery_only",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "enabled_for_opml": true,
+          "opml_category": "CRYPTO_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 30,
+      "freshness_slo_minutes": 240,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["coindesk_rss"]
+    },
+    {
+      "source_id": "decrypt",
+      "name": "Decrypt RSS",
+      "canonical_url": "https://decrypt.co/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["community", "trade"],
+      "domains": ["crypto_rwa_agent_payments", "ai_agents_applications"],
+      "ownership_profile": "media",
+      "evidence_profile": "weak_signal_discovery",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://decrypt.co/feed",
+          "enabled_for_opml": true,
+          "opml_category": "CRYPTO_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["decrypt_rss"]
+    },
+    {
+      "source_id": "retail_dive",
+      "name": "Retail Dive RSS",
+      "canonical_url": "https://www.retaildive.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["trade"],
+      "domains": ["retail_consumer_fashion", "global_markets_macro"],
+      "ownership_profile": "media",
+      "evidence_profile": "discovery_only",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.retaildive.com/feeds/news/",
+          "enabled_for_opml": true,
+          "opml_category": "RETAIL_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["retail_dive_rss"]
+    },
+    {
+      "source_id": "rsshub_project_github_releases",
+      "name": "RSSHub GitHub releases Atom",
+      "canonical_url": "https://github.com/DIYgod/RSSHub",
+      "publisher_country": "Global",
+      "macro_region": "Global",
+      "languages": ["en", "zh-Hans"],
+      "source_roles": ["community", "research"],
+      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "ownership_profile": "open_source_project",
+      "evidence_profile": "infrastructure_signal_only",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://github.com/DIYgod/RSSHub/releases.atom",
+          "enabled_for_opml": true,
+          "opml_category": "RSS_INFRA",
+          "route_status": "verified"
+        }
+      ],
+      "fetch_interval_minutes": 1440,
+      "freshness_slo_minutes": 2880,
+      "usage_policy": "github_atom_metadata_only",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "verified",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["rsshub_project_github_releases_atom"]
+    },
+    {
+      "source_id": "anthropic_news",
+      "name": "Anthropic News Web Watch",
+      "canonical_url": "https://www.anthropic.com/news",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": ["en"],
+      "source_roles": ["company", "official"],
+      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_source_when_checked",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.anthropic.com/news",
+          "enabled_for_opml": false,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "feed_not_verified"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 240,
+      "usage_policy": "manual_or_policy_checked_web_watch",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "feed_not_verified",
+      "last_verified_at": "2026-07-07",
+      "aliases": ["anthropic_news_web_watch"]
+    },
+    {
+      "source_id": "twse",
+      "name": "Taiwan Stock Exchange",
+      "canonical_url": "https://www.twse.com.tw/",
+      "publisher_country": "Taiwan",
+      "macro_region": "Taiwan",
+      "languages": ["zh-Hant", "en"],
+      "source_roles": ["official", "exchange"],
+      "domains": ["global_markets_macro", "policy_geopolitics"],
+      "ownership_profile": "public_exchange",
+      "evidence_profile": "primary_data",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "api",
+          "url": "https://www.twse.com.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_data_source"
+        }
+      ],
+      "fetch_interval_minutes": 30,
+      "freshness_slo_minutes": 120,
+      "usage_policy": "official_data_with_method_note",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "verified_source_library",
+      "last_verified_at": "2026-07-02",
+      "aliases": []
+    }
+  ]
+}
