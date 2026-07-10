@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import { allReportEntries } from '../../lib/data';
+
+export function getStaticPaths() {
+  const PER_PAGE = 30;
+  const entries = allReportEntries();
+  const pages = Math.max(1, Math.ceil(entries.length / PER_PAGE));
+  return Array.from({ length: pages }, (_v, index) => {
+    const page = index + 1;
+    return {
+      params: { page: String(page) },
+      props: { slice: entries.slice(index * PER_PAGE, page * PER_PAGE), page, pages },
+    };
+  });
+}
+const { slice, page, pages } = Astro.props as any;
+const base = import.meta.env.BASE_URL;
+const href = (p: number) => `${base}${base.endsWith('/') ? '' : '/'}history/${p}`;
+const reportHref = (date: string) => `${base}${base.endsWith('/') ? '' : '/'}reports/${date}`;
+---
+<Base title={`歷史 第 ${page} 頁`}>
+  <h1>歷史報告 · 第 {page} / {pages} 頁</h1>
+  {slice.length === 0 && <p class="empty">尚無歷史報告。</p>}
+  <table>
+    <thead><tr><th>日期</th><th>狀態</th><th>模式</th><th>重大</th><th>潛力</th><th>台灣</th></tr></thead>
+    <tbody>
+      {slice.map((e: any) => (
+        <tr>
+          <td><a href={reportHref(e.date)}>{e.date}</a></td>
+          <td>{e.status}</td>
+          <td>{e.evaluation_mode}{e.is_fixture ? ' ⚠' : ''}</td>
+          <td>{e.major_count}</td>
+          <td>{e.potential_count}</td>
+          <td>{e.taiwan_count}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <div class="pager">
+    {page > 1 && <a href={href(page - 1)}>← 上一頁</a>}
+    {page < pages && <a href={href(page + 1)}>下一頁 →</a>}
+  </div>
+</Base>

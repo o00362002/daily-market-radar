@@ -5,7 +5,7 @@ result. No secrets, no full articles, no model-invented conclusions ever enter t
 
 ```bash
 radar prepare-chat --date 2026-07-10 --output-root .
-# -> artifacts/chat/v1/2026-07-10/<context-hash>/{manifest,context,events,evidence,prior-state,
+# -> artifacts/chat/v1/YYYY-MM-DD/<context-hash>/{manifest,context,events,evidence,prior-state,
 #    deterministic-evaluation,runtime-contract,report-schema,expected-output.schema}.json + INSTRUCTIONS.md
 radar import-chat --package-dir <dir> --report chatgpt-output.json --receipt receipt.json
 ```

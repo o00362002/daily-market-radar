@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import BadgeList from '../../components/BadgeList.astro';
+import { allReportEntries, getFullByPath } from '../../lib/data';
+import { evaluationBadge, statusBadge, fixtureBadge } from '../../lib/format';
+
+export function getStaticPaths() {
+  return allReportEntries().map((entry) => ({ params: { date: entry.date }, props: { entry } }));
+}
+const { entry } = Astro.props as any;
+const report: any = getFullByPath(entry.full_path) ?? {};
+const items: any[] = report.items ?? [];
+---
+<Base title={`報告 ${entry.date}`}>
+  <h1>報告 · {entry.date}</h1>
+  <BadgeList badges={[statusBadge(entry.status), evaluationBadge(entry.evaluation_mode), fixtureBadge(entry.is_fixture)]} />
+  <p class="muted">run_id: {entry.run_id}</p>
+  {items.map((item) => (
+    <article class="card">
+      <div class="row">
+        <strong>{item.headline}</strong>
+        <span class={`badge ${item.report_lane === 'major' ? 'complete' : 'inference'}`}>{item.report_lane}</span>
+      </div>
+      <p>{item.today_delta}</p>
+    </article>
+  ))}
+  <p><a href={`../../${entry.full_path}`}>下載完整報告 JSON ↗</a></p>
+</Base>

@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { getLatestReport } from '../lib/data';
+const report: any = getLatestReport();
+const crypto = report?.crypto_matrix ?? {};
+---
+<Base title="加密矩陣 Crypto">
+  <h1>加密矩陣 Crypto</h1>
+  {Object.keys(crypto).length === 0 && <p class="empty">尚無資料。</p>}
+  {Object.entries(crypto).map(([key, cell]: any) => (
+    <div class="card">
+      <div class="row">
+        <strong>{key}</strong>
+        {cell.status === 'observed'
+          ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
+          : <span class="badge gap"><span class="sym">▽</span> 資料不足 insufficient</span>}
+      </div>
+      {(cell.data_checked ?? []).length > 0 && <p class="muted">特徵：{cell.data_checked.join('、')}</p>}
+      {cell.gap && <p class="muted">{cell.gap}</p>}
+    </div>
+  ))}
+</Base>

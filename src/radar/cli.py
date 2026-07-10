@@ -66,6 +66,14 @@ def build_parser() -> argparse.ArgumentParser:
     import_chat.add_argument("--package-dir", required=True)
     import_chat.add_argument("--report", required=True)
     import_chat.add_argument("--receipt", default="")
+
+    export_web = sub.add_parser("export-web")
+    export_web.add_argument("--out-dir", default=".")
+    export_web.add_argument("--database", default="")
+    export_web.add_argument("--input", default="")
+    export_web.add_argument("--reports-dir", default="")
+    export_web.add_argument("--latest", action="store_true")
+    export_web.add_argument("--full-rebuild", action="store_true", help="disable incremental unchanged-skip")
     return parser
 
 
@@ -152,6 +160,27 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(json.dumps(receipt.as_dict(), ensure_ascii=False, indent=2))
         return 0 if receipt.valid else 1
+
+    if args.command == "export-web":
+        from radar.web.runtime import export_web
+
+        result = export_web(
+            repo_root,
+            Path(args.out_dir).resolve(),
+            database=Path(args.database).resolve() if args.database else None,
+            input_report=Path(args.input).resolve() if args.input else None,
+            reports_dir=Path(args.reports_dir).resolve() if args.reports_dir else None,
+            latest=args.latest,
+            incremental=not args.full_rebuild,
+        )
+        print(
+            json.dumps(
+                {"status": "exported", "written": len(result.written), "skipped": len(result.skipped)},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
 
     if args.command in {"ingest", "process", "coverage", "report", "trends", "backtest"}:
         print(

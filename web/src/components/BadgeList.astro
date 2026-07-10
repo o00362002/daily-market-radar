@@ -1,0 +1,13 @@
+---
+import type { Badge } from '../lib/format';
+interface Props { badges: (Badge | null)[]; }
+const { badges } = Astro.props;
+---
+<div class="row">
+  {badges.filter(Boolean).map((badge) => (
+    <span class={`badge ${(badge as Badge).kind}`}>
+      <span class="sym">{(badge as Badge).symbol}</span>
+      <span>{(badge as Badge).label}</span>
+    </span>
+  ))}
+</div>

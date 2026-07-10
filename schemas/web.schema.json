@@ -1,0 +1,586 @@
+{
+  "WebManifestV1": {
+    "additionalProperties": false,
+    "properties": {
+      "schema_version": {
+        "title": "Schema Version",
+        "type": "string"
+      },
+      "generated_at": {
+        "title": "Generated At",
+        "type": "string"
+      },
+      "latest_date": {
+        "title": "Latest Date",
+        "type": "string"
+      },
+      "latest_full_path": {
+        "title": "Latest Full Path",
+        "type": "string"
+      },
+      "report_count": {
+        "minimum": 0,
+        "title": "Report Count",
+        "type": "integer"
+      },
+      "report_dates": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Report Dates",
+        "type": "array"
+      },
+      "domains": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Domains",
+        "type": "array"
+      },
+      "indicator_ids": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Indicator Ids",
+        "type": "array"
+      },
+      "years": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Years",
+        "type": "array"
+      }
+    },
+    "required": [
+      "schema_version",
+      "generated_at",
+      "latest_date",
+      "latest_full_path",
+      "report_count",
+      "report_dates",
+      "domains",
+      "indicator_ids",
+      "years"
+    ],
+    "title": "WebManifestV1",
+    "type": "object"
+  },
+  "ReportSummaryV1": {
+    "additionalProperties": false,
+    "properties": {
+      "date": {
+        "title": "Date",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "profile": {
+        "title": "Profile",
+        "type": "string"
+      },
+      "status": {
+        "title": "Status",
+        "type": "string"
+      },
+      "evaluation_mode": {
+        "title": "Evaluation Mode",
+        "type": "string"
+      },
+      "is_fixture": {
+        "title": "Is Fixture",
+        "type": "boolean"
+      },
+      "degradation_reasons": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Degradation Reasons",
+        "type": "array"
+      },
+      "major_count": {
+        "minimum": 0,
+        "title": "Major Count",
+        "type": "integer"
+      },
+      "potential_count": {
+        "minimum": 0,
+        "title": "Potential Count",
+        "type": "integer"
+      },
+      "taiwan_count": {
+        "minimum": 0,
+        "title": "Taiwan Count",
+        "type": "integer"
+      },
+      "coverage_gap_count": {
+        "minimum": 0,
+        "title": "Coverage Gap Count",
+        "type": "integer"
+      },
+      "retail_observed": {
+        "minimum": 0,
+        "title": "Retail Observed",
+        "type": "integer"
+      },
+      "crypto_observed": {
+        "minimum": 0,
+        "title": "Crypto Observed",
+        "type": "integer"
+      },
+      "structural_directional": {
+        "minimum": 0,
+        "title": "Structural Directional",
+        "type": "integer"
+      },
+      "content_hash": {
+        "title": "Content Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "date",
+      "run_id",
+      "profile",
+      "status",
+      "evaluation_mode",
+      "is_fixture",
+      "degradation_reasons",
+      "major_count",
+      "potential_count",
+      "taiwan_count",
+      "coverage_gap_count",
+      "retail_observed",
+      "crypto_observed",
+      "structural_directional",
+      "content_hash"
+    ],
+    "title": "ReportSummaryV1",
+    "type": "object"
+  },
+  "ReportIndexEntryV1": {
+    "additionalProperties": false,
+    "properties": {
+      "date": {
+        "title": "Date",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "status": {
+        "title": "Status",
+        "type": "string"
+      },
+      "evaluation_mode": {
+        "title": "Evaluation Mode",
+        "type": "string"
+      },
+      "is_fixture": {
+        "title": "Is Fixture",
+        "type": "boolean"
+      },
+      "major_count": {
+        "minimum": 0,
+        "title": "Major Count",
+        "type": "integer"
+      },
+      "potential_count": {
+        "minimum": 0,
+        "title": "Potential Count",
+        "type": "integer"
+      },
+      "taiwan_count": {
+        "minimum": 0,
+        "title": "Taiwan Count",
+        "type": "integer"
+      },
+      "summary_path": {
+        "title": "Summary Path",
+        "type": "string"
+      },
+      "full_path": {
+        "title": "Full Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "date",
+      "run_id",
+      "status",
+      "evaluation_mode",
+      "is_fixture",
+      "major_count",
+      "potential_count",
+      "taiwan_count",
+      "summary_path",
+      "full_path"
+    ],
+    "title": "ReportIndexEntryV1",
+    "type": "object"
+  },
+  "ReportsYearIndexV1": {
+    "$defs": {
+      "ReportIndexEntryV1": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "evaluation_mode": {
+            "title": "Evaluation Mode",
+            "type": "string"
+          },
+          "is_fixture": {
+            "title": "Is Fixture",
+            "type": "boolean"
+          },
+          "major_count": {
+            "minimum": 0,
+            "title": "Major Count",
+            "type": "integer"
+          },
+          "potential_count": {
+            "minimum": 0,
+            "title": "Potential Count",
+            "type": "integer"
+          },
+          "taiwan_count": {
+            "minimum": 0,
+            "title": "Taiwan Count",
+            "type": "integer"
+          },
+          "summary_path": {
+            "title": "Summary Path",
+            "type": "string"
+          },
+          "full_path": {
+            "title": "Full Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "run_id",
+          "status",
+          "evaluation_mode",
+          "is_fixture",
+          "major_count",
+          "potential_count",
+          "taiwan_count",
+          "summary_path",
+          "full_path"
+        ],
+        "title": "ReportIndexEntryV1",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "year": {
+        "title": "Year",
+        "type": "string"
+      },
+      "entries": {
+        "items": {
+          "$ref": "#/$defs/ReportIndexEntryV1"
+        },
+        "title": "Entries",
+        "type": "array"
+      }
+    },
+    "required": [
+      "year",
+      "entries"
+    ],
+    "title": "ReportsYearIndexV1",
+    "type": "object"
+  },
+  "DomainIndexV1": {
+    "$defs": {
+      "ReportIndexEntryV1": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "evaluation_mode": {
+            "title": "Evaluation Mode",
+            "type": "string"
+          },
+          "is_fixture": {
+            "title": "Is Fixture",
+            "type": "boolean"
+          },
+          "major_count": {
+            "minimum": 0,
+            "title": "Major Count",
+            "type": "integer"
+          },
+          "potential_count": {
+            "minimum": 0,
+            "title": "Potential Count",
+            "type": "integer"
+          },
+          "taiwan_count": {
+            "minimum": 0,
+            "title": "Taiwan Count",
+            "type": "integer"
+          },
+          "summary_path": {
+            "title": "Summary Path",
+            "type": "string"
+          },
+          "full_path": {
+            "title": "Full Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "run_id",
+          "status",
+          "evaluation_mode",
+          "is_fixture",
+          "major_count",
+          "potential_count",
+          "taiwan_count",
+          "summary_path",
+          "full_path"
+        ],
+        "title": "ReportIndexEntryV1",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "domain": {
+        "title": "Domain",
+        "type": "string"
+      },
+      "year": {
+        "title": "Year",
+        "type": "string"
+      },
+      "entries": {
+        "items": {
+          "$ref": "#/$defs/ReportIndexEntryV1"
+        },
+        "title": "Entries",
+        "type": "array"
+      }
+    },
+    "required": [
+      "domain",
+      "year",
+      "entries"
+    ],
+    "title": "DomainIndexV1",
+    "type": "object"
+  },
+  "TaiwanIndexEntryV1": {
+    "additionalProperties": false,
+    "properties": {
+      "date": {
+        "title": "Date",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "taiwan_count": {
+        "minimum": 0,
+        "title": "Taiwan Count",
+        "type": "integer"
+      },
+      "summary_path": {
+        "title": "Summary Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "date",
+      "run_id",
+      "taiwan_count",
+      "summary_path"
+    ],
+    "title": "TaiwanIndexEntryV1",
+    "type": "object"
+  },
+  "TaiwanIndexV1": {
+    "$defs": {
+      "TaiwanIndexEntryV1": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "taiwan_count": {
+            "minimum": 0,
+            "title": "Taiwan Count",
+            "type": "integer"
+          },
+          "summary_path": {
+            "title": "Summary Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "run_id",
+          "taiwan_count",
+          "summary_path"
+        ],
+        "title": "TaiwanIndexEntryV1",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "year": {
+        "title": "Year",
+        "type": "string"
+      },
+      "entries": {
+        "items": {
+          "$ref": "#/$defs/TaiwanIndexEntryV1"
+        },
+        "title": "Entries",
+        "type": "array"
+      }
+    },
+    "required": [
+      "year",
+      "entries"
+    ],
+    "title": "TaiwanIndexV1",
+    "type": "object"
+  },
+  "TrendPointV1": {
+    "additionalProperties": false,
+    "properties": {
+      "date": {
+        "title": "Date",
+        "type": "string"
+      },
+      "direction": {
+        "title": "Direction",
+        "type": "string"
+      },
+      "support_score": {
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Support Score",
+        "type": "integer"
+      },
+      "counter_score": {
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Counter Score",
+        "type": "integer"
+      },
+      "confidence": {
+        "title": "Confidence",
+        "type": "string"
+      }
+    },
+    "required": [
+      "date",
+      "direction",
+      "support_score",
+      "counter_score",
+      "confidence"
+    ],
+    "title": "TrendPointV1",
+    "type": "object"
+  },
+  "TrendSeriesV1": {
+    "$defs": {
+      "TrendPointV1": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "support_score": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Support Score",
+            "type": "integer"
+          },
+          "counter_score": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Counter Score",
+            "type": "integer"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "direction",
+          "support_score",
+          "counter_score",
+          "confidence"
+        ],
+        "title": "TrendPointV1",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "indicator_id": {
+        "title": "Indicator Id",
+        "type": "string"
+      },
+      "points": {
+        "items": {
+          "$ref": "#/$defs/TrendPointV1"
+        },
+        "title": "Points",
+        "type": "array"
+      }
+    },
+    "required": [
+      "indicator_id",
+      "points"
+    ],
+    "title": "TrendSeriesV1",
+    "type": "object"
+  }
+}
