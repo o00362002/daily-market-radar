@@ -1,6 +1,7 @@
 # Daily Market Radar - Radar Configuration
 # 狀態值：major_signal / weak_signal / no_major_change / insufficient_data
 # 證據值：high / medium / low / insufficient_data
+# canonical news domains 只由 config/runtime_contract.json 定義；本檔是細雷達模組與指標。
 
 radars:
   - id: global_markets_geopolitics
@@ -128,7 +129,7 @@ radars:
       - 就業證據
       - 商業閉環
       - 法律反彈
-    escalation_rule: 若同時出現「技術突破 + 產業流程替代 + 平台政策 + 就業證據」，必須列入必看訊號或候選訊號，不得只當作模型發布新聞。
+    escalation_rule: 若同時出現「技術突破 + 產業流程替代 + 平台政策 + 就業證據」，必須列入必看訊號或候選訊號，不得只當作模型發布新聞；就業證據同步更新 labor indicator，但不建立 labor 新聞章節。
 
   - id: tech_overheating_indicators
     name: 科技發展過熱指標
@@ -298,9 +299,31 @@ radars:
       - 混合狀態
       - 可驗證方法
 
+  - id: competitor_intelligence
+    name: 產品與社群競品情報
+    required: true
+    mode: cross_domain_projection
+    canonical_registry: config/competitor_registry.json
+    policy: configs/competitor_intelligence.yml
+    consumes_news_slot: false
+    output_sections:
+      - Product Competitors
+      - Social / Content Competitors
+    required_questions:
+      - 是否推出低價、自助式或 freemium 的 RetailOps / AI 營運入口？
+      - 是否從 CRM / 行銷延伸到補貨、庫存、商品角色、門市診斷、損益或展店？
+      - 是否推出 fashion retail operations pack、module marketplace 或產業模板？
+      - 是否開始服務 3–30 店的中小型服飾品牌？
+      - 是否出現與「門市營運 × 數據 × AI」高度重疊的社群定位與產品導流？
+    no_update_rule: 固定檢查完成且無 fresh material delta 才可寫「已查無重大更新」；未完成檢查寫「未完整查證」。
+
   - id: labor_consumption_pressure
     name: 勞動與消費結構壓力
     required: true
+    mode: indicator_only
+    standalone_news_section: false
+    consumes_news_slot: false
+    indicator_target: configs/indicator_tracking.yml#labor_consumption_pressure
     scope:
       - 青年失業
       - 初階白領
@@ -311,7 +334,7 @@ radars:
       - 中價品牌
       - AI 勞動替代
       - 消費信心
-    cross_rule: 若 AI 新聞涉及工作替代，必須同步放入此雷達，不得只放 AI 區。
+    cross_rule: 若 AI 或其他新聞涉及工作替代、招聘、裁員或薪資，必須更新此指標；只有事件本身獨立符合 AI、全球市場、零售或科技重大新聞門檻時，才依該 canonical domain 輸出一次，不得另開 labor 新聞章節。
 
   - id: taiwan_mapping
     name: 台灣本地訊號總表與跨領域缺口
@@ -326,7 +349,8 @@ radars:
       - 服飾品牌
       - AI 企業導入
       - 加密監管
-      - 勞動與消費
+      - 勞動與消費指標
+      - 台灣產品競品與社群競品
     output_requirements:
       - 本地訊號
       - 產業關聯
