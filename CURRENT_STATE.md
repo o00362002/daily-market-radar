@@ -12,6 +12,8 @@ Contracts：RadarReportV2（事實）、AIAnalysisV1（解讀）、WebArtifactV1
 Runtime：src/radar/ modular monolith；外部 collaborator 經 behavior Protocols 注入，concrete implementations 只由 composition root 選擇。
 Validated boundary：AIAnalysisV1 只引用已驗證 report/event ids，不得改寫 RadarReportV2 或 deterministic indicator values。
 Report domains：五個 canonical domains；labor 預設 indicator-only；競品採 cross-domain projection，不新增領域或重複計數。
+Core structural indicators：k_shaped_ai_productivity_economy、ai_bubble_overinvestment、brand_market_polarization_and_true_vs_fake_segmentation；三項皆為每日必出主指標。
+Indicator hierarchy：三個 structural indicators 是長期主層；AI／零售／Crypto／台灣／跨域／證據六項動能分數是 auxiliary signal panel，不得互相取代。
 Taiwan：direct evidence 與 implication 分離；推論不得算成台灣直接證據。
 Scoring：importance、potential、confidence 分開；來源角色不得單獨決定 Major/Potential。
 Language：API/Chat-assisted 受約束輸出繁中並保留原文；無 AI 時保留原文並揭露 fallback。
@@ -26,7 +28,7 @@ Durability：SQLite 保存 document/event/delta/report/indicator/state/match/sou
 Resolution：跨日事件以 deterministic 7-strategy matching 與 material-delta taxonomy 判定；同日 re-run 取當日聯集，跨日無新增不重播。
 Evaluation：deterministic／auto／api-assisted／chat-assisted 已接線；AI 只讀 bounded context，輸出需重驗證，invalid/provider failure 安全降級。
 Chat flow：prepare-chat 從 durable live state 產生 content-addressed 封包；import-chat 驗證成功後可寫回 state、建站與部署；fixture 預設不得覆蓋正式站。
-AI analysis：AIAnalysisV1 產生翻譯、跨事件統整、條件式未來趨勢與六個連動指標。指標分數與方向由透明公式計算，AI 只能解讀。provider/model/time/run/hash/prompt/schema/fallback 全留痕；無 key 或 invalid output 轉 deterministic fallback。
+AI analysis：AIAnalysisV1 產生翻譯、跨事件統整、條件式未來趨勢；/analysis 先顯示三個 canonical structural indicators，再顯示六個 auxiliary signals。三個主指標直接沿用 RadarReportV2 deterministic 結果，AI 不得改寫；provider/model/time/run/hash/prompt/schema/fallback 全留痕。
 Web：Astro static、zero-JS-first、Pages-compatible；事實層與 /analysis 解讀層分開，JSON artifacts 同步發佈於 /data/。
 Automation：daily-intelligence 每日 07:00 台灣執行 live pipeline；ai-analysis 在 daily/import 成功後產生解讀層並重新部署；共同使用 radar-daily concurrency lock。
 Coverage：來源數量與輸出數量不是完整性證明；coverage gaps、failures、rejection counters、matrices、structural indicators 與 backtest 固定揭露。
@@ -38,8 +40,11 @@ Legacy：reports/2026/ 人工報告投影至 /legacy/，明確標示非 validate
 
 ```text
 AGENTS.md = 第一入口
+README.md = 專案能力與三個核心指標快速索引
 CURRENT_STATE.md = 現況
 CURRENT_DECISIONS.md = 已接受決策
+docs/structural-indicators.md = 三個核心結構指標的人類可讀權威入口
+configs/structural_trend_indicators.yml = 支持／反向證據與待查資料規格
 schema/sync-matrix.json = 連動矩陣
 
 make validate

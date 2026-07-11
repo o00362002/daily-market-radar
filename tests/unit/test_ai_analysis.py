@@ -56,7 +56,32 @@ class AIAnalysisTests(unittest.TestCase):
         for row in typed.linked_indicators:
             self.assertTrue(set(row.source_event_ids).issubset(allowed_events))
 
-    def test_same_report_as_previous_produces_flat_indicator_deltas(self) -> None:
+    def test_three_canonical_structural_indicators_are_primary_and_unchanged(self) -> None:
+        analysis = build_deterministic_analysis(
+            self.report,
+            None,
+            self.config,
+            generated_at="2026-07-10T02:00:00+00:00",
+        )
+        expected_ids = [row["indicator_id"] for row in self.config["core_structural_indicators"]]
+        actual_ids = [row.indicator_id for row in analysis.structural_indicators]
+        self.assertEqual(actual_ids, expected_ids)
+        self.assertEqual(len(actual_ids), 3)
+
+        source = {row.indicator_id: row for row in self.report.structural_indicators}
+        for row in analysis.structural_indicators:
+            original = source[row.indicator_id]
+            self.assertEqual(row.direction, original.direction)
+            self.assertEqual(row.support_score, original.support_score)
+            self.assertEqual(row.counter_score, original.counter_score)
+            self.assertEqual(row.confidence, original.confidence)
+            self.assertEqual(row.supporting_signal_ids, original.supporting_signal_ids)
+            self.assertEqual(row.counter_signal_ids, original.counter_signal_ids)
+            self.assertEqual(row.missing_data, original.missing_data)
+            self.assertEqual(row.one_sentence_read, original.one_sentence_read)
+            self.assertEqual(row.next_verification, original.next_verification)
+
+    def test_same_report_as_previous_produces_flat_auxiliary_indicator_deltas(self) -> None:
         analysis = build_deterministic_analysis(
             self.report,
             self.report,
@@ -85,6 +110,10 @@ class AIAnalysisTests(unittest.TestCase):
         schema = ai_analysis_json_schema()
         self.assertEqual(schema["$schema"], "https://json-schema.org/draft/2020-12/schema")
         self.assertEqual(schema["properties"]["provenance"]["$ref"], "#/$defs/AnalysisProvenanceV1")
+        self.assertEqual(
+            schema["properties"]["structural_indicators"]["items"]["$ref"],
+            "#/$defs/StructuralIndicatorAnalysisV1",
+        )
 
 
 if __name__ == "__main__":

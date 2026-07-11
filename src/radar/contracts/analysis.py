@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -56,6 +56,22 @@ class FutureTrendV1(CanonicalAnalysisModel):
     confidence: int = Field(ge=0, le=100)
 
 
+class StructuralIndicatorAnalysisV1(CanonicalAnalysisModel):
+    indicator_id: str
+    label: str
+    observation_date: str
+    direction: Literal["toward", "against", "mixed", "insufficient"]
+    support_score: int = Field(ge=0, le=100)
+    counter_score: int = Field(ge=0, le=100)
+    confidence: Union[int, Literal["insufficient"]]
+    supporting_signal_ids: list[str]
+    counter_signal_ids: list[str]
+    missing_data: list[str]
+    one_sentence_read: str
+    next_verification: list[str]
+    evaluation_mode: str
+
+
 class LinkedIndicatorV1(CanonicalAnalysisModel):
     indicator_id: str
     label: str
@@ -79,6 +95,7 @@ class AIAnalysisV1(CanonicalAnalysisModel):
     translations: list[TranslationV1]
     key_findings: list[AnalysisFindingV1]
     future_trends: list[FutureTrendV1]
+    structural_indicators: list[StructuralIndicatorAnalysisV1]
     linked_indicators: list[LinkedIndicatorV1]
     limitations: list[str]
     provenance: AnalysisProvenanceV1

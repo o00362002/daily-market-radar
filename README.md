@@ -55,6 +55,25 @@ science_technology_industry
 
 The retired labor-domain identifier remains only as a backward-compatible alias. Labor and consumption pressure normally render in the final indicator panel; an independently material event may appear once under AI, macro, retail or technology.
 
+## Three canonical structural indicators
+
+These are the project's long-term primary direction meters. They are mandatory in every `RadarReportV2` and appear first on the `/analysis` page:
+
+```text
+k_shaped_ai_productivity_economy
+  生產力便車無法共享的 K 型經濟
+
+ai_bubble_overinvestment
+  AI 泡沫 / 過度投資趨勢
+
+brand_market_polarization_and_true_vs_fake_segmentation
+  品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾
+```
+
+Canonical IDs live in `config/runtime_contract.json`; detailed supporting, counter and evidence requirements live in `configs/structural_trend_indicators.yml`; the human-readable index is `docs/structural-indicators.md`.
+
+The six AI/retail/crypto/Taiwan/convergence/evidence scores in `AIAnalysisV1.linked_indicators` are auxiliary daily signal indicators. They do not replace the three structural indicators.
+
 ## Competitor Intelligence
 
 ```text
@@ -185,7 +204,7 @@ Connected now:
 RSS / Atom
 FreshRSS inbox when configured
 cross-day event history and material delta
-Retail / Crypto / structural deterministic evaluators
+Retail / Crypto / three structural deterministic evaluators
 canonical competitor registry and registry-backed web projection
 labor/consumption indicator-only policy
 optional API and chat-assisted evaluation

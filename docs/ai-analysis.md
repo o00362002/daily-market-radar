@@ -9,9 +9,10 @@ It never replaces or mutates the source report.
 RadarReportV2 validated facts
 → faithful headline translation
 → cross-event daily synthesis
+→ three canonical structural indicators as the primary trend panel
 → conditional future-trend scenarios
-→ deterministic linked indicators
-→ AI interpretation of immutable indicator values
+→ six deterministic auxiliary signal indicators
+→ AI interpretation of immutable auxiliary values
 → AIAnalysisV1 web artifact
 ```
 
@@ -22,27 +23,36 @@ The `/analysis` page keeps the following content types visibly separate:
 - background context
 - early hypotheses
 - uncertainty and follow-up verification
+- canonical structural trend indicators
+- auxiliary daily signal indicators
 
-## Provenance
+## Indicator hierarchy
 
-Every analysis records:
+The project has two distinct indicator layers. They must not be merged or described as equivalents.
 
-- provider and model
-- generation time
-- source report date and run id
-- source context hash
-- prompt version
-- schema version
-- requested and effective mode
-- validation and fallback status
+### Primary: three canonical structural indicators
 
-## Linked indicators
+These are defined by `config/runtime_contract.json` and detailed in
+`configs/structural_trend_indicators.yml`:
 
-Indicator values are calculated by deterministic code from validated report fields.
-The model may explain an indicator but cannot change its score, previous score, delta,
-direction, status, method, components or source event ids.
+1. `k_shaped_ai_productivity_economy`
+   - 生產力便車無法共享的 K 型經濟
+2. `ai_bubble_overinvestment`
+   - AI 泡沫 / 過度投資趨勢
+3. `brand_market_polarization_and_true_vs_fake_segmentation`
+   - 品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾
 
-Initial indicators:
+`AIAnalysisV1.structural_indicators` is an ordered, labelled projection of the same
+`RadarReportV2.structural_indicators` observations. Direction, support score, counter score,
+confidence, signal IDs, missing data, interpretation and next verification are immutable.
+The AI provider may use them when synthesising the day, but cannot edit or replace them.
+
+The authoritative human-readable index is `docs/structural-indicators.md`.
+
+### Secondary: six auxiliary signal indicators
+
+`AIAnalysisV1.linked_indicators` remains for backward compatibility, but the website labels it
+**輔助訊號面板**. These values describe daily signal strength and evidence conditions:
 
 - AI application momentum
 - retail change momentum
@@ -72,8 +82,21 @@ Directions compare the latest report with the previous report of the same profil
 - no prior baseline: new
 - no qualifying data: insufficient
 
-These scores describe signal strength and evidence conditions. They do not prove causality,
-market direction or investment returns.
+These scores do not prove causality, market direction or investment returns, and they must not
+be presented as replacements for the three structural indicators.
+
+## Provenance
+
+Every analysis records:
+
+- provider and model
+- generation time
+- source report date and run id
+- source context hash
+- prompt version
+- schema version
+- requested and effective mode
+- validation and fallback status
 
 ## Evaluation modes
 
@@ -81,9 +104,10 @@ market direction or investment returns.
 - `auto`: uses OpenAI when `OPENAI_API_KEY` is available, otherwise deterministic fallback.
 - `api-assisted`: requests OpenAI enhancement and falls back safely on provider or validation failure.
 
-OpenAI receives only a bounded JSON payload containing report items, matrices, structural
-indicators, linked indicators and coverage gaps. It never receives secrets or full article bodies.
-Output is constrained to a typed schema and revalidated against allowed event and indicator ids.
+OpenAI receives only a bounded JSON payload containing report items, matrices, the three
+structural indicators, auxiliary signal indicators and coverage gaps. It never receives secrets
+or full article bodies. Output is constrained to a typed schema and revalidated against allowed
+event and auxiliary-indicator ids.
 
 ## Automation
 

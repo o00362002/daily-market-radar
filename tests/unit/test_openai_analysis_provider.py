@@ -82,7 +82,7 @@ class OpenAIAnalysisProviderTests(unittest.TestCase):
             limitations=["分析只使用 bounded report context。"],
         )
 
-    def test_model_may_interpret_but_not_change_indicator_values(self) -> None:
+    def test_model_may_interpret_auxiliary_signals_but_not_change_values(self) -> None:
         enhanced = _merge_proposal(
             self.report,
             self.baseline,
@@ -103,6 +103,7 @@ class OpenAIAnalysisProviderTests(unittest.TestCase):
             self.assertEqual(updated.method, original.method)
             self.assertEqual(updated.components, original.components)
             self.assertEqual(updated.source_event_ids, original.source_event_ids)
+        self.assertEqual(enhanced.structural_indicators, self.baseline.structural_indicators)
         self.assertEqual(enhanced.provenance.provider, "openai")
         self.assertEqual(enhanced.provenance.model, "test-model")
         self.assertFalse(enhanced.provenance.fallback_used)
