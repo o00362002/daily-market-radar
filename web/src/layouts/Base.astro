@@ -19,6 +19,7 @@ const groups: NavGroup[] = [
     title: '總覽 Radar',
     items: [
       { label: '今日', sub: 'Today', path: '', sym: '◎', match: [''] },
+      { label: 'AI 解讀', sub: 'Analysis', path: 'analysis', sym: '✦', match: ['analysis'] },
       { label: '候選池', sub: 'Pool', path: 'potential', sym: '◍', match: ['potential'] },
       {
         label: '完整報告',
@@ -101,7 +102,8 @@ const isActive = (item: NavItem) =>
           ))}
         </nav>
         <div class="side-foot">
-          靜態投影自 validated RadarReportV2<br />
+          事實層：validated RadarReportV2<br />
+          解讀層：可追溯 AIAnalysisV1<br />
           事實／推論／反證／不確定／缺口分開標示<br />
           數量不是完整性證明
         </div>
