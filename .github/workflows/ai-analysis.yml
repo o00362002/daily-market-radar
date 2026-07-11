@@ -1,13 +1,24 @@
 name: ai-analysis
 
-# Runs after a validated daily/import deployment, restores the same durable state,
-# generates AIAnalysisV1, then redeploys the static site with the separate AI layer.
-# Missing API credentials degrade to deterministic analysis instead of failing.
+# Runs after a validated daily/import deployment, and after analysis-layer code
+# lands on main. Restores the same durable state, generates AIAnalysisV1, then
+# redeploys the static site. Missing API credentials degrade to deterministic
+# analysis instead of failing.
 
 on:
   workflow_run:
     workflows: ["daily-intelligence", "import-chat"]
     types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ai-analysis.yml"
+      - "src/radar/analysis/**"
+      - "src/radar/contracts/analysis.py"
+      - "config/ai_analysis.json"
+      - "web/src/pages/analysis.astro"
+      - "web/src/layouts/Base.astro"
+      - "web/src/lib/data.ts"
   workflow_dispatch:
     inputs:
       mode:
@@ -31,7 +42,7 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     outputs:
       deployable: ${{ steps.gate.outputs.deployable }}
