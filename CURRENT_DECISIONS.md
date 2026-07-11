@@ -4,6 +4,41 @@
 
 ---
 
+## 2026-07-11：Competitor Intelligence 一級能力；Labor 降為 indicator-only
+
+### Decision
+
+```text
+1. 競品情報正式成為 Daily Market Radar 的一級能力，固定分為 Product Competitors 與
+   Social / Content Competitors。固定身分、別名、優先級與高風險訊號的唯一資料來源為
+   config/competitor_registry.json；collection/projection policy 為 configs/competitor_intelligence.yml。
+2. 競品情報採 cross-domain projection，不新增 canonical report-domain quota。同一事件維持唯一
+   primary domain、唯一 Major/Potential lane，可投影到競品區但不得重複計數或提高證據等級。
+3. 固定競品檢查完成且無 fresh material delta 時，輸出「已查無重大更新」；未完成固定來源或
+   direct-channel check 時只能標示「未完整查證」，不得用舊聞補位。
+4. 勞動、招聘、裁員、薪資、失業與消費壓力從 standalone news domain 降為 indicator-only；
+   不再產生完整新聞章節或領域配額。只有事件本身獨立符合 AI、全球市場、零售或科技重大新聞
+   門檻時，才依該 canonical domain 輸出一次。
+5. runtime contract v2.1 的 canonical news domains 由六個改為五個；退役的
+   labor_demographics_consumption_pressure 僅保留為 global_markets_macro compatibility alias。
+6. Web 左側競品分析、首頁競品摘要與競品頁必須共用 config/competitor_registry.json，不得各自
+   維護關鍵詞名單。現階段 competitor output 仍是 validated RadarReportV2 items 的 projection；
+   typed competitor payload 與 durable competitor history 是後續實作，不得假裝已完成。
+```
+
+### Supersedes
+
+```text
+本決議取代 2026-07-10 runtime-v2 sync repair 中「canonical report domains are six」的細節，
+並取代任何仍將 labor 視為完整新聞領域的 active wording。歷史報告可保留舊結構，但不是現行規則。
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-11_competitor_intelligence_labor_boundary.md`
+
+---
+
 ## 2026-07-11：day-union reportability、minimum floors、legacy archive
 
 ### Decision
@@ -234,7 +269,8 @@ Those remain explicit later implementation work.
 5. Completeness is determined by source health, coverage cells, evidence trace, fresh material delta,
    de-duplication, rejection/retry audit, Taiwan direct evidence, fixed matrices, structural indicators,
    report-contract validation and backtest.
-6. Canonical report domains are six. policy_geopolitics maps to global_markets_macro.
+6. Canonical report domains were six at this revision; this detail is superseded by the 2026-07-11
+   Competitor Intelligence / Labor indicator-only decision and runtime contract v2.1.
 7. Major and potential are separate lanes; one event cannot occupy both lanes or multiple primary domains.
 8. Importance, future potential and evidence confidence are independent scores.
 9. Retail matrix, Crypto matrix and Structural Trend Indicator Panel are executable report requirements.
