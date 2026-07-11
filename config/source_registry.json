@@ -1356,6 +1356,793 @@
       "verification_status": "verified_source_library",
       "last_verified_at": "2026-07-10",
       "aliases": []
+    },
+    {
+      "source_id": "bbc_business",
+      "name": "BBC Business",
+      "canonical_url": "https://www.bbc.com/business",
+      "publisher_country": "GB",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "news_agency"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "guardian_business",
+      "name": "The Guardian Business",
+      "canonical_url": "https://www.theguardian.com/uk/business",
+      "publisher_country": "GB",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "credible_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.theguardian.com/uk/business/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "cnbc_top",
+      "name": "CNBC Top News",
+      "canonical_url": "https://www.cnbc.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "marketwatch_top",
+      "name": "MarketWatch Top Stories",
+      "canonical_url": "https://www.marketwatch.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "ecb_press",
+      "name": "European Central Bank Press",
+      "canonical_url": "https://www.ecb.europa.eu/",
+      "publisher_country": "EU",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "central_bank",
+        "official"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "central_bank",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.ecb.europa.eu/rss/press.html",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "official_feed_allowed_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "scmp_business",
+      "name": "South China Morning Post Business",
+      "canonical_url": "https://www.scmp.com/business",
+      "publisher_country": "HK",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.scmp.com/rss/92/feed",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "nikkei_asia",
+      "name": "Nikkei Asia",
+      "canonical_url": "https://asia.nikkei.com/",
+      "publisher_country": "JP",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://asia.nikkei.com/rss/feed/nar",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "ars_technica",
+      "name": "Ars Technica",
+      "canonical_url": "https://arstechnica.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "industry_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://feeds.arstechnica.com/arstechnica/index",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "mit_tech_review",
+      "name": "MIT Technology Review",
+      "canonical_url": "https://www.technologyreview.com/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "research",
+        "trade"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.technologyreview.com/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "hacker_news",
+      "name": "Hacker News Front Page",
+      "canonical_url": "https://news.ycombinator.com/",
+      "publisher_country": "US",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "community"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "crypto_rwa_agent_payments"
+      ],
+      "ownership_profile": "independent_data_provider",
+      "evidence_profile": "weak_signal_discovery",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://hnrss.org/frontpage",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "discovery_only_verify_primary_source",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "huggingface_blog",
+      "name": "Hugging Face Blog",
+      "canonical_url": "https://huggingface.co/blog",
+      "publisher_country": "US",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_technical_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://huggingface.co/blog/feed.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "official_feed_allowed_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "deepmind_blog",
+      "name": "Google DeepMind Blog",
+      "canonical_url": "https://deepmind.google/",
+      "publisher_country": "GB",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "company_official",
+      "evidence_profile": "primary_technical_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://deepmind.google/blog/rss.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "official_feed_allowed_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "cointelegraph",
+      "name": "Cointelegraph",
+      "canonical_url": "https://cointelegraph.com/",
+      "publisher_country": "US",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "crypto_media"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://cointelegraph.com/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "theblock",
+      "name": "The Block",
+      "canonical_url": "https://www.theblock.co/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "crypto_media",
+        "crypto_analysis"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "global_markets_macro"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.theblock.co/rss.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "modern_retail",
+      "name": "Modern Retail",
+      "canonical_url": "https://www.modernretail.co/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade",
+        "fashion_media"
+      ],
+      "domains": [
+        "retail_consumer_fashion",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.modernretail.co/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "arxiv_cs_lg",
+      "name": "arXiv cs.LG (Machine Learning)",
+      "canonical_url": "https://arxiv.org/list/cs.LG/recent",
+      "publisher_country": "US",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "research"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "research_repository",
+      "evidence_profile": "research_preprint",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://rss.arxiv.org/rss/cs.LG",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_and_abstract_with_preprint_label",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "nature_news",
+      "name": "Nature News",
+      "canonical_url": "https://www.nature.com/news",
+      "publisher_country": "GB",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "research"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.nature.com/nature.rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "ieee_spectrum",
+      "name": "IEEE Spectrum",
+      "canonical_url": "https://spectrum.ieee.org/",
+      "publisher_country": "US",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "research",
+        "industry"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://spectrum.ieee.org/feeds/feed.rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "technews_tw",
+      "name": "科技新報 TechNews",
+      "canonical_url": "https://technews.tw/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications",
+        "global_markets_macro"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://technews.tw/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "ithome_tw",
+      "name": "iThome",
+      "canonical_url": "https://www.ithome.com.tw/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.ithome.com.tw/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "inside_tw",
+      "name": "INSIDE 硬塞的網路趨勢觀察",
+      "canonical_url": "https://www.inside.com.tw/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "trade",
+        "community"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.inside.com.tw/feed/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
     }
   ]
 }

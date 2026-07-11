@@ -7,6 +7,7 @@ import { evaluationBadge, statusBadge, fixtureBadge } from '../lib/format';
 const manifest = getManifest();
 const report: any = getLatestReport();
 const items: any[] = report?.items ?? [];
+const base = import.meta.env.BASE_URL;
 const major = items.filter((i) => i.report_lane === 'major');
 const potential = items.filter((i) => i.report_lane === 'potential');
 const taiwan = items.filter((i) => (i.direct_taiwan_evidence ?? []).length > 0);
@@ -22,6 +23,26 @@ const sortedPotential = [...potential].sort((a, b) =>
   || (b.confidence_score - a.confidence_score)
   || String(a.item_id).localeCompare(String(b.item_id))
 );
+
+// Major picks: homepage shows the top few per domain for readability; every
+// qualified item is retained in the full report page and the JSON artifact.
+const sortedMajor = [...major].sort((a, b) =>
+  (b.importance_score - a.importance_score)
+  || (b.confidence_score - a.confidence_score)
+  || String(a.item_id).localeCompare(String(b.item_id))
+);
+const selectedMajorIds = new Set<string>();
+const majorPerDomain = new Map<string, number>();
+for (const item of sortedMajor) {
+  const domain = item.primary_domain ?? 'unknown';
+  const count = majorPerDomain.get(domain) ?? 0;
+  if (count < 3) {
+    selectedMajorIds.add(item.item_id);
+    majorPerDomain.set(domain, count + 1);
+  }
+}
+const majorSelected = sortedMajor.filter((item) => selectedMajorIds.has(item.item_id));
+const majorOverflowCount = sortedMajor.length - majorSelected.length;
 const selectedPotentialIds = new Set<string>();
 const selectedPerDomain = new Map<string, number>();
 for (const item of sortedPotential) {
@@ -62,9 +83,11 @@ const visibleUncertainties = (item: any) =>
         <div class="kpi"><div class="n">{gaps.length}</div><div class="l">覆蓋缺口 Gaps</div></div>
       </div>
 
-      <h2>重大 Major</h2>
-      {major.length === 0 && <p class="empty">今日無重大項目。</p>}
-      {major.map((item) => (
+      <h2>重大精選 Major Picks</h2>
+      <p class="muted">每個領域首頁最多顯示 3 筆；共 {major.length} 筆重大項目全數保留於
+        <a href={`${base}${base.endsWith('/') ? '' : '/'}reports/${report.date}`}>完整報告頁</a>。</p>
+      {majorSelected.length === 0 && <p class="empty">今日無重大項目。</p>}
+      {majorSelected.map((item) => (
         <article class="card">
           <div class="row">
             <strong>{item.headline}</strong>
@@ -122,7 +145,11 @@ const visibleUncertainties = (item: any) =>
 
       <h2>台灣 Taiwan（直接證據）</h2>
       {taiwan.length === 0 && <p class="empty">今日無台灣直接證據項目；「台灣可能受影響」屬推論，不計入。</p>}
-      {taiwan.map((item) => (
+      {taiwan.length > 0 && (
+        <p class="muted">首頁顯示前 8 筆；共 {taiwan.length} 筆台灣直接證據項目，完整清單見
+          <a href={`${base}${base.endsWith('/') ? '' : '/'}taiwan`}>台灣頁</a>。</p>
+      )}
+      {taiwan.slice(0, 8).map((item) => (
         <article class="card"><strong>{item.headline}</strong><p>{item.taiwan_implication || item.today_delta}</p></article>
       ))}
 

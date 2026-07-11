@@ -29,7 +29,7 @@ Potential：事件以試點/原型/新應用/新商業模式/跨域組合/採用
 Web projection：validated RadarReportV2 → typed web read-models → content-addressed immutable artifacts（atomic stage-then-replace、unchanged skip、incremental、失敗不留半套）via radar export-web；Astro static dashboard 為繁中、zero-JS、Pages-compatible，首頁區分 Potential 精選與完整候選池，翻譯標題另列原文供查核。
 Daily automation：daily-intelligence 以 --mode live 執行 direct RSS/Atom＋optional FreshRSS；cron '0 23 * * *' UTC＝07:00 台灣；durable radar-state branch 保存 compressed+checksum SQLite；Pages 只部署 validated artifact，並將 JSON artifacts 一併發佈於 /data/。
 Reportability：以台灣日期錨定——事件「今日首見」或「今日有實質變化」即進當日報告；同日 re-run 不縮水（聯集），跨日 replay 仍抑制。Profiles 為最低地板（精簡版每日至少 3 重大、3 潛力、1 台灣；完整版至少 5、5、2），無上限；未達地板揭露 below_minimum_* degradation＋coverage gap，不用重播湊數。
-收集：RSS-capable 來源 17 個（含台灣 4 個：中央社、經濟日報、區塊勢、Vogue Taiwan，均 2026-07-11 實測），per-feed-limit 50。
+收集：54 個來源、RSS-capable 38 個（含台灣 7 個：中央社、經濟日報、區塊勢、Vogue Taiwan、TechNews、iThome、INSIDE，均 2026-07-11 實測），per-feed-limit 50；2026-07-11 實測 live run 38 來源 0 失敗、976 items。
 Legacy archive：reports/2026/ 的人工報告經 project_legacy 投影至 /legacy/（明確標示非 RadarReportV2）；機器驗證歷史自 2026-07-11 起。
 FreshRSS：設定 FRESHRSS_BASE_URL / FRESHRSS_USERNAME / FRESHRSS_API_PASSWORD 後，Google Reader inbox 會依 origin stream 映回 canonical source_id；缺 credentials、讀取失敗或 stream 無法映射都轉為 coverage gap，且不阻止 direct RSS。RSS 與 FreshRSS 重複 URL 在下游 document dedup 排除。
 尚未完成：把 registry 的 web watches 接成 source-specific extraction；替每個 API source 提供可執行 endpoint/pagination/field mapping；GDELT coverage-query＋original-source verification workflow；X/Meta/Threads/Instagram authenticated official API implementations；以真實 API key 線上驗證 AI evaluation。
