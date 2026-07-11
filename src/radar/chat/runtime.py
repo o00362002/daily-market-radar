@@ -14,7 +14,42 @@ from radar.chat.context_package import (
     validate_chat_import,
 )
 from radar.composition import CompositionConfig, compose_application
+from radar.contracts.report import RadarReportV2
 from radar.contracts.runtime import RuntimeContract
+from radar.domain.models import Event
+from radar.repositories.sqlite import SqliteRunRepository
+
+
+def _load_persisted_report_and_events(
+    repo_root: Path,
+    database_path: Path,
+    *,
+    date: str,
+    profile: str,
+) -> tuple[RadarReportV2, list[Event]]:
+    """Load one validated report and its evidence-bearing events from durable state."""
+
+    repository = SqliteRunRepository(database_path, repo_root / "migrations")
+    report = repository.get_report_by_date(date, profile)
+    if report is None:
+        raise ValueError(f"no persisted report for date={date} profile={profile}")
+
+    event_ids = sorted({item.event_id for item in report.items})
+    events: list[Event] = []
+    missing: list[str] = []
+    for event_id in event_ids:
+        event = repository.get_event(event_id)
+        if event is None:
+            missing.append(event_id)
+        else:
+            events.append(event)
+
+    if missing:
+        raise ValueError(
+            "persisted report references events that are missing from durable state: "
+            + ", ".join(missing)
+        )
+    return report, events
 
 
 def prepare_chat(
@@ -23,17 +58,34 @@ def prepare_chat(
     *,
     profile: str = "daily_push",
     output_root: Path | None = None,
+    database_path: Path | None = None,
 ) -> ChatPackage:
-    """Run a deterministic fixture evaluation and write a byte-stable chat package."""
+    """Write a bounded, byte-stable package from durable state or fixture fallback.
+
+    Production automation supplies ``database_path`` and packages the already
+    validated report plus its persisted evidence-bearing events. Omitting the
+    database preserves the deterministic fixture path used by local contract
+    tests and does not claim live coverage.
+    """
 
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
-    composed = compose_application(CompositionConfig(source_backend="fixture"))
-    result = composed.application.run(
-        DailyRunRequest(date=date, profile=profile, ingestion_mode="fixture", evaluation_mode="chat-assisted"),
-        contract,
-    )
-    package = build_chat_package(result.report, list(result.events), contract)
+    if database_path is not None:
+        report, events = _load_persisted_report_and_events(
+            repo_root,
+            database_path,
+            date=date,
+            profile=profile,
+        )
+    else:
+        composed = compose_application(CompositionConfig(source_backend="fixture"))
+        result = composed.application.run(
+            DailyRunRequest(date=date, profile=profile, ingestion_mode="fixture", evaluation_mode="chat-assisted"),
+            contract,
+        )
+        report = result.report
+        events = list(result.events)
 
+    package = build_chat_package(report, events, contract)
     root = output_root or repo_root
     target = root / package.relative_dir
     target.mkdir(parents=True, exist_ok=True)
