@@ -1,10 +1,24 @@
 {
   "schema_version": "ai-analysis/v1",
-  "prompt_version": "daily-analysis-v1",
+  "prompt_version": "daily-analysis-v1.1",
   "max_summary_points": 6,
   "max_findings": 8,
   "max_trends": 6,
-  "indicators": [
+  "core_structural_indicators": [
+    {
+      "indicator_id": "k_shaped_ai_productivity_economy",
+      "label": "生產力便車無法共享的 K 型經濟"
+    },
+    {
+      "indicator_id": "ai_bubble_overinvestment",
+      "label": "AI 泡沫 / 過度投資趨勢"
+    },
+    {
+      "indicator_id": "brand_market_polarization_and_true_vs_fake_segmentation",
+      "label": "品牌大者更大 + 小眾存活 + 中間層萎縮 + 真分眾 / 假分眾"
+    }
+  ],
+  "auxiliary_signal_indicators": [
     {
       "indicator_id": "ai_application_momentum",
       "label": "AI 應用動能",
