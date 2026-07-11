@@ -16,6 +16,7 @@ REQUIRED = {
     "daily-intelligence.yml",
     "prepare-chat.yml",
     "import-chat.yml",
+    "ai-analysis.yml",
     "pages-deploy.yml",
     "mount-check.yml",
 }
@@ -78,6 +79,18 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("export-web", text)
         self.assertIn("deploy-pages", text)
         self.assertIn("allow_fixture_deploy", text)
+
+    def test_ai_analysis_runs_after_validated_pipelines_and_degrades_without_key(self) -> None:
+        doc = self._load("ai-analysis.yml")
+        on = doc.get("on", doc.get(True))
+        self.assertEqual(on["workflow_run"]["workflows"], ["daily-intelligence", "import-chat"])
+        self.assertEqual(doc["concurrency"]["group"], "radar-daily")
+        text = (WORKFLOWS / "ai-analysis.yml").read_text(encoding="utf-8")
+        self.assertIn("radar.analysis.cli", text)
+        self.assertIn("OPENAI_ANALYSIS_MODEL", text)
+        self.assertIn("ai-analysis/latest.json", text)
+        self.assertIn("fixture", text)
+        self.assertIn("deploy-pages", text)
 
     def test_pages_deploy_only_deploys_validated_non_fixture(self) -> None:
         text = (WORKFLOWS / "pages-deploy.yml").read_text(encoding="utf-8")
