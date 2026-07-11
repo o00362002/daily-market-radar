@@ -129,15 +129,32 @@ jobs:
 
       - name: Workflow summary
         if: always()
+        env:
+          DEPLOYABLE: ${{ steps.gate.outputs.deployable || 'false' }}
         run: |
-          echo "## AI analysis" >> "$GITHUB_STEP_SUMMARY"
-          echo >> "$GITHUB_STEP_SUMMARY"
-          echo "- Deployable: \`${{ steps.gate.outputs.deployable || 'false' }}\`" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f artifacts/web/v1/ai-analysis/latest.json ]; then
-            python -c "import json; p=json.load(open('artifacts/web/v1/ai-analysis/latest.json'))['provenance']; print(f\"- Effective mode: \\`{p['effective_mode']}\\`\")" >> "$GITHUB_STEP_SUMMARY"
-            python -c "import json; p=json.load(open('artifacts/web/v1/ai-analysis/latest.json'))['provenance']; print(f\"- Provider/model: \\`{p.get('provider') or 'deterministic'} / {p.get('model') or 'none'}\\`\")" >> "$GITHUB_STEP_SUMMARY"
-            python -c "import json; p=json.load(open('artifacts/web/v1/ai-analysis/latest.json'))['provenance']; print(f\"- Fallback: \\`{p['fallback_used']}\\`\")" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          lines = [
+              "## AI analysis",
+              "",
+              f"- Deployable: `{os.environ['DEPLOYABLE']}`",
+          ]
+          path = Path("artifacts/web/v1/ai-analysis/latest.json")
+          if path.exists():
+              provenance = json.loads(path.read_text(encoding="utf-8"))["provenance"]
+              lines.extend(
+                  [
+                      f"- Effective mode: `{provenance['effective_mode']}`",
+                      f"- Provider/model: `{provenance.get('provider') or 'deterministic'} / {provenance.get('model') or 'none'}`",
+                      f"- Fallback: `{provenance['fallback_used']}`",
+                  ]
+              )
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as output:
+              output.write("\n".join(lines) + "\n")
+          PY
 
   deploy:
     needs: build
