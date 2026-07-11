@@ -5,14 +5,15 @@ Navigation projection for Event Intelligence Runtime v2.
 ## 1. Canonical control layer
 
 ```text
-AGENTS.md                    first entry and route selection
-CURRENT_STATE.md             current facts
-CURRENT_DECISIONS.md         accepted decisions
-config/runtime_contract.json machine execution and output contract
-config/source_registry.json  canonical source registry
-AGENT_DEFINITION_MAP.md      route mapping
-DEPENDENCY_MAP.md            dependency and degradation map
-schema/sync-matrix.json      machine-consumed change edges
+AGENTS.md                     first entry and route selection
+CURRENT_STATE.md              current facts
+CURRENT_DECISIONS.md          accepted decisions
+config/runtime_contract.json  machine execution and output contract
+config/source_registry.json   canonical source registry
+config/competitor_registry.json canonical competitor identity registry
+AGENT_DEFINITION_MAP.md       route mapping
+DEPENDENCY_MAP.md             dependency and degradation map
+schema/sync-matrix.json       machine-consumed change edges
 ```
 
 ## 2. Deterministic runtime
@@ -20,7 +21,7 @@ schema/sync-matrix.json      machine-consumed change edges
 ```text
 src/radar/contracts/    strict report/web models plus typed frozen evaluation/runtime DTOs
 src/radar/domain/       provider-neutral document, event and signal values
-src/radar/ports/        nine stable behavior Protocols
+src/radar/ports/        ten stable behavior Protocols
 src/radar/application/  provider-neutral daily orchestration
 src/radar/pipeline/     pure deduplicate, cluster, classify and coverage functions
 src/radar/reporting/    planner and report-contract validation
@@ -49,12 +50,26 @@ LLMs may assist semantic extraction, fuzzy matching, summaries and trend mapping
 config/source_registry.json = canonical identity and adapter registry
 FRESHRSS_SEEDS.opml         = generated projection
 sources/                    = legacy / compatibility inputs pending regeneration
-configs/query_recipes.yml   = fixed query recipes
+configs/query_recipes.yml   = fixed news, competitor and indicator-only query recipes
 ```
 
 One real source has one source_id. RSS, API, web, RSSHub and social are adapters.
 
-## 4. Semantic radar modules
+## 4. Competitor Intelligence architecture
+
+```text
+config/competitor_registry.json       canonical product/social competitor identities, aliases and priorities
+configs/competitor_intelligence.yml   collection, projection, evidence and analysis policy
+memory/watchlist.md                    owner-approved long-term watch intent
+tools/coverage_checker.md              fixed-check and gap audit
+web/src/lib/competitors.ts             registry-backed projection helper
+web/src/pages/competitors.astro        complete competitor page
+web/src/pages/index.astro              daily competitor summary
+```
+
+Competitor Intelligence is a first-class cross-domain capability, not a sixth news domain. Each event keeps exactly one canonical primary domain and may additionally appear in the competitor projection without being counted twice.
+
+## 5. Semantic radar modules
 
 ```text
 configs/radars.yml
@@ -62,24 +77,36 @@ configs/triggers.yml
 configs/evidence.yml
 configs/technology_development.yml
 configs/structural_trend_indicators.yml
+configs/indicator_tracking.yml
 configs/news_freshness_and_taiwan_news.yml
 configs/search_retry_protocol.yml
+configs/competitor_intelligence.yml
 ```
 
 These define what to look for and how to judge it. They do not redefine report domains or completion counts.
 
-## 5. Report domains and profiles
+Labor and consumption pressure are maintained under `configs/indicator_tracking.yml` as indicator-only. The retired labor domain identifier remains only as a compatibility alias in the runtime contract.
+
+## 6. Report domains and profiles
 
 Canonical report domains and profile minimum floors live only in `config/runtime_contract.json`.
 
 ```text
-daily_push = concise rendering with minimum floors (no ceiling)
+global_markets_macro
+ai_agents_applications
+crypto_rwa_agent_payments
+retail_consumer_fashion
+science_technology_industry
+```
+
+```text
+daily_push = concise rendering with minimum floors and no ceiling
 full       = all qualified items allowed by run budget
 ```
 
-Fine-grained radars map into the canonical domains.
+Fine-grained radars and competitor projections map into the canonical domains without creating extra quotas.
 
-## 6. Human workflow and rendering
+## 7. Human workflow and rendering
 
 ```text
 workflows/daily_push_brief_workflow.md
@@ -90,12 +117,13 @@ workflows/news_search_content_workflow.md
 workflows/news_content_workflow.md
 ```
 
-Workflows order execution. Templates render already validated runtime output.
+Workflows order execution. Templates render already validated runtime output. Product/Social Competitor Watch is a fixed rendered section; labor and consumption pressure appear in the final indicator panel rather than a standalone news chapter.
 
-## 7. Memory, evidence and evaluation
+## 8. Memory, evidence and evaluation
 
 ```text
 memory/potential_pool.md       capture-stage weak signals without prefilter
+memory/watchlist.md            owner-approved persistent watch areas and competitor list
 memory/missed_cases/           approved reusable failure checks
 reports/                       historical reports and execution evidence
 reports/backtests/             post-run reviews
@@ -104,7 +132,18 @@ evals/ and loops/              replay and improvement controls
 
 Evidence does not become Memory without approval.
 
-## 8. Runtime boundary
+## 9. Web projection
+
+```text
+validated RadarReportV2
+→ typed WebArtifactV1 projection
+→ artifacts/web/v1
+→ Astro static dashboard
+```
+
+The left sidebar exposes Today, History, Legacy, Trends, Retail, Crypto, Taiwan and Competitors. The competitor web layer consumes the canonical competitor registry instead of maintaining separate hard-coded lists.
+
+## 10. Runtime boundary
 
 Implemented:
 
@@ -112,6 +151,7 @@ Implemented:
 fixture replay
 live RSS/Atom ingestion
 source registry validation
+competitor identity registry and registry-backed web projection
 OPML drift validation
 URL normalization and de-duplication
 event clustering and lane separation
@@ -123,13 +163,14 @@ optional SQLite report and gap persistence
 Still incomplete for production completeness:
 
 ```text
-web, API, social and FreshRSS adapters
+web, API and authenticated social source-specific adapters
 external discovery providers
-historical event repository and material-delta comparison
-semantic scoring and structural-indicator evaluators
-scheduler and production credentials
+typed competitor payload and durable competitor-history table inside RadarReportV2/runtime
+complete fixed competitor official-channel execution audit
+historical event repository and material-delta comparison for every source route
+production credentials and end-to-end live validation
 ```
 
-## 9. Frozen history
+## 11. Frozen history
 
-Historical v1 fixed-count specifications and migration files remain for context only. They are not current routing or completion authority.
+Historical v1 fixed-count specifications, six-domain wording and labor standalone-news behavior remain for context only. They are not current routing or completion authority.
