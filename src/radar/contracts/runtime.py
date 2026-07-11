@@ -17,10 +17,9 @@ _LEGACY_PROFILE_KEYS = {
 class ProfileContract:
     """Report-level minimum floors — never ceilings.
 
-    Floors are totals across the whole report (per-domain floors would force
-    an implausible 6x multiple into the daily push). More items are always
-    allowed; an unmet floor must be disclosed as a degradation reason, never
-    padded with 歷史重播 (replays are filtered out before selection).
+    Floors are totals across the whole report. More items are always allowed;
+    an unmet floor must be disclosed as a degradation reason, never padded with
+    歷史重播 (replays are filtered out before selection).
     """
 
     min_major_items: int = 0
