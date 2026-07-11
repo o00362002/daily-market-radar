@@ -1,0 +1,100 @@
+---
+import Base from '../layouts/Base.astro';
+import { getLatestReport } from '../lib/data';
+
+const report: any = getLatestReport();
+const items: any[] = report?.items ?? [];
+
+const productTerms = [
+  'CATCH', 'Claireye', 'FLAPS', '91APP', 'SHOPLINE', 'CYBERBIZ', 'WACA',
+  'ACT', '艾克特', 'Omnichat', '團薦', 'Tangent Plus', 'RSL', '宏誌',
+  'Shopify', 'Microsoft', 'Google Cloud', 'Salesforce', 'SAP', 'Oracle',
+  'AWS', 'ServiceNow', 'Adobe', 'Retail Cloud', 'Commerce Cloud',
+  'Agentforce', 'Copilot Studio', 'Dynamics 365', 'Joule', 'NetSuite'
+];
+const socialTerms = [
+  'Threads', 'Instagram', 'YouTube', 'LinkedIn', 'TikTok', 'creator',
+  '創作者', '顧問', 'KOL', '社群', '內容', '媒體', '商業周刊', '數位時代',
+  '經理人', '天下'
+];
+
+const textOf = (item: any) => [
+  item.headline,
+  item.today_delta,
+  item.taiwan_implication,
+  item.primary_domain,
+  ...(item.uncertainties ?? []),
+].filter(Boolean).join(' ');
+
+const matches = (item: any, terms: string[]) => {
+  const text = textOf(item).toLowerCase();
+  return terms.some((term) => text.includes(term.toLowerCase()));
+};
+
+const productItems = items.filter((item) => matches(item, productTerms));
+const socialItems = items.filter((item) => matches(item, socialTerms) && !productItems.includes(item));
+const sortItems = (rows: any[]) => [...rows].sort((a, b) =>
+  (b.importance_score - a.importance_score)
+  || (b.potential_score - a.potential_score)
+  || (b.confidence_score - a.confidence_score)
+);
+const productSorted = sortItems(productItems);
+const socialSorted = sortItems(socialItems);
+---
+<Base title="競品分析｜Daily Market Radar">
+  <h1>競品分析 · {report?.date ?? '尚無報告'}</h1>
+  <p class="muted">固定追蹤 RetailOps 產品競品與社群內容競品。只顯示當日報告中有新增證據的項目；沒有更新時明確標示，不用舊新聞補位。</p>
+
+  {!report && <p class="empty">尚無報告。請先執行 radar run-daily 與 radar export-web。</p>}
+
+  {report && (
+    <>
+      <div class="grid">
+        <div class="kpi"><div class="n">{productSorted.length}</div><div class="l">產品競品訊號</div></div>
+        <div class="kpi"><div class="n">{socialSorted.length}</div><div class="l">社群競品訊號</div></div>
+      </div>
+
+      <h2>產品競品 Product Competitors</h2>
+      {productSorted.length === 0 && <p class="empty">今日已查無產品競品重大更新，或目前報告尚未產出可辨識的競品訊號。</p>}
+      {productSorted.map((item) => (
+        <article class="card">
+          <div class="row">
+            <strong>{item.headline}</strong>
+            <span class="badge deterministic">重要 {item.importance_score}</span>
+            <span class="badge auto">信心 {item.confidence_score}</span>
+          </div>
+          <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
+          {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
+          <div class="row muted">
+            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
+          </div>
+        </article>
+      ))}
+
+      <h2>社群競品 Social & Content Competitors</h2>
+      {socialSorted.length === 0 && <p class="empty">今日已查無社群競品重大更新，或目前報告尚未產出可辨識的社群競品訊號。</p>}
+      {socialSorted.map((item) => (
+        <article class="card">
+          <div class="row">
+            <strong>{item.headline}</strong>
+            <span class="badge inference">社群／內容</span>
+            <span class="badge auto">潛力 {item.potential_score}</span>
+          </div>
+          <p>{item.today_delta}</p>
+          <div class="row muted">
+            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
+          </div>
+        </article>
+      ))}
+
+      <h2>判斷框架</h2>
+      <ul class="tight">
+        <li>是否推出低價、自助式或 freemium 的 RetailOps 入口？</li>
+        <li>是否從 CRM／行銷延伸到補貨、庫存、門市診斷、損益或展店？</li>
+        <li>是否推出 fashion retail operations pack、module marketplace 或產業模板？</li>
+        <li>是否開始服務 3–30 店的中小型服飾品牌？</li>
+        <li>是否出現與「門市營運 × 數據 × AI」高度重疊的社群定位與產品導流？</li>
+      </ul>
+    </>
+  )}
+</Base>
