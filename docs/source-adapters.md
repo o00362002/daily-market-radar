@@ -7,8 +7,8 @@ Every network adapter depends on the `HttpTransport` seam (`radar/adapters/trans
 | Mode | Connected adapters |
 |------|--------------------|
 | `fixture` | deterministic fixtures only |
-| `live-rss` | direct registry RSS / Atom only |
-| `live` | direct registry RSS / Atom + optional FreshRSS reading-list inbox |
+| `live-rss` | direct registry RSS 2.0 / RSS 1.0 RDF / Atom only |
+| `live` | direct registry RSS 2.0 / RSS 1.0 RDF / Atom + optional FreshRSS reading-list inbox |
 
 `live` uses `CompositeSourceAdapter` to isolate child failures and merge canonical `SourceFetchResult` values. One provider failure never stops the other configured providers.
 
@@ -16,7 +16,7 @@ Every network adapter depends on the `HttpTransport` seam (`radar/adapters/trans
 
 | Adapter | Module | Runtime status |
 |---------|--------|----------------|
-| RSS/Atom | `adapters/rss.py`, `adapters/rss_client.py` | Connected to `live-rss` and `live`. |
+| RSS 2.0 / RSS 1.0 RDF / Atom | `adapters/rss.py`, `adapters/rss_client.py` | Connected to `live-rss` and `live`; namespaced RDF fields and Taiwan naïve timestamps are normalized. |
 | FreshRSS | `adapters/freshrss.py`, `adapters/freshrss_source.py` | Connected to `live`; credential-gated. Items map from `origin.streamId` to canonical registry RSS URLs. Missing credentials, fetch failures and unknown streams become explicit gaps. |
 | Composite | `adapters/composite.py` | Connected to `live`; fans out, isolates failures and merges documents/audit/gaps. |
 | Safe Web | `adapters/safe_web.py` | Lower-level implementation complete; not generically connected because each site still needs source-specific list/detail extraction rules. |

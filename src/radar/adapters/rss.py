@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from typing import Iterable
 from urllib.parse import urljoin
@@ -107,7 +107,11 @@ def _parse_feed(payload: bytes, *, source: Source, fetched_at: str, limit: int) 
         link = urljoin(source.canonical_url, raw_link)
         if not title or not link:
             continue
-        published_at = _normalize_date(entry.get("published", ""), fallback=fetched_at)
+        published_at = _normalize_date(
+            entry.get("published", ""),
+            fallback=fetched_at,
+            default_timezone=_default_timezone(source),
+        )
         summary = entry.get("summary", "").strip()
         documents.append(
             Document.fixture(
@@ -132,17 +136,17 @@ def _parse_feed(payload: bytes, *, source: Source, fetched_at: str, limit: int) 
 
 
 def _rss_entries(root: ElementTree.Element) -> Iterable[dict[str, str]]:
-    channel = root.find("channel")
-    if channel is None:
-        return []
     rows: list[dict[str, str]] = []
-    for item in channel.findall("item"):
+    # RSS 2.0 uses unqualified ``channel/item`` nodes, while RSS 1.0 uses
+    # namespaced RDF ``item`` nodes at the document root. Match by local name
+    # so both standards follow the same provider-neutral normalization path.
+    for item in (node for node in root.iter() if _local_name(node.tag) == "item"):
         rows.append(
             {
-                "title": _text(item.find("title")),
-                "link": _text(item.find("link")),
-                "published": _text(item.find("pubDate")) or _text(item.find("date")),
-                "summary": _text(item.find("description")),
+                "title": _child_text(item, "title"),
+                "link": _child_text(item, "link") or _rdf_about(item),
+                "published": _child_text(item, "pubDate", "date", "published", "updated"),
+                "summary": _child_text(item, "description", "summary", "encoded"),
             }
         )
     return rows
@@ -176,19 +180,51 @@ def _text(node: ElementTree.Element | None) -> str:
     return "".join(node.itertext()).strip()
 
 
-def _normalize_date(value: str, *, fallback: str) -> str:
+def _local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def _child_text(node: ElementTree.Element, *names: str) -> str:
+    # Respect caller priority (for example prefer a short description over a
+    # full content:encoded body) while remaining namespace agnostic.
+    for name in names:
+        for child in node:
+            if _local_name(child.tag) == name:
+                value = _text(child)
+                if value:
+                    return value
+    return ""
+
+
+def _rdf_about(node: ElementTree.Element) -> str:
+    return node.attrib.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about", "").strip()
+
+
+def _default_timezone(source: Source) -> timezone:
+    return timezone(timedelta(hours=8)) if source.macro_region == "Taiwan" else timezone.utc
+
+
+def _normalize_date(
+    value: str,
+    *,
+    fallback: str,
+    default_timezone: timezone = timezone.utc,
+) -> str:
     if not value:
         return fallback
+    # Some otherwise valid feeds emit two spaces between date and time. Both
+    # RFC and ISO parsers reject that spelling, so normalize whitespace first.
+    value = " ".join(value.split())
     try:
         parsed = parsedate_to_datetime(value)
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = parsed.replace(tzinfo=default_timezone)
         return parsed.astimezone(timezone.utc).isoformat()
     except (TypeError, ValueError, OverflowError):
         try:
             parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
             if parsed.tzinfo is None:
-                parsed = parsed.replace(tzinfo=timezone.utc)
+                parsed = parsed.replace(tzinfo=default_timezone)
             return parsed.astimezone(timezone.utc).isoformat()
         except ValueError:
             return fallback

@@ -40,6 +40,20 @@ class ProjectionTests(unittest.TestCase):
         again = project_web(self.reports, self.contract, generated_at=STAMP)
         self.assertEqual([(a.path, a.content_hash) for a in self.artifacts], [(a.path, a.content_hash) for a in again])
 
+    def test_same_day_projection_keeps_latest_write_not_largest_run_id(self) -> None:
+        older = self.reports[-1].model_copy(update={"run_id": "run_zzzz"})
+        newer = self.reports[-1].model_copy(update={"run_id": "run_aaaa"})
+
+        artifacts = project_web([older, newer], self.contract, generated_at=STAMP)
+        by_path = {artifact.path: artifact for artifact in artifacts}
+        latest = RadarReportV2.model_validate_json(by_path["latest.json"].content)
+        summary = ReportSummaryV1.model_validate_json(
+            by_path["reports/2026/2026-07-10/summary.json"].content
+        )
+
+        self.assertEqual(latest.run_id, "run_aaaa")
+        self.assertEqual(summary.run_id, "run_aaaa")
+
     def test_full_report_filename_matches_content_hash(self) -> None:
         for path, artifact in self.by_path.items():
             if "/full." in path:

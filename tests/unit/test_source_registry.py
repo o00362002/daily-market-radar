@@ -41,6 +41,33 @@ class SourceRegistryTests(unittest.TestCase):
         for source_id in ("twse", "fsc_tw", "dgbas_tw", "vogue_taiwan", "cryptocity_tw", "blocktrend_tw"):
             self.assertEqual(self.registry.get(source_id).macro_region, "Taiwan")
 
+    def test_expanded_regional_and_primary_sources_have_executable_feeds(self) -> None:
+        for source_id in (
+            "dgbas_tw",
+            "pts_tw",
+            "abmedia_tw",
+            "blocktempo_tw",
+            "digitimes_asia",
+            "sec_press",
+            "ethereum_foundation_blog",
+            "aws_ml_blog",
+            "adb_news",
+            "wto_news",
+            "asean_news",
+            "africanews",
+            "abc_australia_business",
+            "channel_news_asia",
+            "the_hindu_business",
+            "glossy_retail",
+        ):
+            source = self.registry.get(source_id)
+            self.assertTrue(any(adapter.kind == "rss" for adapter in source.adapters), source_id)
+
+        self.assertEqual(
+            next(adapter.url for adapter in self.registry.get("blocktrend_tw").adapters if adapter.kind == "rss"),
+            "https://www.blocktrend.today/feed",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -869,6 +869,13 @@
           "enabled_for_opml": false,
           "opml_category": "",
           "route_status": "official_web"
+        },
+        {
+          "kind": "rss",
+          "url": "https://www.dgbas.gov.tw/OpenData.aspx?SN=0DA0FD2F5416554E&isRssFeed=1",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
         }
       ],
       "fetch_interval_minutes": 1440,
@@ -877,7 +884,7 @@
       "fulltext_policy": "metadata_summary_only",
       "enabled": true,
       "verification_status": "verified_source_library",
-      "last_verified_at": "2026-07-10",
+      "last_verified_at": "2026-07-11",
       "aliases": []
     },
     {
@@ -1342,10 +1349,10 @@
         },
         {
           "kind": "rss",
-          "url": "https://blocktrend.substack.com/feed",
+          "url": "https://www.blocktrend.today/feed",
           "enabled_for_opml": false,
           "opml_category": "",
-          "route_status": "live_probe_verified_2026_07_11"
+          "route_status": "live_probe_verified_direct_2026_07_11"
         }
       ],
       "fetch_interval_minutes": 360,
@@ -1354,7 +1361,7 @@
       "fulltext_policy": "metadata_summary_only",
       "enabled": true,
       "verification_status": "verified_source_library",
-      "last_verified_at": "2026-07-10",
+      "last_verified_at": "2026-07-11",
       "aliases": []
     },
     {
@@ -2130,6 +2137,585 @@
         {
           "kind": "rss",
           "url": "https://www.inside.com.tw/feed/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "pts_tw",
+      "name": "公視新聞網",
+      "canonical_url": "https://news.pts.org.tw/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "national",
+        "public_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "public_media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://news.pts.org.tw/xml/newsfeed.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "abmedia_tw",
+      "name": "ABMedia 鏈新聞",
+      "canonical_url": "https://abmedia.io/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "crypto_media",
+        "local"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "global_markets_macro"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media_verify_original_sources",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://abmedia.io/feed",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "blocktempo_tw",
+      "name": "動區動趨 BlockTempo",
+      "canonical_url": "https://www.blocktempo.com/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "crypto_media",
+        "local"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "global_markets_macro"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media_verify_original_sources",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.blocktempo.com/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "digitimes_asia",
+      "name": "DIGITIMES Asia",
+      "canonical_url": "https://www.digitimes.com/",
+      "publisher_country": "TW",
+      "macro_region": "Taiwan",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "science_technology_industry",
+        "ai_agents_applications",
+        "global_markets_macro"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.digitimes.com/rss/daily.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "sec_press",
+      "name": "U.S. SEC Press Releases",
+      "canonical_url": "https://www.sec.gov/newsroom/press-releases",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "regulator",
+        "official"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "crypto_rwa_agent_payments",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "government_regulator",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.sec.gov/news/pressreleases.rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "official_release_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "ethereum_foundation_blog",
+      "name": "Ethereum Foundation Blog",
+      "canonical_url": "https://blog.ethereum.org/",
+      "publisher_country": "CH",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "research"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "nonprofit_foundation",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://blog.ethereum.org/feed.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 120,
+      "freshness_slo_minutes": 720,
+      "usage_policy": "official_blog_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "aws_ml_blog",
+      "name": "AWS Machine Learning Blog",
+      "canonical_url": "https://aws.amazon.com/blogs/machine-learning/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "developer"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "company",
+      "evidence_profile": "primary_company_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 120,
+      "freshness_slo_minutes": 720,
+      "usage_policy": "official_blog_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "adb_news",
+      "name": "Asian Development Bank News",
+      "canonical_url": "https://www.adb.org/news",
+      "publisher_country": "PH",
+      "macro_region": "Asia-Pacific",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "international_organization",
+        "official",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "international_organization",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://feeds.feedburner.com/adb_news",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 240,
+      "freshness_slo_minutes": 1440,
+      "usage_policy": "official_release_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "wto_news",
+      "name": "World Trade Organization News",
+      "canonical_url": "https://www.wto.org/",
+      "publisher_country": "CH",
+      "macro_region": "Global",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "international_organization",
+        "official"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "international_organization",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.wto.org/library/rss/latest_news_e.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 240,
+      "freshness_slo_minutes": 1440,
+      "usage_policy": "official_release_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "asean_news",
+      "name": "ASEAN News",
+      "canonical_url": "https://asean.org/",
+      "publisher_country": "ID",
+      "macro_region": "Southeast Asia",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "international_organization",
+        "official"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "international_organization",
+      "evidence_profile": "primary_source",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://asean.org/feed/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 240,
+      "freshness_slo_minutes": 1440,
+      "usage_policy": "official_release_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "africanews",
+      "name": "Africanews",
+      "canonical_url": "https://www.africanews.com/",
+      "publisher_country": "FR",
+      "macro_region": "Africa",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "news_agency",
+        "regional"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.africanews.com/feed/rss?themes=business",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "abc_australia_business",
+      "name": "ABC Australia Business",
+      "canonical_url": "https://www.abc.net.au/news/business/",
+      "publisher_country": "AU",
+      "macro_region": "Oceania",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "public_media",
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion",
+        "science_technology_industry"
+      ],
+      "ownership_profile": "public_media",
+      "evidence_profile": "credible_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.abc.net.au/news/feed/51892/rss.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "channel_news_asia",
+      "name": "Channel NewsAsia",
+      "canonical_url": "https://www.channelnewsasia.com/",
+      "publisher_country": "SG",
+      "macro_region": "Southeast Asia",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "national",
+        "regional"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "public_media",
+      "evidence_profile": "credible_media",
+      "priority": "high",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "the_hindu_business",
+      "name": "The Hindu Business",
+      "canonical_url": "https://www.thehindu.com/business/",
+      "publisher_country": "IN",
+      "macro_region": "South Asia",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "business_media",
+        "regional"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "credible_media_verify_major_claims",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.thehindu.com/business/feeder/default.rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
+      "fetch_interval_minutes": 60,
+      "freshness_slo_minutes": 360,
+      "usage_policy": "metadata_summary_with_attribution",
+      "fulltext_policy": "metadata_summary_only",
+      "enabled": true,
+      "verification_status": "runtime_test_required",
+      "last_verified_at": "2026-07-11",
+      "aliases": []
+    },
+    {
+      "source_id": "glossy_retail",
+      "name": "Glossy",
+      "canonical_url": "https://www.glossy.co/",
+      "publisher_country": "US",
+      "macro_region": "North America",
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "retail_consumer_fashion",
+        "ai_agents_applications",
+        "labor_demographics_consumption_pressure"
+      ],
+      "ownership_profile": "independent_media",
+      "evidence_profile": "industry_media",
+      "priority": "medium",
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.glossy.co/feed/",
           "enabled_for_opml": false,
           "opml_category": "",
           "route_status": "live_probe_verified_2026_07_11"

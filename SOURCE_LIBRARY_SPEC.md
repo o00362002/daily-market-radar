@@ -153,7 +153,8 @@ Implemented:
 
 ```text
 registry validation
-RSS/Atom live adapter
+RSS 2.0 / RSS 1.0 RDF / Atom live adapter
+RSS + optional FreshRSS composite live collection
 OPML projection validation
 fixture ingestion
 coverage gaps for failed feeds
@@ -162,9 +163,10 @@ coverage gaps for failed feeds
 Not yet connected:
 
 ```text
-web/API/social/FreshRSS adapters
+web/API/social adapters
 external discovery providers
-full source-health persistence
+fixed query recipes and coverage retry routing
+full per-source health persistence
 ```
 
 These unexecuted routes must be disclosed as degradation reasons.

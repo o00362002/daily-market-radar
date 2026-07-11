@@ -85,10 +85,11 @@ def project_web(reports: list[RadarReportV2], contract: RuntimeContract, *, gene
     if not reports:
         raise ValueError("cannot project web artifacts without at least one report")
 
-    ordered = sorted(reports, key=lambda report: (report.date, report.run_id))
-    # De-duplicate by date keeping the last write for that date.
+    # Callers provide reports in durable write order. Preserve that order while
+    # de-duplicating same-day re-runs: ``run_id`` is a content hash, not a clock,
+    # so sorting by it can resurrect an older, smaller report on the live site.
     by_date: dict[str, RadarReportV2] = {}
-    for report in ordered:
+    for report in reports:
         by_date[report.date] = report
     ordered = [by_date[date] for date in sorted(by_date)]
 
