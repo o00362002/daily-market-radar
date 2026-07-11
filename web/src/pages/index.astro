@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import BadgeList from '../components/BadgeList.astro';
 import { getLatestReport, getManifest } from '../lib/data';
 import { evaluationBadge, statusBadge, fixtureBadge } from '../lib/format';
+import { projectCompetitorItems } from '../lib/competitors';
 
 const manifest = getManifest();
 const report: any = getLatestReport();
@@ -18,40 +19,9 @@ const retail = report?.retail_matrix ?? {};
 const crypto = report?.crypto_matrix ?? {};
 const structural: any[] = report?.structural_indicators ?? [];
 
-const productCompetitorTerms = [
-  'CATCH', 'Claireye', 'FLAPS', '91APP', 'SHOPLINE', 'CYBERBIZ', 'WACA',
-  'ACT', '艾克特', 'Omnichat', '團薦', 'Tangent Plus', 'RSL', '宏誌',
-  'Shopify', 'Microsoft', 'Google Cloud', 'Salesforce', 'SAP', 'Oracle',
-  'AWS', 'ServiceNow', 'Adobe', 'Retail Cloud', 'Commerce Cloud',
-  'Agentforce', 'Copilot Studio', 'Dynamics 365', 'Joule', 'NetSuite'
-];
-const socialCompetitorTerms = [
-  'Threads', 'Instagram', 'YouTube', 'LinkedIn', 'TikTok', 'creator',
-  '創作者', '顧問', 'KOL', '社群', '內容', '媒體', '商業周刊', '數位時代',
-  '經理人', '天下'
-];
-const competitorText = (item: any) => [
-  item.headline,
-  item.today_delta,
-  item.taiwan_implication,
-  item.primary_domain,
-  ...(item.uncertainties ?? []),
-].filter(Boolean).join(' ').toLowerCase();
-const matchesCompetitor = (item: any, terms: string[]) => {
-  const text = competitorText(item);
-  return terms.some((term) => text.includes(term.toLowerCase()));
-};
-const productCompetitors = items.filter((item) => matchesCompetitor(item, productCompetitorTerms));
-const socialCompetitors = items.filter((item) =>
-  matchesCompetitor(item, socialCompetitorTerms) && !productCompetitors.includes(item)
-);
-const competitorSort = (rows: any[]) => [...rows].sort((a, b) =>
-  (b.importance_score - a.importance_score)
-  || (b.potential_score - a.potential_score)
-  || (b.confidence_score - a.confidence_score)
-);
-const productCompetitorPicks = competitorSort(productCompetitors).slice(0, 4);
-const socialCompetitorPicks = competitorSort(socialCompetitors).slice(0, 4);
+const { product: productCompetitors, social: socialCompetitors } = projectCompetitorItems(items);
+const productCompetitorPicks = productCompetitors.slice(0, 4);
+const socialCompetitorPicks = socialCompetitors.slice(0, 4);
 
 const sortedPotential = [...potential].sort((a, b) =>
   (b.potential_score - a.potential_score)
@@ -142,6 +112,7 @@ const visibleUncertainties = (item: any) =>
           </div>
         </article>
       ))}
+      {majorOverflowCount > 0 && <p class="muted">另有 {majorOverflowCount} 筆重大項目保留於完整報告。</p>}
 
       <h2>潛力精選 Potential Picks</h2>
       <p class="muted">每個領域首頁最多顯示 3 筆；其餘項目不刪除，完整保留在下方候選池與完整報告。</p>
@@ -189,7 +160,7 @@ const visibleUncertainties = (item: any) =>
       ))}
 
       <h2>競品重點 Competitor Watch</h2>
-      <p class="muted">產品與社群競品固定分區；完整判斷框架與全部訊號見
+      <p class="muted">產品與社群競品固定分區；名單統一由 <code>config/competitor_registry.json</code> 管理。完整判斷框架與全部訊號見
         <a href={`${base}${base.endsWith('/') ? '' : '/'}competitors`}>競品分析頁</a>。</p>
       <div class="grid">
         <div class="kpi"><div class="n">{productCompetitors.length}</div><div class="l">產品競品</div></div>
@@ -197,7 +168,7 @@ const visibleUncertainties = (item: any) =>
       </div>
 
       <h3>產品競品</h3>
-      {productCompetitorPicks.length === 0 && <p class="empty">今日已查無產品競品重大更新，或報告尚未產出可辨識訊號。</p>}
+      {productCompetitorPicks.length === 0 && <p class="empty">今日已查無產品競品重大更新，或固定來源檢查尚未完整。</p>}
       {productCompetitorPicks.map((item) => (
         <article class="card">
           <div class="row"><strong>{item.headline}</strong><span class="badge deterministic">產品競品</span></div>
@@ -206,7 +177,7 @@ const visibleUncertainties = (item: any) =>
       ))}
 
       <h3>社群競品</h3>
-      {socialCompetitorPicks.length === 0 && <p class="empty">今日已查無社群競品重大更新，或報告尚未產出可辨識訊號。</p>}
+      {socialCompetitorPicks.length === 0 && <p class="empty">今日已查無社群競品重大更新，或固定社群渠道尚未完整。</p>}
       {socialCompetitorPicks.map((item) => (
         <article class="card">
           <div class="row"><strong>{item.headline}</strong><span class="badge inference">社群競品</span></div>
