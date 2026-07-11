@@ -1,0 +1,22 @@
+name: debug-ai-analysis-gates
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Document path reality check
+        run: node tools/brain/check-doc-paths.js "$PWD"
+      - name: Core mount check
+        if: always()
+        run: node tools/brain/check-core.js "$PWD"
