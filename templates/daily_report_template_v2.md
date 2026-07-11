@@ -13,6 +13,7 @@ contract_version:
 ingestion_mode: live / degraded / fixture
 run budget:
 source registry status:
+competitor registry status:
 source health status:
 report contract validation:
 degradation reasons:
@@ -20,19 +21,21 @@ degradation reasons:
 
 ## 1. Executive Synthesis
 
-Summarize the main cross-domain developments, structural changes and decision relevance. Every conclusion links to event or signal IDs.
+Summarize the main cross-domain developments, structural changes, competitor movement and decision relevance. Every conclusion links to event or signal IDs.
 
 ## 2. Coverage Cells and Gap Cards
 
 | Domain | Region | Language | Source role | Channel | Window | Observed | Status | Retry / gap |
 |---|---|---|---|---|---|---:|---|---|
 
-Completeness is determined by coverage and contract validation, not fixed item counts.
+Completeness is determined by coverage and contract validation, not fixed item counts. Competitor Intelligence is a projection and labor/consumption is indicator-only, so neither creates an extra canonical domain row.
 
 ## 3. Source and Ingestion Audit
 
 ```text
-canonical registry checked:
+canonical source registry checked:
+competitor registry checked:
+fixed competitor product/social checks:
 source health checks:
 top-down sources checked:
 bottom-up sources checked:
@@ -88,7 +91,23 @@ next check:
 
 A single event cannot appear in both lanes or more than one primary domain.
 
-## 6. Taiwan Direct-Evidence Section
+## 6. Competitor Intelligence
+
+Competitor watch reuses the same validated events. It does not duplicate event counts or create a sixth domain.
+
+### 6.1 Product Competitors
+
+| Competitor | Event date | Fresh delta | Type | Overlap | Affected layer | Threat | Differentiation status | Action | Evidence |
+|---|---|---|---|---|---|---|---|---|---|
+
+### 6.2 Social and Content Competitors
+
+| Competitor/category | Fresh delta | Positioning overlap | Attention/product-funnel threat | Action | Evidence |
+|---|---|---|---|---|---|
+
+Completed fixed checks with no fresh delta must render `已查無重大更新`; incomplete checks render `未完整查證`. Never fill with historical competitor news.
+
+## 7. Taiwan Direct-Evidence Section
 
 ```text
 qualified Taiwan events:
@@ -100,7 +119,7 @@ failed or unavailable Taiwan sources:
 next retry:
 ```
 
-## 7. Retail Fixed Matrix
+## 8. Retail Fixed Matrix
 
 Render every configured Retail key.
 
@@ -109,14 +128,14 @@ Render every configured Retail key.
 
 Include true-vs-fake segmentation evidence at product, assortment, channel, community, sell-through, repeat purchase and discount levels.
 
-## 8. Crypto Fixed Matrix
+## 9. Crypto Fixed Matrix
 
 Render every configured Crypto key.
 
 | Key | Status | Data checked | Supporting IDs | Counter IDs | Missing data | Next verification |
 |---|---|---|---|---|---|---|
 
-## 9. Structural Trend Indicator Panel
+## 10. Structural Trend Indicator Panel
 
 | Indicator | Direction | Confidence | Supporting IDs | Counter IDs | Missing data | One-sentence read | Next verification |
 |---|---|---|---|---|---|---|---|
@@ -124,7 +143,19 @@ Render every configured Crypto key.
 | AI bubble / overinvestment |  |  |  |  |  |  |  |
 | Brand polarization + true vs fake segmentation |  |  |  |  |  |  |  |
 
-## 10. Technology Development Audit
+## 11. Final Indicator Status and News Synthesis Panel
+
+| Indicator area | Current status | Direction | Supporting IDs | Data gap | Next verification |
+|---|---|---|---|---|---|
+| Crypto / blockchain |  |  |  |  |  |
+| AI product / infrastructure |  |  |  |  |  |
+| Retail / consumer / social / fashion |  |  |  |  |  |
+| Labor and consumption pressure (indicator only) |  |  |  |  |  |
+| Global markets / capital flows |  |  |  |  |  |
+
+Labor, hiring, layoffs, wages and consumption pressure do not receive a standalone news chapter. An independently material event may appear once under AI, global markets, retail or technology.
+
+## 12. Technology Development Audit
 
 ```text
 non-AI subdomains checked:
@@ -136,7 +167,7 @@ Taiwan technology evidence:
 remaining gaps:
 ```
 
-## 11. Rejection, De-duplication and Retry Audit
+## 13. Rejection, De-duplication and Retry Audit
 
 ```text
 duplicate_rejection_count:
@@ -145,9 +176,10 @@ niche_low_novelty_rejection_count:
 background-only rejection count:
 candidate_retry_paths_used:
 external discovery results accepted / rejected:
+competitor checks completed / missing:
 ```
 
-## 12. Future Direction
+## 14. Future Direction
 
 ```text
 7–30 days:
@@ -157,13 +189,15 @@ external discovery results accepted / rejected:
 
 Each statement requires supporting IDs, counterevidence and invalidation conditions.
 
-## 13. Post-run Backtest
+## 15. Post-run Backtest
 
 ```text
 missed cases:
 coverage blind spots:
+competitor blind spots:
 source health failures:
 source registry changes proposed:
+competitor registry changes proposed:
 contract / schema changes proposed:
 model behavior adjustments:
 next-run acceptance tests:
@@ -171,4 +205,4 @@ next-run acceptance tests:
 
 ## Archive Gate
 
-A formal report may be marked complete only when the runtime contract, coverage gate, evidence trace, matrices, structural indicators and post-run backtest validate. Fixture mode cannot be archived as complete real-world intelligence.
+A formal report may be marked complete only when the runtime contract, coverage gate, evidence trace, competitor checks, matrices, indicator panels, structural indicators and post-run backtest validate. Fixture mode cannot be archived as complete real-world intelligence.
