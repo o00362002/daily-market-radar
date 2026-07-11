@@ -13,6 +13,7 @@ ingestion_mode: live / degraded / fixture
 source_registry_status:
 source_health_status:
 coverage_status:
+competitor_registry_status:
 report_contract_validation:
 degradation_reasons:
 ```
@@ -23,10 +24,10 @@ One concise synthesis paragraph linked to supporting event IDs.
 
 ## 2. Coverage Matrix
 
-| Report domain | Major rendered / cap | Potential rendered / cap | Taiwan direct evidence | Coverage status | Gap card |
+| Report domain | Major qualified | Potential qualified | Taiwan direct evidence | Coverage status | Gap card |
 |---|---:|---:|---:|---|---|
 
-Caps come from `config/runtime_contract.json`. A lower count is valid when no qualified item exists and a gap card is present.
+Canonical report domains come from `config/runtime_contract.json`. Homepage/per-domain selections are readability projections, not completeness proof. Labor and consumption pressure do not receive a standalone report-domain row.
 
 ## 3. Domain Blocks
 
@@ -84,7 +85,42 @@ remaining gap:
 
 Do not repeat one event across domains or lanes.
 
-## 4. Taiwan Direct-Evidence Audit
+## 4. Competitor Intelligence
+
+Competitor watch is a cross-domain projection from the same validated events. It does not create a sixth report domain and does not count an event twice.
+
+### 4.1 Product Competitors
+
+```text
+fixed checks executed: yes / no / partial
+status: major update / potential signal / checked no major update / incomplete
+competitor_id:
+event date:
+fresh material delta:
+overlap: low / medium / high
+affected layer: free entry / template subscription / decision module / agent / private integration
+threat: functional substitution / price compression / distribution control / ecosystem advantage
+current differentiation status:
+recommended action: observe / verify / reposition / accelerate / no action
+evidence:
+```
+
+### 4.2 Social and Content Competitors
+
+```text
+fixed checks executed: yes / no / partial
+status: major update / potential signal / checked no major update / incomplete
+competitor_id or category:
+fresh material delta:
+overlap with store operations × data × AI positioning:
+attention or product-funnel threat:
+recommended action:
+evidence:
+```
+
+If there is no fresh material delta after fixed checks, state `已查無重大更新`. If fixed checks were not completed, state `未完整查證`. Never fill with old competitor news.
+
+## 5. Taiwan Direct-Evidence Audit
 
 ```text
 qualified Taiwan item count:
@@ -96,7 +132,7 @@ Taiwan implications excluded from direct count:
 remaining Taiwan gaps:
 ```
 
-## 5. Retail Fixed Matrix
+## 6. Retail Fixed Matrix
 
 Render every key from `runtime_contract.retail_matrix_keys`.
 
@@ -105,7 +141,7 @@ Render every key from `runtime_contract.retail_matrix_keys`.
 
 The `true_vs_fake_segmentation` row must distinguish real product/community/channel differentiation from copy-only or targeting-only personalization.
 
-## 6. Crypto Fixed Matrix
+## 7. Crypto Fixed Matrix
 
 Render every key from `runtime_contract.crypto_matrix_keys`.
 
@@ -114,7 +150,7 @@ Render every key from `runtime_contract.crypto_matrix_keys`.
 
 Price-only coverage is insufficient.
 
-## 7. Structural Trend Indicator Panel
+## 8. Structural Trend Indicator Panel
 
 | Indicator | Direction | Confidence | Supporting IDs | Counter IDs | Missing data | Next verification |
 |---|---|---|---|---|---|---|
@@ -124,7 +160,21 @@ Price-only coverage is insufficient.
 
 These are cumulative direction meters, not single-day conclusions.
 
-## 8. Rejection and Retry Audit
+## 9. Final Indicator Status and News Synthesis Panel
+
+Fixed indicators do not consume news slots.
+
+| Indicator area | Today status | Direction | Supporting news IDs | Data gap | Next check |
+|---|---|---|---|---|---|
+| Crypto / blockchain |  |  |  |  |  |
+| AI product / infrastructure |  |  |  |  |  |
+| Retail / consumer / social / fashion |  |  |  |  |  |
+| Labor and consumption pressure (indicator only) |  |  |  |  |  |
+| Global markets / capital flows |  |  |  |  |  |
+
+Labor, hiring, layoffs, wages and consumption pressure must remain in this panel unless the event independently qualifies under AI, global markets, retail or technology. Do not create a standalone labor news chapter.
+
+## 10. Rejection and Retry Audit
 
 ```text
 duplicate_rejection_count:
@@ -132,9 +182,10 @@ field_overlap_rejection_count:
 niche_low_novelty_rejection_count:
 candidate_retry_paths_used:
 source discovery used:
+competitor fixed checks used:
 ```
 
-## 9. Future Outlook
+## 11. Future Outlook
 
 ```text
 7–30 days:
@@ -144,12 +195,13 @@ source discovery used:
 
 Each outlook statement must cite supporting event or signal IDs and state what would invalidate it.
 
-## 10. Post-run Backtest and Model Adjustment
+## 12. Post-run Backtest and Model Adjustment
 
 ```text
 what improved:
 what failed:
 coverage blind spots:
+competitor blind spots:
 source registry additions proposed:
 runtime / contract changes proposed:
 next-run checks:
