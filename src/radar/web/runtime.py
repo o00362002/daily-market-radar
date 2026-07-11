@@ -36,9 +36,11 @@ def _load_reports(
     else:
         raise ValueError("export-web requires one of --database, --input or --reports-dir")
 
-    # Only validated reports may be projected.
+    # Only structurally valid reports may be projected. Floor policy is enforced
+    # at creation/import time; stored history was valid under the policy of its
+    # day and must not be retroactively invalidated by later floor changes.
     for report in reports:
-        validate_report_contract(report.model_dump(mode="json"), contract=contract)
+        validate_report_contract(report.model_dump(mode="json"), contract=contract, enforce_floors=False)
     return reports
 
 

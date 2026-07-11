@@ -71,7 +71,21 @@ LEGACY_REQUIRED_ITEM_FIELDS = {
 }
 
 
-def validate_report_contract(report: dict[str, Any], contract: RuntimeContract | None = None) -> None:
+def validate_report_contract(
+    report: dict[str, Any],
+    contract: RuntimeContract | None = None,
+    *,
+    enforce_floors: bool = True,
+) -> None:
+    """Validate a report against the structural contract.
+
+    ``enforce_floors=True`` (default) additionally enforces the CURRENT profile
+    floor policy — correct at report-creation and import time. Historical
+    reports stored in the database were valid under the policy in force when
+    they were produced, so projection paths pass ``enforce_floors=False``:
+    floor policy changes must never retroactively invalidate stored history.
+    """
+
     if contract is None:
         if "items" not in report or "coverage_gaps" not in report:
             raise ValueError("report requires items and coverage_gaps")
@@ -90,7 +104,7 @@ def validate_report_contract(report: dict[str, Any], contract: RuntimeContract |
 
     for item in report["items"]:
         _validate_item(item, contract=contract)
-    _validate_contract_sections(report, contract)
+    _validate_contract_sections(report, contract, enforce_floors=enforce_floors)
     _validate_event_resolution_audit(report["event_resolution_audit"])
 
 
@@ -133,7 +147,12 @@ def _validate_common_item_fields(item: dict[str, Any]) -> None:
         _validate_evidence_link(link)
 
 
-def _validate_contract_sections(report: dict[str, Any], contract: RuntimeContract) -> None:
+def _validate_contract_sections(
+    report: dict[str, Any],
+    contract: RuntimeContract,
+    *,
+    enforce_floors: bool = True,
+) -> None:
     if set(report["retail_matrix"]) != set(contract.retail_matrix_keys):
         raise ValueError("retail_matrix keys do not match runtime contract")
     if set(report["crypto_matrix"]) != set(contract.crypto_matrix_keys):
@@ -154,7 +173,8 @@ def _validate_contract_sections(report: dict[str, Any], contract: RuntimeContrac
         raise ValueError(f"same event cannot fill major and potential lanes: {sorted(overlap)}")
 
     profile = contract.profile(report["profile"])
-    _validate_slot_floors(report, profile)
+    if enforce_floors:
+        _validate_slot_floors(report, profile)
 
 
 def _validate_slot_floors(report: dict[str, Any], profile: Any) -> None:

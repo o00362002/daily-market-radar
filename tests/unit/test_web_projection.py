@@ -69,6 +69,58 @@ class ProjectionTests(unittest.TestCase):
         self.assertEqual(checked_in, web_json_schemas())
 
 
+class FloorRetroValidationTests(unittest.TestCase):
+    """Regression: 2026-07-11 daily run failed because export re-validated stored
+    pre-floors reports against the new floor policy (taiwan 0 below floor 1
+    without declared below_minimum_taiwan). Floor policy must apply at creation
+    time only — never retroactively to stored history."""
+
+    def _pre_floors_payload(self) -> dict:
+        from radar.contracts.report import RadarReportV2
+
+        report = RadarReportV2.from_payload(
+            run_daily_fixture(ROOT, date="2026-07-09", freshrss_available=False).report
+        )
+        payload = report.model_dump(mode="json")
+        # Simulate a report produced before the floor policy existed: no
+        # below_minimum_* declarations, no floor coverage gaps, taiwan count 0.
+        payload["degradation_reasons"] = [
+            r for r in payload["degradation_reasons"] if not r.startswith("below_minimum_")
+        ]
+        payload["coverage_gaps"] = [
+            g for g in payload["coverage_gaps"] if not g["reason"].startswith("below_minimum_")
+        ]
+        for item in payload["items"]:
+            item["direct_taiwan_evidence"] = []
+        return payload
+
+    def test_projection_tolerates_stored_pre_floors_reports(self) -> None:
+        from radar.reporting.contracts import validate_report_contract
+
+        payload = self._pre_floors_payload()
+        contract = _contract()
+        # Creation-time validation still rejects the undeclared shortfall...
+        with self.assertRaises(ValueError):
+            validate_report_contract(payload, contract=contract)
+        # ...but projection of stored history must not.
+        validate_report_contract(payload, contract=contract, enforce_floors=False)
+
+    def test_export_web_projects_a_database_containing_pre_floors_reports(self) -> None:
+        import json as jsonlib
+        import tempfile
+
+        from radar.web.runtime import export_web
+
+        payload = self._pre_floors_payload()
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            report_dir = out / "stored"
+            report_dir.mkdir()
+            (report_dir / "old.json").write_text(jsonlib.dumps(payload), encoding="utf-8")
+            result = export_web(ROOT, out, reports_dir=report_dir, generated_at=STAMP)
+            self.assertTrue(result.written)
+
+
 class ExportTests(unittest.TestCase):
     def setUp(self) -> None:
         self.reports = _reports()
