@@ -5,17 +5,20 @@
 
   規則（「多領域可擴充」的機器化保證）：
     domains/ 下每個非底線開頭的目錄＝一個領域包，必須有：
-      1. domain_pack.json — schema=domain-pack/v1，必備欄位：
-         id / name / positioning / scope[] / required_questions[] /
+      1. domain_pack.json — schema=domain-pack/v2，必備欄位：
+         id / name / positioning / canonical_domain / rendering_policy /
+         consumes_news_slot / scope[] / required_questions[] /
          mainstream_search_angles[] / edge_search_angles[] / output_mapping[] /
-         taiwan_mapping_rule / minimum_daily{large_news, candidates}
+         taiwan_mapping_rule / coverage_policy{minimum_source_checks, missing_behavior,
+         replay_old_news_to_fill}
          且不得殘留 <角括號> 佔位符。
       2. sources.json — schema=news-source-pack/v1，至少 1 個 tier（每個 tier 有 name
          ＋非空 sources[]，每個 source 有 name 且有 url/rss/query 其一），
          至少 1 條 query_recipe（每條有 id + query）。
     domains/_template/ 只驗結構存在，允許佔位符（它是複製起點）。
 
-  這保證：新領域照 _template 填完就會被引擎完整抓到；填不完整在 commit 關口被擋。
+  canonical_domain 必須存在於 config/runtime_contract.json.report_domains。
+  projection_only / indicator_only 必須 consumes_news_slot=false。
 
   Usage: node tools/brain/check-domain-packs.js [repoDir]
   Exit:  0 = complete, 1 = 領域包紅
@@ -25,8 +28,9 @@ const path = require('path');
 
 const repo = path.resolve(process.cwd(), process.argv[2] || path.resolve(__dirname, '..', '..'));
 const DIR = path.join(repo, 'domains');
-const PACK_FIELDS = ['id', 'name', 'positioning', 'scope', 'required_questions',
-  'mainstream_search_angles', 'edge_search_angles', 'output_mapping', 'taiwan_mapping_rule', 'minimum_daily'];
+const PACK_FIELDS = ['id', 'name', 'positioning', 'canonical_domain', 'rendering_policy',
+  'consumes_news_slot', 'scope', 'required_questions', 'mainstream_search_angles',
+  'edge_search_angles', 'output_mapping', 'taiwan_mapping_rule', 'coverage_policy'];
 
 let FAIL = 0;
 const fail = (m) => { console.log('FAIL  ' + m); FAIL++; };
@@ -43,6 +47,9 @@ function loadJson(rel) {
   catch (e) { fail(`${rel} JSON 壞了：${e.message}`); return null; }
 }
 
+const runtime = loadJson('config/runtime_contract.json');
+const canonicalDomains = new Set(runtime && Array.isArray(runtime.report_domains) ? runtime.report_domains : []);
+
 function checkPack(name, isTemplate) {
   const before = FAIL;
   const packRel = `domains/${name}/domain_pack.json`;
@@ -51,15 +58,28 @@ function checkPack(name, isTemplate) {
   const src = loadJson(srcRel);
 
   if (pack) {
-    if (pack.schema !== 'domain-pack/v1') fail(`${packRel} 缺 schema=domain-pack/v1`);
+    if (pack.schema !== 'domain-pack/v2') fail(`${packRel} 缺 schema=domain-pack/v2`);
     for (const f of PACK_FIELDS) {
       if (pack[f] === undefined) fail(`${packRel} 缺欄位 ${f}`);
     }
-    if (pack.minimum_daily && (typeof pack.minimum_daily.large_news !== 'number' || typeof pack.minimum_daily.candidates !== 'number')) {
-      fail(`${packRel} minimum_daily 需含數字欄位 large_news 與 candidates`);
+    const coverage = pack.coverage_policy;
+    if (coverage && (
+      typeof coverage.minimum_source_checks !== 'number'
+      || typeof coverage.missing_behavior !== 'string'
+      || typeof coverage.replay_old_news_to_fill !== 'boolean'
+    )) {
+      fail(`${packRel} coverage_policy 欄位格式錯誤`);
     }
-    if (!isTemplate && /<[^>]+>/.test(JSON.stringify(pack))) {
-      fail(`${packRel} 殘留 <佔位符>——照 _template 填完再 commit`);
+    if (!isTemplate) {
+      if (!canonicalDomains.has(pack.canonical_domain)) {
+        fail(`${packRel} canonical_domain=${pack.canonical_domain} 不在 runtime contract`);
+      }
+      if (['projection_only', 'indicator_only'].includes(pack.rendering_policy) && pack.consumes_news_slot !== false) {
+        fail(`${packRel} ${pack.rendering_policy} 必須 consumes_news_slot=false`);
+      }
+      if (/<[^>]+>/.test(JSON.stringify(pack))) {
+        fail(`${packRel} 殘留 <佔位符>——照 _template 填完再 commit`);
+      }
     }
   }
 
@@ -93,7 +113,7 @@ checkPack('_template', true);
 const packs = fs.readdirSync(DIR, { withFileTypes: true })
   .filter((d) => d.isDirectory() && !d.name.startsWith('_'))
   .map((d) => d.name);
-console.log(packs.length ? `pass  領域包：${packs.join('、')}` : 'pass  目前無擴充領域包（六大核心領域仍在 configs/radars.yml）');
+console.log(packs.length ? `pass  領域包：${packs.join('、')}` : 'pass  目前無擴充領域包（canonical news domains 由 runtime contract 定義）');
 packs.forEach((p) => checkPack(p, false));
 
 console.log(`Result: FAIL=${FAIL}`);
