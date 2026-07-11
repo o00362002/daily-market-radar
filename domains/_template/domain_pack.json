@@ -1,16 +1,19 @@
 {
-  "schema": "domain-pack/v1",
-  "_comment": "複製本目錄成 domains/<domain_id>/ 後,把所有 <角括號> 佔位符換成實際內容。填不完整 commit 會被 check-domain-packs 擋下。",
+  "schema": "domain-pack/v2",
+  "_comment": "複製本目錄成 domains/<domain_id>/ 後，把所有 <角括號> 佔位符換成實際內容。填不完整 commit 會被 check-domain-packs 擋下。新增 domain pack 不等於新增 canonical report domain。",
   "id": "<domain_id_snake_case>",
   "name": "<領域中文名稱>",
-  "positioning": "<一到兩句:這個領域在雷達中要回答什麼問題>",
+  "positioning": "<一到兩句：這個主題包要回答什麼問題>",
+  "canonical_domain": "<從 config/runtime_contract.json.report_domains 選一個>",
+  "rendering_policy": "news_domain_mapping",
+  "consumes_news_slot": true,
   "scope": [
     "<範圍關鍵詞1>",
     "<範圍關鍵詞2>",
     "<範圍關鍵詞3>"
   ],
   "required_questions": [
-    "<今日此領域是否出現…?(必答問題1)>",
+    "<今日此領域是否出現…？必答問題1>",
     "<必答問題2>"
   ],
   "mainstream_search_angles": [
@@ -18,7 +21,7 @@
     "<主流大事搜尋角度2>"
   ],
   "edge_search_angles": [
-    "<小眾/早期/地方試點/研究原型搜尋角度1>",
+    "<小眾／早期／地方試點／研究原型搜尋角度1>",
     "<小眾搜尋角度2>"
   ],
   "output_mapping": [
@@ -29,10 +32,11 @@
     "台灣 / 使用者映射",
     "下一步觀察"
   ],
-  "taiwan_mapping_rule": "<此領域的台灣新聞判定規則;無在地面向時寫 not_required 並說明>",
-  "minimum_daily": {
-    "large_news": 3,
-    "candidates": 2,
-    "_comment": "新領域最低量可低於核心六領域的 5+3;不足時照 search_retry_protocol 逐項 retry 並揭露"
+  "taiwan_mapping_rule": "<此領域的台灣新聞判定規則；無在地面向時寫 not_required 並說明>",
+  "coverage_policy": {
+    "minimum_source_checks": 1,
+    "missing_behavior": "coverage_gap",
+    "replay_old_news_to_fill": false,
+    "_comment": "新聞最低地板只由 config/runtime_contract.json profile 定義；domain pack 不自行發明固定新聞數。projection-only 或 indicator-only 主題請把 consumes_news_slot 設為 false，並改 rendering_policy。"
   }
 }
