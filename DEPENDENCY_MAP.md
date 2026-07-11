@@ -86,7 +86,7 @@ coverage gate = completeness check
 ```
 
 A domain with fewer qualified items receives a gap card. Do not fabricate or repeat items.
-A run with many qualified items retains qualified items in canonical output while concise web/report projections may show fewer for readability.
+A run with many qualified items retains qualified items in canonical output while concise web and report projections may show fewer for readability.
 Historical fixed-count completion rules are frozen v1 behavior and are not active.
 
 ## 4. Completion gate
