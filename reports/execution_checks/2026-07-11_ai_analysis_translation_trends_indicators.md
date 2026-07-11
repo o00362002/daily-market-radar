@@ -11,14 +11,24 @@
 
 ## 機器檢查
 
-待 PR CI 執行：
+PR #28 實際 GitHub Actions 結果：
 
-- runtime-check
-- web-check
-- mount-check
-- AIAnalysisV1 unit tests
-- workflow YAML contract tests
-- Astro typecheck/build
+- `runtime-check` run 192：success
+  - `make validate` 全綠
+  - deterministic no-secret run 全綠
+  - auto-without-key fallback 全綠
+  - AIAnalysisV1 與 provider guard unit tests 全綠
+  - workflow YAML contract tests 全綠
+- `web-check` run 57：success
+  - generated TypeScript sync 全綠
+  - Astro typecheck/build 全綠
+  - JS/CSS bundle budgets 全綠
+- `mount-check` run 562：success
+  - unit／integration／contract／architecture tests 全綠
+  - runtime contract、source registry／OPML、CLI smoke 全綠
+  - brain-core mount integrity 全綠
+
+曾由文件路徑檢查抓到 `web/API/social/external` 被誤認為 repo path；已改為文字分隔，focused diagnostics 證實 doc-path exit 0、CURRENT_STATE 頭部低於 8000-byte 預算。
 
 ## 沒做什麼
 
@@ -27,6 +37,7 @@
 - 趨勢是有條件情境，不是確定預測或投資建議。
 - 本次不建立公開聊天介面；「問雷達」留待 read-only MCP 階段。
 - 分析歷史目前隨每次最新 durable state 重新產生，尚未建立獨立長期 analysis repository。
+- CI 沒有使用真實 `OPENAI_API_KEY`；OpenAI 網路路徑仍需在 repository secret 設定後由正式 workflow 驗證，失敗會安全 fallback。
 
 ## 會影響誰
 
