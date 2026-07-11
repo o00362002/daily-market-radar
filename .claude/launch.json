@@ -2,6 +2,20 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "web-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "/Users/o00362002/Documents/GitHub/daily-market-radar/web",
+        "--",
+        "--port",
+        "4398"
+      ],
+      "port": 4398
+    },
+    {
       "name": "web-preview",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
