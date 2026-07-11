@@ -1,18 +1,20 @@
 # Daily Market Radar
 
-`daily-market-radar` is a deterministic-first global event-intelligence runtime, evidence archive and static dashboard. It tracks important current events, future-potential signals and material changes across global markets, AI, crypto, retail/fashion, technology, labor and Taiwan.
+`daily-market-radar` is a deterministic-first global event-intelligence runtime, evidence archive and static dashboard. It tracks important current events, future-potential signals and material changes across global markets, AI, crypto, retail/fashion and technology. Product/social competitor intelligence is a fixed cross-domain projection; labor and consumption pressure are indicator-only by default.
 
 ## What is connected
 
 ```text
-Source registry
+Source registry + competitor registry
 → direct RSS / Atom
 → optional FreshRSS Google Reader inbox
+→ fixed product/social competitor checks
 → normalization and document de-duplication
 → cross-day event resolution
 → material-delta filtering
 → deterministic / optional AI / chat-assisted evaluation
 → strict RadarReportV2
+→ competitor projection + fixed indicator panels
 → SQLite durable state
 → versioned web projection
 → Astro static dashboard
@@ -25,16 +27,44 @@ The application depends on provider-neutral ports. Concrete RSS, FreshRSS, OpenA
 
 ```text
 source registry before generic search
+competitor registry before ad-hoc competitor keywords
 one real source = one source_id
 RSS/API/web/RSSHub/social = adapters
 one event = one primary report domain
 importance, future potential and evidence confidence are independent
 Major/Potential is content-driven, not source-role routing
+competitor watch = projection, not a sixth domain or duplicate event
+labor / hiring / wages / consumption pressure = indicator-only by default
 Taiwan direct evidence != Taiwan implication
 item floors are minimums, never ceilings
 coverage gaps must be visible
 fixture replay != live-news coverage
 ```
+
+## Canonical news domains
+
+The current `config/runtime_contract.json` defines five canonical news domains:
+
+```text
+global_markets_macro
+ai_agents_applications
+crypto_rwa_agent_payments
+retail_consumer_fashion
+science_technology_industry
+```
+
+The retired labor-domain identifier remains only as a backward-compatible alias. Labor and consumption pressure normally render in the final indicator panel; an independently material event may appear once under AI, macro, retail or technology.
+
+## Competitor Intelligence
+
+```text
+config/competitor_registry.json       canonical product/social identities and aliases
+configs/competitor_intelligence.yml   collection and projection policy
+memory/watchlist.md                    owner-approved fixed watch intent
+web/src/pages/competitors.astro        product/social competitor page
+```
+
+A competitor update must have a fresh material delta and verified evidence. Completed checks with no delta render `已查無重大更新`; incomplete checks render `未完整查證`. Old competitor news is never replayed to fill the section.
 
 ## Install and validate
 
@@ -102,7 +132,7 @@ Deterministic system narratives use Taiwan Traditional Chinese. Without an AI ke
 ## Potential candidate retention
 
 ```text
-daily_push Major      maximum 3 items per domain
+daily_push Major      homepage highlights up to 3 items per domain
 daily_push Potential  all qualified candidates retained in report data
 homepage Potential    top 3 per domain highlighted, complete pool remains visible
 full                  all qualified items within the run budget
@@ -156,6 +186,8 @@ RSS / Atom
 FreshRSS inbox when configured
 cross-day event history and material delta
 Retail / Crypto / structural deterministic evaluators
+canonical competitor registry and registry-backed web projection
+labor/consumption indicator-only policy
 optional API and chat-assisted evaluation
 SQLite state, web projection, Astro and daily automation
 ```
@@ -167,6 +199,7 @@ web-page watches that require source-specific extraction rules
 JSON/API sources without executable endpoint + pagination + field mappings
 GDELT gap discovery queries and original-source verification workflow
 authenticated X / Meta / Threads / Instagram official APIs
+typed competitor payload and durable competitor-history table in RadarReportV2/runtime
 ```
 
-These remain explicit coverage gaps. They are not silently treated as checked, and the current system must not claim complete global coverage.
+These remain explicit coverage gaps. They are not silently treated as checked, and the current system must not claim complete global or competitor coverage.
