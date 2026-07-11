@@ -28,7 +28,7 @@ Durability：SQLite 保存 document/event/delta/report/indicator/state/match/sou
 Resolution：跨日事件以 deterministic 7-strategy matching 與 material-delta taxonomy 判定；同日 re-run 取當日聯集，跨日無新增不重播。
 Evaluation：deterministic／auto／api-assisted／chat-assisted 已接線；AI 只讀 bounded context，輸出需重驗證，invalid/provider failure 安全降級。
 Chat flow：prepare-chat 從 durable live state 產生 content-addressed 封包；import-chat 驗證成功後可寫回 state、建站與部署；fixture 預設不得覆蓋正式站。
-AI analysis：AIAnalysisV1 產生翻譯、跨事件統整、條件式未來趨勢；/analysis 先顯示三個 canonical structural indicators，再顯示六個 auxiliary signals。三個主指標直接沿用 RadarReportV2 deterministic 結果，AI 不得改寫；provider/model/time/run/hash/prompt/schema/fallback 全留痕。
+AI analysis：AIAnalysisV1 產生翻譯、跨事件統整與條件式未來趨勢；/analysis 的閱讀順序為今日統整→重點判讀→未來趨勢→三個核心結構指標→六個輔助訊號。每項未來趨勢顯示 3 個月與 6 個月條件式可能性；核心指標預設只顯示一個淨趨勢分數與一句解讀，完整 signal ids、支持／反向分數、缺口與驗證點收進摺疊細節。AI 不得改寫 deterministic 指標；provider/model/time/run/hash/prompt/schema/fallback 全留痕。
 Web：Astro static、zero-JS-first、Pages-compatible；事實層與 /analysis 解讀層分開，JSON artifacts 同步發佈於 /data/。
 Automation：daily-intelligence 每日 07:00 台灣執行 live pipeline；ai-analysis 在 daily/import 成功後產生解讀層並重新部署；共同使用 radar-daily concurrency lock。
 Coverage：來源數量與輸出數量不是完整性證明；coverage gaps、failures、rejection counters、matrices、structural indicators 與 backtest 固定揭露。
