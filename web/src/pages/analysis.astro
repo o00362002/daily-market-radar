@@ -1,0 +1,207 @@
+---
+import Base from '../layouts/Base.astro';
+import { getLatestAnalysis } from '../lib/data';
+
+const analysis: any = getLatestAnalysis();
+const provenance = analysis?.provenance ?? {};
+const findings: any[] = analysis?.key_findings ?? [];
+const trends: any[] = analysis?.future_trends ?? [];
+const indicators: any[] = analysis?.linked_indicators ?? [];
+const translations: any[] = analysis?.translations ?? [];
+const limitations: string[] = analysis?.limitations ?? [];
+
+const findingLabel: Record<string, string> = {
+  verified_fact: '已驗證事實',
+  ai_inference: 'AI 關聯推論',
+  background: '背景補充',
+  hypothesis: '早期假設',
+  uncertainty: '需後續確認',
+};
+const findingClass: Record<string, string> = {
+  verified_fact: 'fact',
+  ai_inference: 'inference',
+  background: 'deterministic',
+  hypothesis: 'uncertainty',
+  uncertainty: 'gap',
+};
+const directionLabel: Record<string, string> = {
+  up: '上升',
+  down: '下降',
+  flat: '持平',
+  new: '新基準',
+  mixed: '混合',
+  uncertain: '不確定',
+  insufficient: '資料不足',
+};
+const stageLabel: Record<string, string> = {
+  emerging: '萌芽',
+  forming: '成形',
+  established: '已建立',
+  uncertain: '不確定',
+};
+const horizonLabel: Record<string, string> = {
+  days: '數日',
+  weeks: '數週',
+  months: '數月',
+  years: '數年',
+};
+const generatedAt = provenance.generated_at
+  ? new Intl.DateTimeFormat('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(provenance.generated_at))
+  : '未知';
+---
+<Base title="AI 解讀｜全球情報雷達">
+  {!analysis && (
+    <>
+      <h1>AI 解讀</h1>
+      <p class="empty">尚無 AIAnalysisV1。每日情報流程完成後，AI 分析工作流會自動產生。</p>
+    </>
+  )}
+
+  {analysis && (
+    <>
+      <h1>AI 解讀 · {analysis.date}</h1>
+      <p class="notice">
+        本頁是模型根據已驗證 RadarReportV2 產生的翻譯、統整與情境推演，不等同原始新聞事實。
+        指標分數由透明公式計算，AI 只能解讀，不能修改。
+      </p>
+
+      <section class="provenance card">
+        <h2>AI 產出履歷</h2>
+        <div class="meta-grid">
+          <div><span>供應商</span><strong>{provenance.provider ?? 'deterministic'}</strong></div>
+          <div><span>模型</span><strong>{provenance.model ?? '無模型 fallback'}</strong></div>
+          <div><span>產生時間</span><strong>{generatedAt}</strong></div>
+          <div><span>有效模式</span><strong>{provenance.effective_mode}</strong></div>
+          <div><span>資料日期</span><strong>{provenance.source_report_date}</strong></div>
+          <div><span>資料 Run</span><code>{provenance.source_run_id}</code></div>
+          <div><span>提示詞版本</span><code>{provenance.prompt_version}</code></div>
+          <div><span>Schema</span><code>{provenance.schema_version}</code></div>
+        </div>
+        <details class="notes">
+          <summary>稽核識別</summary>
+          <p class="muted">Analysis ID：<code>{analysis.analysis_id}</code></p>
+          <p class="muted">Source context hash：<code>{provenance.source_context_hash}</code></p>
+          <p class="muted">驗證：{provenance.validation_status} · fallback：{String(provenance.fallback_used)}</p>
+        </details>
+      </section>
+
+      <h2>今日統整</h2>
+      <div class="summary-grid">
+        {(analysis.executive_summary ?? []).map((text: string, index: number) => (
+          <article class="card summary-card"><span class="summary-index">{index + 1}</span><p>{text}</p></article>
+        ))}
+      </div>
+
+      <h2>重點判讀</h2>
+      {findings.length === 0 && <p class="empty">今日無可產出的重點判讀。</p>}
+      {findings.map((item) => (
+        <article class="card">
+          <div class="row">
+            <span class={`badge ${findingClass[item.label] ?? 'deterministic'}`}>{findingLabel[item.label] ?? item.label}</span>
+            <span class="badge auto">信心 {item.confidence}</span>
+          </div>
+          <h3>{item.title}</h3>
+          <p>{item.summary}</p>
+          <p class="muted">來源事件：{(item.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+        </article>
+      ))}
+
+      <h2>未來趨勢情境</h2>
+      <p class="muted">以下是有條件的情境推演，不是確定預測。每項都必須附來源事件、反證與下一個驗證點。</p>
+      {trends.length === 0 && <p class="empty">今日沒有足夠資料形成趨勢情境。</p>}
+      {trends.map((trend) => (
+        <article class="card trend-card">
+          <div class="row">
+            <span class="badge inference">{stageLabel[trend.stage] ?? trend.stage}</span>
+            <span class="badge deterministic">{horizonLabel[trend.horizon] ?? trend.horizon}</span>
+            <span class="badge auto">方向 {directionLabel[trend.direction] ?? trend.direction}</span>
+            <span class="badge uncertainty">信心 {trend.confidence}</span>
+          </div>
+          <h3>{trend.title}</h3>
+          <p><span class="badge inference">AI 推演</span> {trend.summary}</p>
+          {(trend.counterevidence ?? []).length > 0 && (
+            <p><span class="badge counter">反證</span> {trend.counterevidence.join('；')}</p>
+          )}
+          {(trend.uncertainties ?? []).length > 0 && (
+            <p><span class="badge uncertainty">不確定</span> {trend.uncertainties.join('；')}</p>
+          )}
+          {(trend.next_watch ?? []).length > 0 && (
+            <p><span class="badge fact">下一步</span> {trend.next_watch.join('；')}</p>
+          )}
+          <p class="muted">來源事件：{(trend.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+        </article>
+      ))}
+
+      <h2>連動指標</h2>
+      <p class="muted">分數由 RadarReportV2 的重要性、潛力、信心、事件廣度與覆蓋缺口計算；模型只產生文字解讀。</p>
+      <div class="indicator-grid">
+        {indicators.map((indicator) => (
+          <article class="card indicator-card">
+            <div class="indicator-head">
+              <div>
+                <span class={`badge ${indicator.status === 'observed' ? 'fact' : indicator.status === 'partial' ? 'uncertainty' : 'gap'}`}>
+                  {indicator.status}
+                </span>
+                <h3>{indicator.label}</h3>
+              </div>
+              <div class="indicator-score">{indicator.score}</div>
+            </div>
+            <p class="delta">
+              {directionLabel[indicator.direction] ?? indicator.direction}
+              {indicator.delta === null || indicator.delta === undefined ? '' : ` · ${indicator.delta > 0 ? '+' : ''}${indicator.delta}`}
+            </p>
+            <p>{indicator.interpretation}</p>
+            <details class="notes">
+              <summary>公式與組成</summary>
+              <p>{indicator.method}</p>
+              <table><tbody>
+                {Object.entries(indicator.components ?? {}).map(([key, value]) => (
+                  <tr><td>{key}</td><td>{String(value)}</td></tr>
+                ))}
+              </tbody></table>
+              <p class="muted">來源事件：{(indicator.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+            </details>
+          </article>
+        ))}
+      </div>
+
+      <details class="card" open={limitations.length > 0}>
+        <summary><strong>限制與缺口</strong></summary>
+        <ul>{limitations.map((text) => <li>{text}</li>)}</ul>
+      </details>
+
+      <details class="card">
+        <summary><strong>標題翻譯對照</strong>（{translations.length} 筆）</summary>
+        <table>
+          <thead><tr><th>事件</th><th>原文</th><th>繁中</th></tr></thead>
+          <tbody>
+            {translations.map((row) => (
+              <tr><td><code>{row.event_id}</code></td><td>{row.original_text}</td><td>{row.translated_text}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </>
+  )}
+</Base>
+
+<style>
+  .notice { border: 1px solid var(--border-default); border-left: 4px solid var(--accent-fg); border-radius: 6px; padding: 1rem; background: var(--canvas-subtle); }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; }
+  .meta-grid div { display: flex; flex-direction: column; gap: .2rem; padding: .7rem; border: 1px solid var(--border-muted); border-radius: 6px; }
+  .meta-grid span { color: var(--fg-muted); font-size: .82rem; }
+  .summary-grid, .indicator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .8rem; }
+  .summary-card { display: flex; align-items: flex-start; gap: .7rem; }
+  .summary-card p { margin: 0; }
+  .summary-index { min-width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border: 1px solid var(--border-default); border-radius: 50%; font-weight: 700; }
+  .indicator-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .indicator-head h3 { margin: .5rem 0 0; }
+  .indicator-score { font-size: 2.4rem; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .delta { font-weight: 600; }
+  code { overflow-wrap: anywhere; }
+  @media (max-width: 700px) { .meta-grid, .summary-grid, .indicator-grid { grid-template-columns: 1fr; } }
+</style>
