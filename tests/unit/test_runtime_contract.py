@@ -11,12 +11,17 @@ class RuntimeContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.contract = RuntimeContract.from_file(ROOT / "config/runtime_contract.json")
 
-    def test_six_canonical_report_domains(self) -> None:
-        self.assertEqual(len(self.contract.report_domains), 6)
+    def test_five_canonical_report_domains(self) -> None:
+        self.assertEqual(len(self.contract.report_domains), 5)
         self.assertEqual(len(self.contract.report_domains), len(set(self.contract.report_domains)))
+        self.assertNotIn("labor_demographics_consumption_pressure", self.contract.report_domains)
 
-    def test_policy_geopolitics_maps_to_global_markets(self) -> None:
+    def test_legacy_aliases_map_to_global_markets(self) -> None:
         self.assertEqual(self.contract.canonical_domain("policy_geopolitics"), "global_markets_macro")
+        self.assertEqual(
+            self.contract.canonical_domain("labor_demographics_consumption_pressure"),
+            "global_markets_macro",
+        )
 
     def test_profiles_define_minimum_floors_never_ceilings(self) -> None:
         daily = self.contract.profile("daily_push")
