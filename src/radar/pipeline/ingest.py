@@ -11,7 +11,7 @@ def ingest_fixture_documents() -> list[Document]:
         ("eu_policy", "https://example.eu/policy", "EU regulator opens AI procurement sandbox", "en", "Europe", "global_markets_macro", "EU regulator", "opens", "AI procurement sandbox", "Europe", "top_down"),
         ("coindesk", "https://www.coindesk.com/rwa", "Bank pilots tokenized settlement", "en", "North America", "crypto_rwa_agent_payments", "Bank", "pilots", "tokenized settlement", "US", "bottom_up"),
         ("retail_dive", "https://www.retaildive.com/news/store-format", "Retailer tests neighborhood store format", "en", "North America", "retail_consumer_fashion", "Retailer", "tests", "neighborhood store format", "US", "bottom_up"),
-        ("bls", "https://www.bls.gov/news", "Labor data shows wage pressure easing", "en", "North America", "labor_demographics_consumption_pressure", "BLS", "reports", "wage pressure", "US", "top_down"),
+        ("bls", "https://www.bls.gov/news", "Labor data shows wage pressure easing", "en", "North America", "global_markets_macro", "BLS", "reports", "wage pressure", "US", "top_down"),
     ]
     return [
         Document.fixture(
