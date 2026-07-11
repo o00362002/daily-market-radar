@@ -1,0 +1,63 @@
+name: verify-structural-indicator-deploy
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-structural-indicator-deploy.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify latest main deployment and public artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: 2326f700a8b22800455b641c4d4f3dfb2f47b545
+        run: |
+          set -euo pipefail
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/actions/workflows/ai-analysis.yml/runs?branch=main&per_page=10" \
+            > runs-raw.json
+          jq --arg sha "$EXPECTED_SHA" '{runs: [.workflow_runs[] | select(.head_sha == $sha) | {id,event,status,conclusion,head_sha,html_url}]}' runs-raw.json > deployment-run.json
+          RUN_ID=$(jq -r '.runs[0].id // empty' deployment-run.json)
+          if [ -z "$RUN_ID" ]; then
+            echo "No ai-analysis run found for $EXPECTED_SHA" >&2
+            exit 1
+          fi
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs?per_page=100" \
+            --jq '{jobs: [.jobs[] | {name,status,conclusion,steps: [.steps[] | {name,status,conclusion}]}]}' \
+            > deployment-jobs.json
+          test "$(jq -r '.runs[0].conclusion' deployment-run.json)" = "success"
+          test "$(jq '[.jobs[] | select(.name == "deploy" and .conclusion == "success")] | length' deployment-jobs.json)" -eq 1
+
+          BASE="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
+          curl --fail --location --retry 8 --retry-delay 5 "$BASE/data/ai-analysis/latest.json" -o deployed-analysis.json
+          curl --fail --location --retry 8 --retry-delay 5 "$BASE/analysis/" -o deployed-analysis.html
+
+          test "$(jq -r '.provenance.schema_version' deployed-analysis.json)" = "ai-analysis/v1"
+          test "$(jq '.structural_indicators | length' deployed-analysis.json)" -eq 3
+          test "$(jq '.linked_indicators | length' deployed-analysis.json)" -eq 6
+          jq -e '.structural_indicators | map(.indicator_id) == ["k_shaped_ai_productivity_economy","ai_bubble_overinvestment","brand_market_polarization_and_true_vs_fake_segmentation"]' deployed-analysis.json
+          grep -q '三個核心結構趨勢指標' deployed-analysis.html
+          grep -q '輔助訊號面板' deployed-analysis.html
+
+          jq '{schema_version: .provenance.schema_version, prompt_version: .provenance.prompt_version, effective_mode: .provenance.effective_mode, model: .provenance.model, structural_indicator_ids: [.structural_indicators[].indicator_id], auxiliary_indicator_ids: [.linked_indicators[].indicator_id]}' deployed-analysis.json > verification-summary.json
+          cat deployment-run.json
+          cat deployment-jobs.json
+          cat verification-summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: structural-indicator-deploy-verification
+          path: |
+            deployment-run.json
+            deployment-jobs.json
+            verification-summary.json
+            deployed-analysis.json
