@@ -54,8 +54,18 @@ def _request(mode: str) -> EvaluationRequest:
 
 
 def _valid_builder(request: AiProposalRequest) -> AiProposalResult:
+    # Realistic provider output: zh-Hant narrative fields (the system prompt
+    # mandates Traditional Chinese, and validate_ai_proposal now guards it).
     items = tuple(
-        AiProposalItem(event_id=event.event_id, headline=f"[AI] {event.summary}", rationale="context supports this", importance_delta=5)
+        AiProposalItem(
+            event_id=event.event_id,
+            headline=f"[AI] 繁中標題：{event.summary}",
+            today_delta="今日新增：官方正式發布並附具體數據。",
+            taiwan_implication="暫無台灣直接證據；影響屬推論。",
+            next_watch="觀察獨立來源跟進與採用擴散。",
+            rationale="依據 bounded context 的官方證據。",
+            importance_delta=5,
+        )
         for event in request.events
     )
     return AiProposalResult(items=items, usage=AiUsage(input_tokens=100, output_tokens=50, estimated_cost_usd=0.001))
@@ -78,6 +88,9 @@ class AiAssistedEvaluatorTests(unittest.TestCase):
         self.assertEqual(result.audit.effective_mode, "api-assisted")
         self.assertEqual(result.audit.provider, "mock")
         self.assertTrue(any(item.headline.startswith("[AI]") for item in result.items))
+        # Translated narrative fields flow through to the report items (and thus the live page).
+        self.assertTrue(any(item.today_delta == "今日新增：官方正式發布並附具體數據。" for item in result.items))
+        self.assertTrue(any("暫無台灣直接證據" in item.taiwan_implication for item in result.items))
         self.assertTrue(all(0 <= item.importance_score <= 100 for item in result.items))
         self.assertEqual(provider.calls, 1)
 

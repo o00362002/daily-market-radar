@@ -70,10 +70,10 @@ These define what to look for and how to judge it. They do not redefine report d
 
 ## 5. Report domains and profiles
 
-Canonical report domains and profile slot caps live only in `config/runtime_contract.json`.
+Canonical report domains and profile minimum floors live only in `config/runtime_contract.json`.
 
 ```text
-daily_push = concise rendering with slot caps
+daily_push = concise rendering with minimum floors (no ceiling)
 full       = all qualified items allowed by run budget
 ```
 

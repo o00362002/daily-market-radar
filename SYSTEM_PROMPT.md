@@ -39,7 +39,7 @@ post-run backtest and model adjustment
 The active machine contract is `config/runtime_contract.json`.
 
 ```text
-Daily Push Brief = concise rendering with per-domain slot caps.
+Daily Push Brief = concise rendering; profiles define minimum floors, never ceilings.
 Full Daily Radar = all qualified items allowed by the run budget and report profile.
 Slot caps are readability limits, not completeness proof.
 ```

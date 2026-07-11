@@ -181,4 +181,20 @@ def validate_ai_proposal(proposal: AiProposalResult, allowed: AllowedFacts) -> l
         ):
             if abs(delta) > MAX_SCORE_DELTA:
                 reasons.append(f"score_delta_out_of_bounds:{name}:{delta}")
+        for field_name, text in (("headline", item.headline), ("today_delta", item.today_delta)):
+            if not _looks_translated(text):
+                reasons.append(f"non_zh_hant_output:{field_name}")
     return reasons
+
+
+def _looks_translated(text: str) -> bool:
+    """Loose zh-Hant guard: long narrative text must contain at least one CJK char.
+
+    Deliberately permissive — empty fields (no change proposed), short strings and
+    ticker/number-heavy strings pass; only clearly untranslated prose is rejected,
+    which triggers the retry-then-deterministic-fallback path.
+    """
+
+    if len(text) <= 12:
+        return True
+    return any(0x4E00 <= ord(char) <= 0x9FFF for char in text)

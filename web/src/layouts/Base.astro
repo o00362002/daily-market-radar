@@ -10,6 +10,7 @@ const href = (path: string) => `${base}${base.endsWith('/') ? '' : '/'}${path}`.
 const nav: { label: string; sub: string; path: string; sym: string; match: string[] }[] = [
   { label: '今日', sub: 'Today', path: '', sym: '◎', match: [''] },
   { label: '歷史', sub: 'History', path: 'history/1', sym: '▤', match: ['history', 'reports'] },
+  { label: '歸檔', sub: 'Legacy', path: 'legacy', sym: '▦', match: ['legacy'] },
   { label: '趨勢', sub: 'Trends', path: 'trends', sym: '↗', match: ['trends'] },
   { label: '零售', sub: 'Retail', path: 'retail', sym: '▣', match: ['retail'] },
   { label: '加密', sub: 'Crypto', path: 'crypto', sym: '◇', match: ['crypto'] },

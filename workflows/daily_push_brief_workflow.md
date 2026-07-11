@@ -33,7 +33,7 @@ Use for ordinary daily-news, morning-brief and market-radar requests. Full/archi
 14. Keep major and potential lanes separate.
 15. Build coverage cells and gap cards.
 16. Run Retail matrix, Crypto matrix and Structural Trend Indicator Panel.
-17. Apply daily-push slot caps from the runtime contract.
+17. Check daily-push minimum floors from the runtime contract; disclose any shortfall.
 18. Render templates/daily_push_brief_template.md.
 19. Validate schemas/report.schema.json and Python report contract.
 20. Run post-output backtest and expose degradation reasons.

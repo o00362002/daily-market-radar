@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
@@ -71,11 +71,17 @@ def event_has_material_delta(event: Event) -> bool:
     return any(is_material_delta_type(delta.delta_type) for delta in event.deltas)
 
 
-def _utc_date(timestamp: str) -> str:
+# The radar's "day" is a Taiwan day: the scheduler passes TZ=Asia/Taipei dates and
+# runs at 07:00 TW (23:00 UTC of the previous day), so date anchoring must use the
+# same zone or the morning run would mis-bucket everything. Taiwan has no DST.
+_TAIWAN_TZ = timezone(timedelta(hours=8))
+
+
+def _taiwan_date(timestamp: str) -> str:
     parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc).date().isoformat()
+    return parsed.astimezone(_TAIWAN_TZ).date().isoformat()
 
 
 def event_is_reportable_for_date(event: Event, report_date: str) -> bool:
@@ -91,8 +97,8 @@ def event_is_reportable_for_date(event: Event, report_date: str) -> bool:
         return True
     try:
         return (
-            _utc_date(event.first_seen_at) == report_date
-            or _utc_date(event.last_material_delta_at) == report_date
+            _taiwan_date(event.first_seen_at) == report_date
+            or _taiwan_date(event.last_material_delta_at) == report_date
         )
     except ValueError:
         return False

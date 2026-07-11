@@ -32,7 +32,7 @@ AGENT_DAILY_PUSH_BRIEF
 → normalize / deduplicate / event clustering / cross-day material delta
 → evidence verification / independent scores
 → coverage cells and gap discovery
-→ report planner with slot caps
+→ report planner with minimum floors
 → templates/daily_push_brief_template.md
 → schemas/report.schema.json + Python contract validation
 → post-run backtest
@@ -72,10 +72,10 @@ Content rewrite cannot search broadly, upgrade evidence or alter event identity.
 
 ## 3. Slot-cap rule
 
-Daily Push slot caps and Full profile behavior are read from `config/runtime_contract.json`.
+Daily Push and Full minimum floors are read from `config/runtime_contract.json`.
 
 ```text
-slot cap = readability limit
+floor = disclosure target; unmet floor -> below_minimum_* degradation
 coverage gate = completeness check
 ```
 

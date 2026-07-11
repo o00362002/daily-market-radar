@@ -41,4 +41,8 @@ const reportHref = (date: string) => `${base}${base.endsWith('/') ? '' : '/'}rep
     {page > 1 && <a href={href(page - 1)}>← 上一頁</a>}
     {page < pages && <a href={href(page + 1)}>下一頁 →</a>}
   </div>
+  <p class="muted">
+    機器驗證的歷史自 2026-07-11 起；更早的人工每日報告請見
+    <a href={`${base}${base.endsWith('/') ? '' : '/'}legacy`}>歸檔 Legacy</a>。
+  </p>
 </Base>
