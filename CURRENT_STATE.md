@@ -66,7 +66,7 @@ PYTHONPATH=src python -m radar.cli run-daily --mode live --date YYYY-MM-DD --dat
 cd web && npm run types:check && npm run build
 ```
 
-## Frozen v1 behavior
+## 歷程｜Frozen v1 behavior
 
 ```text
 fixed-count completion rules
