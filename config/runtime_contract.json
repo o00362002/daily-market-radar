@@ -1,15 +1,15 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "report_domains": [
     "global_markets_macro",
     "ai_agents_applications",
     "crypto_rwa_agent_payments",
     "retail_consumer_fashion",
-    "science_technology_industry",
-    "labor_demographics_consumption_pressure"
+    "science_technology_industry"
   ],
   "domain_aliases": {
-    "policy_geopolitics": "global_markets_macro"
+    "policy_geopolitics": "global_markets_macro",
+    "labor_demographics_consumption_pressure": "global_markets_macro"
   },
   "profiles": {
     "daily_push": {
