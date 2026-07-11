@@ -1,1 +1,1 @@
-{"domain": "labor_demographics_consumption_pressure", "top_down": ["labor statistics", "income data"], "bottom_up": ["household pressure signal"]}
+{"mode":"indicator_only","indicator_id":"labor_consumption_pressure","canonical_news_domain":null,"fallback_news_domains":["global_markets_macro","retail_consumer_fashion","ai_agents_applications"],"top_down":["labor statistics","income data"],"bottom_up":["household pressure signal"],"consumes_news_slot":false}
