@@ -1,13 +1,15 @@
-version: 0.1
-last_updated: 2026-07-06
+version: 0.2
+last_updated: 2026-07-11
 status: active
 purpose: >
-  核心六領域的固定查詢配方(query recipes)。目的:預設較弱的模型也能照抄執行、
-  穩定搜到高品質新聞,不依賴模型自行發明查詢。配方是資料,不是建議——
-  照抄執行,可加日期限定詞(例如「本週」「July 2026」),不可刪改核心詞。
+  核心五個新聞領域與競品情報投影的固定查詢配方(query recipes)。目的:預設較弱的模型也能照抄執行、
+  穩定搜到高品質新聞,不依賴模型自行發明查詢。勞動與消費壓力只保留在 indicator_only_recipes，
+  不建立獨立新聞領域或新聞配額。
 
 usage_rules:
-  - 每個核心領域每日至少執行 mainstream 配方 2 條 + edge 配方 2 條;命中不足才啟動 retry。
+  - 每個核心新聞領域每日至少執行 mainstream 配方 2 條 + edge 配方 2 條;命中不足才啟動 retry。
+  - 競品情報必須執行 product 與 social 配方，並依 config/competitor_registry.json 展開固定名稱與別名。
+  - 勞動與消費壓力配方只更新固定指標面板，不逐段生成完整新聞；事件若獨立符合其他主領域門檻，才在該主領域輸出一次。
   - 配方先於自由發想:模型自己想的查詢只能作為配方跑完後的補充,且需在 coverage audit 揭露。
   - 台灣缺口配方(taiwan_gap)只在該領域台灣新聞不足時執行,不可跳過直接標「台灣新聞不足」。
   - 配方命中的項目照現有欄位規則記錄(edge_case_discovery output_template);缺資料標 unknown。
@@ -111,7 +113,25 @@ recipes:
       - id: tech_tw_supply
         query: "台灣 半導體 OR 供應鏈 OR PCB 載板 site:technews.tw OR site:digitimes.com"
 
-  labor_consumption_taiwan:
+  competitor_intelligence:
+    product:
+      - id: competitor_product_release
+        query: "RetailOps OR retail AI agent product release pricing case study"
+      - id: competitor_platform_pack
+        query: "fashion retail operations pack OR retail agent marketplace OR retail copilot launch"
+      - id: competitor_low_cost_entry
+        query: "retail operations freemium OR self-service retail analytics OR OS builder"
+      - id: competitor_taiwan
+        query: "台灣 零售 AI 系統 補貨 門市診斷 POS ERP 新功能 案例"
+    social:
+      - id: competitor_social_positioning
+        query: "門市營運 數據 AI Threads Instagram YouTube LinkedIn"
+      - id: competitor_retail_creator
+        query: "retail operations creator consultant AI content trend"
+    required_registry_expansion: config/competitor_registry.json
+
+indicator_only_recipes:
+  labor_consumption_pressure:
     mainstream:
       - id: labor_market_shift
         query: "youth unemployment OR white collar layoffs OR wage data this week"
@@ -125,3 +145,5 @@ recipes:
     taiwan_gap:
       - id: labor_tw_official
         query: "台灣 失業率 OR 薪資 OR 消費信心 主計總處 site:cna.com.tw OR site:news.pts.org.tw"
+    output: configs/indicator_tracking.yml#labor_consumption_pressure
+    consumes_news_slot: false
