@@ -89,6 +89,10 @@ indicator_tracking:
 
   labor_consumption_pressure:
     name: 勞動與消費壓力固定指標
+    mode: indicator_only
+    standalone_news_section: false
+    consumes_news_slot: false
+    promotion_rule: "只有事件本身獨立符合 AI、全球市場、零售或科技重大新聞門檻時，才依該 canonical primary domain 輸出一次；不得因勞動指標身分另開新聞段落。"
     required_indicators:
       - Youth unemployment
       - Entry-level white-collar jobs
@@ -148,3 +152,4 @@ indicator_tracking:
       - 是否將社群討論放入候選訊號並附原始連結與未證實標記？
       - 是否把上次漏抓事件回測到固定指標中？
       - 是否確認指標與結論未計入每領域新聞輸出槽位？
+      - 是否確認勞動與消費壓力沒有被渲染成獨立新聞領域？
