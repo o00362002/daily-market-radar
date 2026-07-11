@@ -12,6 +12,7 @@ const nav: { label: string; sub: string; path: string; sym: string; match: strin
   { label: '歷史', sub: 'History', path: 'history/1', sym: '▤', match: ['history', 'reports'] },
   { label: '歸檔', sub: 'Legacy', path: 'legacy', sym: '▦', match: ['legacy'] },
   { label: '趨勢', sub: 'Trends', path: 'trends', sym: '↗', match: ['trends'] },
+  { label: '競品分析', sub: 'Competitors', path: 'competitors', sym: '◈', match: ['competitors'] },
   { label: '零售', sub: 'Retail', path: 'retail', sym: '▣', match: ['retail'] },
   { label: '加密', sub: 'Crypto', path: 'crypto', sym: '◇', match: ['crypto'] },
   { label: '台灣', sub: 'Taiwan', path: 'taiwan', sym: '⊙', match: ['taiwan'] },
@@ -35,7 +36,7 @@ const isActive = (item: (typeof nav)[number]) =>
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
     <meta name="description" content="全球每日事件情報雷達與多領域趨勢／潛力訊號掃描" />
   </head>
