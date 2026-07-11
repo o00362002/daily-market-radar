@@ -9,6 +9,7 @@ CURRENT_STATE.md = current facts
 CURRENT_DECISIONS.md = accepted decisions
 config/runtime_contract.json = canonical runtime/output contract
 config/source_registry.json = canonical source registry
+config/competitor_registry.json = canonical competitor registry
 src/radar/ = deterministic execution runtime
 DEPENDENCY_MAP.md = human-readable dependency and degradation map
 workflows/ = ordered execution guidance
@@ -30,6 +31,8 @@ coverage gaps and silent-source risk
 technology development paths
 Taiwan direct evidence and separate Taiwan implication
 fixed Retail and Crypto matrices
+product and social competitor intelligence
+labor and consumption pressure as indicator-only tracking
 long-term structural trend indicators
 post-run backtest and model adjustment
 ```
@@ -41,7 +44,7 @@ The active machine contract is `config/runtime_contract.json`.
 ```text
 Daily Push Brief = concise rendering; profiles define minimum floors, never ceilings.
 Full Daily Radar = all qualified items allowed by the run budget and report profile.
-Slot caps are readability limits, not completeness proof.
+Homepage and section selections are readability projections, not completeness proof.
 ```
 
 A run is complete only when the machine contract validates source health, run budget,
@@ -63,8 +66,8 @@ confidence = evidence quality, independent from importance and potential
 ```
 
 One event may not occupy both lanes or more than one primary report domain.
-Cross-domain consequences belong in mappings, indicators or synthesis and do not create
-a second counted event.
+Cross-domain consequences and competitor relevance belong in mappings, indicators or
+projections and do not create a second counted event.
 
 Every output item requires:
 
@@ -96,12 +99,14 @@ Collection order:
 source health
 → top-down ingest
 → bottom-up ingest
+→ fixed competitor checks
 → external gap discovery
 → normalize / deduplicate / event cluster
 → material-delta check
 → evidence verification
 → independent scoring
 → coverage gate
+→ competitor projection
 → report planning and contract validation
 ```
 
@@ -129,13 +134,42 @@ Technology is an independent radar. AI market, regulation or server-supply news 
 consume a standalone technology slot unless there is a technical milestone.
 Scan at least six non-AI technical subdomains or expose the coverage gap.
 
-## 7. Fixed matrices and structural indicators
+## 7. Competitor intelligence boundary
 
-Every daily report contract includes:
+Competitor intelligence is a first-class capability with canonical identities in
+`config/competitor_registry.json` and policy in `configs/competitor_intelligence.yml`.
 
 ```text
+Product competitors = Taiwan RetailOps vendors + global general platforms + retail vertical SaaS.
+Social competitors = retail / apparel / operations / AI creators, consultants, media and official vendor content.
+Competitor watch = cross-domain projection, not an additional canonical report domain.
+```
+
+Every competitor update requires a fresh material delta and must distinguish official
+release, live product, public test, partnership announcement, case evidence and media
+speculation. If fixed checks ran and no delta exists, render `已查無重大更新`. If fixed
+checks did not run, render `未完整查證`. Never replay old competitor news to fill the section.
+
+## 8. Labor and consumption boundary
+
+Labor, hiring, layoffs, wages, unemployment and consumption pressure are indicator-only by
+default. They update `configs/indicator_tracking.yml#labor_consumption_pressure` and do not
+receive an independent news chapter or quota.
+
+A labor-related event may appear once only when it independently qualifies as a material
+AI, global-market, retail or technology event. It then uses that canonical primary domain.
+The retired `labor_demographics_consumption_pressure` identifier is a compatibility alias,
+not an active report domain.
+
+## 9. Fixed matrices and structural indicators
+
+Every daily report includes:
+
+```text
+Product and Social Competitor Watch
 Retail fixed matrix
 Crypto fixed matrix
+Labor and Consumption Pressure indicator-only row
 Structural Trend Indicator Panel
 ```
 
@@ -150,7 +184,7 @@ brand polarization + true vs fake segmentation
 Each indicator must show direction, confidence, supporting and counter signals, missing
 data and next verification.
 
-## 8. Evidence and uncertainty
+## 10. Evidence and uncertainty
 
 Evidence levels remain separate from impact and potential.
 
@@ -164,7 +198,7 @@ insufficient = cannot confirm
 Important claims distinguish fact, source, inference, uncertainty, counterevidence,
 what cannot yet be concluded and the next verification step.
 
-## 9. Degradation rule
+## 11. Degradation rule
 
 Never claim completion when a required machine gate was not verified.
 Use one of:
@@ -176,9 +210,9 @@ failed
 ```
 
 List degradation reasons, missing source cells, unavailable adapters, unverified direct
-channels and unexecuted runtime stages.
+channels, incomplete competitor checks and unexecuted runtime stages.
 
-## 10. Completion receipt
+## 12. Completion receipt
 
 Before declaring completion, report:
 
@@ -186,12 +220,15 @@ Before declaring completion, report:
 selected route and profile
 runtime contract version
 source registry and source-health status
+competitor registry and fixed-check status
 live vs fixture ingestion mode
 coverage and gap status
 major/potential lane status
 fresh-delta and de-dup status
 Taiwan direct-evidence status
+Product/Social Competitor Watch
 Retail/Crypto matrices
+Labor and Consumption Pressure indicator-only status
 structural indicators
 report-contract validation
 post-run backtest
