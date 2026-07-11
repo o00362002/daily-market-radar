@@ -52,6 +52,35 @@ const horizonLabel: Record<string, string> = {
   months: '數月',
   years: '數年',
 };
+
+const clamp = (value: number) => Math.max(0, Math.min(100, value));
+const trendProbability = (trend: any, months: 3 | 6) => {
+  const confidence = Number(trend.confidence ?? 0);
+  const stageAdjustments: Record<string, [number, number]> = {
+    emerging: [-4, 6],
+    forming: [4, 8],
+    established: [8, 5],
+    uncertain: [-12, -10],
+  };
+  const directionAdjustments: Record<string, number> = {
+    up: 5,
+    flat: -4,
+    down: -12,
+    mixed: 0,
+    uncertain: -10,
+  };
+  const stageAdjustment = (stageAdjustments[trend.stage] ?? stageAdjustments.uncertain)[months === 3 ? 0 : 1];
+  const directionAdjustment = directionAdjustments[trend.direction] ?? -10;
+  const counterPenalty = Math.min(18, (trend.counterevidence ?? []).length * 4);
+  const uncertaintyPenalty = Math.min(months === 6 ? 20 : 14, (trend.uncertainties ?? []).length * (months === 6 ? 4 : 3));
+  return clamp(Math.round(confidence + stageAdjustment + directionAdjustment - counterPenalty - uncertaintyPenalty));
+};
+const probabilityBand = (score: number) => score >= 70 ? '偏高' : score >= 50 ? '中等' : '偏低';
+const structuralScore = (indicator: any) => {
+  if (indicator.direction === 'insufficient' || indicator.confidence === 'insufficient') return null;
+  return clamp(Math.round(50 + (Number(indicator.support_score ?? 0) - Number(indicator.counter_score ?? 0)) / 2));
+};
+
 const generatedAt = provenance.generated_at
   ? new Intl.DateTimeFormat('zh-TW', {
       timeZone: 'Asia/Taipei',
@@ -72,29 +101,12 @@ const generatedAt = provenance.generated_at
     <>
       <h1>AI 解讀 · {analysis.date}</h1>
       <p class="notice">
-        本頁是模型根據已驗證 RadarReportV2 產生的翻譯、統整與情境推演，不等同原始新聞事實。
-        三個核心結構指標直接沿用 RadarReportV2 的 deterministic 評估；AI 不得改寫。六個動能與品質分數只作輔助訊號。
+        本頁先呈現今日內容與未來情境，再呈現指標。事實仍以 RadarReportV2 與來源證據為準；AI 解讀不得改寫原始事件或 deterministic 指標。
       </p>
-
-      <section class="provenance card">
-        <h2>AI 產出履歷</h2>
-        <div class="meta-grid">
-          <div><span>供應商</span><strong>{provenance.provider ?? 'deterministic'}</strong></div>
-          <div><span>模型</span><strong>{provenance.model ?? '無模型 fallback'}</strong></div>
-          <div><span>產生時間</span><strong>{generatedAt}</strong></div>
-          <div><span>有效模式</span><strong>{provenance.effective_mode}</strong></div>
-          <div><span>資料日期</span><strong>{provenance.source_report_date}</strong></div>
-          <div><span>資料 Run</span><code>{provenance.source_run_id}</code></div>
-          <div><span>提示詞版本</span><code>{provenance.prompt_version}</code></div>
-          <div><span>Schema</span><code>{provenance.schema_version}</code></div>
-        </div>
-        <details class="notes">
-          <summary>稽核識別</summary>
-          <p class="muted">Analysis ID：<code>{analysis.analysis_id}</code></p>
-          <p class="muted">Source context hash：<code>{provenance.source_context_hash}</code></p>
-          <p class="muted">驗證：{provenance.validation_status} · fallback：{String(provenance.fallback_used)}</p>
-        </details>
-      </section>
+      <p class="analysis-byline">
+        分析者：<strong>{provenance.provider ?? 'deterministic'} / {provenance.model ?? '無模型 fallback'}</strong>
+        · 產生時間：{generatedAt}
+      </p>
 
       <h2>今日統整</h2>
       <div class="summary-grid">
@@ -103,93 +115,104 @@ const generatedAt = provenance.generated_at
         ))}
       </div>
 
-      <h2>三個核心結構趨勢指標</h2>
-      <p class="muted">
-        這三項是本專案的長期主指標：AI 生產力是否形成 K 型分配、AI 是否走向泡沫／過度投資、品牌是否走向兩極化與真／假分眾。
-        單日事件不能直接證明長期趨勢；資料不足時必須保留 insufficient。
-      </p>
-      {structuralIndicators.length === 0 && <p class="empty">核心結構指標缺失，請檢查 RadarReportV2 與 runtime contract。</p>}
-      <div class="structural-grid">
-        {structuralIndicators.map((indicator) => (
-          <article class="card structural-card">
-            <div class="row">
-              <span class={`badge ${indicator.direction === 'toward' ? 'uncertainty' : indicator.direction === 'against' ? 'counter' : indicator.direction === 'mixed' ? 'inference' : 'gap'}`}>
-                {structuralDirectionLabel[indicator.direction] ?? indicator.direction}
-              </span>
-              <span class="badge deterministic">信心 {String(indicator.confidence)}</span>
-              <span class="badge auto">{indicator.evaluation_mode}</span>
-            </div>
-            <h3>{indicator.label}</h3>
-            <p>{indicator.one_sentence_read}</p>
-            <div class="score-pair">
-              <div><span>支持分數</span><strong>{indicator.support_score}</strong></div>
-              <div><span>反向分數</span><strong>{indicator.counter_score}</strong></div>
-            </div>
-            {(indicator.supporting_signal_ids ?? []).length > 0 && (
-              <p><span class="badge fact">支持訊號</span> {indicator.supporting_signal_ids.map((id: string) => <code>{id}</code>)}</p>
-            )}
-            {(indicator.counter_signal_ids ?? []).length > 0 && (
-              <p><span class="badge counter">反向訊號</span> {indicator.counter_signal_ids.map((id: string) => <code>{id}</code>)}</p>
-            )}
-            <details class="notes">
-              <summary>資料缺口與下一步驗證</summary>
-              {(indicator.missing_data ?? []).length > 0
-                ? <p><strong>缺口：</strong>{indicator.missing_data.join('；')}</p>
-                : <p>目前沒有列出的額外資料缺口。</p>}
-              {(indicator.next_verification ?? []).length > 0 && (
-                <p><strong>下一步：</strong>{indicator.next_verification.join('；')}</p>
-              )}
-              <p class="muted">Indicator ID：<code>{indicator.indicator_id}</code></p>
-            </details>
-          </article>
-        ))}
-      </div>
-
       <h2>重點判讀</h2>
       {findings.length === 0 && <p class="empty">今日無可產出的重點判讀。</p>}
       {findings.map((item) => (
-        <article class="card">
+        <article class="card content-card">
           <div class="row">
             <span class={`badge ${findingClass[item.label] ?? 'deterministic'}`}>{findingLabel[item.label] ?? item.label}</span>
             <span class="badge auto">信心 {item.confidence}</span>
           </div>
           <h3>{item.title}</h3>
           <p>{item.summary}</p>
-          <p class="muted">來源事件：{(item.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+          <details class="notes">
+            <summary>來源事件</summary>
+            <p class="muted">{(item.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+          </details>
         </article>
       ))}
 
       <h2>未來趨勢情境</h2>
-      <p class="muted">以下是有條件的情境推演，不是確定預測。每項都必須附來源事件、反證與下一個驗證點。</p>
+      <p class="muted">
+        3 個月與 6 個月數字是條件式可能性評估，不是統計校準後的投資機率。計算以趨勢信心、形成階段與方向為基礎，再扣除反證和不確定性。
+      </p>
       {trends.length === 0 && <p class="empty">今日沒有足夠資料形成趨勢情境。</p>}
-      {trends.map((trend) => (
-        <article class="card trend-card">
-          <div class="row">
-            <span class="badge inference">{stageLabel[trend.stage] ?? trend.stage}</span>
-            <span class="badge deterministic">{horizonLabel[trend.horizon] ?? trend.horizon}</span>
-            <span class="badge auto">方向 {directionLabel[trend.direction] ?? trend.direction}</span>
-            <span class="badge uncertainty">信心 {trend.confidence}</span>
-          </div>
-          <h3>{trend.title}</h3>
-          <p><span class="badge inference">AI 推演</span> {trend.summary}</p>
-          {(trend.counterevidence ?? []).length > 0 && (
-            <p><span class="badge counter">反證</span> {trend.counterevidence.join('；')}</p>
-          )}
-          {(trend.uncertainties ?? []).length > 0 && (
-            <p><span class="badge uncertainty">不確定</span> {trend.uncertainties.join('；')}</p>
-          )}
-          {(trend.next_watch ?? []).length > 0 && (
-            <p><span class="badge fact">下一步</span> {trend.next_watch.join('；')}</p>
-          )}
-          <p class="muted">來源事件：{(trend.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
-        </article>
-      ))}
+      {trends.map((trend) => {
+        const probability3m = trendProbability(trend, 3);
+        const probability6m = trendProbability(trend, 6);
+        return (
+          <article class="card trend-card">
+            <div class="row">
+              <span class="badge inference">{stageLabel[trend.stage] ?? trend.stage}</span>
+              <span class="badge deterministic">原始尺度 {horizonLabel[trend.horizon] ?? trend.horizon}</span>
+              <span class="badge auto">方向 {directionLabel[trend.direction] ?? trend.direction}</span>
+              <span class="badge uncertainty">信心 {trend.confidence}</span>
+            </div>
+            <h3>{trend.title}</h3>
+            <p><span class="badge inference">情境推演</span> {trend.summary}</p>
+            <div class="probability-grid">
+              <div>
+                <span>未來 3 個月可能性</span>
+                <strong>{probability3m}%</strong>
+                <small>{probabilityBand(probability3m)}</small>
+              </div>
+              <div>
+                <span>未來 6 個月可能性</span>
+                <strong>{probability6m}%</strong>
+                <small>{probabilityBand(probability6m)}</small>
+              </div>
+            </div>
+            <details class="notes">
+              <summary>反證、缺口與下一步</summary>
+              {(trend.counterevidence ?? []).length > 0 && <p><strong>反證：</strong>{trend.counterevidence.join('；')}</p>}
+              {(trend.uncertainties ?? []).length > 0 && <p><strong>不確定：</strong>{trend.uncertainties.join('；')}</p>}
+              {(trend.next_watch ?? []).length > 0 && <p><strong>下一步：</strong>{trend.next_watch.join('；')}</p>}
+              <p class="muted">來源事件：{(trend.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+            </details>
+          </article>
+        );
+      })}
+
+      <h2>三個核心結構趨勢指標</h2>
+      <p class="muted">
+        每項只先顯示一個淨趨勢分數與一句解讀。50 分代表支持與反向力量接近；高於 50 偏向命題增強，低於 50 偏向反向證據增強。完整證據收在細節內。
+      </p>
+      {structuralIndicators.length === 0 && <p class="empty">核心結構指標缺失，請檢查 RadarReportV2 與 runtime contract。</p>}
+      <div class="structural-grid">
+        {structuralIndicators.map((indicator) => {
+          const score = structuralScore(indicator);
+          return (
+            <article class="card structural-card">
+              <div class="indicator-head">
+                <div>
+                  <span class={`badge ${indicator.direction === 'toward' ? 'uncertainty' : indicator.direction === 'against' ? 'counter' : indicator.direction === 'mixed' ? 'inference' : 'gap'}`}>
+                    {structuralDirectionLabel[indicator.direction] ?? indicator.direction}
+                  </span>
+                  <h3>{indicator.label}</h3>
+                </div>
+                <div class="indicator-score">{score === null ? 'N/A' : score}</div>
+              </div>
+              <p>{indicator.one_sentence_read}</p>
+              <details class="notes">
+                <summary>完整依據</summary>
+                <div class="detail-score-grid">
+                  <div><span>支持</span><strong>{indicator.support_score}</strong></div>
+                  <div><span>反向</span><strong>{indicator.counter_score}</strong></div>
+                  <div><span>信心</span><strong>{String(indicator.confidence)}</strong></div>
+                </div>
+                {(indicator.missing_data ?? []).length > 0 && <p><strong>資料缺口：</strong>{indicator.missing_data.join('；')}</p>}
+                {(indicator.next_verification ?? []).length > 0 && <p><strong>下一步：</strong>{indicator.next_verification.join('；')}</p>}
+                {(indicator.supporting_signal_ids ?? []).length > 0 && <p><strong>支持訊號：</strong>{indicator.supporting_signal_ids.map((id: string) => <code>{id}</code>)}</p>}
+                {(indicator.counter_signal_ids ?? []).length > 0 && <p><strong>反向訊號：</strong>{indicator.counter_signal_ids.map((id: string) => <code>{id}</code>)}</p>}
+                <p class="muted">Indicator ID：<code>{indicator.indicator_id}</code> · {indicator.evaluation_mode}</p>
+              </details>
+            </article>
+          );
+        })}
+      </div>
 
       <h2>輔助訊號面板</h2>
-      <p class="muted">
-        下列六項衡量當日事件動能、台灣曝險、跨領域匯流與證據品質，不是本專案的三個核心結構趨勢指標。
-        分數由透明公式計算，模型只產生文字解讀。
-      </p>
+      <p class="muted">下列六項只衡量當日事件動能、曝險與證據品質，不取代三個核心結構趨勢指標。</p>
       <div class="indicator-grid">
         {auxiliaryIndicators.map((indicator) => (
           <article class="card indicator-card">
@@ -202,19 +225,16 @@ const generatedAt = provenance.generated_at
               </div>
               <div class="indicator-score">{indicator.score}</div>
             </div>
-            <p class="delta">
-              {directionLabel[indicator.direction] ?? indicator.direction}
-              {indicator.delta === null || indicator.delta === undefined ? '' : ` · ${indicator.delta > 0 ? '+' : ''}${indicator.delta}`}
-            </p>
             <p>{indicator.interpretation}</p>
             <details class="notes">
-              <summary>公式與組成</summary>
+              <summary>公式與來源</summary>
               <p>{indicator.method}</p>
               <table><tbody>
                 {Object.entries(indicator.components ?? {}).map(([key, value]) => (
                   <tr><td>{key}</td><td>{String(value)}</td></tr>
                 ))}
               </tbody></table>
+              <p class="muted">方向：{directionLabel[indicator.direction] ?? indicator.direction}{indicator.delta === null || indicator.delta === undefined ? '' : ` · ${indicator.delta > 0 ? '+' : ''}${indicator.delta}`}</p>
               <p class="muted">來源事件：{(indicator.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
             </details>
           </article>
@@ -237,12 +257,30 @@ const generatedAt = provenance.generated_at
           </tbody>
         </table>
       </details>
+
+      <details class="card provenance-details">
+        <summary><strong>AI 產出履歷與稽核識別</strong></summary>
+        <div class="meta-grid">
+          <div><span>供應商</span><strong>{provenance.provider ?? 'deterministic'}</strong></div>
+          <div><span>模型</span><strong>{provenance.model ?? '無模型 fallback'}</strong></div>
+          <div><span>產生時間</span><strong>{generatedAt}</strong></div>
+          <div><span>有效模式</span><strong>{provenance.effective_mode}</strong></div>
+          <div><span>資料日期</span><strong>{provenance.source_report_date}</strong></div>
+          <div><span>資料 Run</span><code>{provenance.source_run_id}</code></div>
+          <div><span>提示詞版本</span><code>{provenance.prompt_version}</code></div>
+          <div><span>Schema</span><code>{provenance.schema_version}</code></div>
+        </div>
+        <p class="muted">Analysis ID：<code>{analysis.analysis_id}</code></p>
+        <p class="muted">Source context hash：<code>{provenance.source_context_hash}</code></p>
+        <p class="muted">驗證：{provenance.validation_status} · fallback：{String(provenance.fallback_used)}</p>
+      </details>
     </>
   )}
 </Base>
 
 <style>
   .notice { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 6px; padding: 1rem; background: var(--canvas-subtle); }
+  .analysis-byline { color: var(--fg-muted); margin-top: -.25rem; }
   .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; }
   .meta-grid div { display: flex; flex-direction: column; gap: .2rem; padding: .7rem; border: 1px solid var(--border-muted); border-radius: 6px; }
   .meta-grid span { color: var(--fg-muted); font-size: .82rem; }
@@ -250,15 +288,25 @@ const generatedAt = provenance.generated_at
   .summary-card { display: flex; align-items: flex-start; gap: .7rem; }
   .summary-card p { margin: 0; }
   .summary-index { min-width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; font-weight: 700; }
+  .content-card, .trend-card { max-width: 980px; }
+  .probability-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: 1rem 0; }
+  .probability-grid div { border: 1px solid var(--border-muted); border-radius: 8px; padding: .9rem; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .2rem .7rem; }
+  .probability-grid span { color: var(--fg-muted); font-size: .86rem; }
+  .probability-grid strong { grid-row: span 2; font-size: 2rem; font-variant-numeric: tabular-nums; }
+  .probability-grid small { font-weight: 700; }
   .structural-card { border-top: 4px solid var(--accent); }
-  .score-pair { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .8rem 0; }
-  .score-pair div { border: 1px solid var(--border-muted); border-radius: 6px; padding: .7rem; display: flex; flex-direction: column; gap: .2rem; }
-  .score-pair span { color: var(--fg-muted); font-size: .82rem; }
-  .score-pair strong { font-size: 1.5rem; }
   .indicator-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
   .indicator-head h3 { margin: .5rem 0 0; }
   .indicator-score { font-size: 2.4rem; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .delta { font-weight: 600; }
+  .detail-score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin: .8rem 0; }
+  .detail-score-grid div { border: 1px solid var(--border-muted); border-radius: 6px; padding: .6rem; display: flex; flex-direction: column; gap: .15rem; }
+  .detail-score-grid span { color: var(--fg-muted); font-size: .8rem; }
+  .detail-score-grid strong { font-size: 1.25rem; }
+  .provenance-details { margin-top: 1rem; }
   code { overflow-wrap: anywhere; }
-  @media (max-width: 700px) { .meta-grid, .summary-grid, .indicator-grid, .structural-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) {
+    .meta-grid, .summary-grid, .indicator-grid, .structural-grid, .probability-grid { grid-template-columns: 1fr; }
+    .probability-grid strong { grid-row: auto; }
+    .detail-score-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
 </style>
