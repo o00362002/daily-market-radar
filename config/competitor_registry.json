@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "status": "active",
+  "tracking_mode": "cross_domain_projection",
+  "report_domain_policy": "Competitor intelligence does not create a new canonical report-domain quota. Each event keeps one canonical primary domain and may additionally appear in the competitor projection.",
+  "no_update_policy": "If no fresh material delta is found, render an explicit checked-no-major-update state. Never replay old competitor news to fill the section.",
+  "groups": {
+    "taiwan_retailops_products": [
+      {"id": "catch_claireye", "name": "CATCH / Claireye", "aliases": ["CATCH", "Claireye"], "priority": "high"},
+      {"id": "flaps", "name": "FLAPS 輔翼科技", "aliases": ["FLAPS", "輔翼科技"], "priority": "high"},
+      {"id": "91app", "name": "91APP", "aliases": ["91APP"], "priority": "high"},
+      {"id": "shopline", "name": "SHOPLINE", "aliases": ["SHOPLINE"], "priority": "high"},
+      {"id": "cyberbiz", "name": "CYBERBIZ", "aliases": ["CYBERBIZ"], "priority": "medium"},
+      {"id": "waca", "name": "WACA", "aliases": ["WACA"], "priority": "medium"},
+      {"id": "act", "name": "ACT 艾克特", "aliases": ["ACT", "艾克特"], "priority": "high"},
+      {"id": "omnichat", "name": "Omnichat", "aliases": ["Omnichat"], "priority": "medium"},
+      {"id": "tangent_plus", "name": "團薦科技 / Tangent Plus", "aliases": ["團薦科技", "團薦", "Tangent Plus"], "priority": "medium"},
+      {"id": "rsl", "name": "宏誌科技 RSL", "aliases": ["宏誌科技", "宏誌", "RSL"], "priority": "medium"}
+    ],
+    "global_platforms": [
+      {"id": "shopify", "name": "Shopify", "aliases": ["Shopify", "Sidekick", "Shopify Magic"], "priority": "high"},
+      {"id": "microsoft", "name": "Microsoft", "aliases": ["Microsoft", "Copilot Studio", "Dynamics 365", "Power Platform", "Retail Cloud"], "priority": "high"},
+      {"id": "google_cloud", "name": "Google Cloud", "aliases": ["Google Cloud", "Vertex AI", "Agentspace", "BigQuery", "Looker", "Shopping Graph"], "priority": "high"},
+      {"id": "salesforce", "name": "Salesforce", "aliases": ["Salesforce", "Agentforce", "Data Cloud", "Commerce Cloud", "MuleSoft"], "priority": "high"},
+      {"id": "sap", "name": "SAP", "aliases": ["SAP", "Joule", "SAP Business AI", "S/4HANA", "BTP"], "priority": "high"},
+      {"id": "oracle", "name": "Oracle", "aliases": ["Oracle", "NetSuite", "Fusion AI Agents", "Oracle Retail"], "priority": "high"},
+      {"id": "aws", "name": "AWS", "aliases": ["AWS", "Bedrock Agents", "Amazon Web Services"], "priority": "medium"},
+      {"id": "servicenow", "name": "ServiceNow", "aliases": ["ServiceNow", "AI Agents", "Now Platform"], "priority": "medium"},
+      {"id": "adobe", "name": "Adobe", "aliases": ["Adobe", "Experience Cloud", "Adobe Commerce", "GenStudio"], "priority": "medium"}
+    ],
+    "social_and_content": [
+      {"id": "taiwan_business_media", "name": "台灣商業與管理媒體", "aliases": ["商業周刊", "數位時代", "經理人", "天下"], "priority": "medium"},
+      {"id": "retail_creators", "name": "零售／百貨／服飾營運創作者", "aliases": ["零售顧問", "百貨顧問", "服飾顧問", "門市營運", "店長管理"], "priority": "high"},
+      {"id": "ai_retail_creators", "name": "AI × 零售／商業管理創作者", "aliases": ["AI 零售", "AI retail", "RetailOps", "AI 營運", "門市數據"], "priority": "high"},
+      {"id": "social_platform_accounts", "name": "社群平台新帳號與內容定位", "aliases": ["Threads", "Instagram", "YouTube", "LinkedIn", "TikTok", "creator", "創作者", "KOL", "KOC"], "priority": "medium"}
+    ]
+  },
+  "high_risk_signals": [
+    "low_cost_or_freemium_retailops_entry",
+    "self_service_os_builder_or_template_generation",
+    "crm_or_marketing_expands_into_replenishment_inventory_store_diagnosis_profitability_or_expansion",
+    "fashion_retail_operations_pack_or_module_marketplace",
+    "general_platform_bundles_data_agent_workflow_permissions_dashboard_api_and_billing",
+    "targets_three_to_thirty_store_apparel_brands",
+    "publishes_verified_roi_pricing_customer_count_or_taiwan_implementation",
+    "social_positioning_overlaps_store_operations_data_ai_and_product_funnel"
+  ],
+  "analysis_fields": [
+    "competitor_id",
+    "event_date",
+    "fresh_material_delta",
+    "competitor_type",
+    "overlap_level",
+    "affected_product_layer",
+    "threat_type",
+    "current_differentiation_status",
+    "recommended_action",
+    "evidence_links"
+  ]
+}
