@@ -61,6 +61,11 @@ def build_parser() -> argparse.ArgumentParser:
     prepare_chat.add_argument("--date", required=True)
     prepare_chat.add_argument("--profile", choices=["daily_push", "full"], default="daily_push")
     prepare_chat.add_argument("--output-root", default="")
+    prepare_chat.add_argument(
+        "--database",
+        default="",
+        help="package a persisted validated report instead of generating fixture context",
+    )
 
     import_chat = sub.add_parser("import-chat")
     import_chat.add_argument("--package-dir", required=True)
@@ -153,7 +158,14 @@ def main(argv: list[str] | None = None) -> int:
         from radar.chat.runtime import prepare_chat
 
         output_root = Path(args.output_root).resolve() if args.output_root else None
-        package = prepare_chat(repo_root, date=args.date, profile=args.profile, output_root=output_root)
+        database_path = Path(args.database).resolve() if args.database else None
+        package = prepare_chat(
+            repo_root,
+            date=args.date,
+            profile=args.profile,
+            output_root=output_root,
+            database_path=database_path,
+        )
         print(
             json.dumps(
                 {
@@ -266,6 +278,7 @@ def main(argv: list[str] | None = None) -> int:
                     "message": "Use run-daily for the currently connected deterministic pipeline.",
                 },
                 ensure_ascii=False,
+                indent=2,
             )
         )
         return 0
