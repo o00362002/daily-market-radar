@@ -58,10 +58,26 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("npm run build", text)
         self.assertIn("61440", text)  # 60 KB gzip JS budget
 
-    def test_prepare_chat_makes_no_api_call(self) -> None:
+    def test_prepare_chat_reads_durable_state_without_api_call(self) -> None:
+        doc = self._load("prepare-chat.yml")
+        self.assertEqual(doc["concurrency"]["group"], "radar-daily")
         text = (WORKFLOWS / "prepare-chat.yml").read_text(encoding="utf-8")
+        self.assertIn("radar-state", text)
+        self.assertIn("state restore", text)
         self.assertIn("prepare-chat", text)
-        self.assertIn("openai", text)  # asserts openai is NOT imported
+        self.assertIn("--database", text)
+        self.assertIn("OPENAI_API_KEY", text)
+        self.assertIn("refusing to publish a fixture package", text)
+
+    def test_import_chat_can_persist_build_and_deploy_with_fixture_gate(self) -> None:
+        doc = self._load("import-chat.yml")
+        self.assertEqual(doc["concurrency"]["group"], "radar-daily")
+        text = (WORKFLOWS / "import-chat.yml").read_text(encoding="utf-8")
+        self.assertIn("import-chat", text)
+        self.assertIn("save_report", text)
+        self.assertIn("export-web", text)
+        self.assertIn("deploy-pages", text)
+        self.assertIn("allow_fixture_deploy", text)
 
     def test_pages_deploy_only_deploys_validated_non_fixture(self) -> None:
         text = (WORKFLOWS / "pages-deploy.yml").read_text(encoding="utf-8")
