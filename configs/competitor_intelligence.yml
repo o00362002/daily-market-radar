@@ -1,0 +1,61 @@
+version: 1.0
+status: active
+purpose: >
+  將產品競品與社群內容競品設為固定情報能力。競品情報是跨領域投影，
+  不建立新的 canonical report domain，也不讓同一事件重複占用新聞配額。
+
+source_of_truth:
+  registry: config/competitor_registry.json
+  watchlist: memory/watchlist.md
+
+tracking_groups:
+  - taiwan_retailops_products
+  - global_platforms
+  - social_and_content
+
+collection_rules:
+  - 固定競品名稱與別名必須進入每日來源檢查或固定查詢配方。
+  - 優先檢查官方發布、產品文件、release notes、案例、定價與合作公告。
+  - 媒體與社群可作發現來源，但重大功能與價格主張需回到官方或可驗證案例。
+  - 沒有 fresh material delta 時，輸出「已查無重大更新」，不得用舊聞補位。
+  - 未執行官方或固定來源檢查時，只能標記未完整，不得宣稱沒有更新。
+
+projection_rules:
+  - 每個事件仍保留一個 canonical primary domain。
+  - 產品競品可從 AI、零售、科技或全球市場事件投影到 competitor watch。
+  - 社群競品可從零售、AI 或平台政策事件投影到 competitor watch。
+  - 競品投影不得複製事件、改變 Major/Potential lane 或提高證據等級。
+  - 網頁首頁與 competitors 頁使用同一份 competitor registry，不得各自維護關鍵詞清單。
+
+required_analysis:
+  - competitor_id
+  - event_date
+  - fresh_material_delta
+  - competitor_type
+  - overlap_level
+  - affected_product_layer
+  - threat_type
+  - current_differentiation_status
+  - recommended_action
+  - evidence_links
+
+product_layers:
+  - free_entry
+  - template_subscription
+  - decision_module
+  - agent
+  - private_integration
+
+threat_types:
+  - functional_substitution
+  - price_compression
+  - distribution_control
+  - ecosystem_advantage
+  - content_attention
+
+labor_boundary:
+  rule: >
+    勞動力、招聘、裁員、薪資與消費壓力不再是獨立新聞領域；只進入固定指標面板，
+    或在事件本身符合 AI、全球市場、零售或科技重大新聞門檻時，依該主領域輸出一次。
+  no_standalone_domain: true
+  indicator_config: configs/indicator_tracking.yml
