@@ -31,10 +31,16 @@ triggers:
   - id: employment_skill_change
     name: 就業 / 職能變化
     question: 是否有裁員、招聘下降、新職位、薪資變化、工作量下降？
+    output_mode: indicator_only_unless_independently_material
+    indicator_target: configs/indicator_tracking.yml#labor_consumption_pressure
+    consumes_news_slot: false
     examples:
       - 初階白領職缺下降
       - 影片後製、設計、客服、內容職能需求下降
       - AI operator / agent manager 等新職位出現
+    promotion_rule: >
+      預設只更新勞動與消費壓力指標。只有事件本身獨立符合 AI、全球市場、零售或科技重大新聞門檻，
+      才依該 canonical primary domain 輸出一次；不得建立勞動力新聞章節。
 
   - id: cost_structure_change
     name: 成本結構變化
@@ -104,6 +110,6 @@ triggers:
 escalation_rules:
   - 若同一事件命中 3 個以上觸發器，至少列為「候選訊號」。
   - 若同一事件命中 4 個以上觸發器，且證據強度中以上，必須列入「今日必看訊號」。
-  - 若事件同時涉及 AI 工作流替代、平台政策、就業證據，必須進入硬檢查。
+  - 若事件同時涉及 AI 工作流替代、平台政策、就業證據，必須進入硬檢查；是否輸出新聞仍依 AI／全球市場／零售／科技主領域門檻判斷，不建立 labor domain。
   - 若事件涉及台灣半導體、出口、零售、內容產業或企業導入 AI，必須同步進入台灣映射。
   - 若事件涉及 AI 產品 token、credit、quota、pricing、promo code、gift / transfer、usage limit 或 overage cost，即使不是模型能力新聞，也必須至少列入候選訊號或資料不足區。
