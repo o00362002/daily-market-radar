@@ -9,8 +9,8 @@ It never replaces or mutates the source report.
 RadarReportV2 validated facts
 → faithful headline translation
 → cross-event daily synthesis
-→ three canonical structural indicators as the primary trend panel
 → conditional future-trend scenarios
+→ three canonical structural indicators
 → six deterministic auxiliary signal indicators
 → AI interpretation of immutable auxiliary values
 → AIAnalysisV1 web artifact
@@ -25,6 +25,46 @@ The `/analysis` page keeps the following content types visibly separate:
 - uncertainty and follow-up verification
 - canonical structural trend indicators
 - auxiliary daily signal indicators
+
+## Human reading order
+
+The page is content-first rather than indicator-first:
+
+```text
+今日統整
+→ 重點判讀
+→ 未來趨勢情境
+→ 三個核心結構趨勢指標
+→ 六個輔助訊號
+→ 限制、翻譯與 provenance
+```
+
+Signal IDs, support/counter details, missing data and verification notes are collapsed by default.
+The default view must remain readable by a non-technical person.
+
+## Future horizon display
+
+Each future-trend card displays:
+
+```text
+未來 3 個月條件式可能性
+未來 6 個月條件式可能性
+```
+
+These values are presentation-layer scenario estimates, not statistically calibrated probabilities and
+not investment-return forecasts. They are derived transparently from:
+
+```text
+trend confidence
++ formation-stage adjustment
++ direction adjustment
+- counterevidence penalty
+- uncertainty penalty
+```
+
+The 6-month estimate allows more time for an emerging trend to form but applies a larger uncertainty
+penalty. The source events, counterevidence, uncertainties and next-watch conditions remain available
+inside the card details.
 
 ## Indicator hierarchy
 
@@ -46,6 +86,25 @@ These are defined by `config/runtime_contract.json` and detailed in
 `RadarReportV2.structural_indicators` observations. Direction, support score, counter score,
 confidence, signal IDs, missing data, interpretation and next verification are immutable.
 The AI provider may use them when synthesising the day, but cannot edit or replace them.
+
+The default website card shows only:
+
+```text
+indicator name
+one net structural score
+one direction label
+one-sentence interpretation
+```
+
+The net structural score is a readability projection:
+
+```text
+50 + (support score - counter score) / 2
+```
+
+`50` means supporting and counter forces are balanced. `insufficient` evidence renders `N/A` rather
+than a fabricated number. The original support score, counter score and confidence remain visible in
+the collapsed details and continue to be the canonical deterministic values.
 
 The authoritative human-readable index is `docs/structural-indicators.md`.
 
@@ -97,6 +156,9 @@ Every analysis records:
 - schema version
 - requested and effective mode
 - validation and fallback status
+
+The page shows a compact provider/model byline near the title. Full provenance and hashes are kept in
+a collapsed audit section after the content and indicators.
 
 ## Evaluation modes
 
