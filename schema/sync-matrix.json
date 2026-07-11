@@ -1,12 +1,13 @@
 {
   "schema": "brain-sync-matrix/v1",
-  "version": "6",
+  "version": "7",
   "_note": "daily-market-radar machine sync edges. Keep derivable facts out of prose.",
   "byFile": {
     "README.md": ["PROJECT_MAP.md", "HIGH_LEVEL_INDEX.md", "CURRENT_STATE.md"],
     "AGENTS.md": ["CLAUDE.md", "README.md", "AGENT_DEFINITION_MAP.md"],
     "brain.manifest.yaml": ["AGENTS.md", "PROJECT_OS_MOUNT.md", "CURRENT_STATE.md"],
     "CURRENT_DECISIONS.md": ["CURRENT_STATE.md", "reports/execution_checks/"],
+    "memory/watchlist.md": ["tools/coverage_checker.md", "workflows/execution_checklist.md", "skill_specs/coverage_check_skill.md"],
     "Makefile": [".github/workflows/mount-check.yml", "tests/architecture/"],
     "pyproject.toml": [".github/workflows/mount-check.yml", "tests/"],
     "config/runtime_contract.json": [
