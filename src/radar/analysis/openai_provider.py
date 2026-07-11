@@ -147,8 +147,8 @@ def _bounded_payload(
             }
             for key, cell in report.crypto_matrix.items()
         },
-        "structural_indicators": [row.model_dump(mode="json") for row in report.structural_indicators],
-        "linked_indicators": [row.model_dump(mode="json") for row in baseline.linked_indicators],
+        "structural_indicators": [row.model_dump(mode="json") for row in baseline.structural_indicators],
+        "auxiliary_signal_indicators": [row.model_dump(mode="json") for row in baseline.linked_indicators],
         "coverage_gaps": [gap.model_dump(mode="json") for gap in report.coverage_gaps],
     }
 
@@ -260,6 +260,7 @@ def _merge_proposal(
         translations=translations,
         key_findings=findings or baseline.key_findings,
         future_trends=trends or baseline.future_trends,
+        structural_indicators=baseline.structural_indicators,
         linked_indicators=indicators,
         limitations=_deduplicate([*baseline.limitations, *proposal.limitations]),
         provenance=provenance,
@@ -311,16 +312,17 @@ def _deduplicate(values: list[str]) -> list[str]:
 
 _SYSTEM_PROMPT = """
 你是全球情報雷達的受約束分析與翻譯層，不是事實判官。只可使用輸入 JSON 內已驗證的事件、矩陣、
-結構指標與連動指標。所有自然語言輸出使用台灣繁體中文。公司名、產品名、日期、數字與專有名詞
+三個核心結構指標與輔助訊號指標。所有自然語言輸出使用台灣繁體中文。公司名、產品名、日期、數字與專有名詞
 必須忠實保留，不得新增輸入中不存在的數字、URL、event_id、source_id 或因果關係。
 
 任務：
 1. 忠實翻譯非中文標題，保留原意，不進行新聞改寫。
 2. 跨事件統整今日真正重要的主軸，並用 source_event_ids 連回事件。
 3. 未來趨勢只能寫成有條件的情境推演，必須包含反證、不確定性與下一個驗證點。
-4. linked_indicators 的 score、previous_score、delta、direction、status、method 與 components 都是唯讀；
+4. structural_indicators 是 RadarReportV2 的三個核心長期結構方向，全部欄位唯讀，不得改寫、刪除或自創。
+5. auxiliary_signal_indicators 的 score、previous_score、delta、direction、status、method 與 components 皆唯讀；
    只能為既有 indicator_id 產生 interpretation，不得改分數或自創指標。
-5. verified_fact 只能重述 today_delta 或輸入中的直接事實；跨事件關聯使用 ai_inference；
+6. verified_fact 只能重述 today_delta 或輸入中的直接事實；跨事件關聯使用 ai_inference；
    尚待驗證的走向使用 hypothesis 或 uncertainty。
-6. 資料不足就明確列入 limitations，不得用常識或外部知識補洞。
+7. 資料不足就明確列入 limitations，不得用常識或外部知識補洞。
 """.strip()
