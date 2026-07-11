@@ -16,7 +16,7 @@ governance_posture:
 core_repo: o00362002/brain-core
 core_version: v0
 mounted_since: 2026-07-06
-role: 每日市場情報雷達（recurring intelligence workflow）＋ 多領域新聞趨勢掃描
+role: 每日市場情報雷達＋多領域趨勢／潛力訊號掃描＋產品與社群競品情報
 
 previous_mount:
   repo: o00362002/Human-AI-Collaboration-Brain
@@ -38,14 +38,18 @@ machine_layer:
     - tools/brain/check-core.js          # 不變式4：必備檔＋入口預算＋不變式數量鎖
     - tools/brain/check-sync-matrix.js   # 不變式2：連動提醒（advisory）
     - tools/brain/check-doc-paths.js     # 不變式3：路徑現實（advisory）
-    - tools/brain/check-domain-packs.js  # 不變式5：領域包完整性
+    - tools/brain/check-domain-packs.js  # 不變式5：領域包完整性＋canonical mapping
   ci_wrapper: check_mount_integrity.sh   # CI 與人工共用同一入口
 
 domain_extension:
-  core_domains: configs/radars.yml       # 六大核心領域（canonical，不動）
-  packs_dir: domains/                    # 新領域＝複製 _template 填完（spec: domains/README.md）
-  query_recipes: configs/query_recipes.yml  # 固定查詢配方（弱模型照抄執行）
-  potential_pool: memory/potential_pool.md  # 蒐集階段不預篩，全收入池
+  canonical_news_domains: config/runtime_contract.json  # 現行五個；唯一 domain quota authority
+  fine_radars: configs/radars.yml                       # 模組／指標，不自行建立 quota
+  packs_dir: domains/                                   # 新主題包映射既有 canonical domain
+  query_recipes: configs/query_recipes.yml              # 新聞、競品與 indicator-only 固定配方
+  competitor_registry: config/competitor_registry.json  # 產品／社群競品身分與別名
+  competitor_policy: configs/competitor_intelligence.yml
+  indicator_tracking: configs/indicator_tracking.yml    # labor/consumption 為 indicator-only
+  potential_pool: memory/potential_pool.md               # 蒐集階段不預篩，全收入池
   capture_stage_no_filtering: true
 
 boundary:
@@ -53,4 +57,6 @@ boundary:
   agent_cannot_approve_itself: true
   human_final_review_for_structural_changes: true
   evidence_needs_approval_to_become_memory: true
+  competitor_projection_is_not_report_domain: true
+  labor_is_indicator_only_by_default: true
   frozen_history_is_not_current_state: true
