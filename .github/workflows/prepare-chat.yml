@@ -1,38 +1,133 @@
 name: prepare-chat
 
-# Build a deterministic, secret-free chat context package for a given date and
-# upload it as a workflow artifact. Makes no API call and uses no secrets.
+# Build a secret-free bounded package from an already validated report in the
+# durable radar-state database. This workflow performs no live collection and
+# makes no AI/API call; it packages the evidence that the daily pipeline saved.
 
 on:
   workflow_dispatch:
     inputs:
       date:
-        description: "Report date (YYYY-MM-DD); defaults to today (Taiwan)"
+        description: "Persisted report date (YYYY-MM-DD); defaults to today in Taiwan"
         required: false
+        type: string
+      profile:
+        description: "Report profile"
+        required: false
+        type: choice
+        default: daily_push
+        options:
+          - daily_push
+          - full
+
+concurrency:
+  # Wait for the daily pipeline to finish writing radar-state before reading it.
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install -e ".[dev]"
-      - name: Assert no OpenAI SDK is importable during prepare-chat
+
+      - name: Install Python dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Restore validated durable state
+        run: |
+          set -e
+          mkdir -p data
+          if ! git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            echo "radar-state does not exist; run daily-intelligence successfully first" >&2
+            exit 1
+          fi
+          git fetch origin radar-state
+          git worktree add .state origin/radar-state
+          PYTHONPATH=src python -m radar.cli state restore \
+            --state-root .state/state \
+            --database "$PWD/data/radar.db"
+
+      - name: Prepare bounded package from persisted report
+        id: prepare
+        env:
+          INPUT_DATE: ${{ inputs.date }}
+          INPUT_PROFILE: ${{ inputs.profile }}
         run: |
           python - <<'PY'
-          import sys, subprocess, os
-          env = dict(os.environ); env["PYTHONPATH"] = "src"; env["OPENAI_API_KEY"] = ""
-          date = os.environ.get("INPUT_DATE") or subprocess.check_output(["date", "+%F"], env={"TZ": "Asia/Taipei", **os.environ}).decode().strip()
-          out = subprocess.check_output([sys.executable, "-m", "radar.cli", "prepare-chat", "--date", date, "--output-root", "."], env=env)
-          print(out.decode())
-          assert "openai" not in sys.modules
+          import json
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          env = dict(os.environ)
+          env["PYTHONPATH"] = "src"
+          env["OPENAI_API_KEY"] = ""
+          date = env.get("INPUT_DATE") or subprocess.check_output(
+              ["date", "+%F"], env={"TZ": "Asia/Taipei", **os.environ}
+          ).decode().strip()
+          profile = env.get("INPUT_PROFILE") or "daily_push"
+          command = [
+              sys.executable,
+              "-m",
+              "radar.cli",
+              "prepare-chat",
+              "--date",
+              date,
+              "--profile",
+              profile,
+              "--database",
+              str(Path("data/radar.db").resolve()),
+              "--output-root",
+              ".",
+          ]
+          output = subprocess.check_output(command, env=env)
+          result = json.loads(output)
+          package_dir = Path(result["package_dir"])
+          baseline = json.loads((package_dir / "deterministic-evaluation.json").read_text(encoding="utf-8"))
+          ingestion_mode = baseline.get("source_audit", {}).get("ingestion_mode", "unknown")
+          if ingestion_mode == "fixture":
+              raise SystemExit("refusing to publish a fixture package from production prepare-chat")
+          if "openai" in sys.modules:
+              raise SystemExit("OpenAI SDK was imported during secret-free package preparation")
+
+          print(json.dumps({
+              **result,
+              "date": date,
+              "profile": profile,
+              "ingestion_mode": ingestion_mode,
+          }, ensure_ascii=False, indent=2))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
+              handle.write(f"date={date}\n")
+              handle.write(f"profile={profile}\n")
+              handle.write(f"package_dir={package_dir.as_posix()}\n")
+              handle.write(f"context_hash={result['context_hash']}\n")
+              handle.write(f"ingestion_mode={ingestion_mode}\n")
           PY
-        env:
-          INPUT_DATE: ${{ github.event.inputs.date }}
+
       - name: Upload chat package
         uses: actions/upload-artifact@v4
         with:
-          name: chat-package
-          path: artifacts/chat/v1/**
+          name: chat-package-${{ steps.prepare.outputs.date }}-${{ steps.prepare.outputs.context_hash }}
+          path: ${{ steps.prepare.outputs.package_dir }}
+          if-no-files-found: error
+
+      - name: Write workflow summary
+        run: |
+          {
+            echo "## Prepared chat package"
+            echo
+            echo "- Date: \`${{ steps.prepare.outputs.date }}\`"
+            echo "- Profile: \`${{ steps.prepare.outputs.profile }}\`"
+            echo "- Ingestion mode: \`${{ steps.prepare.outputs.ingestion_mode }}\`"
+            echo "- Context hash: \`${{ steps.prepare.outputs.context_hash }}\`"
+            echo "- Package: \`${{ steps.prepare.outputs.package_dir }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
