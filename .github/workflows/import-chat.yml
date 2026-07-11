@@ -1,8 +1,9 @@
 name: import-chat
 
-# Validate a human-produced (ChatGPT) report against a prepared context package.
-# A failed import produces a validation receipt and does NOT deploy or overwrite
-# the site. A valid import is a chat-assisted result that can be redeployed.
+# Validate a ChatGPT-produced RadarReportV2, persist it into durable state,
+# rebuild the static dashboard and deploy GitHub Pages. Invalid imports and
+# fixture reports never overwrite production unless fixture deployment is
+# explicitly requested in a manual run.
 
 on:
   workflow_dispatch:
@@ -10,40 +11,287 @@ on:
       package_dir:
         description: "Path (in the repo) to the prepared package directory"
         required: true
+        type: string
       report_path:
         description: "Path (in the repo) to the ChatGPT-produced RadarReportV2 JSON"
         required: true
+        type: string
+      deploy:
+        description: "Persist, rebuild and deploy after validation"
+        required: false
+        type: boolean
+        default: true
+      allow_fixture_deploy:
+        description: "Allow fixture data to replace the production Pages site (testing only)"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "chat-imports/**/RadarReportV2.json"
+
+concurrency:
+  # Share the daily pipeline lock so two jobs cannot race while writing state
+  # or deploying the same Pages environment.
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   import:
     runs-on: ubuntu-latest
     outputs:
       valid: ${{ steps.import.outputs.valid }}
+      deployable: ${{ steps.gate.outputs.deployable }}
+      status: ${{ steps.gate.outputs.status }}
+      ingestion_mode: ${{ steps.gate.outputs.ingestion_mode }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install -e ".[dev]"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install Python dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Resolve package and report paths
+        id: paths
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PACKAGE_DIR: ${{ inputs.package_dir }}
+          INPUT_REPORT_PATH: ${{ inputs.report_path }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PACKAGE_DIR="$INPUT_PACKAGE_DIR"
+            REPORT_PATH="$INPUT_REPORT_PATH"
+          else
+            mapfile -t REPORTS < <(
+              git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" \
+                | grep -E '^chat-imports/.+/RadarReportV2\.json$' || true
+            )
+            if [ "${#REPORTS[@]}" -ne 1 ]; then
+              echo "Expected exactly one changed RadarReportV2.json, found ${#REPORTS[@]}" >&2
+              printf '%s\n' "${REPORTS[@]:-}" >&2
+              exit 1
+            fi
+            REPORT_PATH="${REPORTS[0]}"
+            PACKAGE_DIR="$(dirname "$REPORT_PATH")/package"
+          fi
+
+          test -d "$PACKAGE_DIR" || { echo "package directory not found: $PACKAGE_DIR" >&2; exit 1; }
+          test -f "$REPORT_PATH" || { echo "report file not found: $REPORT_PATH" >&2; exit 1; }
+          echo "package_dir=$PACKAGE_DIR" >> "$GITHUB_OUTPUT"
+          echo "report_path=$REPORT_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Restore durable state (radar-state branch; never main)
+        run: |
+          set -e
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore \
+              --state-root .state/state \
+              --database "$PWD/data/radar.db" \
+              || echo "state restore reported no usable state"
+          else
+            echo "no radar-state branch yet; starting with an empty database"
+            mkdir -p .state/state
+          fi
+
       - name: Validate chat import
         id: import
+        shell: bash
         run: |
           set +e
           PYTHONPATH=src python -m radar.cli import-chat \
-            --package-dir "${{ github.event.inputs.package_dir }}" \
-            --report "${{ github.event.inputs.report_path }}" \
+            --package-dir "${{ steps.paths.outputs.package_dir }}" \
+            --report "${{ steps.paths.outputs.report_path }}" \
             --receipt import-receipt.json
           CODE=$?
           set -e
           cat import-receipt.json || true
-          if [ "$CODE" -eq 0 ]; then echo "valid=true" >> "$GITHUB_OUTPUT"; else echo "valid=false" >> "$GITHUB_OUTPUT"; fi
+          if [ "$CODE" -eq 0 ]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload validation receipt
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: import-receipt
+          name: import-receipt-${{ github.run_id }}
           path: import-receipt.json
-      - name: Fail the run on invalid import (site untouched)
+
+      - name: Deployment safety gate
+        id: gate
+        if: steps.import.outputs.valid == 'true'
+        env:
+          REPORT_PATH: ${{ steps.paths.outputs.report_path }}
+          EVENT_NAME: ${{ github.event_name }}
+          DEPLOY_INPUT: ${{ inputs.deploy }}
+          ALLOW_FIXTURE_INPUT: ${{ inputs.allow_fixture_deploy }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path(os.environ["REPORT_PATH"]).read_text(encoding="utf-8"))
+          status = str(report.get("status", "failed"))
+          ingestion_mode = str(report.get("source_audit", {}).get("ingestion_mode", "unknown"))
+          event_name = os.environ.get("EVENT_NAME", "")
+          requested = event_name == "push" or os.environ.get("DEPLOY_INPUT", "").lower() == "true"
+          allow_fixture = (
+              event_name == "workflow_dispatch"
+              and os.environ.get("ALLOW_FIXTURE_INPUT", "").lower() == "true"
+          )
+
+          deployable = requested and status != "failed"
+          reason = "validated"
+          if not requested:
+              deployable = False
+              reason = "validation_only"
+          elif status == "failed":
+              deployable = False
+              reason = "report_status_failed"
+          elif ingestion_mode == "fixture" and not allow_fixture:
+              deployable = False
+              reason = "fixture_preview_only"
+
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              output.write(f"status={status}\n")
+              output.write(f"ingestion_mode={ingestion_mode}\n")
+              output.write(f"deployable={str(deployable).lower()}\n")
+              output.write(f"reason={reason}\n")
+
+          print(json.dumps({
+              "status": status,
+              "ingestion_mode": ingestion_mode,
+              "deployable": deployable,
+              "reason": reason,
+          }, ensure_ascii=False))
+          PY
+
+      - name: Persist validated chat report into SQLite
+        if: steps.gate.outputs.deployable == 'true'
+        env:
+          REPORT_PATH: ${{ steps.paths.outputs.report_path }}
+          DATABASE_PATH: ${{ github.workspace }}/data/radar.db
+        run: |
+          PYTHONPATH=src python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          from radar.repositories.sqlite import SqliteRunRepository
+
+          report_path = Path(os.environ["REPORT_PATH"])
+          database_path = Path(os.environ["DATABASE_PATH"])
+          payload = json.loads(report_path.read_text(encoding="utf-8"))
+          repository = SqliteRunRepository(database_path, Path("migrations"))
+          repository.save_report(payload)
+          print(f"persisted chat report {payload['run_id']} to {database_path}")
+          PY
+
+      - name: Export web artifacts from durable state
+        if: steps.gate.outputs.deployable == 'true'
+        run: |
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD" \
+            --database "$PWD/data/radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Persist updated durable state
+        if: steps.gate.outputs.deployable == 'true'
+        run: |
+          set -e
+          git config --global user.name "radar-bot"
+          git config --global user.email "radar-bot@users.noreply.github.com"
+          rm -rf .state
+          git worktree prune
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch -q origin radar-state
+            git worktree add -f .state origin/radar-state
+            git -C .state checkout -B radar-state
+          else
+            root_commit=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "init radar-state")
+            git branch -f radar-state "$root_commit"
+            git worktree add -f .state radar-state
+          fi
+          PYTHONPATH=src python -m radar.cli state pack \
+            --database "$PWD/data/radar.db" \
+            --state-root .state/state \
+            --run-id "chat-${GITHUB_RUN_ID}"
+          git -C .state add state
+          git -C .state commit -q -m "state: chat import ${GITHUB_RUN_ID}" || echo "no state change"
+          git -C .state push origin HEAD:radar-state
+
+      - name: Build static site
+        if: steps.gate.outputs.deployable == 'true'
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: |
+          npm ci
+          npm run types:check
+          npm run build
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+
+      - name: Upload Pages artifact
+        if: steps.gate.outputs.deployable == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Chat import"
+            echo
+            echo "- Report: \`${{ steps.paths.outputs.report_path }}\`"
+            echo "- Package: \`${{ steps.paths.outputs.package_dir }}\`"
+            echo "- Valid: \`${{ steps.import.outputs.valid || 'false' }}\`"
+            echo "- Status: \`${{ steps.gate.outputs.status || 'not-evaluated' }}\`"
+            echo "- Ingestion mode: \`${{ steps.gate.outputs.ingestion_mode || 'not-evaluated' }}\`"
+            echo "- Deployable: \`${{ steps.gate.outputs.deployable || 'false' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail invalid import (last valid state and site stay untouched)
         if: steps.import.outputs.valid != 'true'
         run: |
-          echo "Chat import rejected — last valid report and site are preserved."
+          echo "Chat import rejected; last valid report and site are preserved."
           exit 1
+
+  deploy:
+    needs: import
+    if: needs.import.outputs.deployable == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
