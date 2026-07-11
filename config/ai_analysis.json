@@ -1,0 +1,45 @@
+{
+  "schema_version": "ai-analysis/v1",
+  "prompt_version": "daily-analysis-v1",
+  "max_summary_points": 6,
+  "max_findings": 8,
+  "max_trends": 6,
+  "indicators": [
+    {
+      "indicator_id": "ai_application_momentum",
+      "label": "AI 應用動能",
+      "selector": "domain",
+      "values": ["ai_agents_applications"]
+    },
+    {
+      "indicator_id": "retail_change_momentum",
+      "label": "零售變革動能",
+      "selector": "domain",
+      "values": ["retail_consumer_fashion"]
+    },
+    {
+      "indicator_id": "crypto_rwa_adoption_momentum",
+      "label": "加密與 RWA 採用動能",
+      "selector": "domain",
+      "values": ["crypto_rwa_agent_payments"]
+    },
+    {
+      "indicator_id": "taiwan_exposure_intensity",
+      "label": "台灣直接曝險強度",
+      "selector": "taiwan_direct",
+      "values": []
+    },
+    {
+      "indicator_id": "cross_domain_convergence",
+      "label": "跨領域匯流強度",
+      "selector": "cross_domain",
+      "values": []
+    },
+    {
+      "indicator_id": "evidence_confidence",
+      "label": "證據可信度",
+      "selector": "evidence_quality",
+      "values": []
+    }
+  ]
+}

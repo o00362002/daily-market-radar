@@ -31,6 +31,10 @@ export function getLatestReport(): Record<string, unknown> | null {
   return readJson<Record<string, unknown>>('latest.json');
 }
 
+export function getLatestAnalysis(): Record<string, unknown> | null {
+  return readJson<Record<string, unknown>>('ai-analysis/latest.json');
+}
+
 export function getReportsYear(year: string): ReportsYearIndexV1 | null {
   return readJson<ReportsYearIndexV1>(`indexes/reports/${year}.json`);
 }

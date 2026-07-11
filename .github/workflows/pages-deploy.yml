@@ -1,14 +1,23 @@
 name: pages-deploy
 
-# Manual redeploy of the validated static site (e.g. after import-chat). Deploys
-# only the built site artifact — it never fetches live data — and skips deployment
-# when the latest report is failed or fixture-only.
+# Manual redeploy of the validated static site. It restores durable state, exports
+# report artifacts, regenerates AIAnalysisV1, and skips failed or fixture output.
 
 on:
   workflow_dispatch:
+    inputs:
+      analysis_mode:
+        description: "deterministic | auto | api-assisted"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - deterministic
+          - api-assisted
 
 concurrency:
-  group: radar-pages
+  group: radar-daily
   cancel-in-progress: false
 
 permissions:
@@ -31,7 +40,8 @@ jobs:
           node-version: "20"
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - run: python -m pip install -e ".[dev]"
+      - run: python -m pip install -e ".[dev,ai]"
+
       - name: Restore state and export the latest validated artifacts
         run: |
           mkdir -p data
@@ -43,22 +53,46 @@ jobs:
           else
             echo "no durable state to deploy"; exit 1
           fi
+
       - name: Deploy gate
         id: gate
         run: |
           STATUS=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['status'])")
           MODE=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['source_audit']['ingestion_mode'])")
-          if [ "$STATUS" = "failed" ] || [ "$MODE" = "fixture" ]; then echo "deployable=false" >> "$GITHUB_OUTPUT"; else echo "deployable=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$STATUS" = "failed" ] || [ "$MODE" = "fixture" ]; then
+            echo "deployable=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate AI interpretation artifacts
+        if: steps.gate.outputs.deployable == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          OPENAI_ANALYSIS_MODEL: ${{ vars.OPENAI_ANALYSIS_MODEL }}
+          ANALYSIS_MODE: ${{ github.event.inputs.analysis_mode || vars.RADAR_AI_ANALYSIS_MODE || 'auto' }}
+        run: |
+          PYTHONPATH=src python -m radar.analysis.cli \
+            --database "$PWD/data/radar.db" \
+            --repo-root "$PWD" \
+            --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
+            --mode "$ANALYSIS_MODE"
+
       - name: Build site
+        if: steps.gate.outputs.deployable == 'true'
         working-directory: web
         env:
           RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
           PAGES_SITE: https://${{ github.repository_owner }}.github.io
           PAGES_BASE: /${{ github.event.repository.name }}
         run: |
-          npm ci && npm run build
+          npm ci
+          npm run types:check
+          npm run build
           mkdir -p dist/data
           cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+
       - uses: actions/upload-pages-artifact@v3
         if: steps.gate.outputs.deployable == 'true'
         with:

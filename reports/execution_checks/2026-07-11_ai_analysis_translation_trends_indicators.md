@@ -1,0 +1,67 @@
+# AI interpretation, translation, future trends and linked indicators
+
+## 改了什麼
+
+- 新增獨立 `AIAnalysisV1` contract，不修改 `RadarReportV2` 事實層。
+- 新增受約束的 OpenAI Responses API structured-output enhancer。
+- 新增 deterministic fallback，無 API key 或模型失敗仍可輸出。
+- 新增六個透明公式連動指標，支援與前一期比較。
+- 新增 `/analysis` 選單與頁面，顯示模型、資料版本、prompt、hash、fallback 與來源事件。
+- 新增 post-run GitHub Actions，自動在 daily/import 完成後生成並部署 AI 解讀頁。
+
+## 機器檢查
+
+PR #28 實際 GitHub Actions 結果：
+
+- `runtime-check` run 192：success
+  - `make validate` 全綠
+  - deterministic no-secret run 全綠
+  - auto-without-key fallback 全綠
+  - AIAnalysisV1 與 provider guard unit tests 全綠
+  - workflow YAML contract tests 全綠
+- `web-check` run 57：success
+  - generated TypeScript sync 全綠
+  - Astro typecheck/build 全綠
+  - JS/CSS bundle budgets 全綠
+- `mount-check` run 562：success
+  - unit／integration／contract／architecture tests 全綠
+  - runtime contract、source registry／OPML、CLI smoke 全綠
+  - brain-core mount integrity 全綠
+
+曾由文件路徑檢查抓到 `web/API/social/external` 被誤認為 repo path；已改為文字分隔，focused diagnostics 證實 doc-path exit 0、CURRENT_STATE 頭部低於 8000-byte 預算。
+
+## 沒做什麼
+
+- AI 不得改寫原始 RadarReportV2。
+- AI 不得修改指標分數、公式、方向或來源事件。
+- 趨勢是有條件情境，不是確定預測或投資建議。
+- 本次不建立公開聊天介面；「問雷達」留待 read-only MCP 階段。
+- 分析歷史目前隨每次最新 durable state 重新產生，尚未建立獨立長期 analysis repository。
+- CI 沒有使用真實 `OPENAI_API_KEY`；OpenAI 網路路徑仍需在 repository secret 設定後由正式 workflow 驗證，失敗會安全 fallback。
+
+## 會影響誰
+
+- GitHub Pages 新增 AI 解讀選單與頁面。
+- 有 `OPENAI_API_KEY` 時使用模型語意增強；沒有 key 時顯示 deterministic fallback。
+- 每次 `daily-intelligence` 或 `import-chat` 成功後會再執行一次 AI analysis 部署工作流。
+
+## 你可以驗證
+
+```bash
+PYTHONPATH=src python -m radar.analysis.cli \
+  --database data/radar.db \
+  --output-dir artifacts/web/v1/ai-analysis \
+  --mode deterministic
+
+cd web
+RADAR_ARTIFACTS_DIR=../artifacts/web/v1 npm run types:check
+RADAR_ARTIFACTS_DIR=../artifacts/web/v1 npm run build
+```
+
+網站檢查：
+
+```text
+/analysis
+/data/ai-analysis/latest.json
+/data/ai-analysis/schema.json
+```
