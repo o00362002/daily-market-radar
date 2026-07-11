@@ -52,6 +52,7 @@ def export_web(
     latest: bool = False,
     incremental: bool = True,
     generated_at: str | None = None,
+    legacy_reports_dir: Path | None = None,
 ) -> ExportResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     reports = _load_reports(
@@ -63,5 +64,17 @@ def export_web(
         contract=contract,
     )
     stamp = generated_at or datetime.now(timezone.utc).isoformat()
-    artifacts = project_web(reports, contract, generated_at=stamp)
+    artifacts = list(project_web(reports, contract, generated_at=stamp))
+    if legacy_reports_dir is not None:
+        artifacts.extend(_load_legacy_artifacts(legacy_reports_dir))
     return export_web_artifacts(artifacts, out_dir, incremental=incremental)
+
+
+def _load_legacy_artifacts(legacy_reports_dir: Path):
+    from radar.web.legacy import project_legacy
+
+    files: list[tuple[str, str]] = []
+    for path in sorted(legacy_reports_dir.glob("[0-9][0-9][0-9][0-9]/**/*.md")):
+        relative = f"reports/{path.relative_to(legacy_reports_dir)}"
+        files.append((relative, path.read_text(encoding="utf-8")))
+    return project_legacy(files)

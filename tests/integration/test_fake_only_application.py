@@ -59,15 +59,18 @@ def _contract() -> RuntimeContract:
         ],
         domain_aliases={"policy_geopolitics": "global_markets_macro"},
         profiles={
+            # Test-contract floors sized to what the fake documents yield so the
+            # baseline status stays "complete"; floor-shortfall behavior has its
+            # own dedicated assertions.
             "daily_push": ProfileContract(
-                major_slot_cap_per_domain=3,
-                potential_slot_cap_per_domain=3,
-                slot_caps_are_completeness_proof=False,
+                min_major_items=3,
+                min_potential_items=2,
+                min_taiwan_items=1,
             ),
             "full": ProfileContract(
-                major_slot_cap_per_domain=None,
-                potential_slot_cap_per_domain=None,
-                slot_caps_are_completeness_proof=False,
+                min_major_items=4,
+                min_potential_items=2,
+                min_taiwan_items=1,
             ),
         },
         completion_requires=[],
@@ -366,6 +369,37 @@ class FakeOnlyApplicationTests(unittest.TestCase):
             publishers=publishers if publishers is not None else (FakePublisher(),),
         )
         return DailyRadarApplication(dependencies, clock=lambda: FIXED_NOW), dependencies
+
+    def test_unmet_floor_degrades_to_partial_with_declared_reason(self) -> None:
+        """Floors are disclosure targets: below the floor -> partial + below_minimum_*."""
+
+        from dataclasses import replace as dc_replace
+
+        from radar.contracts.runtime import ProfileContract
+
+        demanding = dc_replace(
+            self.contract,
+            profiles={
+                **self.contract.profiles,
+                "daily_push": ProfileContract(
+                    min_major_items=50,  # unreachable for the fake documents
+                    min_potential_items=2,
+                    min_taiwan_items=1,
+                ),
+            },
+        )
+        application, _ = self._build_application()
+        result = application.run(self.request, demanding)
+
+        self.assertEqual(result.report.status, "partial")
+        self.assertIn("below_minimum_major", result.report.degradation_reasons)
+        self.assertTrue(
+            any(gap.reason == "below_minimum_major" for gap in result.report.coverage_gaps)
+        )
+        # Still a valid report — an unmet floor never fails the run.
+        validate_report_contract(result.report.model_dump(mode="json"), contract=demanding)
+        # No ceiling: every qualified item is retained despite the huge floor.
+        self.assertEqual(len(result.report.items), len(self.documents))
 
     def test_full_flow_runs_with_fakes_and_external_io_disabled(self) -> None:
         application, dependencies = self._build_application()

@@ -74,6 +74,11 @@ def build_parser() -> argparse.ArgumentParser:
     export_web.add_argument("--reports-dir", default="")
     export_web.add_argument("--latest", action="store_true")
     export_web.add_argument("--full-rebuild", action="store_true", help="disable incremental unchanged-skip")
+    export_web.add_argument(
+        "--legacy-reports-dir",
+        default="",
+        help="project pre-dashboard markdown reports (e.g. reports/) into a /legacy archive",
+    )
 
     state = sub.add_parser("state")
     state_sub = state.add_subparsers(dest="state_command", required=True)
@@ -186,6 +191,7 @@ def main(argv: list[str] | None = None) -> int:
             reports_dir=Path(args.reports_dir).resolve() if args.reports_dir else None,
             latest=args.latest,
             incremental=not args.full_rebuild,
+            legacy_reports_dir=Path(args.legacy_reports_dir).resolve() if args.legacy_reports_dir else None,
         )
         print(
             json.dumps(

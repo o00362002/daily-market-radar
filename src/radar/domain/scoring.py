@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
@@ -68,6 +69,33 @@ def event_has_material_delta(event: Event) -> bool:
     if not event.deltas:
         return True
     return any(is_material_delta_type(delta.delta_type) for delta in event.deltas)
+
+
+def _utc_date(timestamp: str) -> str:
+    parsed = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).date().isoformat()
+
+
+def event_is_reportable_for_date(event: Event, report_date: str) -> bool:
+    """Reportable if material this run, or first seen / materially changed ON the report date.
+
+    Same-day re-runs keep the whole day's union reportable (an event first observed
+    by an earlier run today must not vanish from the day's report), while a true
+    cross-day replay — both anchors on an earlier date and no material delta today —
+    stays suppressed, honoring 歷史重播無新增資料不計入槽位.
+    """
+
+    if event_has_material_delta(event):
+        return True
+    try:
+        return (
+            _utc_date(event.first_seen_at) == report_date
+            or _utc_date(event.last_material_delta_at) == report_date
+        )
+    except ValueError:
+        return False
 
 
 def explain_event_scores(event: Event) -> EventScoreExplanation:

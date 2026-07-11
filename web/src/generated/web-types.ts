@@ -78,3 +78,18 @@ export interface TrendSeriesV1 {
   indicator_id: string;
   points: TrendPointV1[];
 }
+
+export interface LegacyReportEntryV1 {
+  date: string;
+  slug: string;
+  title: string;
+  variant: string;
+  source_path: string;
+  markdown_path: string;
+  content_hash: string;
+}
+
+export interface LegacyReportIndexV1 {
+  year: string;
+  entries: LegacyReportEntryV1[];
+}

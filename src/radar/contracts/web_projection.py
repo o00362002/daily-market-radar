@@ -98,6 +98,23 @@ class ReportsYearIndexV1(WebModel):
     entries: list[ReportIndexEntryV1]
 
 
+class LegacyReportEntryV1(WebModel):
+    """A pre-dashboard human/chat-authored markdown report — never RadarReportV2 data."""
+
+    date: str
+    slug: str
+    title: str
+    variant: str
+    source_path: str
+    markdown_path: str
+    content_hash: str
+
+
+class LegacyReportIndexV1(WebModel):
+    year: str
+    entries: list[LegacyReportEntryV1]
+
+
 def canonical_json_bytes(model: WebModel) -> bytes:
     payload = model.model_dump(mode="json")
     return (json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
@@ -116,5 +133,7 @@ def web_json_schemas() -> dict[str, dict[str, Any]]:
         TaiwanIndexV1,
         TrendPointV1,
         TrendSeriesV1,
+        LegacyReportEntryV1,
+        LegacyReportIndexV1,
     ]
     return {model.__name__: model.model_json_schema() for model in models}

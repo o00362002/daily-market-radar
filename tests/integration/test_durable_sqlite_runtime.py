@@ -99,6 +99,35 @@ class DurableSqliteRuntimeTests(unittest.TestCase):
             result.report.canonical_json_bytes(),
         )
 
+    def test_same_day_rerun_keeps_the_days_union_reportable(self) -> None:
+        """Re-running the pipeline on the same date must not shrink the day's report."""
+
+        document = _document(
+            "https://example.tw/day-1",
+            "TWSE reports ETF flows",
+            200,
+            "2026-07-09T08:01:00+00:00",
+        )
+        first = self._run("2026-07-09", (document,))
+        self.assertEqual(len(first.report.items), 1)
+
+        rerun = self._run("2026-07-09", (document,))
+        # The event was first seen today, so it stays in today's report even though
+        # this run classified it as a duplicate observation.
+        self.assertEqual(len(rerun.report.items), 1)
+        self.assertEqual(rerun.report.items[0].event_id, first.report.items[0].event_id)
+        self.assertEqual(rerun.events[0].first_seen_at, first.events[0].first_seen_at)
+
+        # A true cross-day replay (no material delta on the later date) stays suppressed.
+        replay = _document(
+            "https://example.tw/replay",
+            "TWSE reports ETF flows",
+            200,
+            "2026-07-10T08:01:00+00:00",
+        )
+        next_day = self._run("2026-07-10", (replay,))
+        self.assertEqual(next_day.report.items, [])
+
     def test_cross_run_material_delta_uses_latest_prior_event_state(self) -> None:
         day_1 = _document(
             "https://example.tw/day-1",

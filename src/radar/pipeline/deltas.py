@@ -14,7 +14,7 @@ from radar.domain.event_resolution import (
     classify_event_delta as _classify_event_delta,
 )
 from radar.domain.models import Document, Event, EventDelta
-from radar.domain.scoring import event_has_material_delta
+from radar.domain.scoring import event_has_material_delta, event_is_reportable_for_date
 
 _DEFAULT_SERVICE = EventResolutionService()
 
@@ -43,5 +43,15 @@ def reconcile_cross_day_events(current_events: list[Event], prior_events: list[E
     return _DEFAULT_SERVICE.resolve(current_events, prior_events, observed_at=observed_at).events
 
 
-def material_events(events: list[Event]) -> list[Event]:
-    return [event for event in events if event_has_material_delta(event)]
+def material_events(events: list[Event], *, report_date: str | None = None) -> list[Event]:
+    """Events worth reporting.
+
+    Without ``report_date``: pure delta materiality (legacy semantics). With
+    ``report_date``: the union of everything materially new FOR that date, so
+    same-day re-runs never shrink the day's report while cross-day replays stay
+    suppressed.
+    """
+
+    if report_date is None:
+        return [event for event in events if event_has_material_delta(event)]
+    return [event for event in events if event_is_reportable_for_date(event, report_date)]

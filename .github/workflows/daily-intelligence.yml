@@ -70,10 +70,10 @@ jobs:
           echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
           PYTHONPATH=src python -m radar.cli run-daily --mode live --date "$DATE" \
             --database "$PWD/data/radar.db" --evaluation-mode "$RADAR_EVALUATION_MODE" \
-            --timeout-seconds 12 --per-feed-limit 20 > /tmp/report.json
+            --timeout-seconds 20 --per-feed-limit 50 > /tmp/report.json
 
       - name: Export web artifacts
-        run: PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db"
+        run: PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db" --legacy-reports-dir "$PWD/reports"
 
       - name: Deploy gate (failed reports are not deployed; fixture is preview-only)
         id: gate
@@ -125,6 +125,10 @@ jobs:
           npm ci
           npm run types:check
           npm run build
+          # Ship the immutable JSON artifacts with the site so report-download
+          # links and external consumers can fetch them from Pages.
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
 
       - name: Upload Pages artifact
         if: steps.gate.outputs.deployable == 'true'

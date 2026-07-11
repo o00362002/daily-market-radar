@@ -32,7 +32,7 @@ jobs:
       - name: Export fixture web artifacts
         run: |
           PYTHONPATH=src python -m radar.cli run-daily --date 2026-07-10 --database "$PWD/data/ci.db" >/dev/null
-          PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/ci.db"
+          PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/ci.db" --legacy-reports-dir "$PWD/reports"
       - name: Install web deps
         working-directory: web
         run: npm ci

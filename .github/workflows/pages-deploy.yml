@@ -39,7 +39,7 @@ jobs:
             git fetch origin radar-state
             git worktree add .state origin/radar-state
             PYTHONPATH=src python -m radar.cli state restore --state-root .state/state --database "$PWD/data/radar.db"
-            PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db"
+            PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db" --legacy-reports-dir "$PWD/reports"
           else
             echo "no durable state to deploy"; exit 1
           fi
@@ -55,7 +55,10 @@ jobs:
           RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
           PAGES_SITE: https://${{ github.repository_owner }}.github.io
           PAGES_BASE: /${{ github.event.repository.name }}
-        run: npm ci && npm run build
+        run: |
+          npm ci && npm run build
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
       - uses: actions/upload-pages-artifact@v3
         if: steps.gate.outputs.deployable == 'true'
         with:

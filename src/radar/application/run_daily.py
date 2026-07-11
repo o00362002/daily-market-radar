@@ -100,7 +100,7 @@ class DailyRadarApplication:
         resolution = resolve_events(cluster_documents(documents), prior_events, observed_at=started_at)
         events = resolution.events
 
-        reportable_events = material_events(events)
+        reportable_events = material_events(events, report_date=request.date)
         evaluation = self._dependencies.evaluator.evaluate(
             EvaluationRequest(
                 date=request.date,
@@ -111,9 +111,10 @@ class DailyRadarApplication:
                 started_at=started_at,
             )
         )
-        items = self._apply_slot_caps(list(evaluation.items), contract, request.profile)
+        items = self._select_items(list(evaluation.items), contract)
+        floor_gaps, floor_reasons = self._floor_shortfalls(items, contract, request.profile)
         coverage_cells = self._coverage_cells(documents, contract, request.ingestion_mode)
-        coverage_gaps = [*source_result.coverage_gaps, *self._coverage_gaps(coverage_cells)]
+        coverage_gaps = [*source_result.coverage_gaps, *self._coverage_gaps(coverage_cells), *floor_gaps]
         source_health = self._dependencies.source_adapter.health_check()
         credentials = self._dependencies.source_adapter.credentials_status()
         if source_health.status in {"failing", "silent_zero", "empty", "stale", "policy_blocked"}:
@@ -131,7 +132,7 @@ class DailyRadarApplication:
             )
         degradation_reasons = self._degradation_reasons(
             source_result,
-            evaluation.audit.degradation_reasons,
+            [*evaluation.audit.degradation_reasons, *floor_reasons],
             source_health.status,
             credentials.available,
         )
@@ -249,33 +250,80 @@ class DailyRadarApplication:
         return self._dependencies.source_adapter.fetch(SourceFetchRequest(date=request.date, profile=request.profile))
 
     @staticmethod
-    def _apply_slot_caps(
+    def _select_items(
         items: list[ReportItemV2],
         contract: RuntimeContract,
-        profile_name: str,
     ) -> list[ReportItemV2]:
-        profile = contract.profile(profile_name)
+        """Deterministic ordering only — profiles define floors, never ceilings.
+
+        Every qualified item is kept (使用者要求：最低數量是地板，有多的可以超過).
+        Curation for readability happens in the web layer, not by discarding items.
+        """
+
         grouped: dict[tuple[str, str], list[ReportItemV2]] = defaultdict(list)
         for item in items:
             grouped[(item.primary_domain, item.report_lane)].append(item)
 
         selected: list[ReportItemV2] = []
         for domain in contract.report_domains:
-            for lane, cap in (
-                ("major", profile.major_slot_cap_per_domain),
-                ("potential", profile.potential_slot_cap_per_domain),
-            ):
-                lane_items = sorted(
-                    grouped.get((domain, lane), []),
-                    key=lambda item: (
-                        item.importance_score if lane == "major" else item.potential_score,
-                        item.confidence_score,
-                        item.item_id,
-                    ),
-                    reverse=True,
+            for lane in ("major", "potential"):
+                selected.extend(
+                    sorted(
+                        grouped.get((domain, lane), []),
+                        key=lambda item: (
+                            item.importance_score if lane == "major" else item.potential_score,
+                            item.confidence_score,
+                            item.item_id,
+                        ),
+                        reverse=True,
+                    )
                 )
-                selected.extend(lane_items if cap is None else lane_items[:cap])
         return selected
+
+    @staticmethod
+    def _floor_shortfalls(
+        items: list[ReportItemV2],
+        contract: RuntimeContract,
+        profile_name: str,
+    ) -> tuple[list[CoverageGapV2], list[str]]:
+        """Disclose unmet minimum floors — the run never fails and never pads.
+
+        Floors count real material items only (replays are filtered upstream, so
+        歷史重播 can never satisfy a floor). Taiwan counts ITEMS with source-backed
+        direct evidence, not evidence links.
+        """
+
+        profile = contract.profile(profile_name)
+        major = sum(1 for item in items if item.report_lane == "major")
+        potential = sum(1 for item in items if item.report_lane == "potential")
+        taiwan = sum(1 for item in items if item.direct_taiwan_evidence)
+
+        gaps: list[CoverageGapV2] = []
+        reasons: list[str] = []
+        for lane, count, floor in (
+            ("major", major, profile.min_major_items),
+            ("potential", potential, profile.min_potential_items),
+            ("taiwan", taiwan, profile.min_taiwan_items),
+        ):
+            if count >= floor:
+                continue
+            reasons.append(f"below_minimum_{lane}")
+            gaps.append(
+                CoverageGapV2(
+                    domain="all",
+                    macro_region="Taiwan" if lane == "taiwan" else "global",
+                    language="zh-Hant" if lane == "taiwan" else "multi",
+                    source_role="direct" if lane == "taiwan" else "selection",
+                    channel="report_floor",
+                    time_window="24h",
+                    reason=f"below_minimum_{lane}",
+                    message=(
+                        f"{lane} items {count} below the {profile_name} floor of {floor}; "
+                        "floors are disclosure targets — no replay padding, expand collection instead"
+                    ),
+                )
+            )
+        return gaps, reasons
 
     @staticmethod
     def _coverage_cells(

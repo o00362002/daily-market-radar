@@ -8,13 +8,30 @@
       "canonical_url": "https://openai.com/news/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["company", "official"],
-      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "official"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "global_markets_macro"
+      ],
       "ownership_profile": "company_official",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "rss", "url": "https://openai.com/news/rss.xml", "enabled_for_opml": true, "opml_category": "AI_OFFICIAL", "route_status": "verified_official_link"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://openai.com/news/rss.xml",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "verified_official_link"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 180,
       "usage_policy": "official_feed_allowed_with_attribution",
@@ -22,7 +39,9 @@
       "enabled": true,
       "verification_status": "verified",
       "last_verified_at": "2026-07-07",
-      "aliases": ["openai_news_rss"]
+      "aliases": [
+        "openai_news_rss"
+      ]
     },
     {
       "source_id": "nvidia_blog",
@@ -30,13 +49,29 @@
       "canonical_url": "https://blogs.nvidia.com/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["company", "official"],
-      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "official"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
       "ownership_profile": "company_official",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "rss", "url": "https://blogs.nvidia.com/feed/", "enabled_for_opml": true, "opml_category": "AI_OFFICIAL", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://blogs.nvidia.com/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "check_before_fulltext",
@@ -44,7 +79,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["nvidia_blog_rss"]
+      "aliases": [
+        "nvidia_blog_rss"
+      ]
     },
     {
       "source_id": "nvidia_developer_blog",
@@ -52,13 +89,29 @@
       "canonical_url": "https://developer.nvidia.com/blog/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["company", "research"],
-      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "research"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
       "ownership_profile": "company_developer",
       "evidence_profile": "primary_technical_source",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://developer.nvidia.com/blog/feed/", "enabled_for_opml": true, "opml_category": "AI_OFFICIAL", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://developer.nvidia.com/blog/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "check_before_fulltext",
@@ -66,7 +119,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["nvidia_developer_blog_rss"]
+      "aliases": [
+        "nvidia_developer_blog_rss"
+      ]
     },
     {
       "source_id": "google_ai_blog",
@@ -74,13 +129,29 @@
       "canonical_url": "https://blog.google/technology/ai/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["company", "official"],
-      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "official"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
       "ownership_profile": "company_official",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "rss", "url": "https://blog.google/technology/ai/rss/", "enabled_for_opml": true, "opml_category": "AI_OFFICIAL", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://blog.google/technology/ai/rss/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_OFFICIAL",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "check_before_fulltext",
@@ -88,7 +159,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["google_ai_blog_rss"]
+      "aliases": [
+        "google_ai_blog_rss"
+      ]
     },
     {
       "source_id": "techcrunch_ai",
@@ -96,13 +169,30 @@
       "canonical_url": "https://techcrunch.com/category/artificial-intelligence/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["trade", "community"],
-      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade",
+        "community"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "global_markets_macro"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "discovery_only",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://techcrunch.com/category/artificial-intelligence/feed/", "enabled_for_opml": true, "opml_category": "AI_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -110,7 +200,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["techcrunch_ai_rss"]
+      "aliases": [
+        "techcrunch_ai_rss"
+      ]
     },
     {
       "source_id": "venturebeat_ai",
@@ -118,13 +210,28 @@
       "canonical_url": "https://venturebeat.com/category/ai/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["trade"],
-      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "discovery_only",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://venturebeat.com/category/ai/feed/", "enabled_for_opml": true, "opml_category": "AI_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://venturebeat.com/category/ai/feed/",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -132,7 +239,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["venturebeat_ai_rss"]
+      "aliases": [
+        "venturebeat_ai_rss"
+      ]
     },
     {
       "source_id": "theverge_ai",
@@ -140,13 +249,29 @@
       "canonical_url": "https://www.theverge.com/ai-artificial-intelligence",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["national", "trade"],
-      "domains": ["ai_agents_applications", "retail_consumer_fashion"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "national",
+        "trade"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "retail_consumer_fashion"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "discovery_only",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", "enabled_for_opml": true, "opml_category": "AI_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+          "enabled_for_opml": true,
+          "opml_category": "AI_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -154,7 +279,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["theverge_ai_rss"]
+      "aliases": [
+        "theverge_ai_rss"
+      ]
     },
     {
       "source_id": "coindesk",
@@ -162,13 +289,28 @@
       "canonical_url": "https://www.coindesk.com/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["trade"],
-      "domains": ["crypto_rwa_agent_payments", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "global_markets_macro"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "discovery_only",
       "priority": "high",
-      "adapters": [{"kind": "rss", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "enabled_for_opml": true, "opml_category": "CRYPTO_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+          "enabled_for_opml": true,
+          "opml_category": "CRYPTO_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -176,7 +318,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["coindesk_rss"]
+      "aliases": [
+        "coindesk_rss"
+      ]
     },
     {
       "source_id": "decrypt",
@@ -184,13 +328,29 @@
       "canonical_url": "https://decrypt.co/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["community", "trade"],
-      "domains": ["crypto_rwa_agent_payments", "ai_agents_applications"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "community",
+        "trade"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments",
+        "ai_agents_applications"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "weak_signal_discovery",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://decrypt.co/feed", "enabled_for_opml": true, "opml_category": "CRYPTO_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://decrypt.co/feed",
+          "enabled_for_opml": true,
+          "opml_category": "CRYPTO_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -198,7 +358,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["decrypt_rss"]
+      "aliases": [
+        "decrypt_rss"
+      ]
     },
     {
       "source_id": "retail_dive",
@@ -206,13 +368,28 @@
       "canonical_url": "https://www.retaildive.com/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["trade"],
-      "domains": ["retail_consumer_fashion", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "trade"
+      ],
+      "domains": [
+        "retail_consumer_fashion",
+        "global_markets_macro"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "discovery_only",
       "priority": "high",
-      "adapters": [{"kind": "rss", "url": "https://www.retaildive.com/feeds/news/", "enabled_for_opml": true, "opml_category": "RETAIL_DISCOVERY", "route_status": "runtime_test_required"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://www.retaildive.com/feeds/news/",
+          "enabled_for_opml": true,
+          "opml_category": "RETAIL_DISCOVERY",
+          "route_status": "runtime_test_required"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 360,
       "usage_policy": "discovery_only_verify_primary_source",
@@ -220,7 +397,9 @@
       "enabled": true,
       "verification_status": "runtime_test_required",
       "last_verified_at": "2026-07-07",
-      "aliases": ["retail_dive_rss"]
+      "aliases": [
+        "retail_dive_rss"
+      ]
     },
     {
       "source_id": "rsshub_project_github_releases",
@@ -228,13 +407,30 @@
       "canonical_url": "https://github.com/DIYgod/RSSHub",
       "publisher_country": "Global",
       "macro_region": "Global",
-      "languages": ["en", "zh-Hans"],
-      "source_roles": ["community", "research"],
-      "domains": ["ai_agents_applications", "science_technology_industry"],
+      "languages": [
+        "en",
+        "zh-Hans"
+      ],
+      "source_roles": [
+        "community",
+        "research"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry"
+      ],
       "ownership_profile": "open_source_project",
       "evidence_profile": "infrastructure_signal_only",
       "priority": "medium",
-      "adapters": [{"kind": "rss", "url": "https://github.com/DIYgod/RSSHub/releases.atom", "enabled_for_opml": true, "opml_category": "RSS_INFRA", "route_status": "verified"}],
+      "adapters": [
+        {
+          "kind": "rss",
+          "url": "https://github.com/DIYgod/RSSHub/releases.atom",
+          "enabled_for_opml": true,
+          "opml_category": "RSS_INFRA",
+          "route_status": "verified"
+        }
+      ],
       "fetch_interval_minutes": 1440,
       "freshness_slo_minutes": 2880,
       "usage_policy": "github_atom_metadata_only",
@@ -242,7 +438,9 @@
       "enabled": true,
       "verification_status": "verified",
       "last_verified_at": "2026-07-07",
-      "aliases": ["rsshub_project_github_releases_atom"]
+      "aliases": [
+        "rsshub_project_github_releases_atom"
+      ]
     },
     {
       "source_id": "anthropic_news",
@@ -250,13 +448,30 @@
       "canonical_url": "https://www.anthropic.com/news",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["company", "official"],
-      "domains": ["ai_agents_applications", "science_technology_industry", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "company",
+        "official"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "global_markets_macro"
+      ],
       "ownership_profile": "company_official",
       "evidence_profile": "primary_source_when_checked",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.anthropic.com/news", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.anthropic.com/news",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 240,
       "usage_policy": "manual_or_policy_checked_web_watch",
@@ -272,13 +487,29 @@
       "canonical_url": "https://www.bls.gov/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["official", "data"],
-      "domains": ["labor_demographics_consumption_pressure", "global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "data"
+      ],
+      "domains": [
+        "labor_demographics_consumption_pressure",
+        "global_markets_macro"
+      ],
       "ownership_profile": "government",
       "evidence_profile": "primary_data",
       "priority": "high",
-      "adapters": [{"kind": "api", "url": "https://www.bls.gov/developers/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_api"}],
+      "adapters": [
+        {
+          "kind": "api",
+          "url": "https://www.bls.gov/developers/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_api"
+        }
+      ],
       "fetch_interval_minutes": 1440,
       "freshness_slo_minutes": 10080,
       "usage_policy": "official_data_with_method_note",
@@ -294,13 +525,35 @@
       "canonical_url": "https://www.federalreserve.gov/",
       "publisher_country": "US",
       "macro_region": "North America",
-      "languages": ["en"],
-      "source_roles": ["official", "central_bank"],
-      "domains": ["global_markets_macro"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "central_bank"
+      ],
+      "domains": [
+        "global_markets_macro"
+      ],
       "ownership_profile": "central_bank",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.federalreserve.gov/newsevents.htm", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.federalreserve.gov/newsevents.htm",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        },
+        {
+          "kind": "rss",
+          "url": "https://www.federalreserve.gov/feeds/press_all.xml",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 1440,
       "usage_policy": "official_source",
@@ -316,13 +569,30 @@
       "canonical_url": "https://www.imf.org/",
       "publisher_country": "Global",
       "macro_region": "Global",
-      "languages": ["en"],
-      "source_roles": ["international_organization", "official", "data"],
-      "domains": ["global_markets_macro", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "international_organization",
+        "official",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "international_organization",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.imf.org/en/News", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.imf.org/en/News",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "official_source",
@@ -338,13 +608,30 @@
       "canonical_url": "https://www.iea.org/",
       "publisher_country": "Global",
       "macro_region": "Global",
-      "languages": ["en"],
-      "source_roles": ["international_organization", "official", "data"],
-      "domains": ["global_markets_macro", "science_technology_industry"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "international_organization",
+        "official",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry"
+      ],
       "ownership_profile": "international_organization",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.iea.org/news", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.iea.org/news",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "official_source",
@@ -360,13 +647,28 @@
       "canonical_url": "https://defillama.com/",
       "publisher_country": "Global",
       "macro_region": "Global",
-      "languages": ["en"],
-      "source_roles": ["data", "industry"],
-      "domains": ["crypto_rwa_agent_payments"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "data",
+        "industry"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments"
+      ],
       "ownership_profile": "independent_data_provider",
       "evidence_profile": "secondary_data_verify_method",
       "priority": "high",
-      "adapters": [{"kind": "api", "url": "https://api.llama.fi/", "enabled_for_opml": false, "opml_category": "", "route_status": "public_api"}],
+      "adapters": [
+        {
+          "kind": "api",
+          "url": "https://api.llama.fi/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "public_api"
+        }
+      ],
       "fetch_interval_minutes": 60,
       "freshness_slo_minutes": 180,
       "usage_policy": "public_data_with_method_note",
@@ -382,13 +684,37 @@
       "canonical_url": "https://arxiv.org/",
       "publisher_country": "Global",
       "macro_region": "Global",
-      "languages": ["en"],
-      "source_roles": ["research"],
-      "domains": ["ai_agents_applications", "science_technology_industry", "crypto_rwa_agent_payments", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "en"
+      ],
+      "source_roles": [
+        "research"
+      ],
+      "domains": [
+        "ai_agents_applications",
+        "science_technology_industry",
+        "crypto_rwa_agent_payments",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "research_repository",
       "evidence_profile": "research_preprint",
       "priority": "medium",
-      "adapters": [{"kind": "api", "url": "https://export.arxiv.org/api/query", "enabled_for_opml": false, "opml_category": "", "route_status": "public_api"}],
+      "adapters": [
+        {
+          "kind": "api",
+          "url": "https://export.arxiv.org/api/query",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "public_api"
+        },
+        {
+          "kind": "rss",
+          "url": "https://rss.arxiv.org/rss/cs.AI",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 1440,
       "usage_policy": "metadata_and_abstract_with_preprint_label",
@@ -404,13 +730,29 @@
       "canonical_url": "https://www.twse.com.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "exchange"],
-      "domains": ["global_markets_macro"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "exchange"
+      ],
+      "domains": [
+        "global_markets_macro"
+      ],
       "ownership_profile": "public_exchange",
       "evidence_profile": "primary_data",
       "priority": "high",
-      "adapters": [{"kind": "api", "url": "https://www.twse.com.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_data_source"}],
+      "adapters": [
+        {
+          "kind": "api",
+          "url": "https://www.twse.com.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_data_source"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 120,
       "usage_policy": "official_data_with_method_note",
@@ -426,13 +768,30 @@
       "canonical_url": "https://www.fsc.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "regulator"],
-      "domains": ["global_markets_macro", "crypto_rwa_agent_payments"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "regulator"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "crypto_rwa_agent_payments"
+      ],
       "ownership_profile": "government_regulator",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.fsc.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.fsc.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 120,
       "freshness_slo_minutes": 1440,
       "usage_policy": "official_source",
@@ -448,13 +807,30 @@
       "canonical_url": "https://www.cbc.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "central_bank", "data"],
-      "domains": ["global_markets_macro"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "central_bank",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro"
+      ],
       "ownership_profile": "central_bank",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.cbc.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.cbc.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "official_source",
@@ -470,13 +846,31 @@
       "canonical_url": "https://www.dgbas.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "data"],
-      "domains": ["global_markets_macro", "labor_demographics_consumption_pressure", "retail_consumer_fashion"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "labor_demographics_consumption_pressure",
+        "retail_consumer_fashion"
+      ],
       "ownership_profile": "government_statistics",
       "evidence_profile": "primary_data",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.dgbas.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.dgbas.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 1440,
       "freshness_slo_minutes": 10080,
       "usage_policy": "official_data_with_method_note",
@@ -492,13 +886,29 @@
       "canonical_url": "https://www.mol.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "data"],
-      "domains": ["labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "data"
+      ],
+      "domains": [
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "government",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.mol.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.mol.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "official_source",
@@ -514,13 +924,31 @@
       "canonical_url": "https://www.moea.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "data"],
-      "domains": ["global_markets_macro", "science_technology_industry", "retail_consumer_fashion"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "data"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "science_technology_industry",
+        "retail_consumer_fashion"
+      ],
       "ownership_profile": "government",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.moea.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.moea.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "official_source",
@@ -536,13 +964,30 @@
       "canonical_url": "https://www.ly.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["official", "legislature"],
-      "domains": ["global_markets_macro", "crypto_rwa_agent_payments", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "official",
+        "legislature"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "crypto_rwa_agent_payments",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "legislature",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.ly.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.ly.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 120,
       "freshness_slo_minutes": 1440,
       "usage_policy": "official_source",
@@ -558,13 +1003,32 @@
       "canonical_url": "https://www.ey.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant", "en"],
-      "source_roles": ["official", "executive"],
-      "domains": ["global_markets_macro", "crypto_rwa_agent_payments", "retail_consumer_fashion", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant",
+        "en"
+      ],
+      "source_roles": [
+        "official",
+        "executive"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "crypto_rwa_agent_payments",
+        "retail_consumer_fashion",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "government",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.ey.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.ey.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 120,
       "freshness_slo_minutes": 1440,
       "usage_policy": "official_source",
@@ -580,13 +1044,30 @@
       "canonical_url": "https://law.moj.gov.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["official", "law_database"],
-      "domains": ["global_markets_macro", "crypto_rwa_agent_payments", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "official",
+        "law_database"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "crypto_rwa_agent_payments",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "government_law_database",
       "evidence_profile": "primary_source",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://law.moj.gov.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "official_web"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://law.moj.gov.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "official_web"
+        }
+      ],
       "fetch_interval_minutes": 1440,
       "freshness_slo_minutes": 10080,
       "usage_policy": "official_source",
@@ -602,13 +1083,54 @@
       "canonical_url": "https://www.cna.com.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["news_agency", "national"],
-      "domains": ["global_markets_macro", "ai_agents_applications", "crypto_rwa_agent_payments", "retail_consumer_fashion", "science_technology_industry", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "news_agency",
+        "national"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "ai_agents_applications",
+        "crypto_rwa_agent_payments",
+        "retail_consumer_fashion",
+        "science_technology_industry",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "news_agency",
       "evidence_profile": "credible_media",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.cna.com.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.cna.com.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        },
+        {
+          "kind": "rss",
+          "url": "https://feeds.feedburner.com/rsscna/finance",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        },
+        {
+          "kind": "rss",
+          "url": "https://feeds.feedburner.com/rsscna/intworld",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        },
+        {
+          "kind": "rss",
+          "url": "https://feeds.feedburner.com/rsscna/technology",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 180,
       "usage_policy": "metadata_summary_with_attribution",
@@ -616,7 +1138,9 @@
       "enabled": true,
       "verification_status": "verified_source_library",
       "last_verified_at": "2026-07-10",
-      "aliases": ["cna_tw_policy"]
+      "aliases": [
+        "cna_tw_policy"
+      ]
     },
     {
       "source_id": "economic_daily_tw",
@@ -624,13 +1148,44 @@
       "canonical_url": "https://money.udn.com/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["business_media"],
-      "domains": ["global_markets_macro", "retail_consumer_fashion", "science_technology_industry", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion",
+        "science_technology_industry",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "credible_media",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://money.udn.com/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://money.udn.com/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        },
+        {
+          "kind": "rss",
+          "url": "https://money.udn.com/rssfeed/news/1001/5591/5612?ch=money",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        },
+        {
+          "kind": "rss",
+          "url": "https://money.udn.com/rssfeed/news/1001/5588/5599?ch=money",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "metadata_summary_with_attribution",
@@ -646,13 +1201,30 @@
       "canonical_url": "https://www.ctee.com.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["business_media"],
-      "domains": ["global_markets_macro", "retail_consumer_fashion", "science_technology_industry", "labor_demographics_consumption_pressure"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "business_media"
+      ],
+      "domains": [
+        "global_markets_macro",
+        "retail_consumer_fashion",
+        "science_technology_industry",
+        "labor_demographics_consumption_pressure"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "credible_media",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.ctee.com.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.ctee.com.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "metadata_summary_with_attribution",
@@ -668,13 +1240,34 @@
       "canonical_url": "https://www.vogue.com.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["fashion_media"],
-      "domains": ["retail_consumer_fashion"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "fashion_media"
+      ],
+      "domains": [
+        "retail_consumer_fashion"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "industry_media",
       "priority": "medium",
-      "adapters": [{"kind": "web", "url": "https://www.vogue.com.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.vogue.com.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        },
+        {
+          "kind": "rss",
+          "url": "https://www.vogue.com.tw/feed/rss",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 120,
       "freshness_slo_minutes": 1440,
       "usage_policy": "metadata_summary_with_attribution",
@@ -690,13 +1283,27 @@
       "canonical_url": "https://www.cryptocity.tw/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["crypto_media"],
-      "domains": ["crypto_rwa_agent_payments"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "crypto_media"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments"
+      ],
       "ownership_profile": "media",
       "evidence_profile": "credible_media_verify_major_claims",
       "priority": "high",
-      "adapters": [{"kind": "web", "url": "https://www.cryptocity.tw/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.cryptocity.tw/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        }
+      ],
       "fetch_interval_minutes": 30,
       "freshness_slo_minutes": 240,
       "usage_policy": "metadata_summary_with_attribution",
@@ -712,13 +1319,35 @@
       "canonical_url": "https://www.blocktrend.today/",
       "publisher_country": "Taiwan",
       "macro_region": "Taiwan",
-      "languages": ["zh-Hant"],
-      "source_roles": ["crypto_analysis", "newsletter"],
-      "domains": ["crypto_rwa_agent_payments"],
+      "languages": [
+        "zh-Hant"
+      ],
+      "source_roles": [
+        "crypto_analysis",
+        "newsletter"
+      ],
+      "domains": [
+        "crypto_rwa_agent_payments"
+      ],
       "ownership_profile": "independent_media",
       "evidence_profile": "analysis_context_verify_original_sources",
       "priority": "medium",
-      "adapters": [{"kind": "web", "url": "https://www.blocktrend.today/", "enabled_for_opml": false, "opml_category": "", "route_status": "web_watch"}],
+      "adapters": [
+        {
+          "kind": "web",
+          "url": "https://www.blocktrend.today/",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "web_watch"
+        },
+        {
+          "kind": "rss",
+          "url": "https://blocktrend.substack.com/feed",
+          "enabled_for_opml": false,
+          "opml_category": "",
+          "route_status": "live_probe_verified_2026_07_11"
+        }
+      ],
       "fetch_interval_minutes": 360,
       "freshness_slo_minutes": 2880,
       "usage_policy": "metadata_summary_with_attribution",

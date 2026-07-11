@@ -582,5 +582,119 @@
     ],
     "title": "TrendSeriesV1",
     "type": "object"
+  },
+  "LegacyReportEntryV1": {
+    "additionalProperties": false,
+    "description": "A pre-dashboard human/chat-authored markdown report — never RadarReportV2 data.",
+    "properties": {
+      "date": {
+        "title": "Date",
+        "type": "string"
+      },
+      "slug": {
+        "title": "Slug",
+        "type": "string"
+      },
+      "title": {
+        "title": "Title",
+        "type": "string"
+      },
+      "variant": {
+        "title": "Variant",
+        "type": "string"
+      },
+      "source_path": {
+        "title": "Source Path",
+        "type": "string"
+      },
+      "markdown_path": {
+        "title": "Markdown Path",
+        "type": "string"
+      },
+      "content_hash": {
+        "title": "Content Hash",
+        "type": "string"
+      }
+    },
+    "required": [
+      "date",
+      "slug",
+      "title",
+      "variant",
+      "source_path",
+      "markdown_path",
+      "content_hash"
+    ],
+    "title": "LegacyReportEntryV1",
+    "type": "object"
+  },
+  "LegacyReportIndexV1": {
+    "$defs": {
+      "LegacyReportEntryV1": {
+        "additionalProperties": false,
+        "description": "A pre-dashboard human/chat-authored markdown report — never RadarReportV2 data.",
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "variant": {
+            "title": "Variant",
+            "type": "string"
+          },
+          "source_path": {
+            "title": "Source Path",
+            "type": "string"
+          },
+          "markdown_path": {
+            "title": "Markdown Path",
+            "type": "string"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "slug",
+          "title",
+          "variant",
+          "source_path",
+          "markdown_path",
+          "content_hash"
+        ],
+        "title": "LegacyReportEntryV1",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "year": {
+        "title": "Year",
+        "type": "string"
+      },
+      "entries": {
+        "items": {
+          "$ref": "#/$defs/LegacyReportEntryV1"
+        },
+        "title": "Entries",
+        "type": "array"
+      }
+    },
+    "required": [
+      "year",
+      "entries"
+    ],
+    "title": "LegacyReportIndexV1",
+    "type": "object"
   }
 }

@@ -154,22 +154,39 @@ def _validate_contract_sections(report: dict[str, Any], contract: RuntimeContrac
         raise ValueError(f"same event cannot fill major and potential lanes: {sorted(overlap)}")
 
     profile = contract.profile(report["profile"])
-    if profile.major_slot_cap_per_domain is not None:
-        _validate_slot_cap(report["items"], "major", profile.major_slot_cap_per_domain)
-    if profile.potential_slot_cap_per_domain is not None:
-        _validate_slot_cap(report["items"], "potential", profile.potential_slot_cap_per_domain)
+    _validate_slot_floors(report, profile)
 
 
-def _validate_slot_cap(items: list[dict[str, Any]], lane: str, cap: int) -> None:
-    counts: dict[str, int] = {}
-    for item in items:
-        if item["report_lane"] != lane:
+def _validate_slot_floors(report: dict[str, Any], profile: Any) -> None:
+    """Floors are disclosure targets: a shortfall is valid ONLY when declared.
+
+    There is no ceiling — any number of qualified items above the floor is
+    always valid. A count below the floor must be accompanied by the matching
+    below_minimum_* degradation reason and a non-complete status.
+    """
+
+    items = report["items"]
+    counts = {
+        "major": sum(1 for item in items if item["report_lane"] == "major"),
+        "potential": sum(1 for item in items if item["report_lane"] == "potential"),
+        "taiwan": sum(1 for item in items if item.get("direct_taiwan_evidence")),
+    }
+    floors = {
+        "major": profile.min_major_items,
+        "potential": profile.min_potential_items,
+        "taiwan": profile.min_taiwan_items,
+    }
+    declared = set(report.get("degradation_reasons", []))
+    for lane, floor in floors.items():
+        if counts[lane] >= floor:
             continue
-        domain = item["primary_domain"]
-        counts[domain] = counts.get(domain, 0) + 1
-    exceeded = {domain: count for domain, count in counts.items() if count > cap}
-    if exceeded:
-        raise ValueError(f"{lane} slot cap exceeded: {exceeded}")
+        reason = f"below_minimum_{lane}"
+        if reason not in declared:
+            raise ValueError(
+                f"{lane} items {counts[lane]} below floor {floor} without declared {reason}"
+            )
+        if report.get("status") == "complete":
+            raise ValueError(f"report cannot be complete with an unmet {lane} floor")
 
 
 def _validate_event_resolution_audit(audit: dict[str, Any]) -> None:

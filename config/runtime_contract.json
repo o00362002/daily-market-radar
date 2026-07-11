@@ -13,14 +13,14 @@
   },
   "profiles": {
     "daily_push": {
-      "major_slot_cap_per_domain": 3,
-      "potential_slot_cap_per_domain": null,
-      "slot_caps_are_completeness_proof": false
+      "min_major_items": 3,
+      "min_potential_items": 3,
+      "min_taiwan_items": 1
     },
     "full": {
-      "major_slot_cap_per_domain": null,
-      "potential_slot_cap_per_domain": null,
-      "slot_caps_are_completeness_proof": false
+      "min_major_items": 5,
+      "min_potential_items": 5,
+      "min_taiwan_items": 2
     }
   },
   "completion_requires": [

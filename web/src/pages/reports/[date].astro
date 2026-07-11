@@ -10,6 +10,8 @@ export function getStaticPaths() {
 const { entry } = Astro.props as any;
 const report: any = getFullByPath(entry.full_path) ?? {};
 const items: any[] = report.items ?? [];
+const base = import.meta.env.BASE_URL;
+const dataHref = `${base}${base.endsWith('/') ? '' : '/'}data/${entry.full_path}`;
 ---
 <Base title={`報告 ${entry.date}`}>
   <h1>報告 · {entry.date}</h1>
@@ -24,5 +26,5 @@ const items: any[] = report.items ?? [];
       <p>{item.today_delta}</p>
     </article>
   ))}
-  <p><a href={`../../${entry.full_path}`}>下載完整報告 JSON ↗</a></p>
+  <p><a href={dataHref}>下載完整報告 JSON ↗</a></p>
 </Base>
