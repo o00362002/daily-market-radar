@@ -31,7 +31,7 @@ one event = one primary report domain
 importance, future potential and evidence confidence are independent
 Major/Potential is content-driven, not source-role routing
 Taiwan direct evidence != Taiwan implication
-slot caps != completeness
+item floors are minimums, never ceilings
 coverage gaps must be visible
 fixture replay != live-news coverage
 ```

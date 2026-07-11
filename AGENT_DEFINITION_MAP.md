@@ -26,7 +26,7 @@ one event = one primary report domain
 major and potential lanes remain separate
 importance, potential and confidence are independent
 Taiwan direct evidence != Taiwan implication
-slot caps are readability limits, not completeness proof
+profile floors are minimum targets, never ceilings; unmet floors must be disclosed
 fixture mode cannot claim live-news completeness
 ```
 

@@ -1,6 +1,29 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-07-10
+最後更新：2026-07-11
+
+---
+
+## 2026-07-11：day-union reportability、minimum floors、legacy archive
+
+### Decision
+
+```text
+1. Reportability 以台灣日期錨定：事件「當日首見」或「當日有實質變化」即進當日報告。同日 re-run
+   輸出當日聯集、永不縮水；跨日 replay（兩個日期錨都在更早日期且今日無實質變化）仍被抑制。
+2. Profiles 定義最低地板、永不是天花板（此決議取代 2026-07-10「slot caps are readability limits」）：
+   daily_push 每日至少 3 重大、3 潛力、1 台灣；full 至少 5 重大、5 潛力、2 台灣；合格項目一律保留。
+   未達地板 → below_minimum_* degradation ＋ coverage gap（partial），不失敗、不得用歷史重播湊數。
+3. Registry 只加實測可用的 feed（live probe 驗證後標 route_status），失敗的不加；來源健康由
+   source health 持續監測。
+4. reports/<year>/ 的人工報告以 project_legacy 投影為 /legacy 歸檔——byte-identical markdown＋
+   typed index，明確標示非 validated RadarReportV2，絕不偽造 status/counts。
+5. AI 輸出語言為受驗證約束：長敘述欄位無 CJK 即拒收（retry once → deterministic fallback）。
+```
+
+### Evidence
+
+`reports/execution_checks/2026-07-11_volume_floors_legacy_translation.md`
 
 ---
 

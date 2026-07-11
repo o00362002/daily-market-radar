@@ -76,6 +76,15 @@ class ChatPackageTests(unittest.TestCase):
         self.assertIn("manifest.json", self.package.files)
         self.assertIn("expected-output.schema.json", self.package.files)
 
+    def test_instructions_mandate_traditional_chinese_output(self) -> None:
+        import json
+
+        instructions = self.package.files["INSTRUCTIONS.md"].decode("utf-8")
+        self.assertIn("zh-Hant-TW", instructions)
+        self.assertIn("原文標題", instructions)
+        context = json.loads(self.package.files["context.json"])
+        self.assertEqual(context["output_language"], "zh-Hant-TW")
+
     def test_package_excludes_secrets_and_full_articles(self) -> None:
         blob = b"".join(self.package.files.values()).decode("utf-8")
         self.assertNotIn("OPENAI_API_KEY", blob)

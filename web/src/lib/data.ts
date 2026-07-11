@@ -5,6 +5,8 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type {
   DomainIndexV1,
+  LegacyReportEntryV1,
+  LegacyReportIndexV1,
   ReportsYearIndexV1,
   TaiwanIndexV1,
   TrendSeriesV1,
@@ -64,4 +66,23 @@ export function listDomainDirs(): string[] {
   const dir = resolve(ARTIFACTS_DIR, 'indexes/domains');
   if (!existsSync(dir)) return [];
   return readdirSync(dir);
+}
+
+export function getLegacyIndex(year: string): LegacyReportIndexV1 | null {
+  return readJson<LegacyReportIndexV1>(`indexes/legacy/${year}.json`);
+}
+
+export function allLegacyEntries(): LegacyReportEntryV1[] {
+  const dir = resolve(ARTIFACTS_DIR, 'indexes/legacy');
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => name.endsWith('.json'))
+    .flatMap((name) => getLegacyIndex(name.replace('.json', ''))?.entries ?? [])
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getLegacyMarkdown(markdownPath: string): string | null {
+  const path = resolve(ARTIFACTS_DIR, markdownPath);
+  if (!existsSync(path)) return null;
+  return readFileSync(path, 'utf8');
 }
