@@ -15,8 +15,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Document path reality check
-        run: node tools/brain/check-doc-paths.js "$PWD"
-      - name: Core mount check
-        if: always()
-        run: node tools/brain/check-core.js "$PWD"
+      - name: Capture focused gate diagnostics
+        run: |
+          set +e
+          node tools/brain/check-doc-paths.js "$PWD" > diagnostics.txt 2>&1
+          DOC_CODE=$?
+          node tools/brain/check-core.js "$PWD" >> diagnostics.txt 2>&1
+          CORE_CODE=$?
+          printf '\ndoc_paths_exit=%s\ncore_exit=%s\n' "$DOC_CODE" "$CORE_CODE" >> diagnostics.txt
+          cat diagnostics.txt
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-analysis-gate-diagnostics
+          path: diagnostics.txt
