@@ -6,7 +6,8 @@ const analysis: any = getLatestAnalysis();
 const provenance = analysis?.provenance ?? {};
 const findings: any[] = analysis?.key_findings ?? [];
 const trends: any[] = analysis?.future_trends ?? [];
-const indicators: any[] = analysis?.linked_indicators ?? [];
+const structuralIndicators: any[] = analysis?.structural_indicators ?? [];
+const auxiliaryIndicators: any[] = analysis?.linked_indicators ?? [];
 const translations: any[] = analysis?.translations ?? [];
 const limitations: string[] = analysis?.limitations ?? [];
 
@@ -32,6 +33,12 @@ const directionLabel: Record<string, string> = {
   mixed: '混合',
   uncertain: '不確定',
   insufficient: '資料不足',
+};
+const structuralDirectionLabel: Record<string, string> = {
+  toward: '朝此方向增強',
+  against: '反向證據增強',
+  mixed: '正反訊號混合',
+  insufficient: '證據不足',
 };
 const stageLabel: Record<string, string> = {
   emerging: '萌芽',
@@ -66,7 +73,7 @@ const generatedAt = provenance.generated_at
       <h1>AI 解讀 · {analysis.date}</h1>
       <p class="notice">
         本頁是模型根據已驗證 RadarReportV2 產生的翻譯、統整與情境推演，不等同原始新聞事實。
-        指標分數由透明公式計算，AI 只能解讀，不能修改。
+        三個核心結構指標直接沿用 RadarReportV2 的 deterministic 評估；AI 不得改寫。六個動能與品質分數只作輔助訊號。
       </p>
 
       <section class="provenance card">
@@ -93,6 +100,48 @@ const generatedAt = provenance.generated_at
       <div class="summary-grid">
         {(analysis.executive_summary ?? []).map((text: string, index: number) => (
           <article class="card summary-card"><span class="summary-index">{index + 1}</span><p>{text}</p></article>
+        ))}
+      </div>
+
+      <h2>三個核心結構趨勢指標</h2>
+      <p class="muted">
+        這三項是本專案的長期主指標：AI 生產力是否形成 K 型分配、AI 是否走向泡沫／過度投資、品牌是否走向兩極化與真／假分眾。
+        單日事件不能直接證明長期趨勢；資料不足時必須保留 insufficient。
+      </p>
+      {structuralIndicators.length === 0 && <p class="empty">核心結構指標缺失，請檢查 RadarReportV2 與 runtime contract。</p>}
+      <div class="structural-grid">
+        {structuralIndicators.map((indicator) => (
+          <article class="card structural-card">
+            <div class="row">
+              <span class={`badge ${indicator.direction === 'toward' ? 'uncertainty' : indicator.direction === 'against' ? 'counter' : indicator.direction === 'mixed' ? 'inference' : 'gap'}`}>
+                {structuralDirectionLabel[indicator.direction] ?? indicator.direction}
+              </span>
+              <span class="badge deterministic">信心 {String(indicator.confidence)}</span>
+              <span class="badge auto">{indicator.evaluation_mode}</span>
+            </div>
+            <h3>{indicator.label}</h3>
+            <p>{indicator.one_sentence_read}</p>
+            <div class="score-pair">
+              <div><span>支持分數</span><strong>{indicator.support_score}</strong></div>
+              <div><span>反向分數</span><strong>{indicator.counter_score}</strong></div>
+            </div>
+            {(indicator.supporting_signal_ids ?? []).length > 0 && (
+              <p><span class="badge fact">支持訊號</span> {indicator.supporting_signal_ids.map((id: string) => <code>{id}</code>)}</p>
+            )}
+            {(indicator.counter_signal_ids ?? []).length > 0 && (
+              <p><span class="badge counter">反向訊號</span> {indicator.counter_signal_ids.map((id: string) => <code>{id}</code>)}</p>
+            )}
+            <details class="notes">
+              <summary>資料缺口與下一步驗證</summary>
+              {(indicator.missing_data ?? []).length > 0
+                ? <p><strong>缺口：</strong>{indicator.missing_data.join('；')}</p>
+                : <p>目前沒有列出的額外資料缺口。</p>}
+              {(indicator.next_verification ?? []).length > 0 && (
+                <p><strong>下一步：</strong>{indicator.next_verification.join('；')}</p>
+              )}
+              <p class="muted">Indicator ID：<code>{indicator.indicator_id}</code></p>
+            </details>
+          </article>
         ))}
       </div>
 
@@ -136,10 +185,13 @@ const generatedAt = provenance.generated_at
         </article>
       ))}
 
-      <h2>連動指標</h2>
-      <p class="muted">分數由 RadarReportV2 的重要性、潛力、信心、事件廣度與覆蓋缺口計算；模型只產生文字解讀。</p>
+      <h2>輔助訊號面板</h2>
+      <p class="muted">
+        下列六項衡量當日事件動能、台灣曝險、跨領域匯流與證據品質，不是本專案的三個核心結構趨勢指標。
+        分數由透明公式計算，模型只產生文字解讀。
+      </p>
       <div class="indicator-grid">
-        {indicators.map((indicator) => (
+        {auxiliaryIndicators.map((indicator) => (
           <article class="card indicator-card">
             <div class="indicator-head">
               <div>
@@ -194,14 +246,19 @@ const generatedAt = provenance.generated_at
   .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; }
   .meta-grid div { display: flex; flex-direction: column; gap: .2rem; padding: .7rem; border: 1px solid var(--border-muted); border-radius: 6px; }
   .meta-grid span { color: var(--fg-muted); font-size: .82rem; }
-  .summary-grid, .indicator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .8rem; }
+  .summary-grid, .indicator-grid, .structural-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .8rem; }
   .summary-card { display: flex; align-items: flex-start; gap: .7rem; }
   .summary-card p { margin: 0; }
   .summary-index { min-width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; font-weight: 700; }
+  .structural-card { border-top: 4px solid var(--accent); }
+  .score-pair { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .8rem 0; }
+  .score-pair div { border: 1px solid var(--border-muted); border-radius: 6px; padding: .7rem; display: flex; flex-direction: column; gap: .2rem; }
+  .score-pair span { color: var(--fg-muted); font-size: .82rem; }
+  .score-pair strong { font-size: 1.5rem; }
   .indicator-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
   .indicator-head h3 { margin: .5rem 0 0; }
   .indicator-score { font-size: 2.4rem; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
   .delta { font-weight: 600; }
   code { overflow-wrap: anywhere; }
-  @media (max-width: 700px) { .meta-grid, .summary-grid, .indicator-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .meta-grid, .summary-grid, .indicator-grid, .structural-grid { grid-template-columns: 1fr; } }
 </style>
