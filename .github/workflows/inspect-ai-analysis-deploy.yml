@@ -1,0 +1,44 @@
+name: inspect-ai-analysis-deploy
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/inspect-ai-analysis-deploy.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read recent ai-analysis workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/actions/workflows/ai-analysis.yml/runs?branch=main&per_page=5" \
+            --jq '{runs: [.workflow_runs[] | {id, event, status, conclusion, head_sha, created_at, updated_at, html_url}]}' \
+            > ai-analysis-runs.json
+          cat ai-analysis-runs.json
+          RUN_ID=$(jq -r '.runs[0].id // empty' ai-analysis-runs.json)
+          if [ -n "$RUN_ID" ]; then
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs?per_page=100" \
+              --jq '{run_id: '"$RUN_ID"', jobs: [.jobs[] | {id, name, status, conclusion, steps: [.steps[] | {name, status, conclusion}]}]}' \
+              > ai-analysis-jobs.json
+            cat ai-analysis-jobs.json
+          else
+            echo '{"run_id":null,"jobs":[]}' > ai-analysis-jobs.json
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-analysis-deploy-inspection
+          path: |
+            ai-analysis-runs.json
+            ai-analysis-jobs.json
