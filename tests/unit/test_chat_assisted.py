@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import copy
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from radar.application import ApplicationDependencies, DailyRadarApplication, DailyRunRequest
+from radar.chat.context_package import build_chat_package, validate_chat_import
+from radar.chat.runtime import prepare_chat
 from radar.contracts.runtime import RuntimeContract
 from radar.domain.models import Document
 from radar.evaluators.deterministic import DeterministicIntelligenceEvaluator
-from radar.chat.context_package import build_chat_package, validate_chat_import
+from radar.repositories.sqlite import SqliteRunRepository
 from radar.stores.memory import InMemoryWebArtifactStore
 from tests.support import (
     FakePublisher,
@@ -77,8 +81,6 @@ class ChatPackageTests(unittest.TestCase):
         self.assertIn("expected-output.schema.json", self.package.files)
 
     def test_instructions_mandate_traditional_chinese_output(self) -> None:
-        import json
-
         instructions = self.package.files["INSTRUCTIONS.md"].decode("utf-8")
         self.assertIn("zh-Hant-TW", instructions)
         self.assertIn("原文標題", instructions)
@@ -90,12 +92,69 @@ class ChatPackageTests(unittest.TestCase):
         self.assertNotIn("OPENAI_API_KEY", blob)
         self.assertNotIn("FRESHRSS_API_PASSWORD", blob)
         # Only bounded excerpts, never a full article body.
-        import json
-
         events = json.loads(self.package.files["events.json"])
         for event in events:
             for document in event["documents"]:
                 self.assertLessEqual(len(document["excerpt"]), 280)
+
+
+class PersistedChatPackageTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.result, _ = _run()
+
+    def _write_state(self, database: Path, *, include_events: bool = True) -> None:
+        repository = SqliteRunRepository(database, ROOT / "migrations")
+        if include_events:
+            for event in self.result.events:
+                repository.save_event(event)
+        repository.save_report(self.result.report)
+
+    def test_prepare_chat_packages_persisted_report_and_events(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            database = root / "radar.db"
+            output = root / "out"
+            self._write_state(database)
+
+            package = prepare_chat(
+                ROOT,
+                date=self.result.report.date,
+                profile=self.result.report.profile,
+                output_root=output,
+                database_path=database,
+            )
+
+            expected_ids = frozenset(item.event_id for item in self.result.report.items)
+            self.assertEqual(package.context.run_id, self.result.report.run_id)
+            self.assertEqual(package.context.allowed_event_ids, expected_ids)
+            self.assertTrue((output / package.relative_dir / "manifest.json").exists())
+            baseline = json.loads(package.files["deterministic-evaluation.json"])
+            self.assertEqual(baseline["source_audit"]["ingestion_mode"], "fake")
+
+    def test_prepare_chat_rejects_missing_persisted_report(self) -> None:
+        with TemporaryDirectory() as directory:
+            database = Path(directory) / "empty.db"
+            with self.assertRaisesRegex(ValueError, "no persisted report"):
+                prepare_chat(
+                    ROOT,
+                    date="2026-07-10",
+                    database_path=database,
+                    output_root=Path(directory) / "out",
+                )
+
+    def test_prepare_chat_rejects_report_with_missing_events(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            database = root / "radar.db"
+            self._write_state(database, include_events=False)
+            with self.assertRaisesRegex(ValueError, "missing from durable state"):
+                prepare_chat(
+                    ROOT,
+                    date=self.result.report.date,
+                    profile=self.result.report.profile,
+                    database_path=database,
+                    output_root=root / "out",
+                )
 
 
 class ChatImportTests(unittest.TestCase):
