@@ -4,6 +4,7 @@ import BadgeList from '../components/BadgeList.astro';
 import { getLatestReport, getManifest } from '../lib/data';
 import { evaluationBadge, statusBadge, fixtureBadge } from '../lib/format';
 import { projectCompetitorItems } from '../lib/competitors';
+import { domainLabel, matrixLabel } from '../lib/labels';
 
 const manifest = getManifest();
 const report: any = getLatestReport();
@@ -74,11 +75,16 @@ const visibleUncertainties = (item: any) =>
         <BadgeList badges={[statusBadge(report.status), evaluationBadge(evalMode), fixtureBadge(isFixture)]} />
       </div>
       {isFixture && <p class="badge fixture"><span class="sym">⚠</span> 目前為示例資料（fixture），非真實全球覆蓋。</p>}
-      {evalMode === 'deterministic' && (
-        <p class="muted">目前為 deterministic 模式：系統說明已使用繁體中文，非中文來源標題可能保留原文；API／Chat-assisted 模式才會做受約束的繁中翻譯。</p>
-      )}
-      {(report.degradation_reasons ?? []).length > 0 && (
-        <p class="muted">降級：{report.degradation_reasons.join('、')}</p>
+      {(evalMode === 'deterministic' || (report.degradation_reasons ?? []).length > 0) && (
+        <details class="notes">
+          <summary>模式與降級說明</summary>
+          {evalMode === 'deterministic' && (
+            <p class="muted">目前為 deterministic 模式：系統說明已使用繁體中文，非中文來源標題可能保留原文；API／Chat-assisted 模式才會做受約束的繁中翻譯。</p>
+          )}
+          {(report.degradation_reasons ?? []).length > 0 && (
+            <p class="muted">降級：{report.degradation_reasons.join('、')}</p>
+          )}
+        </details>
       )}
 
       <div class="grid">
@@ -93,12 +99,13 @@ const visibleUncertainties = (item: any) =>
         <a href={`${base}${base.endsWith('/') ? '' : '/'}reports/${report.date}`}>完整報告頁</a>。</p>
       {majorSelected.length === 0 && <p class="empty">今日無重大項目。</p>}
       {majorSelected.map((item) => (
-        <article class="card">
+        <article class="card major">
           <div class="row">
-            <strong>{item.headline}</strong>
+            <span class="badge domain">{domainLabel(item.primary_domain)}</span>
             <span class="badge deterministic">重要 {item.importance_score}</span>
             <span class="badge auto">信心 {item.confidence_score}</span>
           </div>
+          <div class="row"><strong class="headline">{item.headline}</strong></div>
           {originalHeadline(item) && <p class="muted">{originalHeadline(item)}</p>}
           <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
           {(item.counterevidence ?? []).length > 0 && (
@@ -119,10 +126,12 @@ const visibleUncertainties = (item: any) =>
       {potentialSelected.length === 0 && <p class="empty">今日無潛力項目。</p>}
       {potentialSelected.map((item) => (
         <article class="card">
-          <div class="row"><strong>{item.headline}</strong>
+          <div class="row">
+            <span class="badge domain">{domainLabel(item.primary_domain)}</span>
             <span class="badge inference">{item.candidate_type ?? '弱訊號'} · {item.formation_level ?? ''}</span>
             <span class="badge auto">潛力 {item.potential_score}</span>
           </div>
+          <div class="row"><strong>{item.headline}</strong></div>
           {originalHeadline(item) && <p class="muted">{originalHeadline(item)}</p>}
           <p>{item.today_delta}</p>
           <div class="row muted">
@@ -131,6 +140,7 @@ const visibleUncertainties = (item: any) =>
         </article>
       ))}
 
+      <p class="muted">完整候選池已有獨立頁：<a href={`${base}${base.endsWith('/') ? '' : '/'}potential`}>潛力候選池</a>。</p>
       <details class="card" open={potentialOverflow.length > 0}>
         <summary><strong>完整潛力候選池：{potential.length} 筆</strong>（首頁未精選 {potentialOverflow.length} 筆）</summary>
         {sortedPotential.map((item, index) => (
@@ -188,7 +198,7 @@ const visibleUncertainties = (item: any) =>
       <h2>零售矩陣 Retail</h2>
       <table><tbody>
         {Object.entries(retail).map(([key, cell]: any) => (
-          <tr><td>{key}</td><td>
+          <tr><td>{matrixLabel(key)}</td><td>
             {cell.status === 'observed'
               ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
               : <span class="badge gap"><span class="sym">▽</span> 資料不足</span>}
@@ -199,7 +209,7 @@ const visibleUncertainties = (item: any) =>
       <h2>加密矩陣 Crypto</h2>
       <table><tbody>
         {Object.entries(crypto).map(([key, cell]: any) => (
-          <tr><td>{key}</td><td>
+          <tr><td>{matrixLabel(key)}</td><td>
             {cell.status === 'observed'
               ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
               : <span class="badge gap"><span class="sym">▽</span> 資料不足</span>}
@@ -210,7 +220,7 @@ const visibleUncertainties = (item: any) =>
       <h2>結構趨勢指標 Structural Indicators</h2>
       {structural.map((row) => (
         <div class="card row">
-          <strong>{row.indicator_id}</strong>
+          <strong>{matrixLabel(row.indicator_id)}</strong>
           {row.direction === 'insufficient'
             ? <span class="badge gap"><span class="sym">▽</span> 證據不足，不生成趨勢</span>
             : <span class="badge inference"><span class="sym">≈</span> {row.direction} · 支持{row.support_score}/反{row.counter_score}</span>}

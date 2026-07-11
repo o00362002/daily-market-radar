@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { getManifest, getDomainIndex, listDomainDirs } from '../../lib/data';
+import { getManifest, getDomainIndex, getLatestReport, listDomainDirs } from '../../lib/data';
+import { domainLabel, domainLabelEn } from '../../lib/labels';
 
 export function getStaticPaths() {
   return listDomainDirs().map((domain) => ({ params: { domain }, props: { domain } }));
@@ -10,16 +11,70 @@ const manifest = getManifest();
 const entries = (manifest?.years ?? []).flatMap((year) => getDomainIndex(domain, year)?.entries ?? []);
 const base = import.meta.env.BASE_URL;
 const reportHref = (date: string) => `${base}${base.endsWith('/') ? '' : '/'}reports/${date}`;
+
+const report: any = getLatestReport();
+const todayItems: any[] = (report?.items ?? []).filter((i: any) => i.primary_domain === domain);
+const major = todayItems.filter((i) => i.report_lane === 'major');
+const potential = [...todayItems.filter((i) => i.report_lane === 'potential')].sort(
+  (a, b) => (b.potential_score - a.potential_score) || (b.confidence_score - a.confidence_score),
+);
+const originalHeadline = (item: any) =>
+  (item.uncertainties ?? []).find((text: string) => text.startsWith('原文標題：')) ?? '';
 ---
-<Base title={`領域 ${domain}`}>
-  <h1>領域 · {domain}</h1>
-  {entries.length === 0 && <p class="empty">此領域尚無報告。</p>}
-  <table>
-    <thead><tr><th>日期</th><th>重大</th><th>潛力</th></tr></thead>
-    <tbody>
-      {entries.sort((a, b) => (a.date < b.date ? 1 : -1)).map((e: any) => (
-        <tr><td><a href={reportHref(e.date)}>{e.date}</a></td><td>{e.major_count}</td><td>{e.potential_count}</td></tr>
-      ))}
-    </tbody>
-  </table>
+<Base title={`${domainLabel(domain)}｜Daily Market Radar`}>
+  <h1>{domainLabel(domain)} <span class="muted">{domainLabelEn(domain)}</span></h1>
+  <p class="muted">領域代碼 <code>{domain}</code>；當日訊號取自最新報告，歷史覆蓋見下表。</p>
+
+  <div class="grid">
+    <div class="kpi"><div class="n">{major.length}</div><div class="l">今日重大</div></div>
+    <div class="kpi"><div class="n">{potential.length}</div><div class="l">今日潛力</div></div>
+    <div class="kpi"><div class="n">{entries.length}</div><div class="l">歷史報告日</div></div>
+  </div>
+
+  <h2>今日重大 Major</h2>
+  {major.length === 0 && <p class="empty">最新報告（{report?.date ?? '—'}）中此領域無重大項目。</p>}
+  {major.map((item) => (
+    <article class="card major">
+      <div class="row">
+        <span class="badge deterministic">重要 {item.importance_score}</span>
+        <span class="badge auto">信心 {item.confidence_score}</span>
+      </div>
+      <div class="row"><strong class="headline">{item.headline}</strong></div>
+      {originalHeadline(item) && <p class="muted">{originalHeadline(item)}</p>}
+      <p>{item.today_delta}</p>
+      <div class="row muted">
+        {(item.evidence_links ?? []).map((l: any) => <a href={l.url}>{l.source_id} ↗</a>)}
+      </div>
+    </article>
+  ))}
+
+  <h2>今日潛力 Potential</h2>
+  {potential.length === 0 && <p class="empty">最新報告（{report?.date ?? '—'}）中此領域無潛力候選。</p>}
+  {potential.map((item) => (
+    <article class="card">
+      <div class="row">
+        <span class="badge inference">{item.candidate_type ?? '弱訊號'} · {item.formation_level ?? ''}</span>
+        <span class="badge auto">潛力 {item.potential_score}</span>
+      </div>
+      <div class="row"><strong>{item.headline}</strong></div>
+      {originalHeadline(item) && <p class="muted">{originalHeadline(item)}</p>}
+      <p>{item.today_delta}</p>
+      <div class="row muted">
+        {(item.evidence_links ?? []).map((l: any) => <a href={l.url}>{l.source_id} ↗</a>)}
+      </div>
+    </article>
+  ))}
+
+  <h2>歷史覆蓋 History</h2>
+  {entries.length === 0 && <p class="empty">此領域尚無歷史報告。</p>}
+  {entries.length > 0 && (
+    <table>
+      <thead><tr><th>日期</th><th>重大</th><th>潛力</th></tr></thead>
+      <tbody>
+        {entries.sort((a, b) => (a.date < b.date ? 1 : -1)).map((e: any) => (
+          <tr><td><a href={reportHref(e.date)}>{e.date}</a></td><td>{e.major_count}</td><td>{e.potential_count}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  )}
 </Base>

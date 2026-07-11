@@ -1,21 +1,56 @@
 ---
 import '../styles/global.css';
+import { getLatestReport } from '../lib/data';
+import { DOMAIN_LABELS } from '../lib/labels';
 interface Props { title?: string; }
 const { title = '全球情報雷達 Daily Market Radar' } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const href = (path: string) => `${base}${base.endsWith('/') ? '' : '/'}${path}`.replace(/\/+$/, '/');
 
-// Sidebar navigation: symbol + label. Active state is derived from the current
-// pathname so deep pages (reports/*) still highlight their section.
-const nav: { label: string; sub: string; path: string; sym: string; match: string[] }[] = [
-  { label: '今日', sub: 'Today', path: '', sym: '◎', match: [''] },
-  { label: '歷史', sub: 'History', path: 'history/1', sym: '▤', match: ['history', 'reports'] },
-  { label: '歸檔', sub: 'Legacy', path: 'legacy', sym: '▦', match: ['legacy'] },
-  { label: '趨勢', sub: 'Trends', path: 'trends', sym: '↗', match: ['trends'] },
-  { label: '競品分析', sub: 'Competitors', path: 'competitors', sym: '◈', match: ['competitors'] },
-  { label: '零售', sub: 'Retail', path: 'retail', sym: '▣', match: ['retail'] },
-  { label: '加密', sub: 'Crypto', path: 'crypto', sym: '◇', match: ['crypto'] },
-  { label: '台灣', sub: 'Taiwan', path: 'taiwan', sym: '⊙', match: ['taiwan'] },
+const latestDate = (getLatestReport() as any)?.date as string | undefined;
+
+// Sidebar navigation, grouped. Active state is derived from the current
+// pathname; domain items match their full path so only the open domain lights up.
+type NavItem = { label: string; sub: string; path: string; sym: string; match: string[] };
+type NavGroup = { title: string; items: NavItem[] };
+
+const groups: NavGroup[] = [
+  {
+    title: '總覽 Radar',
+    items: [
+      { label: '今日', sub: 'Today', path: '', sym: '◎', match: [''] },
+      { label: '候選池', sub: 'Pool', path: 'potential', sym: '◍', match: ['potential'] },
+      {
+        label: '完整報告',
+        sub: 'Report',
+        path: latestDate ? `reports/${latestDate}` : 'history/1',
+        sym: '▥',
+        match: ['reports'],
+      },
+      { label: '歷史', sub: 'History', path: 'history/1', sym: '▤', match: ['history'] },
+      { label: '歸檔', sub: 'Legacy', path: 'legacy', sym: '▦', match: ['legacy'] },
+      { label: '趨勢', sub: 'Trends', path: 'trends', sym: '↗', match: ['trends'] },
+    ],
+  },
+  {
+    title: '領域 Domains',
+    items: Object.entries(DOMAIN_LABELS).map(([id, l]) => ({
+      label: l.zh,
+      sub: l.en,
+      path: `domains/${id}`,
+      sym: '◈',
+      match: [`domains/${id}`],
+    })),
+  },
+  {
+    title: '專題 Focus',
+    items: [
+      { label: '競品分析', sub: 'Rivals', path: 'competitors', sym: '◇', match: ['competitors'] },
+      { label: '零售矩陣', sub: 'Retail', path: 'retail', sym: '▣', match: ['retail'] },
+      { label: '加密矩陣', sub: 'Crypto', path: 'crypto', sym: '⬡', match: ['crypto'] },
+      { label: '台灣', sub: 'Taiwan', path: 'taiwan', sym: '⊙', match: ['taiwan'] },
+    ],
+  },
 ];
 
 const current = Astro.url.pathname;
@@ -28,9 +63,10 @@ const rest =
     : current.startsWith(normalizedBase)
       ? current.slice(normalizedBase.length)
       : current.replace(/^\//, '');
-const section = rest.split('/')[0] ?? '';
-const isActive = (item: (typeof nav)[number]) =>
-  item.match.includes(section) || (item.path === '' && rest === '');
+const restClean = rest.replace(/\/+$/, '');
+const section = restClean.split('/')[0] ?? '';
+const isActive = (item: NavItem) =>
+  item.match.includes(restClean) || item.match.includes(section) || (item.path === '' && restClean === '');
 ---
 <!doctype html>
 <html lang="zh-Hant">
@@ -51,12 +87,17 @@ const isActive = (item: (typeof nav)[number]) =>
           </span>
         </a>
         <nav class="side-nav" aria-label="主選單">
-          {nav.map((item) => (
-            <a class:list={['nav-item', { active: isActive(item) }]} href={href(item.path)} aria-current={isActive(item) ? 'page' : undefined}>
-              <span class="nav-sym" aria-hidden="true">{item.sym}</span>
-              <span class="nav-label">{item.label}</span>
-              <span class="nav-sub">{item.sub}</span>
-            </a>
+          {groups.map((group) => (
+            <div class="nav-group">
+              <div class="nav-group-title">{group.title}</div>
+              {group.items.map((item) => (
+                <a class:list={['nav-item', { active: isActive(item) }]} href={href(item.path)} aria-current={isActive(item) ? 'page' : undefined}>
+                  <span class="nav-sym" aria-hidden="true">{item.sym}</span>
+                  <span class="nav-label">{item.label}</span>
+                  <span class="nav-sub">{item.sub}</span>
+                </a>
+              ))}
+            </div>
           ))}
         </nav>
         <div class="side-foot">

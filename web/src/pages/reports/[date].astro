@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import BadgeList from '../../components/BadgeList.astro';
 import { allReportEntries, getFullByPath } from '../../lib/data';
 import { evaluationBadge, statusBadge, fixtureBadge } from '../../lib/format';
+import { domainLabel } from '../../lib/labels';
 
 export function getStaticPaths() {
   return allReportEntries().map((entry) => ({ params: { date: entry.date }, props: { entry } }));
@@ -21,7 +22,8 @@ const dataHref = `${base}${base.endsWith('/') ? '' : '/'}data/${entry.full_path}
     <article class="card">
       <div class="row">
         <strong>{item.headline}</strong>
-        <span class={`badge ${item.report_lane === 'major' ? 'complete' : 'inference'}`}>{item.report_lane}</span>
+        <span class="badge domain">{domainLabel(item.primary_domain)}</span>
+        <span class={`badge ${item.report_lane === 'major' ? 'complete' : 'inference'}`}>{item.report_lane === 'major' ? '重大' : '潛力'}</span>
       </div>
       <p>{item.today_delta}</p>
     </article>

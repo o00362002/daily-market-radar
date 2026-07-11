@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { getManifest, getTrend } from '../../lib/data';
 import { sparklinePath } from '../../lib/format';
+import { matrixLabel } from '../../lib/labels';
 
 const manifest = getManifest();
 const series = (manifest?.indicator_ids ?? []).map((id) => getTrend(id)).filter(Boolean) as any[];
@@ -15,7 +16,8 @@ const series = (manifest?.indicator_ids ?? []).map((id) => getTrend(id)).filter(
     return (
       <div class="card">
         <div class="row">
-          <strong>{s.indicator_id}</strong>
+          <strong>{matrixLabel(s.indicator_id)}</strong>
+          <code class="muted">{s.indicator_id}</code>
           {latest && latest.direction === 'insufficient'
             ? <span class="badge gap"><span class="sym">▽</span> 證據不足</span>
             : <span class="badge inference"><span class="sym">≈</span> {latest?.direction}</span>}

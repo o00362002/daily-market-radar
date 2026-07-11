@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import { getLatestReport } from '../lib/data';
+import { domainLabel } from '../lib/labels';
+
+const report: any = getLatestReport();
+const items: any[] = report?.items ?? [];
+const potential = items.filter((i) => i.report_lane === 'potential');
+const sorted = [...potential].sort((a, b) =>
+  (b.potential_score - a.potential_score)
+  || (b.confidence_score - a.confidence_score)
+  || String(a.item_id).localeCompare(String(b.item_id))
+);
+const domains = new Set(sorted.map((i) => i.primary_domain ?? 'unknown'));
+const originalHeadline = (item: any) =>
+  (item.uncertainties ?? []).find((text: string) => text.startsWith('原文標題：')) ?? '';
+---
+<Base title="潛力候選池｜Daily Market Radar">
+  <h1>潛力候選池 · {report?.date ?? '尚無報告'}</h1>
+  <p class="muted">完整候選池，不做首頁精選裁切；排序依潛力分數、信心分數。項目只增列不刪除，全數保留於報告 JSON。</p>
+
+  {!report && <p class="empty">尚無報告。請先執行 <code>radar run-daily</code> 並 <code>radar export-web</code>。</p>}
+
+  {report && (
+    <>
+      <div class="grid">
+        <div class="kpi"><div class="n">{sorted.length}</div><div class="l">候選項目</div></div>
+        <div class="kpi"><div class="n">{domains.size}</div><div class="l">覆蓋領域</div></div>
+      </div>
+
+      <h2>全部候選 All Candidates</h2>
+      {sorted.length === 0 && <p class="empty">今日無潛力候選項目。</p>}
+      {sorted.map((item, index) => (
+        <article class="card">
+          <div class="row">
+            <span class="rank">#{index + 1}</span>
+            <strong>{item.headline}</strong>
+          </div>
+          <div class="row">
+            <span class="badge domain">{domainLabel(item.primary_domain)}</span>
+            <span class="badge inference">{item.candidate_type ?? '弱訊號'} · {item.formation_level ?? ''}</span>
+            <span class="badge auto">潛力 {item.potential_score}</span>
+            <span class="badge deterministic">信心 {item.confidence_score}</span>
+          </div>
+          {originalHeadline(item) && <p class="muted">{originalHeadline(item)}</p>}
+          <p>{item.today_delta}</p>
+          <div class="row muted">
+            {(item.evidence_links ?? []).map((l: any) => <a href={l.url}>{l.source_id} ↗</a>)}
+          </div>
+        </article>
+      ))}
+    </>
+  )}
+</Base>

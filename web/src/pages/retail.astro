@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getLatestReport } from '../lib/data';
+import { matrixLabel } from '../lib/labels';
 const report: any = getLatestReport();
 const retail = report?.retail_matrix ?? {};
 ---
@@ -10,7 +11,8 @@ const retail = report?.retail_matrix ?? {};
   {Object.entries(retail).map(([key, cell]: any) => (
     <div class="card">
       <div class="row">
-        <strong>{key}</strong>
+        <strong>{matrixLabel(key)}</strong>
+        <code class="muted">{key}</code>
         {cell.status === 'observed'
           ? <span class="badge fact"><span class="sym">◆</span> 觀察到</span>
           : <span class="badge gap"><span class="sym">▽</span> 資料不足 insufficient</span>}

@@ -17,10 +17,15 @@ type CompetitorRegistry = {
 
 const typedRegistry = registry as CompetitorRegistry;
 
-export const productCompetitorTerms = [
-  ...typedRegistry.groups.taiwan_retailops_products,
-  ...typedRegistry.groups.global_platforms,
-].flatMap((entry) => [entry.name, ...entry.aliases]);
+export const taiwanProductTerms = typedRegistry.groups.taiwan_retailops_products.flatMap(
+  (entry) => [entry.name, ...entry.aliases],
+);
+
+export const globalPlatformTerms = typedRegistry.groups.global_platforms.flatMap(
+  (entry) => [entry.name, ...entry.aliases],
+);
+
+export const productCompetitorTerms = [...taiwanProductTerms, ...globalPlatformTerms];
 
 export const socialCompetitorTerms = typedRegistry.groups.social_and_content.flatMap(
   (entry) => [entry.name, ...entry.aliases],
@@ -51,6 +56,14 @@ export const projectCompetitorItems = (items: any[]) => {
     || String(a.item_id).localeCompare(String(b.item_id)),
   );
   return { product: sort(product), social: sort(social) };
+};
+
+// Finer split of the product lane, for the competitors page: Taiwan RetailOps
+// products vs global platforms (an item matching both counts as Taiwan-first).
+export const splitProductItems = (product: any[]) => {
+  const taiwan = product.filter((item) => matchesTerms(item, taiwanProductTerms));
+  const global = product.filter((item) => !taiwan.includes(item));
+  return { taiwan, global };
 };
 
 export const competitorRegistry = typedRegistry;

@@ -1,15 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getLatestReport } from '../lib/data';
-import { competitorRegistry, projectCompetitorItems } from '../lib/competitors';
+import { competitorRegistry, projectCompetitorItems, splitProductItems } from '../lib/competitors';
 
 const report: any = getLatestReport();
 const items: any[] = report?.items ?? [];
 const { product: productSorted, social: socialSorted } = projectCompetitorItems(items);
-const productRegistryCount =
-  competitorRegistry.groups.taiwan_retailops_products.length
-  + competitorRegistry.groups.global_platforms.length;
-const socialRegistryCount = competitorRegistry.groups.social_and_content.length;
+const { taiwan: taiwanSignals, global: globalSignals } = splitProductItems(productSorted);
+
+const registryGroups = [
+  { key: 'taiwan_retailops_products', zh: '台灣 RetailOps 產品', en: 'Taiwan Products', entries: competitorRegistry.groups.taiwan_retailops_products },
+  { key: 'global_platforms', zh: '全球平台', en: 'Global Platforms', entries: competitorRegistry.groups.global_platforms },
+  { key: 'social_and_content', zh: '社群與內容', en: 'Social & Content', entries: competitorRegistry.groups.social_and_content },
+];
+const priorityLabel = (p: string) => (p === 'high' ? '高' : p === 'medium' ? '中' : '低');
 ---
 <Base title="競品分析｜Daily Market Radar">
   <h1>競品分析 · {report?.date ?? '尚無報告'}</h1>
@@ -20,21 +24,22 @@ const socialRegistryCount = competitorRegistry.groups.social_and_content.length;
   {report && (
     <>
       <div class="grid">
-        <div class="kpi"><div class="n">{productSorted.length}</div><div class="l">產品競品訊號</div></div>
-        <div class="kpi"><div class="n">{socialSorted.length}</div><div class="l">社群競品訊號</div></div>
-        <div class="kpi"><div class="n">{productRegistryCount}</div><div class="l">產品固定追蹤</div></div>
-        <div class="kpi"><div class="n">{socialRegistryCount}</div><div class="l">社群追蹤群組</div></div>
+        <div class="kpi"><div class="n">{taiwanSignals.length}</div><div class="l">台灣產品訊號</div></div>
+        <div class="kpi"><div class="n">{globalSignals.length}</div><div class="l">全球平台訊號</div></div>
+        <div class="kpi"><div class="n">{socialSorted.length}</div><div class="l">社群內容訊號</div></div>
+        <div class="kpi"><div class="n">{registryGroups.reduce((sum, g) => sum + g.entries.length, 0)}</div><div class="l">固定追蹤對象</div></div>
       </div>
 
-      <h2>產品競品 Product Competitors</h2>
-      {productSorted.length === 0 && <p class="empty">今日已查無產品競品重大更新，或固定來源檢查尚未產出可辨識訊號。未完成檢查時不得把本狀態解讀為市場沒有變化。</p>}
-      {productSorted.map((item) => (
+      <h2>台灣產品競品 Taiwan Products</h2>
+      {taiwanSignals.length === 0 && <p class="empty">今日已查無台灣產品競品重大更新，或固定來源檢查尚未產出可辨識訊號。未完成檢查時不得把本狀態解讀為市場沒有變化。</p>}
+      {taiwanSignals.map((item) => (
         <article class="card">
           <div class="row">
-            <strong>{item.headline}</strong>
+            <span class="badge domain">台灣產品</span>
             <span class="badge deterministic">重要 {item.importance_score}</span>
             <span class="badge auto">信心 {item.confidence_score}</span>
           </div>
+          <div class="row"><strong>{item.headline}</strong></div>
           <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
           {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
           <div class="row muted">
@@ -43,15 +48,33 @@ const socialRegistryCount = competitorRegistry.groups.social_and_content.length;
         </article>
       ))}
 
-      <h2>社群競品 Social & Content Competitors</h2>
+      <h2>全球平台競品 Global Platforms</h2>
+      {globalSignals.length === 0 && <p class="empty">今日已查無全球平台競品重大更新，或固定來源檢查尚未產出可辨識訊號。</p>}
+      {globalSignals.map((item) => (
+        <article class="card">
+          <div class="row">
+            <span class="badge domain">全球平台</span>
+            <span class="badge deterministic">重要 {item.importance_score}</span>
+            <span class="badge auto">信心 {item.confidence_score}</span>
+          </div>
+          <div class="row"><strong>{item.headline}</strong></div>
+          <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
+          {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
+          <div class="row muted">
+            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
+          </div>
+        </article>
+      ))}
+
+      <h2>社群內容競品 Social &amp; Content</h2>
       {socialSorted.length === 0 && <p class="empty">今日已查無社群競品重大更新，或固定社群渠道尚未完整檢查。</p>}
       {socialSorted.map((item) => (
         <article class="card">
           <div class="row">
-            <strong>{item.headline}</strong>
-            <span class="badge inference">社群／內容</span>
+            <span class="badge domain">社群內容</span>
             <span class="badge auto">潛力 {item.potential_score}</span>
           </div>
+          <div class="row"><strong>{item.headline}</strong></div>
           <p>{item.today_delta}</p>
           <div class="row muted">
             {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
@@ -59,7 +82,29 @@ const socialRegistryCount = competitorRegistry.groups.social_and_content.length;
         </article>
       ))}
 
-      <h2>判斷框架</h2>
+      <h2>固定追蹤名單 Registry</h2>
+      <p class="muted">依註冊表分三類；優先級決定檢查頻率與訊號門檻。</p>
+      {registryGroups.map((group) => (
+        <>
+          <h3>{group.zh} {group.en}</h3>
+          <table>
+            <thead><tr><th>對象</th><th>別名／關鍵詞</th><th>優先級</th></tr></thead>
+            <tbody>
+              {group.entries.map((entry) => (
+                <tr>
+                  <td>{entry.name}</td>
+                  <td class="muted">{entry.aliases.join('、')}</td>
+                  <td>
+                    <span class={`badge ${entry.priority === 'high' ? 'counter' : 'deterministic'}`}>{priorityLabel(entry.priority)}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ))}
+
+      <h2>判斷框架 Framework</h2>
       <ul class="tight">
         <li>是否推出低價、自助式或 freemium 的 RetailOps 入口？</li>
         <li>是否從 CRM／行銷延伸到補貨、庫存、門市診斷、損益或展店？</li>
