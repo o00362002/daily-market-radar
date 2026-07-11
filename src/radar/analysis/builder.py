@@ -12,6 +12,7 @@ from radar.contracts.analysis import (
     AnalysisProvenanceV1,
     FutureTrendV1,
     LinkedIndicatorV1,
+    StructuralIndicatorAnalysisV1,
     TranslationV1,
 )
 from radar.contracts.report import RadarReportV2, ReportItemV2
@@ -25,8 +26,15 @@ def load_analysis_config(repo_root: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("schema_version") != "ai-analysis/v1":
         raise ValueError("unsupported ai analysis schema version")
-    if not isinstance(payload.get("indicators"), list) or not payload["indicators"]:
-        raise ValueError("ai analysis config requires indicators")
+    core = payload.get("core_structural_indicators")
+    auxiliary = payload.get("auxiliary_signal_indicators")
+    if not isinstance(core, list) or not core:
+        raise ValueError("ai analysis config requires core_structural_indicators")
+    if not isinstance(auxiliary, list) or not auxiliary:
+        raise ValueError("ai analysis config requires auxiliary_signal_indicators")
+    core_ids = [str(row.get("indicator_id", "")) for row in core if isinstance(row, dict)]
+    if len(core_ids) != len(set(core_ids)) or any(not value for value in core_ids):
+        raise ValueError("core structural indicator ids must be unique and non-empty")
     return payload
 
 
@@ -41,11 +49,12 @@ def build_deterministic_analysis(
 ) -> AIAnalysisV1:
     stamp = generated_at or datetime.now(timezone.utc).isoformat()
     source_hash = _source_context_hash(report, config)
+    structural = _build_structural_indicators(report, config)
     linked = _build_linked_indicators(report, previous_report, config)
     translations = [_translation(item) for item in report.items]
     findings = _build_findings(report, int(config.get("max_findings", 8)))
     trends = _build_trends(report, int(config.get("max_trends", 6)))
-    summary = _build_summary(report, linked, int(config.get("max_summary_points", 6)))
+    summary = _build_summary(report, structural, linked, int(config.get("max_summary_points", 6)))
     fallback_used = requested_mode != "deterministic"
     limitations = _limitations(report, previous_report, fallback_reason)
 
@@ -75,6 +84,7 @@ def build_deterministic_analysis(
         translations=translations,
         key_findings=findings,
         future_trends=trends,
+        structural_indicators=structural,
         linked_indicators=linked,
         limitations=limitations,
         provenance=provenance,
@@ -108,7 +118,8 @@ def _translation(item: ReportItemV2) -> TranslationV1:
 
 def _build_summary(
     report: RadarReportV2,
-    indicators: list[LinkedIndicatorV1],
+    structural_indicators: list[StructuralIndicatorAnalysisV1],
+    auxiliary_indicators: list[LinkedIndicatorV1],
     limit: int,
 ) -> list[str]:
     major = sorted(
@@ -129,9 +140,15 @@ def _build_summary(
         f"今日共有 {len(major)} 件重大項目、{len(potential)} 件潛力項目、"
         f"{taiwan_count} 件台灣直接證據項目。"
     )
-    strongest = max((row for row in indicators if row.status != "insufficient"), key=lambda row: row.score, default=None)
+    structural_state = "；".join(f"{row.label}={row.direction}" for row in structural_indicators)
+    rows.append(f"三個核心結構指標：{structural_state}。")
+    strongest = max(
+        (row for row in auxiliary_indicators if row.status != "insufficient"),
+        key=lambda row: row.score,
+        default=None,
+    )
     if strongest is not None:
-        rows.append(f"連動指標最高為「{strongest.label}」{strongest.score} 分，方向為 {strongest.direction}。")
+        rows.append(f"輔助訊號最高為「{strongest.label}」{strongest.score} 分，方向為 {strongest.direction}。")
     if report.coverage_gaps:
         rows.append(f"本次仍有 {len(report.coverage_gaps)} 個覆蓋缺口，結論不得視為完整全球樣本。")
     return rows[: max(1, limit)]
@@ -219,13 +236,44 @@ def _trend_stage(value: str | None) -> str:
     return mapping.get(value or "", "uncertain")
 
 
+def _build_structural_indicators(
+    report: RadarReportV2,
+    config: dict[str, Any],
+) -> list[StructuralIndicatorAnalysisV1]:
+    observations = {row.indicator_id: row for row in report.structural_indicators}
+    rows: list[StructuralIndicatorAnalysisV1] = []
+    for definition in config["core_structural_indicators"]:
+        indicator_id = str(definition["indicator_id"])
+        observation = observations.get(indicator_id)
+        if observation is None:
+            raise ValueError(f"missing core structural indicator: {indicator_id}")
+        rows.append(
+            StructuralIndicatorAnalysisV1(
+                indicator_id=indicator_id,
+                label=str(definition["label"]),
+                observation_date=observation.observation_date,
+                direction=observation.direction,
+                support_score=observation.support_score,
+                counter_score=observation.counter_score,
+                confidence=observation.confidence,
+                supporting_signal_ids=list(observation.supporting_signal_ids),
+                counter_signal_ids=list(observation.counter_signal_ids),
+                missing_data=list(observation.missing_data),
+                one_sentence_read=observation.one_sentence_read,
+                next_verification=list(observation.next_verification),
+                evaluation_mode=observation.evaluation_mode,
+            )
+        )
+    return rows
+
+
 def _build_linked_indicators(
     report: RadarReportV2,
     previous_report: RadarReportV2 | None,
     config: dict[str, Any],
 ) -> list[LinkedIndicatorV1]:
     rows: list[LinkedIndicatorV1] = []
-    for definition in config["indicators"]:
+    for definition in config["auxiliary_signal_indicators"]:
         current = _indicator_snapshot(report, definition)
         previous = _indicator_snapshot(previous_report, definition) if previous_report is not None else None
         previous_score = previous["score"] if previous and previous["status"] != "insufficient" else None
@@ -384,9 +432,12 @@ def _limitations(
     previous_report: RadarReportV2 | None,
     fallback_reason: str | None,
 ) -> list[str]:
-    rows = ["AI 解讀層不改寫 RadarReportV2；事實仍以原報告與來源證據為準。"]
+    rows = [
+        "AI 解讀層不改寫 RadarReportV2；事實仍以原報告與來源證據為準。",
+        "三個核心結構指標直接沿用 RadarReportV2 的 deterministic 評估；AI 不得修改方向、分數或證據。",
+    ]
     if previous_report is None:
-        rows.append("缺少前一期同 profile 報告，連動指標方向只能標記為 new。")
+        rows.append("缺少前一期同 profile 報告，輔助訊號指標方向只能標記為 new。")
     if report.coverage_gaps:
         rows.append(f"存在 {len(report.coverage_gaps)} 個覆蓋缺口，趨勢推演可能受樣本偏差影響。")
     if fallback_reason:
