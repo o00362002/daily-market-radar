@@ -1,0 +1,205 @@
+name: manual-ai-analysis-verify-2026-07-12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/manual-ai-analysis-verify-2026-07-12.yml"
+
+concurrency:
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  EXPECTED_REPORT_DATE: "2026-07-12"
+
+jobs:
+  verify-build-deploy-record:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install runtime and AI dependencies
+        run: python -m pip install -e ".[dev,ai]"
+
+      - name: Restore latest validated durable state
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          git fetch origin radar-state
+          git worktree add .state origin/radar-state
+          PYTHONPATH=src python -m radar.cli state restore \
+            --state-root .state/state \
+            --database "$PWD/data/radar.db"
+
+      - name: Export validated RadarReportV2 artifacts
+        run: |
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD" \
+            --database "$PWD/data/radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Validate today's production source report
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          expected = os.environ["EXPECTED_REPORT_DATE"]
+          report_date = report.get("report_date") or report.get("date")
+          status = report.get("status")
+          ingestion_mode = report.get("source_audit", {}).get("ingestion_mode")
+          if report_date != expected:
+              raise SystemExit(f"expected report date {expected}, got {report_date}")
+          if status == "failed":
+              raise SystemExit("latest RadarReportV2 status is failed")
+          if ingestion_mode == "fixture":
+              raise SystemExit("latest RadarReportV2 uses fixture ingestion")
+          print(f"validated report date={report_date} status={status} ingestion={ingestion_mode}")
+          PY
+
+      - name: Generate AIAnalysisV1
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          OPENAI_ANALYSIS_MODEL: ${{ vars.OPENAI_ANALYSIS_MODEL }}
+          ANALYSIS_MODE: ${{ vars.RADAR_AI_ANALYSIS_MODE || 'auto' }}
+        run: |
+          PYTHONPATH=src python -m radar.analysis.cli \
+            --database "$PWD/data/radar.db" \
+            --repo-root "$PWD" \
+            --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
+            --mode "$ANALYSIS_MODE"
+
+      - name: Validate AIAnalysisV1 provenance and write receipt
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          expected = os.environ["EXPECTED_REPORT_DATE"]
+          report_path = Path("artifacts/web/v1/latest.json")
+          analysis_path = Path("artifacts/web/v1/ai-analysis/latest.json")
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          analysis_raw = analysis_path.read_bytes()
+          analysis = json.loads(analysis_raw)
+          provenance = analysis.get("provenance", {})
+
+          source_date = provenance.get("source_report_date")
+          if source_date != expected:
+              raise SystemExit(f"AIAnalysisV1 source date mismatch: expected {expected}, got {source_date}")
+
+          report_run = report.get("run_id")
+          analysis_run = provenance.get("source_run_id") or provenance.get("source_report_run_id")
+          if report_run and analysis_run and str(report_run) != str(analysis_run):
+              raise SystemExit(f"run id mismatch: report={report_run}, analysis={analysis_run}")
+
+          receipt = {
+              "verification_schema": "manual-ai-analysis-verification/v1",
+              "verified_at": datetime.now(timezone.utc).isoformat(),
+              "expected_report_date": expected,
+              "report_date": report.get("report_date") or report.get("date"),
+              "report_run_id": report_run,
+              "report_status": report.get("status"),
+              "ingestion_mode": report.get("source_audit", {}).get("ingestion_mode"),
+              "analysis_source_report_date": source_date,
+              "analysis_source_run_id": analysis_run,
+              "source_context_hash": provenance.get("source_context_hash"),
+              "requested_mode": provenance.get("requested_mode"),
+              "effective_mode": provenance.get("effective_mode"),
+              "provider": provenance.get("provider") or "deterministic",
+              "model": provenance.get("model"),
+              "fallback_used": provenance.get("fallback_used"),
+              "validation_status": provenance.get("validation_status"),
+              "prompt_version": provenance.get("prompt_version"),
+              "schema_version": provenance.get("schema_version") or analysis.get("schema_version"),
+              "analysis_sha256": hashlib.sha256(analysis_raw).hexdigest(),
+              "structural_indicator_count": len(analysis.get("structural_indicators", [])),
+              "auxiliary_indicator_count": len(analysis.get("linked_indicators", [])),
+              "future_trend_count": len(analysis.get("future_trends", [])),
+              "result": "analysis-generated-and-validated"
+          }
+          out = Path("reports/execution_checks/2026-07-12_ai_analysis_live_verification.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(receipt, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Build static site with today's AI analysis
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: |
+          npm ci
+          npm run types:check
+          npm run build
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Finalize receipt and clean temporary verifier
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("reports/execution_checks/2026-07-12_ai_analysis_live_verification.json")
+          receipt = json.loads(path.read_text(encoding="utf-8"))
+          receipt["pages_deployment"] = "success"
+          receipt["page_url"] = os.environ.get("PAGE_URL")
+          receipt["analysis_url"] = (os.environ.get("PAGE_URL") or "").rstrip("/") + "/analysis/"
+          receipt["analysis_json_url"] = (os.environ.get("PAGE_URL") or "").rstrip("/") + "/data/ai-analysis/latest.json"
+          receipt["result"] = "verified-and-deployed"
+          path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+          rm -f VERIFY_AI_ANALYSIS_LINKS.md
+          rm -f .github/workflows/manual-ai-analysis-verify-2026-07-12.yml
+
+      - name: Commit verification receipt
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-07-12_ai_analysis_live_verification.json
+          git add -u VERIFY_AI_ANALYSIS_LINKS.md .github/workflows/manual-ai-analysis-verify-2026-07-12.yml || true
+          git commit -m "chore: record 2026-07-12 AI analysis live verification"
+          git pull --rebase origin main
+          git push origin HEAD:main
