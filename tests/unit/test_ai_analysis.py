@@ -71,7 +71,12 @@ class AIAnalysisTests(unittest.TestCase):
         source = {row.indicator_id: row for row in self.report.structural_indicators}
         for row in analysis.structural_indicators:
             original = source[row.indicator_id]
-            self.assertEqual(row.direction, original.direction)
+            expected_direction = {
+                "supporting": "toward",
+                "support": "toward",
+                "counter": "against",
+            }.get(original.direction, original.direction)
+            self.assertEqual(row.direction, expected_direction)
             self.assertEqual(row.support_score, original.support_score)
             self.assertEqual(row.counter_score, original.counter_score)
             self.assertEqual(row.confidence, original.confidence)
@@ -80,6 +85,22 @@ class AIAnalysisTests(unittest.TestCase):
             self.assertEqual(row.missing_data, original.missing_data)
             self.assertEqual(row.one_sentence_read, original.one_sentence_read)
             self.assertEqual(row.next_verification, original.next_verification)
+
+    def test_structural_direction_aliases_are_normalized_at_analysis_boundary(self) -> None:
+        payload = self.report.model_dump(mode="json")
+        payload["structural_indicators"][0]["direction"] = "counter"
+        payload["structural_indicators"][1]["direction"] = "supporting"
+        report = RadarReportV2.from_payload(payload)
+
+        analysis = build_deterministic_analysis(
+            report,
+            None,
+            self.config,
+            generated_at="2026-07-10T02:00:00+00:00",
+        )
+
+        self.assertEqual(analysis.structural_indicators[0].direction, "against")
+        self.assertEqual(analysis.structural_indicators[1].direction, "toward")
 
     def test_same_report_as_previous_produces_flat_auxiliary_indicator_deltas(self) -> None:
         analysis = build_deterministic_analysis(

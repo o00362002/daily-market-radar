@@ -236,6 +236,22 @@ def _trend_stage(value: str | None) -> str:
     return mapping.get(value or "", "uncertain")
 
 
+def _structural_direction(value: str) -> str:
+    mapping = {
+        "toward": "toward",
+        "supporting": "toward",
+        "support": "toward",
+        "against": "against",
+        "counter": "against",
+        "mixed": "mixed",
+        "insufficient": "insufficient",
+    }
+    try:
+        return mapping[value]
+    except KeyError as exc:
+        raise ValueError(f"unsupported structural indicator direction: {value}") from exc
+
+
 def _build_structural_indicators(
     report: RadarReportV2,
     config: dict[str, Any],
@@ -252,7 +268,7 @@ def _build_structural_indicators(
                 indicator_id=indicator_id,
                 label=str(definition["label"]),
                 observation_date=observation.observation_date,
-                direction=observation.direction,
+                direction=_structural_direction(observation.direction),
                 support_score=observation.support_score,
                 counter_score=observation.counter_score,
                 confidence=observation.confidence,
