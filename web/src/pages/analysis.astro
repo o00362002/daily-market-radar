@@ -9,6 +9,7 @@ const trends: any[] = analysis?.future_trends ?? [];
 const structuralIndicators: any[] = analysis?.structural_indicators ?? [];
 const auxiliaryIndicators: any[] = analysis?.linked_indicators ?? [];
 const translations: any[] = analysis?.translations ?? [];
+const supplementalEvidence: any[] = analysis?.supplemental_evidence ?? [];
 const limitations: string[] = analysis?.limitations ?? [];
 
 const findingLabel: Record<string, string> = {
@@ -237,6 +238,26 @@ const generatedAt = provenance.generated_at
               <p class="muted">方向：{directionLabel[indicator.direction] ?? indicator.direction}{indicator.delta === null || indicator.delta === undefined ? '' : ` · ${indicator.delta > 0 ? '+' : ''}${indicator.delta}`}</p>
               <p class="muted">來源事件：{(indicator.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
             </details>
+          </article>
+        ))}
+      </div>
+
+      <h2>缺口補搜證據</h2>
+      <p class="muted">以下資料由 09:00 ChatGPT 缺口補搜取得，屬於 supplemental evidence，不會改寫原始 RadarReportV2、固定矩陣或 deterministic 指標。</p>
+      {supplementalEvidence.length === 0 && <p class="empty">本次沒有通過驗證的補搜證據，或正式分析仍為 deterministic fallback。</p>}
+      <div class="summary-grid">
+        {supplementalEvidence.map((item) => (
+          <article class="card content-card">
+            <div class="row">
+              <span class={`badge ${item.evidence_grade === 'primary' ? 'fact' : item.evidence_grade === 'high_quality_secondary' ? 'deterministic' : 'uncertainty'}`}>{item.evidence_grade}</span>
+              <span class="badge auto">{item.freshness}</span>
+              {item.direct_taiwan_evidence && <span class="badge fact">台灣直接證據</span>}
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.summary}</p>
+            <p><strong>補齊缺口：</strong><code>{item.gap_ref}</code></p>
+            <p class="muted">發布：{item.published_at} · 擷取：{item.fetched_at} · 來源角色：{item.source_role}</p>
+            <p><a href={item.url} target="_blank" rel="noreferrer">開啟原始來源</a></p>
           </article>
         ))}
       </div>
