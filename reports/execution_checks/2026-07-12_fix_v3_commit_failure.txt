@@ -1,0 +1,94 @@
+2026-07-12T05:57:00.3525526Z [36;1mnew_assert = '''            expected_direction = {\n                "supporting": "toward",\n                "support": "toward",\n                "counter": "against",\n            }.get(original.direction, original.direction)\n            self.assertEqual(row.direction, expected_direction)\n'''[0m
+2026-07-12T05:57:00.3526508Z [36;1mif text.count(old_assert) != 1:[0m
+2026-07-12T05:57:00.3526861Z [36;1m    raise SystemExit("direction assertion anchor not found")[0m
+2026-07-12T05:57:00.3527268Z [36;1mtext = text.replace(old_assert, new_assert, 1)[0m
+2026-07-12T05:57:00.3527812Z [36;1manchor = "    def test_same_report_as_previous_produces_flat_auxiliary_indicator_deltas(self) -> None:\n"[0m
+2026-07-12T05:57:00.3530695Z [36;1mtest_case = '''    def test_structural_direction_aliases_are_normalized_at_analysis_boundary(self) -> None:\n        payload = self.report.model_dump(mode="json")\n        payload["structural_indicators"][0]["direction"] = "counter"\n        payload["structural_indicators"][1]["direction"] = "supporting"\n        report = RadarReportV2.from_payload(payload)\n\n        analysis = build_deterministic_analysis(\n            report,\n            None,\n            self.config,\n            generated_at="2026-07-10T02:00:00+00:00",\n        )\n\n        self.assertEqual(analysis.structural_indicators[0].direction, "against")\n        self.assertEqual(analysis.structural_indicators[1].direction, "toward")\n\n'''[0m
+2026-07-12T05:57:00.3533018Z [36;1mif anchor not in text:[0m
+2026-07-12T05:57:00.3533329Z [36;1m    raise SystemExit("test insertion anchor not found")[0m
+2026-07-12T05:57:00.3533815Z [36;1mtests.write_text(text.replace(anchor, test_case + anchor, 1), encoding="utf-8")[0m
+2026-07-12T05:57:00.3534233Z [36;1mPY[0m
+2026-07-12T05:57:00.3567901Z shell: /usr/bin/bash -e {0}
+2026-07-12T05:57:00.3568155Z env:
+2026-07-12T05:57:00.3568422Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3568860Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+2026-07-12T05:57:00.3569582Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3569980Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3570367Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3570749Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+2026-07-12T05:57:00.3571069Z ##[endgroup]
+2026-07-12T05:57:00.3906706Z ##[group]Run python -m pytest -q tests/unit/test_ai_analysis.py
+2026-07-12T05:57:00.3907207Z [36;1mpython -m pytest -q tests/unit/test_ai_analysis.py[0m
+2026-07-12T05:57:00.3907653Z [36;1mpython -m compileall -q src/radar/analysis src/radar/contracts[0m
+2026-07-12T05:57:00.3938766Z shell: /usr/bin/bash -e {0}
+2026-07-12T05:57:00.3939247Z env:
+2026-07-12T05:57:00.3939532Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3939985Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+2026-07-12T05:57:00.3940444Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3940849Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3941264Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:00.3941675Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+2026-07-12T05:57:00.3942016Z ##[endgroup]
+2026-07-12T05:57:01.9201840Z ......                                                                   [100%]
+2026-07-12T05:57:01.9202644Z 6 passed in 0.37s
+2026-07-12T05:57:02.0109320Z ##[group]Run set -euo pipefail
+2026-07-12T05:57:02.0109680Z [36;1mset -euo pipefail[0m
+2026-07-12T05:57:02.0110069Z [36;1mrm -f .github/workflows/fix-ai-structural-direction-2026-07-12.yml[0m
+2026-07-12T05:57:02.0110596Z [36;1mrm -f .github/workflows/fix-ai-structural-direction-v2-2026-07-12.yml[0m
+2026-07-12T05:57:02.0111113Z [36;1mrm -f .github/workflows/fix-ai-structural-direction-v3-2026-07-12.yml[0m
+2026-07-12T05:57:02.0111545Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-07-12T05:57:02.0111987Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-07-12T05:57:02.0112534Z [36;1mgit add src/radar/analysis/builder.py tests/unit/test_ai_analysis.py[0m
+2026-07-12T05:57:02.0113583Z [36;1mgit add -u .github/workflows/fix-ai-structural-direction-2026-07-12.yml .github/workflows/fix-ai-structural-direction-v2-2026-07-12.yml .github/workflows/fix-ai-structural-direction-v3-2026-07-12.yml || true[0m
+2026-07-12T05:57:02.0114632Z [36;1mgit commit -m "fix: normalize structural directions for AI analysis"[0m
+2026-07-12T05:57:02.0115018Z [36;1mfor attempt in 1 2 3; do[0m
+2026-07-12T05:57:02.0115373Z [36;1m  if git pull --rebase origin main && git push origin HEAD:main; then[0m
+2026-07-12T05:57:02.0115738Z [36;1m    exit 0[0m
+2026-07-12T05:57:02.0115933Z [36;1m  fi[0m
+2026-07-12T05:57:02.0116129Z [36;1m  git rebase --abort || true[0m
+2026-07-12T05:57:02.0116386Z [36;1m  sleep $((attempt * 2))[0m
+2026-07-12T05:57:02.0116622Z [36;1mdone[0m
+2026-07-12T05:57:02.0116878Z [36;1mecho "unable to push verified fix after retries" >&2[0m
+2026-07-12T05:57:02.0117194Z [36;1mexit 1[0m
+2026-07-12T05:57:02.0149579Z shell: /usr/bin/bash -e {0}
+2026-07-12T05:57:02.0149823Z env:
+2026-07-12T05:57:02.0150087Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:02.0150525Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+2026-07-12T05:57:02.0150970Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:02.0151347Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:02.0151722Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:57:02.0152134Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+2026-07-12T05:57:02.0152463Z ##[endgroup]
+2026-07-12T05:57:02.0508568Z [main d99c20c] fix: normalize structural directions for AI analysis
+2026-07-12T05:57:02.0509225Z  5 files changed, 39 insertions(+), 241 deletions(-)
+2026-07-12T05:57:02.0509740Z  delete mode 100644 .github/workflows/fix-ai-structural-direction-2026-07-12.yml
+2026-07-12T05:57:02.0510570Z  delete mode 100644 .github/workflows/fix-ai-structural-direction-v2-2026-07-12.yml
+2026-07-12T05:57:02.0511627Z  delete mode 100644 .github/workflows/fix-ai-structural-direction-v3-2026-07-12.yml
+2026-07-12T05:57:02.0624295Z error: cannot pull with rebase: You have unstaged changes.
+2026-07-12T05:57:02.0626976Z error: Please commit or stash them.
+2026-07-12T05:57:02.0642020Z fatal: no rebase in progress
+2026-07-12T05:57:04.0695024Z error: cannot pull with rebase: You have unstaged changes.
+2026-07-12T05:57:04.0697308Z error: Please commit or stash them.
+2026-07-12T05:57:04.0712462Z fatal: no rebase in progress
+2026-07-12T05:57:08.0759436Z error: cannot pull with rebase: You have unstaged changes.
+2026-07-12T05:57:08.0761561Z error: Please commit or stash them.
+2026-07-12T05:57:08.0776536Z fatal: no rebase in progress
+2026-07-12T05:57:14.0792496Z unable to push verified fix after retries
+2026-07-12T05:57:14.0807838Z ##[error]Process completed with exit code 1.
+2026-07-12T05:57:14.0946109Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-12T05:57:14.0947364Z Post job cleanup.
+2026-07-12T05:57:14.1829600Z [command]/usr/bin/git version
+2026-07-12T05:57:14.1860016Z git version 2.54.0
+2026-07-12T05:57:14.1899289Z Temporarily overriding HOME='/home/runner/work/_temp/4b90d922-afdd-4edb-a481-39554318f83f' before making global git config changes
+2026-07-12T05:57:14.1900765Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-12T05:57:14.1902501Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/daily-market-radar/daily-market-radar
+2026-07-12T05:57:14.1959634Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-07-12T05:57:14.1994444Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-07-12T05:57:14.2248121Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-12T05:57:14.2277469Z http.https://github.com/.extraheader
+2026-07-12T05:57:14.2292101Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-07-12T05:57:14.2326205Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-07-12T05:57:14.2619612Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T05:57:14.2656057Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-07-12T05:57:14.3046620Z Cleaning up orphan processes
+2026-07-12T05:57:14.3308599Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
