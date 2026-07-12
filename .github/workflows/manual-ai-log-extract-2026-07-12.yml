@@ -1,0 +1,62 @@
+name: manual-ai-log-extract-2026-07-12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/manual-ai-log-extract-2026-07-12.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download failed AI job log
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_ID: "86619971877"
+        run: |
+          set -euo pipefail
+          mkdir -p reports/execution_checks
+          curl --fail --location --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/jobs/$JOB_ID/logs" \
+            -o /tmp/job.log
+          python - <<'PY'
+          from pathlib import Path
+
+          raw = Path('/tmp/job.log').read_bytes()
+          try:
+              text = raw.decode('utf-8-sig')
+          except UnicodeDecodeError:
+              text = raw.decode('utf-8', errors='replace')
+          lines = text.splitlines()
+          markers = ('Traceback', 'Error', 'ERROR', 'Exception', 'ValidationError', '##[error]', 'Process completed with exit code')
+          hits = [i for i, line in enumerate(lines) if any(m in line for m in markers)]
+          start = max(0, (hits[-1] - 60) if hits else len(lines) - 160)
+          excerpt = lines[start:]
+          out = Path('reports/execution_checks/2026-07-12_ai_analysis_failure_log.txt')
+          out.write_text('\n'.join(excerpt[-240:]) + '\n', encoding='utf-8')
+          print('\n'.join(excerpt[-160:]))
+          PY
+          rm -f .github/workflows/manual-ai-log-extract-2026-07-12.yml
+
+      - name: Commit failure log receipt
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-07-12_ai_analysis_failure_log.txt
+          git add -u .github/workflows/manual-ai-log-extract-2026-07-12.yml || true
+          git commit -m "chore: capture 2026-07-12 AI analysis failure log"
+          git pull --rebase origin main
+          git push origin HEAD:main
