@@ -1,0 +1,12 @@
+[
+  {
+    "id": 29181962489,
+    "name": "fix-ai-structural-direction-v4-2026-07-12",
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "1f4fda131646926e3d1f9e81453f91ed6a01f699",
+    "created_at": "2026-07-12T05:59:06Z",
+    "updated_at": "2026-07-12T05:59:29Z",
+    "html_url": "https://github.com/o00362002/daily-market-radar/actions/runs/29181962489"
+  }
+]
