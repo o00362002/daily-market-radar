@@ -1,5 +1,6 @@
 name: manual-ai-analysis-verify-2026-07-12
 
+# Registered on main; this second commit intentionally dispatches the one-time verification.
 on:
   push:
     branches: [main]
