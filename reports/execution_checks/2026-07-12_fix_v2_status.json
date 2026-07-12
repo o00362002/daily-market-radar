@@ -1,0 +1,13 @@
+[
+  {
+    "id": 29181877430,
+    "name": "fix-ai-structural-direction-v2-2026-07-12",
+    "status": "completed",
+    "conclusion": "failure",
+    "run_number": 1,
+    "head_sha": "fc6c09e63b5f7b876cd7d6c579654e10f4cb51ba",
+    "created_at": "2026-07-12T05:55:27Z",
+    "updated_at": "2026-07-12T05:55:54Z",
+    "html_url": "https://github.com/o00362002/daily-market-radar/actions/runs/29181877430"
+  }
+]
