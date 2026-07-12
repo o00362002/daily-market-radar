@@ -1,0 +1,84 @@
+name: manual-actions-observer-2026-07-12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/manual-actions-observer-2026-07-12.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Query recent workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports/execution_checks
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs?per_page=50" \
+            > /tmp/actions-runs.json
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/actions-runs.json').read_text(encoding='utf-8'))
+          wanted = {
+              'daily-intelligence',
+              'ai-analysis',
+              'manual-ai-analysis-verify-2026-07-12',
+              'manual-actions-smoke-2026-07-12',
+              'manual-actions-observer-2026-07-12',
+          }
+          runs = []
+          for run in payload.get('workflow_runs', []):
+              if run.get('name') not in wanted:
+                  continue
+              runs.append({
+                  'id': run.get('id'),
+                  'name': run.get('name'),
+                  'event': run.get('event'),
+                  'status': run.get('status'),
+                  'conclusion': run.get('conclusion'),
+                  'run_number': run.get('run_number'),
+                  'run_attempt': run.get('run_attempt'),
+                  'head_sha': run.get('head_sha'),
+                  'created_at': run.get('created_at'),
+                  'updated_at': run.get('updated_at'),
+                  'html_url': run.get('html_url'),
+              })
+          output = {
+              'observed_at': datetime.now(timezone.utc).isoformat(),
+              'repository': payload.get('repository', None),
+              'runs': runs,
+          }
+          Path('reports/execution_checks/2026-07-12_recent_actions_runs.json').write_text(
+              json.dumps(output, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+          )
+          print(json.dumps(output, ensure_ascii=False, indent=2))
+          PY
+          rm -f .github/workflows/manual-actions-observer-2026-07-12.yml
+
+      - name: Commit observer receipt
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-07-12_recent_actions_runs.json
+          git add -u .github/workflows/manual-actions-observer-2026-07-12.yml || true
+          git commit -m "chore: record recent Actions runs for AI verification"
+          git pull --rebase origin main
+          git push origin HEAD:main
