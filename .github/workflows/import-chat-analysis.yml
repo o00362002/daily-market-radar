@@ -100,13 +100,14 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
 
           report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
           status = report.get("status")
           ingestion = report.get("source_audit", {}).get("ingestion_mode")
           deployable = status != "failed" and ingestion != "fixture"
-          with Path(__import__("os").environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
               output.write(f"deployable={str(deployable).lower()}\n")
           if not deployable:
               raise SystemExit(f"source report is not deployable: status={status}, ingestion={ingestion}")
@@ -154,24 +155,15 @@ jobs:
 
       - name: Workflow summary
         if: always()
+        shell: bash
         run: |
-          {
-            echo "## ChatGPT AI analysis import"
-            echo
-            echo "- Analysis: \`${{ steps.paths.outputs.analysis_path }}\`"
-            echo "- Source report deployable: \`${{ steps.gate.outputs.deployable || 'false' }}\`"
-            if [ -f chat-analysis-import-receipt.json ]; then
-              python - <<'PY'
-          import json
-          from pathlib import Path
-          receipt = json.loads(Path("chat-analysis-import-receipt.json").read_text(encoding="utf-8"))
-          print(f"- Valid: `{receipt.get('valid', False)}`")
-          print(f"- Date: `{receipt.get('date', 'unknown')}`")
-          print(f"- Effective mode: `{receipt.get('effective_mode', 'unknown')}`")
-          print(f"- Supplemental evidence: `{receipt.get('supplemental_evidence_count', 0)}`")
-          PY
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "## ChatGPT AI analysis import" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "- Analysis: \`${{ steps.paths.outputs.analysis_path }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source report deployable: \`${{ steps.gate.outputs.deployable || 'false' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f chat-analysis-import-receipt.json ]; then
+            python -c 'import json; r=json.load(open("chat-analysis-import-receipt.json")); print(f"- Valid: `{r.get(chr(118)+chr(97)+chr(108)+chr(105)+chr(100), False)}`\n- Date: `{r.get(chr(100)+chr(97)+chr(116)+chr(101), chr(117)+chr(110)+chr(107)+chr(110)+chr(111)+chr(119)+chr(110))}`\n- Effective mode: `{r.get(chr(101)+chr(102)+chr(102)+chr(101)+chr(99)+chr(116)+chr(105)+chr(118)+chr(101)+chr(95)+chr(109)+chr(111)+chr(100)+chr(101), chr(117)+chr(110)+chr(107)+chr(110)+chr(111)+chr(119)+chr(110))}`\n- Supplemental evidence: `{r.get(chr(115)+chr(117)+chr(112)+chr(112)+chr(108)+chr(101)+chr(109)+chr(101)+chr(110)+chr(116)+chr(97)+chr(108)+chr(95)+chr(101)+chr(118)+chr(105)+chr(100)+chr(101)+chr(110)+chr(99)+chr(101)+chr(95)+chr(99)+chr(111)+chr(117)+chr(110)+chr(116), 0)}`")' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   deploy:
     needs: build
