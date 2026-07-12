@@ -3,19 +3,7 @@
 This file is the thin human-readable quality policy for `daily-market-radar`.
 It is not the execution entry and does not duplicate machine-derivable rules.
 
-```text
-AGENTS.md = first entry and route selection
-CURRENT_STATE.md = current facts
-CURRENT_DECISIONS.md = accepted decisions
-config/runtime_contract.json = canonical runtime/output contract
-config/source_registry.json = canonical source registry
-config/competitor_registry.json = canonical competitor registry
-src/radar/ = deterministic execution runtime
-DEPENDENCY_MAP.md = human-readable dependency and degradation map
-workflows/ = ordered execution guidance
-configs/ = semantic radar and search policy
-reports/ = evidence and historical runs
-```
+Entry, route selection and per-concept owners live in `AGENTS.md`（讀取路由）plus the machine contract `brain.manifest.yaml`. This file owns only the quality policy in sections 1–12 below and does not re-list those owners.
 
 ## 1. Role
 

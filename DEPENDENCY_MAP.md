@@ -5,20 +5,7 @@ Machine-derivable contract values live in `config/runtime_contract.json` and mus
 
 ## 1. Sources of truth
 
-```text
-Execution entry: AGENTS.md
-Current facts: CURRENT_STATE.md
-Accepted decisions: CURRENT_DECISIONS.md
-Runtime contract: config/runtime_contract.json
-Canonical source registry: config/source_registry.json
-Canonical competitor registry: config/competitor_registry.json
-Competitor policy: configs/competitor_intelligence.yml
-Indicator policy: configs/indicator_tracking.yml
-Deterministic runtime: src/radar/
-Report schema: schemas/report.schema.json
-Database foundation: migrations/0001_runtime_foundation.sql + migrations/0002_report_payloads.sql + migrations/0003_durable_runtime_repositories.sql
-Sync edges: schema/sync-matrix.json
-```
+Entry and per-concept owners live in `AGENTS.md`（讀取路由）plus the machine contract `brain.manifest.yaml`; this map does not keep a second copy. It owns only the human-readable dependency and degradation view in sections 2–14 below.
 
 Semantic policies remain in `configs/`; human rendering remains in `workflows/` and `templates/`.
 If prose conflicts with the runtime contract, mark dependency drift and follow the machine contract.

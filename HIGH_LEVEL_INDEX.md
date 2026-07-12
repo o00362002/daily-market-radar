@@ -4,18 +4,7 @@ This file is a navigation projection, not a source of truth.
 
 ## Source of truth
 
-```text
-brain.manifest.yaml
-AGENTS.md
-CURRENT_STATE.md
-CURRENT_DECISIONS.md
-config/runtime_contract.json
-config/source_registry.json
-config/competitor_registry.json
-AGENT_DEFINITION_MAP.md
-DEPENDENCY_MAP.md
-schema/sync-matrix.json
-```
+Owners and entry route live in `AGENTS.md`（讀取路由）and the machine contract `brain.manifest.yaml`. This file does not maintain a second copy of that list; it only projects the layout below.
 
 ## Runtime v2
 

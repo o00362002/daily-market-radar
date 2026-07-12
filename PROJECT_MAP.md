@@ -4,17 +4,7 @@ Navigation projection for Event Intelligence Runtime v2.
 
 ## 1. Canonical control layer
 
-```text
-AGENTS.md                     first entry and route selection
-CURRENT_STATE.md              current facts
-CURRENT_DECISIONS.md          accepted decisions
-config/runtime_contract.json  machine execution and output contract
-config/source_registry.json   canonical source registry
-config/competitor_registry.json canonical competitor identity registry
-AGENT_DEFINITION_MAP.md       route mapping
-DEPENDENCY_MAP.md             dependency and degradation map
-schema/sync-matrix.json       machine-consumed change edges
-```
+Entry and per-concept owners live in `AGENTS.md`（讀取路由）plus the machine contract `brain.manifest.yaml`. This map does not re-list them; sections 2–11 below project the runtime layout only.
 
 ## 2. Deterministic runtime
 
