@@ -1,0 +1,121 @@
+name: verify-public-ai-analysis-2026-07-12
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-public-ai-analysis-2026-07-12.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-public:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch deployed AIAnalysisV1 with CDN retries
+        run: |
+          set -euo pipefail
+          JSON_URL="https://o00362002.github.io/daily-market-radar/data/ai-analysis/latest.json"
+          PAGE_URL="https://o00362002.github.io/daily-market-radar/analysis/"
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error "$JSON_URL?verify=$GITHUB_RUN_ID-$attempt" -o /tmp/analysis.json \
+              && curl --fail --silent --show-error "$PAGE_URL?verify=$GITHUB_RUN_ID-$attempt" -o /tmp/analysis.html; then
+              if python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('/tmp/analysis.json').read_text(encoding='utf-8'))
+          p=a.get('provenance',{})
+          ok=(a.get('date')=='2026-07-12' and p.get('source_report_date')=='2026-07-12')
+          raise SystemExit(0 if ok else 1)
+          PY
+              then
+                break
+              fi
+            fi
+            if [ "$attempt" -eq 12 ]; then
+              echo "public AI analysis did not reach 2026-07-12" >&2
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Validate public JSON and page, write receipt
+        run: |
+          mkdir -p reports/execution_checks
+          python - <<'PY'
+          import hashlib
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          raw=Path('/tmp/analysis.json').read_bytes()
+          analysis=json.loads(raw)
+          provenance=analysis.get('provenance',{})
+          html=Path('/tmp/analysis.html').read_text(encoding='utf-8',errors='replace')
+
+          expected_date='2026-07-12'
+          expected_run='29172493839'
+          checks={
+              'analysis_date_today': analysis.get('date')==expected_date,
+              'source_report_date_today': provenance.get('source_report_date')==expected_date,
+              'source_run_matches_daily_state': str(provenance.get('source_run_id'))==expected_run,
+              'source_context_hash_present': bool(provenance.get('source_context_hash')),
+              'structural_indicator_count_is_3': len(analysis.get('structural_indicators',[]))==3,
+              'auxiliary_indicator_count_is_6': len(analysis.get('linked_indicators',[]))==6,
+              'analysis_page_has_today_heading': ('AI 解讀' in html and expected_date in html),
+          }
+          if not all(checks.values()):
+              raise SystemExit('public AI analysis validation failed: '+json.dumps(checks,ensure_ascii=False))
+
+          receipt={
+              'verification_schema':'public-ai-analysis-verification/v1',
+              'verified_at':datetime.now(timezone.utc).isoformat(),
+              'analysis_url':'https://o00362002.github.io/daily-market-radar/analysis/',
+              'analysis_json_url':'https://o00362002.github.io/daily-market-radar/data/ai-analysis/latest.json',
+              'analysis_date':analysis.get('date'),
+              'source_report_date':provenance.get('source_report_date'),
+              'source_run_id':provenance.get('source_run_id'),
+              'source_context_hash':provenance.get('source_context_hash'),
+              'provider':provenance.get('provider') or 'deterministic',
+              'model':provenance.get('model'),
+              'requested_mode':provenance.get('requested_mode'),
+              'effective_mode':provenance.get('effective_mode'),
+              'fallback_used':provenance.get('fallback_used'),
+              'validation_status':provenance.get('validation_status'),
+              'prompt_version':provenance.get('prompt_version'),
+              'schema_version':provenance.get('schema_version'),
+              'analysis_sha256':hashlib.sha256(raw).hexdigest(),
+              'executive_summary_count':len(analysis.get('executive_summary',[])),
+              'finding_count':len(analysis.get('key_findings',[])),
+              'future_trend_count':len(analysis.get('future_trends',[])),
+              'structural_indicator_count':len(analysis.get('structural_indicators',[])),
+              'auxiliary_indicator_count':len(analysis.get('linked_indicators',[])),
+              'checks':checks,
+              'result':'verified-public-deployment',
+          }
+          Path('reports/execution_checks/2026-07-12_public_ai_analysis_verification.json').write_text(
+              json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8'
+          )
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+          rm -f .github/workflows/verify-public-ai-analysis-2026-07-12.yml
+          rm -f VERIFY_AI_ANALYSIS_LINKS.md
+          rm -f .github/workflows/manual-ai-analysis-verify-2026-07-12.yml
+
+      - name: Commit public verification receipt and cleanup
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-07-12_public_ai_analysis_verification.json
+          git add -u .github/workflows/verify-public-ai-analysis-2026-07-12.yml VERIFY_AI_ANALYSIS_LINKS.md .github/workflows/manual-ai-analysis-verify-2026-07-12.yml || true
+          git commit -m "chore: verify public 2026-07-12 AI analysis deployment"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push origin HEAD:main
