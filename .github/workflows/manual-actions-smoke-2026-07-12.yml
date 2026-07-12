@@ -1,0 +1,33 @@
+name: manual-actions-smoke-2026-07-12
+
+# Registered on main; this update dispatches the smoke workflow.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/manual-actions-smoke-2026-07-12.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Write smoke receipt
+        run: |
+          mkdir -p reports/execution_checks
+          printf 'actions_smoke=success\ncommit=%s\nrun_id=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" > reports/execution_checks/2026-07-12_actions_smoke.txt
+          rm -f .github/workflows/manual-actions-smoke-2026-07-12.yml
+      - name: Commit receipt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-07-12_actions_smoke.txt
+          git add -u .github/workflows/manual-actions-smoke-2026-07-12.yml || true
+          git commit -m "chore: record 2026-07-12 Actions smoke test"
+          git pull --rebase origin main
+          git push origin HEAD:main
