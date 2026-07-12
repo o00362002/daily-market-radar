@@ -1,13 +1,13 @@
 name: ai-analysis
 
-# Runs after a validated daily/import deployment, and after analysis-layer code
-# lands on main. Restores the same durable state, generates AIAnalysisV1, then
-# redeploys the static site. Missing API credentials degrade to deterministic
-# analysis instead of failing.
+# Runs after a validated chat import and after analysis-layer code lands on main.
+# The scheduled daily-intelligence workflow now generates AIAnalysisV1 inline so
+# the report and interpretation deploy atomically before the 09:00 Taiwan push.
+# Missing API credentials degrade to deterministic analysis instead of failing.
 
 on:
   workflow_run:
-    workflows: ["daily-intelligence", "import-chat"]
+    workflows: ["import-chat"]
     types: [completed]
   push:
     branches: [main]
