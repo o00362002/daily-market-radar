@@ -1,0 +1,80 @@
+2026-07-12T05:40:56.8996369Z [36;1mif report_date != expected:[0m
+2026-07-12T05:40:56.8996753Z [36;1m    raise SystemExit(f"expected report date {expected}, got {report_date}")[0m
+2026-07-12T05:40:56.8997188Z [36;1mif status == "failed":[0m
+2026-07-12T05:40:56.8997514Z [36;1m    raise SystemExit("latest RadarReportV2 status is failed")[0m
+2026-07-12T05:40:56.8997873Z [36;1mif ingestion_mode == "fixture":[0m
+2026-07-12T05:40:56.8998244Z [36;1m    raise SystemExit("latest RadarReportV2 uses fixture ingestion")[0m
+2026-07-12T05:40:56.8998980Z [36;1mprint(f"validated report date={report_date} status={status} ingestion={ingestion_mode}")[0m
+2026-07-12T05:40:56.8999427Z [36;1mPY[0m
+2026-07-12T05:40:56.9032844Z shell: /usr/bin/bash -e {0}
+2026-07-12T05:40:56.9033088Z env:
+2026-07-12T05:40:56.9033289Z   EXPECTED_REPORT_DATE: 2026-07-12
+2026-07-12T05:40:56.9033620Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9034296Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+2026-07-12T05:40:56.9034737Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9035116Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9035510Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9035905Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+2026-07-12T05:40:56.9036228Z ##[endgroup]
+2026-07-12T05:40:56.9382478Z validated report date=2026-07-12 status=partial ingestion=live_multi
+2026-07-12T05:40:56.9461104Z ##[group]Run PYTHONPATH=src python -m radar.analysis.cli \
+2026-07-12T05:40:56.9461608Z [36;1mPYTHONPATH=src python -m radar.analysis.cli \[0m
+2026-07-12T05:40:56.9461968Z [36;1m  --database "$PWD/data/radar.db" \[0m
+2026-07-12T05:40:56.9462272Z [36;1m  --repo-root "$PWD" \[0m
+2026-07-12T05:40:56.9462618Z [36;1m  --output-dir "$PWD/artifacts/web/v1/ai-analysis" \[0m
+2026-07-12T05:40:56.9462964Z [36;1m  --mode "$ANALYSIS_MODE"[0m
+2026-07-12T05:40:56.9496642Z shell: /usr/bin/bash -e {0}
+2026-07-12T05:40:56.9496899Z env:
+2026-07-12T05:40:56.9497110Z   EXPECTED_REPORT_DATE: 2026-07-12
+2026-07-12T05:40:56.9497455Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9497895Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+2026-07-12T05:40:56.9498324Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9498707Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9499145Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+2026-07-12T05:40:56.9499532Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+2026-07-12T05:40:56.9499859Z   OPENAI_API_KEY: 
+2026-07-12T05:40:56.9500062Z   OPENAI_MODEL: 
+2026-07-12T05:40:56.9500265Z   OPENAI_ANALYSIS_MODEL: 
+2026-07-12T05:40:56.9500493Z   ANALYSIS_MODE: auto
+2026-07-12T05:40:56.9500708Z ##[endgroup]
+2026-07-12T05:40:58.2119670Z Traceback (most recent call last):
+2026-07-12T05:40:58.2120329Z   File "<frozen runpy>", line 198, in _run_module_as_main
+2026-07-12T05:40:58.2120894Z   File "<frozen runpy>", line 88, in _run_code
+2026-07-12T05:40:58.2121795Z   File "/home/runner/work/daily-market-radar/daily-market-radar/src/radar/analysis/cli.py", line 116, in <module>
+2026-07-12T05:40:58.2125710Z     raise SystemExit(main())
+2026-07-12T05:40:58.2126301Z                      ^^^^^^
+2026-07-12T05:40:58.2127516Z   File "/home/runner/work/daily-market-radar/daily-market-radar/src/radar/analysis/cli.py", line 41, in main
+2026-07-12T05:40:58.2128811Z     analysis = build_deterministic_analysis(
+2026-07-12T05:40:58.2129452Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-07-12T05:40:58.2130912Z   File "/home/runner/work/daily-market-radar/daily-market-radar/src/radar/analysis/builder.py", line 52, in build_deterministic_analysis
+2026-07-12T05:40:58.2132196Z     structural = _build_structural_indicators(report, config)
+2026-07-12T05:40:58.2132710Z                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-07-12T05:40:58.2133676Z   File "/home/runner/work/daily-market-radar/daily-market-radar/src/radar/analysis/builder.py", line 251, in _build_structural_indicators
+2026-07-12T05:40:58.2134881Z     StructuralIndicatorAnalysisV1(
+2026-07-12T05:40:58.2135696Z   File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pydantic/main.py", line 263, in __init__
+2026-07-12T05:40:58.2136691Z     validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+2026-07-12T05:40:58.2137404Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-07-12T05:40:58.2138655Z pydantic_core._pydantic_core.ValidationError: 1 validation error for StructuralIndicatorAnalysisV1
+2026-07-12T05:40:58.2139188Z direction
+2026-07-12T05:40:58.2139715Z   Input should be 'toward', 'against', 'mixed' or 'insufficient' [type=literal_error, input_value='counter', input_type=str]
+2026-07-12T05:40:58.2140475Z     For further information visit https://errors.pydantic.dev/2.13/v/literal_error
+2026-07-12T05:40:58.2584738Z ##[error]Process completed with exit code 1.
+2026-07-12T05:40:58.2745650Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-07-12T05:40:58.2746933Z Post job cleanup.
+2026-07-12T05:40:58.3655393Z [command]/usr/bin/git version
+2026-07-12T05:40:58.3716264Z git version 2.54.0
+2026-07-12T05:40:58.3773542Z Temporarily overriding HOME='/home/runner/work/_temp/fdc4c44e-9539-482e-a44a-bc308d49d32b' before making global git config changes
+2026-07-12T05:40:58.3796503Z Adding repository directory to the temporary git global config as a safe directory
+2026-07-12T05:40:58.3798555Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/daily-market-radar/daily-market-radar
+2026-07-12T05:40:58.3840973Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-07-12T05:40:58.3889886Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-07-12T05:40:58.4192805Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-07-12T05:40:58.4221020Z http.https://github.com/.extraheader
+2026-07-12T05:40:58.4238246Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-07-12T05:40:58.4282574Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-07-12T05:40:58.4638224Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-07-12T05:40:58.4756658Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-07-12T05:40:58.5205781Z Evaluate and set environment url
+2026-07-12T05:40:58.5209061Z Evaluated environment url: 
+2026-07-12T05:40:58.5209851Z Cleaning up orphan processes
+2026-07-12T05:40:58.5512214Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
