@@ -1,0 +1,185 @@
+name: import-chat-analysis
+
+# Validate a ChatGPT-produced AIAnalysisV1 against the latest durable RadarReportV2,
+# then rebuild and deploy the analysis page. Supplemental web research stays in
+# AIAnalysisV1 and never mutates the canonical report or radar-state.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "chat-analysis-imports/**/AIAnalysisV1.json"
+  workflow_dispatch:
+    inputs:
+      analysis_path:
+        description: "Path to ChatGPT-produced AIAnalysisV1.json"
+        required: true
+        type: string
+
+concurrency:
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deployable: ${{ steps.gate.outputs.deployable }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: python -m pip install -e ".[dev,ai]"
+
+      - name: Resolve analysis path
+        id: paths
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_ANALYSIS_PATH: ${{ inputs.analysis_path }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            ANALYSIS_PATH="$INPUT_ANALYSIS_PATH"
+          else
+            mapfile -t ANALYSES < <(
+              git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" \
+                | grep -E '^chat-analysis-imports/[0-9]{4}-[0-9]{2}-[0-9]{2}/AIAnalysisV1\.json$' || true
+            )
+            if [ "${#ANALYSES[@]}" -ne 1 ]; then
+              echo "Expected exactly one changed AIAnalysisV1.json, found ${#ANALYSES[@]}" >&2
+              printf '%s\n' "${ANALYSES[@]:-}" >&2
+              exit 1
+            fi
+            ANALYSIS_PATH="${ANALYSES[0]}"
+          fi
+          test -f "$ANALYSIS_PATH" || { echo "analysis file not found: $ANALYSIS_PATH" >&2; exit 1; }
+          echo "analysis_path=$ANALYSIS_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Restore validated durable state
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1 || {
+            echo "radar-state does not exist; run daily-intelligence first" >&2
+            exit 1
+          }
+          git fetch origin radar-state
+          git worktree add .state origin/radar-state
+          PYTHONPATH=src python -m radar.cli state restore \
+            --state-root .state/state \
+            --database "$PWD/data/radar.db"
+
+      - name: Export latest validated report
+        run: |
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD" \
+            --database "$PWD/data/radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Production safety gate
+        id: gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          status = report.get("status")
+          ingestion = report.get("source_audit", {}).get("ingestion_mode")
+          deployable = status != "failed" and ingestion != "fixture"
+          with Path(__import__("os").environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              output.write(f"deployable={str(deployable).lower()}\n")
+          if not deployable:
+              raise SystemExit(f"source report is not deployable: status={status}, ingestion={ingestion}")
+          print(f"source report deployable: date={report.get('date')}, status={status}, ingestion={ingestion}")
+          PY
+
+      - name: Validate and publish ChatGPT AIAnalysisV1
+        if: steps.gate.outputs.deployable == 'true'
+        run: |
+          set -euo pipefail
+          PYTHONPATH=src python -m radar.analysis.import_chat \
+            --report "$PWD/artifacts/web/v1/latest.json" \
+            --analysis "${{ steps.paths.outputs.analysis_path }}" \
+            --repo-root "$PWD" \
+            --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
+            --receipt "$PWD/chat-analysis-import-receipt.json"
+
+      - name: Upload validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chat-analysis-import-receipt-${{ github.run_id }}
+          path: chat-analysis-import-receipt.json
+          if-no-files-found: warn
+
+      - name: Build static site
+        if: steps.gate.outputs.deployable == 'true'
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: |
+          npm ci
+          npm run types:check
+          npm run build
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+
+      - name: Upload Pages artifact
+        if: steps.gate.outputs.deployable == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          {
+            echo "## ChatGPT AI analysis import"
+            echo
+            echo "- Analysis: \`${{ steps.paths.outputs.analysis_path }}\`"
+            echo "- Source report deployable: \`${{ steps.gate.outputs.deployable || 'false' }}\`"
+            if [ -f chat-analysis-import-receipt.json ]; then
+              python - <<'PY'
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path("chat-analysis-import-receipt.json").read_text(encoding="utf-8"))
+          print(f"- Valid: `{receipt.get('valid', False)}`")
+          print(f"- Date: `{receipt.get('date', 'unknown')}`")
+          print(f"- Effective mode: `{receipt.get('effective_mode', 'unknown')}`")
+          print(f"- Supplemental evidence: `{receipt.get('supplemental_evidence_count', 0)}`")
+          PY
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.deployable == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
