@@ -87,6 +87,20 @@ class LinkedIndicatorV1(CanonicalAnalysisModel):
     confidence: int = Field(ge=0, le=100)
 
 
+class SupplementalEvidenceV1(CanonicalAnalysisModel):
+    evidence_id: str
+    gap_ref: str
+    title: str
+    url: str
+    published_at: str
+    fetched_at: str
+    source_role: str
+    evidence_grade: Literal["primary", "high_quality_secondary", "specialist", "secondary"]
+    direct_taiwan_evidence: bool
+    freshness: Literal["same_day", "weekend_72h", "candidate", "background"]
+    summary: str
+
+
 class AIAnalysisV1(CanonicalAnalysisModel):
     analysis_id: str
     date: str
@@ -97,6 +111,7 @@ class AIAnalysisV1(CanonicalAnalysisModel):
     future_trends: list[FutureTrendV1]
     structural_indicators: list[StructuralIndicatorAnalysisV1]
     linked_indicators: list[LinkedIndicatorV1]
+    supplemental_evidence: list[SupplementalEvidenceV1] = Field(default_factory=list)
     limitations: list[str]
     provenance: AnalysisProvenanceV1
 
