@@ -1,0 +1,23 @@
+name: single-owner-check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run existing mount integrity check
+        run: bash check_mount_integrity.sh
+      - name: Run deterministic single-owner check
+        run: node tools/brain/check-single-owner.js
