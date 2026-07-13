@@ -77,6 +77,8 @@ class StructuralIndicatorTests(unittest.TestCase):
         self.assertEqual(obs.direction, "supporting")
         self.assertGreater(obs.support_score, 0)
         self.assertTrue(obs.supporting_signal_ids)
+        self.assertTrue(obs.components)
+        self.assertTrue(any(component.evidence for component in obs.components))
         self.assertNotEqual(obs.confidence, "insufficient")
 
 

@@ -20,6 +20,14 @@ from radar.contracts.report import RadarReportV2, ReportItemV2
 
 DEFAULT_CONFIG_PATH = Path("config/ai_analysis.json")
 
+DOMAIN_LABELS = {
+    "global_markets_macro": "全球市場與宏觀",
+    "ai_agents_applications": "AI 代理與應用",
+    "crypto_rwa_agent_payments": "加密、RWA 與代理支付",
+    "retail_consumer_fashion": "零售、消費與時尚",
+    "science_technology_industry": "科學、科技與產業",
+}
+
 
 def load_analysis_config(repo_root: Path) -> dict[str, Any]:
     path = repo_root / DEFAULT_CONFIG_PATH
@@ -35,6 +43,11 @@ def load_analysis_config(repo_root: Path) -> dict[str, Any]:
     core_ids = [str(row.get("indicator_id", "")) for row in core if isinstance(row, dict)]
     if len(core_ids) != len(set(core_ids)) or any(not value for value in core_ids):
         raise ValueError("core structural indicator ids must be unique and non-empty")
+    runtime = json.loads((repo_root / "config/runtime_contract.json").read_text(encoding="utf-8"))
+    domains = runtime.get("report_domains")
+    if not isinstance(domains, list) or len(domains) != 5 or len(set(domains)) != 5:
+        raise ValueError("AI analysis requires the five canonical report domains")
+    payload["_canonical_report_domains"] = [str(domain) for domain in domains]
     return payload
 
 
@@ -52,7 +65,11 @@ def build_deterministic_analysis(
     structural = _build_structural_indicators(report, config)
     linked = _build_linked_indicators(report, previous_report, config)
     translations = [_translation(item) for item in report.items]
-    findings = _build_findings(report, int(config.get("max_findings", 8)))
+    findings = _build_findings(
+        report,
+        int(config.get("max_findings", 8)),
+        [str(domain) for domain in config.get("_canonical_report_domains", [])],
+    )
     trends = _build_trends(report, int(config.get("max_trends", 6)))
     summary = _build_summary(report, structural, linked, int(config.get("max_summary_points", 6)))
     fallback_used = requested_mode != "deterministic"
@@ -132,10 +149,15 @@ def _build_summary(
     )
     taiwan_count = sum(1 for item in report.items if item.direct_taiwan_evidence)
     rows: list[str] = []
-    if major:
-        rows.append(f"重大主軸：{major[0].headline}。")
-    if potential:
-        rows.append(f"潛力主軸：{potential[0].headline}，仍需追蹤後續採用與反證。")
+    dominant_domains = list(dict.fromkeys(item.primary_domain for item in [*major, *potential]))
+    if dominant_domains:
+        rows.append(
+            f"今日大方向：訊號集中在{'、'.join(DOMAIN_LABELS.get(domain, domain) for domain in dominant_domains[:3])}，"
+            f"同時出現 {len(major)} 件已具當期決策意義與 {len(potential)} 件仍待驗證的早期訊號；"
+            "應觀察它們是否跨域匯流，而非只看單一新聞。"
+        )
+    elif not report.items:
+        rows.append("今日大方向：目前沒有足夠的新增事件形成世界級主軸，請以覆蓋缺口與下一步補查為主。")
     rows.append(
         f"今日共有 {len(major)} 件重大項目、{len(potential)} 件潛力項目、"
         f"{taiwan_count} 件台灣直接證據項目。"
@@ -154,7 +176,7 @@ def _build_summary(
     return rows[: max(1, limit)]
 
 
-def _build_findings(report: RadarReportV2, limit: int) -> list[AnalysisFindingV1]:
+def _build_findings(report: RadarReportV2, limit: int, canonical_domains: list[str]) -> list[AnalysisFindingV1]:
     ranked = sorted(
         report.items,
         key=lambda item: (
@@ -164,8 +186,13 @@ def _build_findings(report: RadarReportV2, limit: int) -> list[AnalysisFindingV1
             item.item_id,
         ),
     )
+    # Keep one finding per canonical domain before filling remaining slots by
+    # global relevance, so the AI layer cannot collapse the five-domain view.
+    selected = [next((item for item in ranked if item.primary_domain == domain), None) for domain in canonical_domains]
+    selected = [item for item in selected if item is not None]
+    selected.extend(item for item in ranked if item not in selected)
     findings: list[AnalysisFindingV1] = []
-    for item in ranked[:limit]:
+    for item in selected[:limit]:
         label = "verified_fact" if item.report_lane == "major" else "hypothesis"
         summary = item.today_delta
         if item.report_lane == "potential" and item.next_watch:
@@ -174,6 +201,7 @@ def _build_findings(report: RadarReportV2, limit: int) -> list[AnalysisFindingV1
         findings.append(
             AnalysisFindingV1(
                 finding_id=finding_id,
+                domain=item.primary_domain,
                 label=label,
                 title=item.headline,
                 summary=summary,
@@ -185,39 +213,59 @@ def _build_findings(report: RadarReportV2, limit: int) -> list[AnalysisFindingV1
 
 
 def _build_trends(report: RadarReportV2, limit: int) -> list[FutureTrendV1]:
-    potential = sorted(
-        (item for item in report.items if item.report_lane == "potential"),
-        key=lambda item: (-item.potential_score, -item.confidence_score, item.item_id),
+    relevant = sorted(
+        report.items,
+        key=lambda item: (
+            0 if item.report_lane == "potential" else 1,
+            -max(item.potential_score, item.importance_score),
+            -item.confidence_score,
+            item.item_id,
+        ),
     )
-    selected: list[ReportItemV2] = []
-    seen_domains: set[str] = set()
-    for item in potential:
-        if item.primary_domain in seen_domains and len(selected) < max(1, limit // 2):
-            continue
-        selected.append(item)
-        seen_domains.add(item.primary_domain)
-        if len(selected) >= limit:
-            break
-
+    themes: dict[str, tuple[str, set[str]]] = {
+        "ai_productivity_and_work": (
+            "AI 生產力、工作重組與採用擴散",
+            {"ai_agents_applications", "science_technology_industry", "global_markets_macro"},
+        ),
+        "capital_and_infrastructure": (
+            "資本、基礎設施與新金融管線",
+            {"global_markets_macro", "crypto_rwa_agent_payments", "science_technology_industry"},
+        ),
+        "retail_brand_and_consumption": (
+            "零售、品牌分化與消費結構重排",
+            {"retail_consumer_fashion", "global_markets_macro", "ai_agents_applications"},
+        ),
+    }
     trends: list[FutureTrendV1] = []
-    for item in selected:
-        stage = _trend_stage(item.formation_level)
-        horizon = "months" if stage == "emerging" else "weeks"
-        direction = "up" if item.potential_score >= 75 and item.confidence_score >= 65 else "mixed"
-        trend_id = "trend_" + hashlib.sha256(item.event_id.encode("utf-8")).hexdigest()[:12]
+    for theme_id, (title, domains) in list(themes.items())[:limit]:
+        items = [item for item in relevant if item.primary_domain in domains]
+        if not items:
+            continue
+        source_ids = sorted({item.event_id for item in items})
+        potential_items = [item for item in items if item.report_lane == "potential"]
+        stage = "emerging" if potential_items else "forming"
+        direction = "up" if sum(item.potential_score for item in items) >= sum(item.importance_score for item in items) else "mixed"
+        confidence = round(sum(item.confidence_score for item in items) / len(items))
+        trend_id = "trend_" + hashlib.sha256(f"{theme_id}|{'|'.join(source_ids)}".encode("utf-8")).hexdigest()[:12]
+        counterevidence = list(dict.fromkeys(text for item in items for text in item.counterevidence))[:6]
+        uncertainties = list(dict.fromkeys(text for item in items for text in item.uncertainties))[:6]
+        next_watch = list(dict.fromkeys(item.next_watch for item in items if item.next_watch))[:6]
         trends.append(
             FutureTrendV1(
                 trend_id=trend_id,
-                title=item.headline,
+                title=title,
                 stage=stage,
-                horizon=horizon,
+                horizon="three_to_six_months",
+                horizon_months=[3, 6],
+                synthesis_scope="global",
+                source_domain_ids=sorted({item.primary_domain for item in items}),
                 direction=direction,
-                summary=f"{item.today_delta} 此為情境推演，不是已確認結果。",
-                source_event_ids=[item.event_id],
-                counterevidence=list(item.counterevidence),
-                uncertainties=list(item.uncertainties),
-                next_watch=[item.next_watch] if item.next_watch else [],
-                confidence=item.confidence_score,
+                summary=f"若上述 {len(source_ids)} 個跨域訊號持續出現，未來 3–6 個月可能形成此方向；這是條件式情境，不是確定預測。",
+                source_event_ids=source_ids,
+                counterevidence=counterevidence,
+                uncertainties=uncertainties,
+                next_watch=next_watch,
+                confidence=confidence,
             )
         )
     return trends
@@ -278,6 +326,7 @@ def _build_structural_indicators(
                 one_sentence_read=observation.one_sentence_read,
                 next_verification=list(observation.next_verification),
                 evaluation_mode=observation.evaluation_mode,
+                components=list(observation.components),
             )
         )
     return rows

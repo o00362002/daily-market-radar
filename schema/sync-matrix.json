@@ -157,6 +157,32 @@
       "schemas/report.schema.json",
       "tests/contracts/test_canonical_models.py"
     ],
+    "src/radar/contracts/analysis.py": [
+      "src/radar/analysis/builder.py",
+      "src/radar/analysis/openai_provider.py",
+      "src/radar/analysis/cli.py",
+      "web/src/pages/analysis.astro",
+      "tests/unit/test_ai_analysis.py",
+      "tests/unit/test_openai_analysis_provider.py"
+    ],
+    "src/radar/contracts/runtime.py": [
+      "config/runtime_contract.json",
+      "src/radar/application/run_daily.py",
+      "tests/unit/test_runtime_contract.py",
+      "tests/integration/test_fake_only_application.py"
+    ],
+    "src/radar/pipeline/domain_classification.py": [
+      "src/radar/pipeline/enrich.py",
+      "src/radar/application/run_daily.py",
+      "tests/unit/test_domain_classification.py",
+      "tests/integration/test_fixture_pipeline.py"
+    ],
+    "src/radar/evaluators/matrices.py": [
+      "src/radar/contracts/report.py",
+      "src/radar/analysis/builder.py",
+      "web/src/pages/analysis.astro",
+      "tests/unit/test_deterministic_evaluators.py"
+    ],
     "DEPENDENCY_MAP.md": ["CURRENT_STATE.md", "PROJECT_MAP.md", "AGENT_DEFINITION_MAP.md"],
     "AGENT_DEFINITION_MAP.md": ["DEPENDENCY_MAP.md", "CONTEXT_ROUTING.md"],
     "SOURCE_LIBRARY_SPEC.md": ["config/source_registry.json", "configs/source_routing_rules.yml"],

@@ -43,6 +43,11 @@ class OpenAIAnalysisProviderTests(unittest.TestCase):
             requested_mode="auto",
         )
         self.event_id = self.report.items[0].event_id
+        second_item = next(
+            item for item in self.report.items[1:] if item.primary_domain != self.report.items[0].primary_domain
+        )
+        self.second_event_id = second_item.event_id
+        self.second_domain = second_item.primary_domain
         self.indicator_id = self.baseline.linked_indicators[0].indicator_id
 
     def _proposal(self, *, event_id: str | None = None) -> AiAnalysisProposal:
@@ -52,6 +57,7 @@ class OpenAIAnalysisProviderTests(unittest.TestCase):
             translations=[TranslationProposal(event_id=event, translated_text="忠實繁中標題")],
             key_findings=[
                 FindingProposal(
+                    domain=self.report.items[0].primary_domain,
                     label="ai_inference",
                     title="跨事件關聯判讀",
                     summary="多個訊號可能共同指向採用擴散，但仍需要後續證據。",
@@ -63,10 +69,13 @@ class OpenAIAnalysisProviderTests(unittest.TestCase):
                 TrendProposal(
                     title="採用動能情境",
                     stage="emerging",
-                    horizon="months",
+                    horizon="three_to_six_months",
+                    horizon_months=[3, 6],
+                    synthesis_scope="global",
+                    source_domain_ids=[self.report.items[0].primary_domain, self.second_domain],
                     direction="mixed",
                     summary="若後續出現獨立採用與使用量證據，趨勢才可能成形。",
-                    source_event_ids=[event],
+                    source_event_ids=[event, self.second_event_id],
                     counterevidence=["目前證據仍集中於單日事件。"],
                     uncertainties=["尚缺跨區域擴散資料。"],
                     next_watch=["追蹤獨立採用與量化使用資料。"],

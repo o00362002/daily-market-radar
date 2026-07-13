@@ -1,9 +1,9 @@
 {
   "schema_version": "ai-analysis/v1",
-  "prompt_version": "daily-analysis-v1.1",
+  "prompt_version": "daily-analysis-v1.2",
   "max_summary_points": 6,
   "max_findings": 8,
-  "max_trends": 6,
+  "max_trends": 3,
   "core_structural_indicators": [
     {
       "indicator_id": "k_shaped_ai_productivity_economy",

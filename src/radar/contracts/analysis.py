@@ -6,6 +6,8 @@ from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from radar.contracts.report import StructuralIndicatorComponentV1
+
 
 class CanonicalAnalysisModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
@@ -35,6 +37,7 @@ class TranslationV1(CanonicalAnalysisModel):
 
 class AnalysisFindingV1(CanonicalAnalysisModel):
     finding_id: str
+    domain: str
     label: Literal["verified_fact", "ai_inference", "background", "hypothesis", "uncertainty"]
     title: str
     summary: str
@@ -46,7 +49,10 @@ class FutureTrendV1(CanonicalAnalysisModel):
     trend_id: str
     title: str
     stage: Literal["emerging", "forming", "established", "uncertain"]
-    horizon: Literal["days", "weeks", "months", "years"]
+    horizon: Literal["days", "weeks", "months", "years", "three_to_six_months"]
+    horizon_months: list[int] = Field(default_factory=lambda: [3, 6], min_length=2)
+    synthesis_scope: Literal["global"] = "global"
+    source_domain_ids: list[str] = Field(default_factory=list)
     direction: Literal["up", "flat", "down", "mixed", "uncertain"]
     summary: str
     source_event_ids: list[str]
@@ -70,6 +76,7 @@ class StructuralIndicatorAnalysisV1(CanonicalAnalysisModel):
     one_sentence_read: str
     next_verification: list[str]
     evaluation_mode: str
+    components: list[StructuralIndicatorComponentV1] = Field(default_factory=list)
 
 
 class LinkedIndicatorV1(CanonicalAnalysisModel):

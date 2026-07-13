@@ -10,7 +10,12 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from radar.contracts.report import MatrixObservationV1, StructuralIndicatorObservationV1
+from radar.contracts.report import (
+    MatrixObservationV1,
+    StructuralIndicatorComponentV1,
+    StructuralIndicatorEvidenceV1,
+    StructuralIndicatorObservationV1,
+)
 from radar.domain.models import Event, normalize_text
 
 # Retail matrix key -> (canonical metric namespaces, keyword triggers).
@@ -53,6 +58,33 @@ _STRUCTURAL_FEATURES: dict[str, dict[str, set[str]]] = {
     },
 }
 
+# Component-level evidence is deliberately explicit.  The three structural
+# indicators are conclusions; these components are the observable dimensions
+# that explain how the conclusion was reached.
+_STRUCTURAL_COMPONENTS: dict[str, tuple[tuple[str, str, set[str], set[str]], ...]] = {
+    "k_shaped_ai_productivity_economy": (
+        ("labor_market", "勞動力與就業環境", {"layoff", "hiring", "job", "裁員", "招聘", "就業"}, {"broad hiring", "普遍招聘"}),
+        ("wage_income", "薪資與所得分配", {"wage", "income", "salary", "薪資", "所得"}, {"real wage growth", "實質薪資成長"}),
+        ("productivity_sharing", "生產力與利益分享", {"productivity", "automation", "efficiency", "生產力", "自動化", "效率"}, {"shared", "共享", "inclusive"}),
+        ("firm_size_gap", "大企業與中小企業落差", {"large firm", "platform", "moat", "大企業", "平台", "護城河"}, {"sme adoption", "中小企業採用"}),
+        ("consumption_polarization", "消費分化與中間層壓力", {"premium", "value", "middle", "consumer", "高端", "低價", "中間層", "消費"}, {"broad consumption", "廣泛消費"}),
+    ),
+    "ai_bubble_overinvestment": (
+        ("capex_revenue", "資本支出與 AI 營收", {"capex", "capital expenditure", "資本支出", "營收"}, {"revenue growth", "營收成長"}),
+        ("financing_debt", "資料中心融資與債務", {"debt", "financing", "project finance", "債務", "融資"}, {"cash flow", "營運現金流"}),
+        ("utilization_roi", "使用率與企業 ROI", {"utilization", "roi", "adoption", "使用率", "投資報酬", "採用"}, {"paid adoption", "付費採用"}),
+        ("pricing_margin", "價格競爭與推理毛利", {"price competition", "margin", "inference", "價格競爭", "毛利", "推理成本"}, {"margin expansion", "毛利擴張"}),
+        ("valuation_power", "估值、電力與基礎設施壓力", {"valuation", "bubble", "power", "gpu", "估值", "泡沫", "電力", "GPU"}, {"profitable", "獲利"}),
+    ),
+    "brand_market_polarization_and_true_vs_fake_segmentation": (
+        ("brand_tiers", "品牌層級與市場集中", {"premium", "luxury", "share", "精品", "高端", "市占"}, {"mid-market recovery", "中間層回升"}),
+        ("mid_market_pressure", "中價位、折扣與關店壓力", {"mid-market", "discount", "closure", "中價位", "折扣", "撤店", "關店"}, {"full price", "正價"}),
+        ("niche_strength", "小眾品牌與社群韌性", {"niche", "community", "identity", "小眾", "社群", "身份"}, {"generic", "同質化"}),
+        ("channel_attention", "平台流量、通路與注意力", {"platform", "marketplace", "algorithm", "traffic", "平台", "電商", "演算法", "流量"}, {"discovery tools", "發現工具"}),
+        ("true_vs_fake_segmentation", "真分眾與假分眾", {"segmentation", "personalization", "persona", "分眾", "個人化", "人群"}, {"repeat", "sell-through", "回購", "售罄"}),
+    ),
+}
+
 
 def _event_text(event: Event) -> str:
     parts: list[str] = []
@@ -72,6 +104,61 @@ def _event_metrics(event: Event) -> set[str]:
 
 def _keyword_hit(text: str, keywords: set[str]) -> list[str]:
     return sorted(keyword for keyword in keywords if keyword in text)
+
+
+def _event_evidence(event: Event, *, direction: str, hits: list[str]) -> StructuralIndicatorEvidenceV1:
+    document = event.documents[0]
+    summary = document.summary.strip() or f"{document.action or '事件'}：{document.object or document.title}。"
+    return StructuralIndicatorEvidenceV1(
+        event_id=event.event_id,
+        headline=document.title,
+        summary=f"{summary}（命中：{'、'.join(hits)}）",
+        direction=direction,
+    )
+
+
+def _component_observations(
+    events: list[Event],
+    indicator_id: str,
+) -> list[StructuralIndicatorComponentV1]:
+    rows: list[StructuralIndicatorComponentV1] = []
+    for component_id, label, support_keywords, counter_keywords in _STRUCTURAL_COMPONENTS.get(indicator_id, ()):
+        support_events: list[Event] = []
+        counter_events: list[Event] = []
+        evidence: list[StructuralIndicatorEvidenceV1] = []
+        for event in events:
+            text = _event_text(event)
+            support_hits = _keyword_hit(text, support_keywords)
+            counter_hits = _keyword_hit(text, counter_keywords)
+            if support_hits:
+                support_events.append(event)
+                evidence.append(_event_evidence(event, direction="toward", hits=support_hits))
+            if counter_hits:
+                counter_events.append(event)
+                evidence.append(_event_evidence(event, direction="against", hits=counter_hits))
+        support_score = min(100, 25 * len({event.event_id for event in support_events}))
+        counter_score = min(100, 25 * len({event.event_id for event in counter_events}))
+        if not evidence:
+            direction = "insufficient"
+            score = 0
+            missing_data = ["本次沒有足夠新聞或量化資料支撐此細分指標。"]
+        else:
+            direction = "toward" if support_score > counter_score else "against" if counter_score > support_score else "mixed"
+            score = max(0, min(100, round(50 + (support_score - counter_score) / 2)))
+            missing_data = []
+        rows.append(
+            StructuralIndicatorComponentV1(
+                component_id=component_id,
+                label=label,
+                direction=direction,
+                score=score,
+                support_score=support_score,
+                counter_score=counter_score,
+                evidence=evidence,
+                missing_data=missing_data,
+            )
+        )
+    return rows
 
 
 def _evaluate_matrix(
@@ -216,6 +303,7 @@ def evaluate_structural_indicators(
                     one_sentence_read="Insufficient verified evidence for a directional update.",
                     next_verification=["run indicator-specific evidence checks"],
                     evaluation_mode="deterministic",
+                    components=_component_observations(events, indicator_id),
                 )
             )
             continue
@@ -237,6 +325,7 @@ def evaluate_structural_indicators(
                 one_sentence_read=f"Deterministic keyword evidence leans {direction} for this indicator.",
                 next_verification=["confirm with structured measurement facts and independent sources"],
                 evaluation_mode="deterministic",
+                components=_component_observations(events, indicator_id),
             )
         )
     return observations

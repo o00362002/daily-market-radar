@@ -29,6 +29,7 @@ class TranslationProposal(_ProposalModel):
 
 
 class FindingProposal(_ProposalModel):
+    domain: str
     label: Literal["verified_fact", "ai_inference", "background", "hypothesis", "uncertainty"]
     title: str
     summary: str
@@ -39,7 +40,10 @@ class FindingProposal(_ProposalModel):
 class TrendProposal(_ProposalModel):
     title: str
     stage: Literal["emerging", "forming", "established", "uncertain"]
-    horizon: Literal["days", "weeks", "months", "years"]
+    horizon: Literal["days", "weeks", "months", "years", "three_to_six_months"]
+    horizon_months: list[int] = Field(default_factory=lambda: [3, 6], min_length=2)
+    synthesis_scope: Literal["global"] = "global"
+    source_domain_ids: list[str] = Field(default_factory=list)
     direction: Literal["up", "flat", "down", "mixed", "uncertain"]
     summary: str
     source_event_ids: list[str]
@@ -111,6 +115,7 @@ def _bounded_payload(
             "max_findings": int(config.get("max_findings", 8)),
             "max_trends": int(config.get("max_trends", 6)),
         },
+        "canonical_domains": list(config.get("_canonical_report_domains", [])),
         "events": [
             {
                 "event_id": item.event_id,
@@ -170,12 +175,13 @@ def _merge_proposal(
 ) -> AIAnalysisV1:
     allowed_events = {item.event_id for item in report.items}
     allowed_indicators = {row.indicator_id for row in baseline.linked_indicators}
+    allowed_domains = {str(domain) for domain in config.get("_canonical_report_domains", [])}
     max_summary = int(config.get("max_summary_points", 6))
     max_findings = int(config.get("max_findings", 8))
     max_trends = int(config.get("max_trends", 6))
 
     _validate_text_language(proposal)
-    _validate_references(proposal, allowed_events, allowed_indicators)
+    _validate_references(proposal, allowed_events, allowed_indicators, allowed_domains)
 
     translation_map = {row.event_id: row.translated_text.strip() for row in proposal.translations}
     translations = [
@@ -195,6 +201,7 @@ def _merge_proposal(
         findings.append(
             AnalysisFindingV1(
                 finding_id="finding_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12],
+                domain=row.domain,
                 label=row.label,
                 title=row.title.strip(),
                 summary=row.summary.strip(),
@@ -213,6 +220,9 @@ def _merge_proposal(
                 title=row.title.strip(),
                 stage=row.stage,
                 horizon=row.horizon,
+                horizon_months=list(row.horizon_months),
+                synthesis_scope=row.synthesis_scope,
+                source_domain_ids=sorted(set(row.source_domain_ids)),
                 direction=row.direction,
                 summary=row.summary.strip(),
                 source_event_ids=source_ids,
@@ -271,16 +281,36 @@ def _validate_references(
     proposal: AiAnalysisProposal,
     allowed_events: set[str],
     allowed_indicators: set[str],
+    allowed_domains: set[str],
 ) -> None:
     for row in proposal.translations:
         if row.event_id not in allowed_events:
             raise ValueError(f"unknown translation event_id: {row.event_id}")
-    for row in [*proposal.key_findings, *proposal.future_trends]:
+    for row in proposal.key_findings:
+        if row.domain not in allowed_domains:
+            raise ValueError(f"unknown finding domain: {row.domain}")
         if not row.source_event_ids:
             raise ValueError("analysis rows require at least one source_event_id")
         unknown = set(row.source_event_ids) - allowed_events
         if unknown:
             raise ValueError(f"unknown analysis event ids: {sorted(unknown)}")
+    for row in proposal.future_trends:
+        if not row.source_event_ids:
+            raise ValueError("analysis rows require at least one source_event_id")
+        unknown = set(row.source_event_ids) - allowed_events
+        if unknown:
+            raise ValueError(f"unknown analysis event ids: {sorted(unknown)}")
+        if row.horizon != "three_to_six_months" or sorted(set(row.horizon_months)) != [3, 6]:
+            raise ValueError("future trends must use the 3-to-6-month horizon")
+        if row.synthesis_scope != "global":
+            raise ValueError("future trends must be global syntheses")
+        unknown_domains = set(row.source_domain_ids) - allowed_domains
+        if unknown_domains:
+            raise ValueError(f"unknown future trend domains: {sorted(unknown_domains)}")
+        if len(allowed_events) > 1 and len(set(row.source_event_ids)) < 2:
+            raise ValueError("future trends must synthesize multiple source events")
+        if len(allowed_events) > 1 and len(set(row.source_domain_ids)) < 2:
+            raise ValueError("future trends must synthesize multiple source domains")
     unknown_indicators = {row.indicator_id for row in proposal.indicator_interpretations} - allowed_indicators
     if unknown_indicators:
         raise ValueError(f"unknown indicator ids: {sorted(unknown_indicators)}")
@@ -317,12 +347,15 @@ _SYSTEM_PROMPT = """
 
 任務：
 1. 忠實翻譯非中文標題，保留原意，不進行新聞改寫。
-2. 跨事件統整今日真正重要的主軸，並用 source_event_ids 連回事件。
-3. 未來趨勢只能寫成有條件的情境推演，必須包含反證、不確定性與下一個驗證點。
-4. structural_indicators 是 RadarReportV2 的三個核心長期結構方向，全部欄位唯讀，不得改寫、刪除或自創。
-5. auxiliary_signal_indicators 的 score、previous_score、delta、direction、status、method 與 components 皆唯讀；
+2. 今日統整要回答「今天世界的大方向是什麼」，要跨事件整合，不要只複述最高分新聞。
+3. key_findings 必須使用輸入中的五個 canonical_domains；每筆只能有一個 domain，並只保留符合本專案目標的判讀。
+4. 未來趨勢必須是跨事件、跨領域的全球情境統整，固定使用 horizon=three_to_six_months、horizon_months=[3,6]、synthesis_scope=global；
+   不得把每則新聞各自改寫成一個趨勢。每個趨勢在有多個事件時至少引用兩個 source_event_ids，並包含反證、不確定性與下一個驗證點。
+5. structural_indicators 是 RadarReportV2 的三個核心長期結構方向，全部欄位唯讀，不得改寫、刪除或自創；
+   每個核心指標要依 components 的細分指標與 evidence 先解讀，再保留 deterministic 的總分。
+6. auxiliary_signal_indicators 的 score、previous_score、delta、direction、status、method 與 components 皆唯讀；
    只能為既有 indicator_id 產生 interpretation，不得改分數或自創指標。
-6. verified_fact 只能重述 today_delta 或輸入中的直接事實；跨事件關聯使用 ai_inference；
+7. verified_fact 只能重述 today_delta 或輸入中的直接事實；跨事件關聯使用 ai_inference；
    尚待驗證的走向使用 hypothesis 或 uncertainty。
-7. 資料不足就明確列入 limitations，不得用常識或外部知識補洞。
+8. 資料不足就明確列入 limitations，不得用常識或外部知識補洞。
 """.strip()

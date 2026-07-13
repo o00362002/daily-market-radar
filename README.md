@@ -8,7 +8,7 @@
 Source registry + competitor registry
 → direct RSS / Atom
 → optional FreshRSS Google Reader inbox
-→ fixed product/social competitor checks
+→ registry-backed competitor projection with explicit audit gaps
 → normalization and document de-duplication
 → cross-day event resolution
 → material-delta filtering
@@ -83,7 +83,7 @@ memory/watchlist.md                    owner-approved fixed watch intent
 web/src/pages/competitors.astro        product/social competitor page
 ```
 
-A competitor update must have a fresh material delta and verified evidence. Completed checks with no delta render `已查無重大更新`; incomplete checks render `未完整查證`. Old competitor news is never replayed to fill the section.
+A competitor update must have a fresh material delta and verified evidence. Completed checks with no delta render `已查無重大更新`; when the RadarReportV2 has no fixed competitor audit, render `未完整查證`. Old competitor news is never replayed to fill the section.
 
 ## Install and validate
 
