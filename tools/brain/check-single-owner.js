@@ -28,19 +28,32 @@ function trackedFiles() {
   }
 }
 
+function isExplicitHistoricalPointer(file) {
+  try {
+    const text = fs.readFileSync(path.join(repo, file), 'utf8');
+    return /(redirect|frozen history|historical.*only|不再作為 active|no longer.*active)/i.test(text)
+      && /(CURRENT_DECISIONS\.md|canonical|source of truth|current source)/i.test(text);
+  } catch {
+    return false;
+  }
+}
+
 const files = trackedFiles();
 const governanceStem = /(PROJECT_MAP|DEPENDENCY_MAP|AGENT_DEFINITION_MAP|CURRENT_STATE|CURRENT_DECISIONS|CONTEXT_ROUTING|ARCHITECTURE|GOVERNANCE|ANALYSIS_GRAPH|DECISION_GRAPH|INVARIANT|SOURCE_LIBRARY_SPEC)/i;
 const parallelSuffix = /(_APPEND|_v2|_new|_copy)\.(md|json|ya?ml)$/i;
 const forbiddenExact = /(^|\/)(ANALYSIS_GRAPH|DECISION_GRAPH|GOVERNANCE_COPY|INVARIANTS_COPY)\.(md|json|ya?ml)$/i;
-const violations = files.filter((file) => {
+const candidates = files.filter((file) => {
   const base = path.basename(file);
   return forbiddenExact.test(file) || (governanceStem.test(base) && parallelSuffix.test(base));
 });
+const violations = candidates.filter((file) => !isExplicitHistoricalPointer(file));
+const redirects = candidates.filter((file) => isExplicitHistoricalPointer(file));
 
+for (const file of redirects) pass(`historical pointer allowed: ${file}`);
 if (violations.length) {
   for (const file of violations) fail(`parallel governance carrier: ${file}`);
 } else {
-  pass('no deterministic parallel governance carriers');
+  pass('no active deterministic parallel governance carriers');
 }
 
 for (const required of ['brain.manifest.yaml', 'AGENT_DEFINITION_MAP.md', 'SOURCE_LIBRARY_SPEC.md']) {
