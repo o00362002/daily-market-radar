@@ -19,6 +19,8 @@
       （「刻意不建的未來檔」「建議 profile」這類清單整塊列示時不逐行誤報）。
     跳過 EXEMPT 目錄（archive/reports/research/outputs/examples 等歷史與產出層）
       與 CHILD_REPO_MOUNTS.md（它登記的是「子 repo 的」檔案，不屬本 repo 檔案樹）。
+    GitHub Pages workflow 的 `path: web/dist` 是前一步 Astro build 產生的執行期目錄，
+      不是應預先存在的 repo 路徑，因此只在該精確 workflow upload path 上豁免。
 
   Usage: node tools/brain/check-doc-paths.js [repoDir] [--staged]
          --staged 只掃 git staged 的 md/yaml（pre-commit 快速模式）
@@ -54,7 +56,6 @@ let FAIL = 0, checked = 0;
 console.log(`Doc-Path Reality Gate（${stagedOnly ? 'staged' : 'tracked'} md/yaml；code block 也掃）`);
 for (const f of FILES) {
   const lines = fs.readFileSync(path.join(repo, f), 'utf8').split('\n');
-  // fence 前導豁免：``` 開始前 3 行內含豁免詞 → 整個 code block 跳過
   let inFence = false, fenceExempt = false;
   lines.forEach((line, i) => {
     if (/^\s*```/.test(line)) {
@@ -66,20 +67,18 @@ for (const f of FILES) {
     }
     if (inFence && fenceExempt) return;
     if (SKIP_LINE.test(line)) return;
-    // 全形符號與常見裝飾字元換成空白，讓 token 斷得乾淨
+    if (f.startsWith('.github/workflows/') && /^\s*path:\s*web\/dist\s*(?:#.*)?$/.test(line)) return;
     const clean = line.replace(/[（）「」『』｜、，。；：★├└─▶←→＋=<>{}[\]()'"`,;!？?]/g, ' ');
     for (const raw of clean.match(TOKEN) || []) {
       let t = raw.replace(/[.,;:]+$/, '');
-      if (/[_-]$/.test(t) || /YYYY/.test(t)) continue;   // 檔名前綴/日期模板（xxx_、YYYY-MM-DD_...）
+      if (/[_-]$/.test(t) || /YYYY/.test(t)) continue;
       const first = t.split('/')[0];
-      if (!roots.has(first)) continue;                    // 錨定：第一段必須是根目錄現存項目
-      if (/^\d+$/.test(first)) continue;                  // 日期樣式 2026/07/06
-      // 證據/歷史/產出層＋執行期產物（generated artifacts、runtime DB）本來就來去，token 不驗
+      if (!roots.has(first)) continue;
+      if (/^\d+$/.test(first)) continue;
       if (['reports', 'archive', 'research', 'outputs', 'examples', 'artifacts', 'data'].includes(first)) continue;
       checked++;
       const rel = t.replace(/\/$/, '');
       const abs = path.join(repo, rel);
-      // 模組內文件的相對引用（store-master/README 寫 docs/x.md ＝ store-master/docs/x.md）
       const modAbs = path.join(repo, path.dirname(f), rel);
       if (!fs.existsSync(abs) && !fs.existsSync(abs + '.md') &&
           !fs.existsSync(modAbs) && !fs.existsSync(modAbs + '.md')) {

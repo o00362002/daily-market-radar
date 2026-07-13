@@ -1,62 +1,45 @@
-# brain.manifest.yaml — child mount (brain-core)
-# Projection file: 核心原則的 source of truth 在 brain-core repo。
-schema: brain-manifest/v1
+# brain.manifest.yaml — machine-readable governance and runtime pointers
+schema: brain-manifest/v2
 manifest_kind: child
+repo: o00362002/daily-market-radar
+status: active
 
-parent_control_panel: o00362002/personal-project-brain
 local_source_of_truth: this_repo
 agent_entry: AGENTS.md
+governance_owner: o00362002/brain-core
 
-governance_posture:
-  default_depth: core
-  trigger_depth: mother
-  core_profile: o00362002/brain-core
-  mother_depth: o00362002/Human-AI-Collaboration-Brain
+pointers:
+  current_state: CURRENT_STATE.md
+  current_decisions: CURRENT_DECISIONS.md
+  route_registry: AGENT_DEFINITION_MAP.md
+  source_contract: SOURCE_LIBRARY_SPEC.md
+  query_recipes: configs/query_recipes.yml
+  canonical_runtime_contract: config/runtime_contract.json
+  domain_packs: domains/
+  potential_pool: memory/potential_pool.md
+  sync_review_edges: schema/sync-matrix.json
 
-core_repo: o00362002/brain-core
-core_version: v0
-mounted_since: 2026-07-06
-role: 每日市場情報雷達＋多領域趨勢／潛力訊號掃描＋產品與社群競品情報
+machine_checks:
+  core:
+    structural: tools/brain/check-core.js
+    sync_review: tools/brain/check-sync-matrix.js
+    doc_path_reality: tools/brain/check-doc-paths.js
+    pre_change_confirmation: tools/brain/check-pre-change-confirmation.js
+    protected_file_policy: schema/protected-files.json
+  domain:
+    domain_pack_integrity: tools/brain/check-domain-packs.js
 
-previous_mount:
-  repo: o00362002/Human-AI-Collaboration-Brain
-  mother_version: v2.0-draft
-  status: unmounted_2026-07-06        # 舊母腦掛載已退役；why 見 CURRENT_DECISIONS.md
-
-inherited_principles:                  # 來源：brain-core/DECISIONS.md 創立憲法
-  - P1 規則必有機器消費者
-  - P2 入口極薄、按需路由、沒有必讀清單
-  - P3 資料驅動（JSON/YAML＋檢查器 > 散文）
-  - P4 模型無關層最厚（檢查器/hook/schema；CLAUDE.md 只做薄適配）
-  - P5 記憶輪替（頭部預算＋季度歸檔＋superseded 標記）
-  - 關聯設計原則（強弱判準/漂移長邊/掛載盤點；brain-core DECISIONS 2026-07-07）
-
-machine_layer:
-  entry_contract: AGENTS.md
+execution:
   hook_installer: tools/install_hooks.sh
-  checkers:
-    - tools/brain/check-core.js          # 不變式4：必備檔＋入口預算＋不變式數量鎖
-    - tools/brain/check-sync-matrix.js   # 不變式2：連動提醒（advisory）
-    - tools/brain/check-doc-paths.js     # 不變式3：路徑現實（advisory）
-    - tools/brain/check-domain-packs.js  # 不變式5：領域包完整性＋canonical mapping
-  ci_wrapper: check_mount_integrity.sh   # CI 與人工共用同一入口
+  integrity_entry: check_mount_integrity.sh
+  routine_work: local_first
 
-domain_extension:
-  canonical_news_domains: config/runtime_contract.json  # 現行五個；唯一 domain quota authority
-  fine_radars: configs/radars.yml                       # 模組／指標，不自行建立 quota
-  packs_dir: domains/                                   # 新主題包映射既有 canonical domain
-  query_recipes: configs/query_recipes.yml              # 新聞、競品與 indicator-only 固定配方
-  competitor_registry: config/competitor_registry.json  # 產品／社群競品身分與別名
-  competitor_policy: configs/competitor_intelligence.yml
-  indicator_tracking: configs/indicator_tracking.yml    # labor/consumption 為 indicator-only
-  potential_pool: memory/potential_pool.md               # 蒐集階段不預篩，全收入池
-  capture_stage_no_filtering: true
-
-boundary:
-  brain_never_executes: true
+boundaries:
+  local_content_source_of_truth: true
+  governance_definitions_live_in_profile: true
+  projections_create_no_canonical_rules: true
+  evidence_requires_promotion: true
   agent_cannot_approve_itself: true
-  human_final_review_for_structural_changes: true
-  evidence_needs_approval_to_become_memory: true
   competitor_projection_is_not_report_domain: true
   labor_is_indicator_only_by_default: true
   frozen_history_is_not_current_state: true

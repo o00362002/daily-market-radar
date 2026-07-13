@@ -8,7 +8,7 @@ Control links:
 Parent control panel: o00362002/personal-project-brain
 Local source-of-truth: this repo
 Agent entry: AGENTS.md
-Governance posture: core depth by default; mother depth by trigger
+Governance owner: o00362002/brain-core
 ```
 
 ## 讀取路由（按需，沒有必讀清單）
@@ -21,17 +21,16 @@ Governance posture: core depth by default; mother depth by trigger
 新領域怎麼加？      → domains/README.md（複製 _template 填完即掛上）
 潛力項目放哪？      → memory/potential_pool.md（蒐集階段不篩選）
 改連動關係？        → schema/sync-matrix.json（唯一矩陣）
+治理與 checker 映射？→ brain.manifest.yaml
 其他一切：直接動手。commit 時關口會接住你。
 ```
 
-## 五條不變式（每條都有機器消費者）
+## Core governance 與 domain checks
 
 ```text
-1. 動 CURRENT_STATE/CURRENT_DECISIONS 必附 reports/ 紀錄（hook 擋；SKIP_PROCESS_GATE=1 逃生）
-2. 動 X → 應檢視 Y 清單自動出現（check-sync-matrix，提醒不擋）
-3. 文件宣稱的路徑必須存在（check-doc-paths，提醒不擋）
-4. 入口預算：AGENTS ≤4500、CLAUDE ≤1200、CURRENT_STATE 頭部 ≤8000（check-core 驗）
-5. domains/ 領域包必須完整：domain_pack.json＋sources.json 必備欄位（check-domain-packs 驗）
+Core governance 定義由 brain-core 擁有；本地 consumer mapping 在 brain.manifest.yaml。
+Daily Radar domain checks 只能增加，不能取代 core governance checks。
+修改 protected files 前必須取得人類確認，並同一變更附 reports/change-confirmations/*.md。
 ```
 
 ## 完成的定義
@@ -65,11 +64,11 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 答不出 → 它是說明不是規則，寫進 CURRENT_DECISIONS.md 的 why 即可。
 新增檔案、規則、語彙、檢查器、schema、workflow 前，先看既有路徑能否承接；能承接就改既有。
 
-## 繼承核心＋本專案目標｜Inherited governance + own goal（掛 brain-core）
+## 本專案目標
 
-繼承 brain-core 角色邊界＋決策權/風險分級（權威見 brain-core DECISIONS）：三層命名本專案既有關口——
-light=檢查器綠／standard=動 state/decisions 附 reports/／full=重大變更人終審＋具名第二訊號（Class C）；未認領決策→full。
-**本專案目標＝本專案回測/架構調整的量尺，由人 owner 定、AI 不自產（目標即量尺，不可自訂衡量自己的尺）：**
+繼承 brain-core 角色邊界、決策權與風險分級；權威見 brain-core `DECISIONS.md`。
+
+**本專案目標＝本專案回測／架構調整的量尺，由人 owner 定，AI 不自產。**
 
 本專案目標｜This project's goal: 蒐集全世界重要訊息與新趨勢/新應用/新話題的**潛力訊息**，藉此了解現在與未來方向。（owner 2026-07-08）｜Surface important information and potential signals to understand where things may head.
 

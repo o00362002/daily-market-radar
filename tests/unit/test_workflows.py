@@ -46,6 +46,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertNotIn("HEAD:main", text)
         self.assertIn("run-daily --mode live", text)
         self.assertIn("FRESHRSS_BASE_URL", text)
+        self.assertIn("radar.analysis.cli", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")
@@ -80,10 +81,10 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("deploy-pages", text)
         self.assertIn("allow_fixture_deploy", text)
 
-    def test_ai_analysis_runs_after_validated_pipelines_and_degrades_without_key(self) -> None:
+    def test_ai_analysis_runs_after_chat_import_and_degrades_without_key(self) -> None:
         doc = self._load("ai-analysis.yml")
         on = doc.get("on", doc.get(True))
-        self.assertEqual(on["workflow_run"]["workflows"], ["daily-intelligence", "import-chat"])
+        self.assertEqual(on["workflow_run"]["workflows"], ["import-chat"])
         self.assertEqual(doc["concurrency"]["group"], "radar-daily")
         text = (WORKFLOWS / "ai-analysis.yml").read_text(encoding="utf-8")
         self.assertIn("radar.analysis.cli", text)

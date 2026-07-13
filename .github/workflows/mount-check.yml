@@ -26,8 +26,27 @@ jobs:
           node --version
       - name: Install project and test dependencies
         run: python3 -m pip install --disable-pip-version-check -e '.[dev]'
-      - name: Unit, integration, contract and architecture tests
-        run: make test
+      - name: Unit tests
+        id: unit_tests
+        shell: bash
+        run: |
+          set +e
+          make unit > unit-test.log 2>&1
+          status=$?
+          cat unit-test.log
+          exit $status
+      - name: Upload unit test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-log
+          path: unit-test.log
+      - name: Integration tests
+        run: make integration
+      - name: Contract tests
+        run: make contracts
+      - name: Architecture tests
+        run: make architecture
       - name: Runtime contract validation
         run: make runtime-contract
       - name: Source registry and OPML validation
