@@ -27,7 +27,20 @@ jobs:
       - name: Install project and test dependencies
         run: python3 -m pip install --disable-pip-version-check -e '.[dev]'
       - name: Unit tests
-        run: make unit
+        id: unit_tests
+        shell: bash
+        run: |
+          set +e
+          make unit > unit-test.log 2>&1
+          status=$?
+          cat unit-test.log
+          exit $status
+      - name: Upload unit test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-log
+          path: unit-test.log
       - name: Integration tests
         run: make integration
       - name: Contract tests
