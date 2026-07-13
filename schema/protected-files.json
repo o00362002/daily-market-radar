@@ -1,0 +1,38 @@
+{
+  "schema": "brain-core-protected-files/v1",
+  "confirmation_dir": "reports/change-confirmations/",
+  "protected_files": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CURRENT_STATE.md",
+    "CURRENT_DECISIONS.md",
+    "README.md",
+    "brain.manifest.yaml",
+    "schema/sync-matrix.json",
+    "schema/protected-files.json",
+    "tools/brain/check-core.js",
+    "tools/brain/check-pre-change-confirmation.js",
+    "tools/install_hooks.sh",
+    "check_mount_integrity.sh",
+    ".github/workflows/mount-check.yml"
+  ],
+  "protected_prefixes": [
+    "config/",
+    "configs/",
+    "schema/",
+    "tools/brain/",
+    ".github/workflows/"
+  ],
+  "exempt_prefixes": [
+    "reports/change-confirmations/"
+  ],
+  "required_record_fields": [
+    "Change type:",
+    "Affected files:",
+    "Human confirmed: yes",
+    "Risk level:",
+    "Mother Brain activated:",
+    "Rollback note:"
+  ],
+  "note": "Protected-file changes require a same-change confirmation record. This gate does not authorize semantic decisions; it only verifies the recorded human decision exists."
+}
