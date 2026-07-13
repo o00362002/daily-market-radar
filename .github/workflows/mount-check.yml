@@ -26,8 +26,14 @@ jobs:
           node --version
       - name: Install project and test dependencies
         run: python3 -m pip install --disable-pip-version-check -e '.[dev]'
-      - name: Unit, integration, contract and architecture tests
-        run: make test
+      - name: Unit tests
+        run: make unit
+      - name: Integration tests
+        run: make integration
+      - name: Contract tests
+        run: make contracts
+      - name: Architecture tests
+        run: make architecture
       - name: Runtime contract validation
         run: make runtime-contract
       - name: Source registry and OPML validation
