@@ -11,6 +11,13 @@ const auxiliaryIndicators: any[] = analysis?.linked_indicators ?? [];
 const translations: any[] = analysis?.translations ?? [];
 const supplementalEvidence: any[] = analysis?.supplemental_evidence ?? [];
 const limitations: string[] = analysis?.limitations ?? [];
+const canonicalDomains = [
+  { id: 'global_markets_macro', label: '全球市場與宏觀' },
+  { id: 'ai_agents_applications', label: 'AI 代理與應用' },
+  { id: 'crypto_rwa_agent_payments', label: '加密、RWA 與代理支付' },
+  { id: 'retail_consumer_fashion', label: '零售、消費與時尚' },
+  { id: 'science_technology_industry', label: '科學、科技與產業' },
+];
 
 const findingLabel: Record<string, string> = {
   verified_fact: '已驗證事實',
@@ -52,6 +59,7 @@ const horizonLabel: Record<string, string> = {
   weeks: '數週',
   months: '數月',
   years: '數年',
+  three_to_six_months: '未來 3–6 個月',
 };
 
 const clamp = (value: number) => Math.max(0, Math.min(100, value));
@@ -77,6 +85,7 @@ const trendProbability = (trend: any, months: 3 | 6) => {
   return clamp(Math.round(confidence + stageAdjustment + directionAdjustment - counterPenalty - uncertaintyPenalty));
 };
 const probabilityBand = (score: number) => score >= 70 ? '偏高' : score >= 50 ? '中等' : '偏低';
+const findingsForDomain = (domain: string) => findings.filter((item) => item.domain === domain);
 const structuralScore = (indicator: any) => {
   if (indicator.direction === 'insufficient' || indicator.confidence === 'insufficient') return null;
   return clamp(Math.round(50 + (Number(indicator.support_score ?? 0) - Number(indicator.counter_score ?? 0)) / 2));
@@ -117,25 +126,34 @@ const generatedAt = provenance.generated_at
       </div>
 
       <h2>重點判讀</h2>
-      {findings.length === 0 && <p class="empty">今日無可產出的重點判讀。</p>}
-      {findings.map((item) => (
-        <article class="card content-card">
-          <div class="row">
-            <span class={`badge ${findingClass[item.label] ?? 'deterministic'}`}>{findingLabel[item.label] ?? item.label}</span>
-            <span class="badge auto">信心 {item.confidence}</span>
-          </div>
-          <h3>{item.title}</h3>
-          <p>{item.summary}</p>
-          <details class="notes">
-            <summary>來源事件</summary>
-            <p class="muted">{(item.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
-          </details>
-        </article>
-      ))}
+      <p class="muted">維持五大域；以下內容由 AI 翻譯、去重與跨事件整理，原始事件與證據仍以 RadarReportV2 為準。</p>
+      {canonicalDomains.map((domain) => {
+        const domainFindings = findingsForDomain(domain.id);
+        return (
+          <section class="domain-findings">
+            <h3>{domain.label}</h3>
+            {domainFindings.length === 0 && <p class="empty">今日沒有符合目標的新增判讀。</p>}
+            {domainFindings.map((item) => (
+              <article class="card content-card">
+                <div class="row">
+                  <span class={`badge ${findingClass[item.label] ?? 'deterministic'}`}>{findingLabel[item.label] ?? item.label}</span>
+                  <span class="badge auto">信心 {item.confidence}</span>
+                </div>
+                <h4>{item.title}</h4>
+                <p>{item.summary}</p>
+                <details class="notes">
+                  <summary>來源事件</summary>
+                  <p class="muted">{(item.source_event_ids ?? []).map((id: string) => <code>{id}</code>)}</p>
+                </details>
+              </article>
+            ))}
+          </section>
+        );
+      })}
 
-      <h2>未來趨勢情境</h2>
+      <h2>未來 3–6 個月趨勢情境</h2>
       <p class="muted">
-        3 個月與 6 個月數字是條件式可能性評估，不是統計校準後的投資機率。計算以趨勢信心、形成階段與方向為基礎，再扣除反證和不確定性。
+        這裡統整跨新聞、跨領域的世界發展情境，不是一則新聞一個預測。3 個月與 6 個月數字是條件式可能性評估，不是統計校準後的投資機率。
       </p>
       {trends.length === 0 && <p class="empty">今日沒有足夠資料形成趨勢情境。</p>}
       {trends.map((trend) => {
@@ -151,6 +169,7 @@ const generatedAt = provenance.generated_at
             </div>
             <h3>{trend.title}</h3>
             <p><span class="badge inference">情境推演</span> {trend.summary}</p>
+            {(trend.source_domain_ids ?? []).length > 0 && <p class="muted">涉及領域：{trend.source_domain_ids.join('、')}</p>}
             <div class="probability-grid">
               <div>
                 <span>未來 3 個月可能性</span>
@@ -203,6 +222,25 @@ const generatedAt = provenance.generated_at
                 </div>
                 {(indicator.missing_data ?? []).length > 0 && <p><strong>資料缺口：</strong>{indicator.missing_data.join('；')}</p>}
                 {(indicator.next_verification ?? []).length > 0 && <p><strong>下一步：</strong>{indicator.next_verification.join('；')}</p>}
+                {(indicator.components ?? []).length > 0 && (
+                  <div class="component-grid">
+                    {indicator.components.map((component: any) => (
+                      <article class="component-card">
+                        <div class="row">
+                          <strong>{component.label}</strong>
+                          <span class="badge auto">總分 {component.score}</span>
+                          <span class="badge">{structuralDirectionLabel[component.direction] ?? component.direction}</span>
+                        </div>
+                        <p class="muted">支持 {component.support_score} · 反向 {component.counter_score}</p>
+                        {(component.evidence ?? []).length === 0 && <p class="empty">尚無足夠證據。</p>}
+                        {(component.evidence ?? []).map((evidence: any) => (
+                          <p><strong>{evidence.direction === 'toward' ? '支持' : '反向'}：</strong>{evidence.headline} — {evidence.summary}</p>
+                        ))}
+                        {(component.missing_data ?? []).length > 0 && <p class="muted">資料缺口：{component.missing_data.join('；')}</p>}
+                      </article>
+                    ))}
+                  </div>
+                )}
                 {(indicator.supporting_signal_ids ?? []).length > 0 && <p><strong>支持訊號：</strong>{indicator.supporting_signal_ids.map((id: string) => <code>{id}</code>)}</p>}
                 {(indicator.counter_signal_ids ?? []).length > 0 && <p><strong>反向訊號：</strong>{indicator.counter_signal_ids.map((id: string) => <code>{id}</code>)}</p>}
                 <p class="muted">Indicator ID：<code>{indicator.indicator_id}</code> · {indicator.evaluation_mode}</p>
@@ -302,6 +340,10 @@ const generatedAt = provenance.generated_at
 <style>
   .notice { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 6px; padding: 1rem; background: var(--canvas-subtle); }
   .analysis-byline { color: var(--fg-muted); margin-top: -.25rem; }
+  .domain-findings { margin: 1rem 0 1.5rem; }
+  .domain-findings h3 { border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+  .component-grid { display: grid; gap: .65rem; margin: 1rem 0; }
+  .component-card { border: 1px solid var(--border); border-radius: .5rem; padding: .75rem; background: var(--bg-subtle); }
   .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; }
   .meta-grid div { display: flex; flex-direction: column; gap: .2rem; padding: .7rem; border: 1px solid var(--border-muted); border-radius: 6px; }
   .meta-grid span { color: var(--fg-muted); font-size: .82rem; }

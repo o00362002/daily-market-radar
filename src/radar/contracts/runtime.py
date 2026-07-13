@@ -12,6 +12,11 @@ _LEGACY_PROFILE_KEYS = {
     "slot_caps_are_completeness_proof",
 }
 
+_BUILTIN_DOMAIN_ALIASES = {
+    "policy_geopolitics": "global_markets_macro",
+    "labor_demographics_consumption_pressure": "global_markets_macro",
+}
+
 
 @dataclass(frozen=True)
 class ProfileContract:
@@ -86,7 +91,7 @@ class RuntimeContract:
             raise ValueError("retail and crypto matrix keys are required")
 
     def canonical_domain(self, domain: str) -> str:
-        canonical = self.domain_aliases.get(domain, domain)
+        canonical = self.domain_aliases.get(domain, _BUILTIN_DOMAIN_ALIASES.get(domain, domain))
         if canonical not in self.report_domains:
             raise ValueError(f"unknown report domain: {domain}")
         return canonical

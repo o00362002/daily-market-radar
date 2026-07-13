@@ -14,6 +14,8 @@ src/radar/contracts/analysis.py            AIAnalysisV1 labelled projection cont
 web/src/pages/analysis.astro               primary website panel
 ```
 
+每個指標都先拆成可觀察的細分指標。網站先顯示細分指標的新聞 evidence、摘要、支持／反向方向與 component score，最後才顯示整體指標分數。
+
 搜尋下列任一名稱或 ID，都應能找到本檔、runtime contract、詳細規格與網站輸出：
 
 ```text

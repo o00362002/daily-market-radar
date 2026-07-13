@@ -126,9 +126,12 @@ output_contract:
     - missing_data
     - one_sentence_read
     - next_verification
+    - components
   confidence_values: [high, medium, low, insufficient]
   rule: >
-    All indicator IDs in config/runtime_contract.json must be present. If evidence is inadequate,
+    All indicator IDs in config/runtime_contract.json must be present. Each indicator must first be
+    decomposed into observable components with news evidence, direction and component score before
+    the overall score is presented. If evidence is inadequate,
     direction and confidence are insufficient; the indicator is not omitted.
 
 quality_gate:

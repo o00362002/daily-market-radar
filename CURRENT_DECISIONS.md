@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-07-13：AI 解讀、Domains 與競品分類收斂
+
+### Decision
+
+```text
+1. 今日統整必須回答今日世界的大方向；重點判讀維持五個 canonical domains，由 AI 翻譯、去重與整理符合目標的內容。
+2. 未來趨勢是跨事件的全球情境統整，固定使用 3–6 個月 horizon；不得把每則新聞各自改寫成一個趨勢。
+3. 三個核心結構指標必須展開 components：細分指標 → 新聞 evidence 與摘要 → 支持／反向方向 → component score → overall score。
+4. Domains 在 normalize 後由 deterministic content classifier 判定，來源 domain 只作弱 prior；舊 labor/policy alias 映射到 global_markets_macro。
+5. 競品頁依 config/competitor_registry.json 的每個追蹤對象分類與對應訊號；沒有 fixed competitor audit 時只能標示未完整查證。
+```
+
+### Evidence
+
+`reports/change-confirmations/2026-07-13-ai-domain-competitor-convergence.md`
+
+### Boundary
+
+```text
+本輪不把 GitHub 上過時的 one-off deploy inspection workflow 合回 active runtime；其驗證要求改成永久 unit／contract／page gates。
+typed competitor payload 與 durable competitor history 仍未完成。
+```
+
+---
+
 ## 2026-07-11：Competitor Intelligence 一級能力；Labor 降為 indicator-only
 
 ### Decision

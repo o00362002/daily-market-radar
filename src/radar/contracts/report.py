@@ -104,6 +104,24 @@ class MatrixObservationV1(CanonicalModel):
     gap: str
 
 
+class StructuralIndicatorEvidenceV1(CanonicalModel):
+    event_id: str
+    headline: str
+    summary: str
+    direction: Literal["toward", "against", "mixed"]
+
+
+class StructuralIndicatorComponentV1(CanonicalModel):
+    component_id: str
+    label: str
+    direction: Literal["toward", "against", "mixed", "insufficient"]
+    score: int = Field(ge=0, le=100)
+    support_score: int = Field(ge=0, le=100)
+    counter_score: int = Field(ge=0, le=100)
+    evidence: list[StructuralIndicatorEvidenceV1]
+    missing_data: list[str]
+
+
 class StructuralIndicatorObservationV1(CanonicalModel):
     indicator_id: str
     observation_date: str
@@ -117,6 +135,7 @@ class StructuralIndicatorObservationV1(CanonicalModel):
     one_sentence_read: str
     next_verification: list[str]
     evaluation_mode: str
+    components: list[StructuralIndicatorComponentV1] = Field(default_factory=list)
 
 
 class SignalV1(CanonicalModel):

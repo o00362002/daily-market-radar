@@ -25,6 +25,7 @@ from radar.domain.models import Document, Event, stable_id
 from radar.pipeline.cluster import cluster_documents
 from radar.pipeline.deduplicate import deduplicate_documents
 from radar.pipeline.deltas import material_events, resolve_events
+from radar.pipeline.enrich import enrich_documents
 from radar.reporting.contracts import validate_report_contract
 from radar.ports import (
     DocumentRepository,
@@ -93,7 +94,12 @@ class DailyRadarApplication:
 
         source_result = self._collect(request)
         normalized = self._dependencies.source_adapter.normalize(source_result)
-        documents = deduplicate_documents(normalized)
+        classified = enrich_documents(
+            normalized,
+            canonical_domains=contract.report_domains,
+            domain_aliases=contract.domain_aliases,
+        )
+        documents = deduplicate_documents(classified)
         duplicate_rejection_count = len(normalized) - len(documents)
 
         prior_events = self._dependencies.event_repository.find_recent_events(self._event_history_since(request.date))
@@ -331,7 +337,8 @@ class DailyRadarApplication:
         contract: RuntimeContract,
         channel: str,
     ) -> list[CoverageCellV2]:
-        observed_by_domain = Counter(document.primary_domain for document in documents)
+        observed_by_domain = Counter(contract.canonical_domain(document.primary_domain) for document in documents)
+        coverage_domains = list(dict.fromkeys(contract.canonical_domain(domain) for domain in contract.report_domains))
         cells = [
             CoverageCellV2(
                 domain=domain,
@@ -343,7 +350,7 @@ class DailyRadarApplication:
                 status="healthy" if observed_by_domain.get(domain, 0) else "empty",
                 observed_count=observed_by_domain.get(domain, 0),
             )
-            for domain in contract.report_domains
+            for domain in coverage_domains
         ]
         taiwan_count = sum(1 for document in documents if document.macro_region == "Taiwan")
         cells.append(

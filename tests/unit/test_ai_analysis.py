@@ -48,6 +48,24 @@ class AIAnalysisTests(unittest.TestCase):
         self.assertFalse(typed.provenance.fallback_used)
         self.assertTrue(typed.executive_summary)
         self.assertTrue(typed.linked_indicators)
+        canonical_domains = set(self.config["_canonical_report_domains"])
+        self.assertEqual(
+            canonical_domains,
+            {
+                "global_markets_macro",
+                "ai_agents_applications",
+                "crypto_rwa_agent_payments",
+                "retail_consumer_fashion",
+                "science_technology_industry",
+            },
+        )
+        self.assertTrue(set(row.domain for row in typed.key_findings) <= canonical_domains)
+        self.assertTrue(canonical_domains.issubset({row.domain for row in typed.key_findings}))
+        self.assertTrue(all(row.horizon == "three_to_six_months" for row in typed.future_trends))
+        self.assertTrue(all(sorted(row.horizon_months) == [3, 6] for row in typed.future_trends))
+        self.assertTrue(all(row.synthesis_scope == "global" for row in typed.future_trends))
+        self.assertTrue(all(len(row.source_domain_ids) >= 2 for row in typed.future_trends))
+        self.assertTrue(all(len(row.source_event_ids) >= 2 for row in typed.future_trends))
         self.assertTrue(all(0 <= row.score <= 100 for row in typed.linked_indicators))
         for row in typed.key_findings:
             self.assertTrue(set(row.source_event_ids).issubset(allowed_events))
@@ -67,6 +85,7 @@ class AIAnalysisTests(unittest.TestCase):
         actual_ids = [row.indicator_id for row in analysis.structural_indicators]
         self.assertEqual(actual_ids, expected_ids)
         self.assertEqual(len(actual_ids), 3)
+        self.assertEqual(len(analysis.linked_indicators), 6)
 
         source = {row.indicator_id: row for row in self.report.structural_indicators}
         for row in analysis.structural_indicators:
@@ -85,6 +104,8 @@ class AIAnalysisTests(unittest.TestCase):
             self.assertEqual(row.missing_data, original.missing_data)
             self.assertEqual(row.one_sentence_read, original.one_sentence_read)
             self.assertEqual(row.next_verification, original.next_verification)
+            self.assertEqual(row.components, original.components)
+        self.assertTrue(all(component.evidence or component.missing_data for component in row.components))
 
     def test_structural_direction_aliases_are_normalized_at_analysis_boundary(self) -> None:
         payload = self.report.model_dump(mode="json")
