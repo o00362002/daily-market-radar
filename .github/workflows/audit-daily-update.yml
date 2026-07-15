@@ -14,81 +14,96 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit recent daily and analysis runs
+      - name: Audit recent daily runs, state and public site
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p audit/logs
 
-          gh api \
-            -H "Accept: application/vnd.github+json" \
+          gh api -H "Accept: application/vnd.github+json" \
             "/repos/${GITHUB_REPOSITORY}/actions/workflows/daily-intelligence.yml/runs?branch=main&per_page=30" \
             > audit/daily-runs-raw.json
-
-          gh api \
-            -H "Accept: application/vnd.github+json" \
+          gh api -H "Accept: application/vnd.github+json" \
             "/repos/${GITHUB_REPOSITORY}/actions/workflows/ai-analysis.yml/runs?branch=main&per_page=30" \
             > audit/analysis-runs-raw.json
 
           jq '{runs: [.workflow_runs[] | {id,run_number,event,status,conclusion,created_at,updated_at,run_started_at,head_sha,html_url}]}' audit/daily-runs-raw.json > audit/daily-runs.json
           jq '{runs: [.workflow_runs[] | {id,run_number,event,status,conclusion,created_at,updated_at,run_started_at,head_sha,html_url}]}' audit/analysis-runs-raw.json > audit/analysis-runs.json
 
-          jq -r '.runs[] | select(.conclusion != "success" and .status == "completed") | .id' audit/daily-runs.json | head -10 > audit/failed-run-ids.txt
+          LATEST_RUN_ID=$(jq -r '.runs[] | select(.event == "schedule") | .id' audit/daily-runs.json | head -1)
+          gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/actions/runs/${LATEST_RUN_ID}/jobs?per_page=100" \
+            > audit/latest-scheduled-jobs.json
+          LATEST_INTELLIGENCE_JOB=$(jq -r '.jobs[] | select(.name == "intelligence") | .id' audit/latest-scheduled-jobs.json)
+          gh api -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/actions/jobs/${LATEST_INTELLIGENCE_JOB}/logs" \
+            > audit/latest-intelligence.log
 
-          : > audit/failed-jobs.jsonl
-          : > audit/error-snippets.txt
-          while read -r run_id; do
-            [ -n "$run_id" ] || continue
-            gh api \
-              -H "Accept: application/vnd.github+json" \
-              "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/jobs?per_page=100" \
-              > "audit/jobs-${run_id}.json"
-            jq -c --arg run_id "$run_id" '.jobs[] | select(.conclusion != "success" and .conclusion != "skipped") | {run_id:$run_id,job_id:.id,name,status,conclusion,started_at,completed_at,failed_steps:[.steps[] | select(.conclusion == "failure") | {name,number}]}' "audit/jobs-${run_id}.json" >> audit/failed-jobs.jsonl
+          grep -E 'running for Taiwan date|status=|deployable=|report_|items|coverage|degradation|fallback|state: run|warning|error' \
+            audit/latest-intelligence.log > audit/latest-intelligence-key-lines.txt || true
 
-            jq -r '.jobs[] | select(.conclusion == "failure") | .id' "audit/jobs-${run_id}.json" | while read -r job_id; do
-              [ -n "$job_id" ] || continue
-              if gh api \
-                -H "Accept: application/vnd.github+json" \
-                "/repos/${GITHUB_REPOSITORY}/actions/jobs/${job_id}/logs" \
-                > "audit/logs/job-${job_id}.txt" 2>/dev/null; then
-                {
-                  echo "===== run ${run_id} job ${job_id} ====="
-                  grep -E -i -C 3 'error|failed|failure|exception|traceback|permission|denied|timed out|no such file|invalid|warning' "audit/logs/job-${job_id}.txt" | tail -120 || true
-                } >> audit/error-snippets.txt
-              fi
-            done
-          done < audit/failed-run-ids.txt
+          BASE="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
+          curl --fail --location --retry 8 --retry-delay 5 "$BASE/data/latest.json" -o audit/public-latest.json
+          curl --fail --location --retry 8 --retry-delay 5 "$BASE/data/ai-analysis/latest.json" -o audit/public-analysis.json
+          curl --fail --location --retry 8 --retry-delay 5 -D audit/public-headers.txt "$BASE/" -o audit/public-index.html
+
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "/repos/${GITHUB_REPOSITORY}/contents/state/manifest.json?ref=radar-state" \
+            > audit/state-manifest.json || true
 
           python - <<'PY'
           import json
-          from datetime import datetime
           from pathlib import Path
 
           daily = json.loads(Path('audit/daily-runs.json').read_text())['runs']
-          analysis = json.loads(Path('audit/analysis-runs.json').read_text())['runs']
+          analysis_runs = json.loads(Path('audit/analysis-runs.json').read_text())['runs']
           scheduled = [row for row in daily if row['event'] == 'schedule']
           completed = [row for row in scheduled if row['status'] == 'completed']
           successes = [row for row in completed if row['conclusion'] == 'success']
           failures = [row for row in completed if row['conclusion'] != 'success']
+          latest = json.loads(Path('audit/public-latest.json').read_text())
+          analysis = json.loads(Path('audit/public-analysis.json').read_text())
+
+          items = latest.get('items', [])
           summary = {
-              'daily_total_returned': len(daily),
               'scheduled_total': len(scheduled),
-              'scheduled_completed': len(completed),
               'scheduled_success': len(successes),
               'scheduled_failure': len(failures),
               'latest_scheduled': scheduled[0] if scheduled else None,
-              'latest_successful_scheduled': successes[0] if successes else None,
-              'latest_failed_scheduled': failures[0] if failures else None,
-              'analysis_latest': analysis[0] if analysis else None,
               'recent_scheduled': scheduled[:10],
+              'public_report': {
+                  'date': latest.get('date'),
+                  'status': latest.get('status'),
+                  'run_id': latest.get('run_id'),
+                  'report_id': latest.get('report_id'),
+                  'item_count': len(items),
+                  'major_count': sum(row.get('report_lane') == 'major' for row in items),
+                  'potential_count': sum(row.get('report_lane') == 'potential' for row in items),
+                  'headlines': [row.get('headline') for row in items[:8]],
+                  'degradation_reasons': latest.get('source_audit', {}).get('degradation_reasons'),
+                  'ingestion_mode': latest.get('source_audit', {}).get('ingestion_mode'),
+                  'coverage_gap_count': len(latest.get('coverage_gaps', [])),
+              },
+              'public_analysis': {
+                  'date': analysis.get('date'),
+                  'source_report_id': analysis.get('source_report_id'),
+                  'generated_at': analysis.get('provenance', {}).get('generated_at'),
+                  'effective_mode': analysis.get('provenance', {}).get('effective_mode'),
+                  'model': analysis.get('provenance', {}).get('model'),
+              },
+              'analysis_workflow_latest': analysis_runs[0] if analysis_runs else None,
           }
           Path('audit/summary.json').write_text(json.dumps(summary, indent=2, ensure_ascii=False) + '\n')
           PY
 
           cat audit/summary.json
-          cat audit/failed-jobs.jsonl || true
-          tail -300 audit/error-snippets.txt || true
+          echo '--- latest intelligence key lines ---'
+          cat audit/latest-intelligence-key-lines.txt
+          echo '--- public response headers ---'
+          cat audit/public-headers.txt
+          echo '--- state manifest ---'
+          cat audit/state-manifest.json || true
 
       - uses: actions/upload-artifact@v4
         with:
