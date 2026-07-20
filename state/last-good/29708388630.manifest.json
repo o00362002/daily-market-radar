@@ -1,0 +1,9 @@
+{
+  "compressed_sha256": "dab6a794b5fa80e2a10a23a4c08fb25459c8c3b7f7246452235bc0e401f01fad",
+  "created_at": "2026-07-19T23:49:52.936831+00:00",
+  "db_filename": "radar.db",
+  "run_id": "29708388630",
+  "uncompressed_sha256": "a26b9afa6518eb36075f9aab506a0048e4838d0afb2eb8e74653f43a270a4bd1",
+  "uncompressed_size": 62386176,
+  "version": "state/v1"
+}
