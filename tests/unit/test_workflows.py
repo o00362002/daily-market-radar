@@ -34,11 +34,11 @@ class WorkflowContractTests(unittest.TestCase):
         for name in REQUIRED:
             self.assertIsInstance(self._load(name), dict)
 
-    def test_daily_pipeline_has_utc_cron_concurrency_and_multi_source_mode(self) -> None:
+    def test_daily_pipeline_has_utc_cron_concurrency_and_production_gates(self) -> None:
         doc = self._load("daily-intelligence.yml")
         on = doc.get("on", doc.get(True))
         crons = [entry["cron"] for entry in on["schedule"]]
-        self.assertIn("0 23 * * *", crons)  # 07:00 Asia/Taipei
+        self.assertIn("0 23 * * *", crons)
         self.assertEqual(doc["concurrency"]["group"], "radar-daily")
         self.assertFalse(doc["concurrency"]["cancel-in-progress"])
         text = (WORKFLOWS / "daily-intelligence.yml").read_text(encoding="utf-8")
@@ -47,6 +47,11 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("run-daily --mode live", text)
         self.assertIn("FRESHRSS_BASE_URL", text)
         self.assertIn("radar.analysis.cli", text)
+        self.assertIn("check_production_quality.py", text)
+        self.assertIn("Report quality pre-gate", text)
+        self.assertIn("analysis_fallback", (ROOT / "tools/check_production_quality.py").read_text(encoding="utf-8"))
+        self.assertIn("previous website remains live", text)
+        self.assertIn("Persist durable state (only accepted production runs)", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")
@@ -58,7 +63,7 @@ class WorkflowContractTests(unittest.TestCase):
         text = (WORKFLOWS / "web-check.yml").read_text(encoding="utf-8")
         self.assertIn("types:check", text)
         self.assertIn("npm run build", text)
-        self.assertIn("61440", text)  # 60 KB gzip JS budget
+        self.assertIn("61440", text)
 
     def test_prepare_chat_reads_durable_state_without_api_call(self) -> None:
         doc = self._load("prepare-chat.yml")
@@ -81,7 +86,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("deploy-pages", text)
         self.assertIn("allow_fixture_deploy", text)
 
-    def test_ai_analysis_runs_after_chat_import_and_degrades_without_key(self) -> None:
+    def test_ai_analysis_rejects_fallback_from_production(self) -> None:
         doc = self._load("ai-analysis.yml")
         on = doc.get("on", doc.get(True))
         self.assertEqual(on["workflow_run"]["workflows"], ["import-chat"])
@@ -90,14 +95,16 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("radar.analysis.cli", text)
         self.assertIn("OPENAI_ANALYSIS_MODEL", text)
         self.assertIn("ai-analysis/latest.json", text)
-        self.assertIn("fixture", text)
+        self.assertIn("check_production_quality.py", text)
+        self.assertIn("previous website remains live", text)
         self.assertIn("deploy-pages", text)
 
-    def test_pages_deploy_only_deploys_validated_non_fixture(self) -> None:
+    def test_pages_deploy_uses_same_production_gate(self) -> None:
         text = (WORKFLOWS / "pages-deploy.yml").read_text(encoding="utf-8")
-        self.assertIn("deployable", text)
-        self.assertIn("fixture", text)
+        self.assertIn("check_production_quality.py", text)
+        self.assertIn("production-quality-gate.json", text)
         self.assertIn("deploy-pages", text)
+        self.assertNotIn("deterministic\n", text)
 
 
 if __name__ == "__main__":
