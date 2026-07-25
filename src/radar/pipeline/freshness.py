@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from radar.domain.models import Document
+
+
+_TAIWAN_TZ = timezone(timedelta(hours=8))
 
 
 @dataclass(frozen=True)
@@ -27,13 +30,9 @@ def filter_documents_by_freshness(
 ) -> FreshnessFilterResult:
     """Keep only documents plausibly belonging to the current live-news window.
 
-    Feed endpoints frequently return archive entries on every poll. Without a publication-time
-    boundary, an old article that does not match durable event history can be misclassified as a
-    new event. The filter therefore runs before clustering and event resolution.
-
     ``published_at`` is authoritative. Invalid publication timestamps are rejected rather than
-    silently replaced with ``fetched_at``, because doing so would turn every archive item fetched
-    today into an apparently fresh document.
+    silently replaced with ``fetched_at``, because doing so would turn archive items fetched today
+    into apparently fresh documents.
     """
 
     observed = _parse_timestamp(observed_at)
@@ -64,6 +63,22 @@ def filter_documents_by_freshness(
         rejected_future=rejected_future,
         rejected_invalid_timestamp=rejected_invalid,
     )
+
+
+def document_is_in_report_window(document: Document, report_date: str, *, lookback_days: int = 1) -> bool:
+    """Accept the Taiwan report date and one bounded prior calendar day.
+
+    The 07:00 Taiwan run needs the previous calendar day to cover US and European sessions, but
+    archive entries older than that must not become ``new_event`` merely because a feed returns
+    them again. Invalid publication timestamps are rejected.
+    """
+
+    try:
+        published_date = _parse_timestamp(document.published_at).astimezone(_TAIWAN_TZ).date()
+        anchor = date.fromisoformat(report_date)
+    except ValueError:
+        return False
+    return anchor - timedelta(days=lookback_days) <= published_date <= anchor
 
 
 def _parse_timestamp(value: str) -> datetime:
