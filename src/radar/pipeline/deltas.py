@@ -15,6 +15,7 @@ from radar.domain.event_resolution import (
 )
 from radar.domain.models import Document, Event, EventDelta
 from radar.domain.scoring import event_has_material_delta, event_is_reportable_for_date
+from radar.pipeline.freshness import document_is_in_report_window
 
 _DEFAULT_SERVICE = EventResolutionService()
 
@@ -47,11 +48,16 @@ def material_events(events: list[Event], *, report_date: str | None = None) -> l
     """Events worth reporting.
 
     Without ``report_date``: pure delta materiality (legacy semantics). With
-    ``report_date``: the union of everything materially new FOR that date, so
-    same-day re-runs never shrink the day's report while cross-day replays stay
-    suppressed.
+    ``report_date``: keep the same-day union behavior, but require at least one
+    document published inside the bounded Taiwan report window. This prevents
+    archive entries returned by RSS feeds from becoming fresh ``new_event`` rows.
     """
 
     if report_date is None:
         return [event for event in events if event_has_material_delta(event)]
-    return [event for event in events if event_is_reportable_for_date(event, report_date)]
+    return [
+        event
+        for event in events
+        if event_is_reportable_for_date(event, report_date)
+        and any(document_is_in_report_window(document, report_date) for document in event.documents)
+    ]
