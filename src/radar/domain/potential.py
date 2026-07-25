@@ -27,6 +27,12 @@ _APPLICATION_TERMS = {
     "digital twin", "copilot", "assistant", "integration",
     "新應用", "代理", "自動化", "開發者工具", "整合",
 }
+_APPLICATION_DOMAINS = {
+    "ai_agents_applications",
+    "crypto_rwa_agent_payments",
+    "retail_consumer_fashion",
+    "science_technology_industry",
+}
 _BUSINESS_MODEL_TERMS = {
     "business model", "subscription", "marketplace", "retail media",
     "usage based", "pay per use", "revenue share", "agent payment",
@@ -80,7 +86,7 @@ def assess_event(event: Event) -> PotentialAssessment:
         candidate_type = "新組合"
         score += 40
         reasons.append("出現跨領域或技術組合特徵")
-    elif _contains_any(text, _APPLICATION_TERMS):
+    elif domains & _APPLICATION_DOMAINS and _contains_any(text, _APPLICATION_TERMS):
         candidate_type = "新應用"
         score += 36
         reasons.append("出現新應用或工具特徵")
