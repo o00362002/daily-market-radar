@@ -87,11 +87,19 @@ class UrllibHttpTransport:
         import urllib.error
         import urllib.request
 
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            """Surface redirects as HTTPError so every hop is re-validated."""
+
+            def http_error_302(self, req, fp, code, msg, headers):  # noqa: D401,ANN001
+                raise urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
+
+            http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
+
         if not self._policy.is_allowed(request.url):
             raise AdapterError(f"blocked by url policy: {request.url}")
 
         redirect_chain = [request.url]
-        opener = urllib.request.build_opener(_NoRedirect())
+        opener = urllib.request.build_opener(NoRedirect())
         current = request.url
         headers = {"User-Agent": USER_AGENT, **dict(request.headers)}
         for _ in range(self._max_redirects + 1):
@@ -120,17 +128,6 @@ class UrllibHttpTransport:
                     continue
                 raise AdapterError(f"http error {exc.code}: {current}") from exc
         raise AdapterError(f"too many redirects: {request.url}")
-
-
-class _NoRedirect:
-    """urllib handler that surfaces redirects as HTTPError so we re-check each hop."""
-
-    def http_error_302(self, req, fp, code, msg, headers):  # noqa: D401,ANN001
-        import urllib.error
-
-        raise urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
-
-    http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
 
 
 def _resolve(base: str, location: str) -> str:

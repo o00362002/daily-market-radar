@@ -1,6 +1,9 @@
 import json
 import pathlib
 import unittest
+from urllib.parse import urlsplit
+
+from radar.schemas.competitor import CompetitorMonitoringRegistry
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -10,6 +13,9 @@ class CompetitorRegistryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.payload = json.loads(
             (ROOT / "config/competitor_registry.json").read_text(encoding="utf-8")
+        )
+        self.source_payload = json.loads(
+            (ROOT / "config/competitor_sources.json").read_text(encoding="utf-8")
         )
 
     def test_registry_has_focused_groups_in_explicit_order(self) -> None:
@@ -59,6 +65,33 @@ class CompetitorRegistryTests(unittest.TestCase):
         self.assertIn("headline and today_delta", self.payload["matching_policy"])
         self.assertIn("competitor_group", self.payload["analysis_fields"])
         self.assertIn("recommended_action", self.payload["analysis_fields"])
+
+    def test_every_fixed_product_competitor_has_executable_official_sources(self) -> None:
+        excluded = set(self.source_payload["excluded_registry_groups"])
+        expected_ids = {
+            entry["id"]
+            for group, entries in self.payload["groups"].items()
+            if group not in excluded
+            for entry in entries
+        }
+        self.assertEqual(set(self.source_payload["sources"]), expected_ids)
+        for competitor_id, sources in self.source_payload["sources"].items():
+            self.assertTrue(sources, competitor_id)
+            source_ids = [source["id"] for source in sources]
+            self.assertEqual(len(source_ids), len(set(source_ids)), competitor_id)
+            for source in sources:
+                parts = urlsplit(source["url"])
+                self.assertEqual(parts.scheme, "https", source["url"])
+                self.assertTrue(parts.netloc, source["url"])
+
+    def test_typed_monitoring_registry_loads_and_validates(self) -> None:
+        registry = CompetitorMonitoringRegistry.from_files(
+            ROOT / "config/competitor_registry.json",
+            ROOT / "config/competitor_sources.json",
+        )
+        self.assertEqual(len(registry.targets), 21)
+        self.assertEqual(registry.state_key, "competitor-monitor:v1")
+        self.assertTrue(all(target.sources for target in registry.targets))
 
 
 if __name__ == "__main__":

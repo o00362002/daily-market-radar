@@ -19,6 +19,7 @@ REQUIRED_REPORT_FIELDS = {
     "signals",
     "source_audit",
     "rejection_counters",
+    "competitor_audit",
     "retail_matrix",
     "crypto_matrix",
     "structural_indicators",
@@ -106,6 +107,7 @@ def validate_report_contract(
         _validate_item(item, contract=contract)
     _validate_contract_sections(report, contract, enforce_floors=enforce_floors)
     _validate_event_resolution_audit(report["event_resolution_audit"])
+    _validate_competitor_audit(report["competitor_audit"])
 
 
 def _validate_legacy_item(item: dict[str, Any]) -> None:
@@ -230,6 +232,53 @@ def _validate_event_resolution_audit(audit: dict[str, Any]) -> None:
         raise ValueError("event_resolution_audit: events_observed must equal new + matched events")
     if audit["material_events"] + audit["unchanged_events"] != audit["events_observed"]:
         raise ValueError("event_resolution_audit: material + unchanged must equal events_observed")
+
+
+def _validate_competitor_audit(audit: dict[str, Any]) -> None:
+    checks = audit.get("checks", [])
+    if audit.get("fixed_target_count") != len(checks):
+        raise ValueError("competitor_audit fixed_target_count must equal checks length")
+
+    ids = [check.get("competitor_id") for check in checks]
+    if len(ids) != len(set(ids)):
+        raise ValueError("competitor_audit competitor ids must be unique")
+
+    checked_statuses = {"baseline", "checked_no_major_update", "updated", "partial"}
+    status_ids = {
+        "checked_ids": {check["competitor_id"] for check in checks if check["status"] in checked_statuses},
+        "updated_ids": {check["competitor_id"] for check in checks if check.get("fresh_material_delta")},
+        "baseline_ids": {check["competitor_id"] for check in checks if check["status"] == "baseline"},
+        "partial_ids": {check["competitor_id"] for check in checks if check["status"] == "partial"},
+        "failed_ids": {check["competitor_id"] for check in checks if check["status"] == "failed"},
+        "not_executed_ids": {check["competitor_id"] for check in checks if check["status"] == "not_executed"},
+    }
+    count_fields = {
+        "checked_target_count": "checked_ids",
+        "updated_target_count": "updated_ids",
+        "baseline_target_count": "baseline_ids",
+        "partial_target_count": "partial_ids",
+        "failed_target_count": "failed_ids",
+        "not_executed_target_count": "not_executed_ids",
+    }
+    for field, expected in status_ids.items():
+        if set(audit.get(field, [])) != expected:
+            raise ValueError(f"competitor_audit {field} does not match checks")
+    for count_field, ids_field in count_fields.items():
+        if audit.get(count_field) != len(status_ids[ids_field]):
+            raise ValueError(f"competitor_audit {count_field} does not match {ids_field}")
+
+    for check in checks:
+        source_checks = check.get("source_checks", [])
+        successful = sum(source.get("status") != "failed" for source in source_checks)
+        failed = sum(source.get("status") == "failed" for source in source_checks)
+        if check.get("successful_source_count") != successful:
+            raise ValueError(f"competitor source success count mismatch: {check.get('competitor_id')}")
+        if check.get("failed_source_count") != failed:
+            raise ValueError(f"competitor source failure count mismatch: {check.get('competitor_id')}")
+        for source in source_checks:
+            parts = urlsplit(source.get("url", ""))
+            if parts.scheme not in {"http", "https"} or not parts.netloc:
+                raise ValueError(f"invalid competitor evidence URL: {source.get('url')}")
 
 
 def _validate_evidence_link(link: dict[str, Any]) -> None:

@@ -1,3 +1,4 @@
+from radar.ports.competitors import CompetitorMonitor, CompetitorMonitorResult
 from radar.ports.evaluation import IntelligenceEvaluator
 from radar.ports.persistence import RunPersistenceBatch, UnitOfWork
 from radar.ports.publishing import ReportPublisher, StateStore, WebArtifactStore
@@ -13,6 +14,8 @@ from radar.ports.sources import (
 )
 
 __all__ = [
+    "CompetitorMonitor",
+    "CompetitorMonitorResult",
     "CredentialsStatusV1",
     "DocumentRepository",
     "EventRepository",
