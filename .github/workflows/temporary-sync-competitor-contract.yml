@@ -1,0 +1,62 @@
+name: temporary-sync-competitor-contract
+
+on:
+  push:
+    branches: [feat/typed-competitor-monitoring]
+    paths:
+      - ".github/workflows/temporary-sync-competitor-contract.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/typed-competitor-monitoring
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Generate schema and update port contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from radar.contracts.report import radar_report_json_schema
+
+          root = Path.cwd()
+          (root / "schemas/report.schema.json").write_text(
+              json.dumps(radar_report_json_schema(), ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+
+          path = root / "tests/architecture/test_ports_and_dependencies.py"
+          text = path.read_text(encoding="utf-8")
+          text = text.replace(
+              'PORT_METHODS: dict[str, dict[str, tuple[str, ...]]] = {\n    "SourceAdapter": {',
+              'PORT_METHODS: dict[str, dict[str, tuple[str, ...]]] = {\n    "CompetitorMonitor": {\n        "run": ("self", "report_date", "checked_at"),\n    },\n    "SourceAdapter": {',
+          )
+          text = text.replace(
+              'PORT_ATTRIBUTES: dict[str, set[str]] = {\n    "SourceAdapter":',
+              'PORT_ATTRIBUTES: dict[str, set[str]] = {\n    "CompetitorMonitor": set(),\n    "SourceAdapter":',
+          )
+          text = text.replace(
+              '# PR B extends the port set from nine to ten by adding the atomic UnitOfWork\n        # run-transaction boundary. Every port remains a runtime-checkable Protocol.\n        self.assertEqual(len(PORT_METHODS), 10)',
+              '# CompetitorMonitor extends the provider-neutral boundary while UnitOfWork\n        # remains the atomic run-transaction boundary.\n        self.assertEqual(len(PORT_METHODS), 11)',
+          )
+          path.write_text(text, encoding="utf-8")
+
+          workflow = root / ".github/workflows/temporary-sync-competitor-contract.yml"
+          workflow.unlink()
+          PY
+      - name: Commit generated artifacts
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add schemas/report.schema.json tests/architecture/test_ports_and_dependencies.py .github/workflows/temporary-sync-competitor-contract.yml
+          git commit -m "chore: sync typed competitor contract artifacts"
+          git push origin HEAD:feat/typed-competitor-monitoring
