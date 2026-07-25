@@ -1,5 +1,6 @@
 name: verify-typed-competitor-live
 
+# Second pass includes the urllib redirect-handler fix from the feature base.
 on:
   pull_request:
     branches: [feat/typed-competitor-monitoring]
