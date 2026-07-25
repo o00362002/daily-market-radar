@@ -1,0 +1,106 @@
+name: verify-live-freshness-window
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-live-freshness-window.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev,ai]"
+
+      - name: Restore durable state
+        run: |
+          set -e
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore \
+              --state-root .state/state \
+              --database "$PWD/data/radar.db" || true
+          fi
+
+      - name: Run live deterministic verification without persistence or deployment
+        env:
+          FRESHRSS_BASE_URL: ${{ secrets.FRESHRSS_BASE_URL }}
+          FRESHRSS_USERNAME: ${{ secrets.FRESHRSS_USERNAME }}
+          FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Taipei date +%F)
+          echo "$DATE" > verification-date.txt
+          PYTHONPATH=src python -m radar.cli run-daily \
+            --mode live \
+            --date "$DATE" \
+            --database "$PWD/data/verify-radar.db" \
+            --evaluation-mode deterministic \
+            --timeout-seconds 20 \
+            --per-feed-limit 50 \
+            > report-stdout.json
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD/verify-output" \
+            --database "$PWD/data/verify-radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Evaluate report-only production gate and summarize
+        run: |
+          set +e
+          DATE=$(cat verification-date.txt)
+          python tools/check_production_quality.py \
+            --report verify-output/artifacts/web/v1/latest.json \
+            --expected-date "$DATE" \
+            --report-only \
+            --output verification-quality.json
+          GATE_EXIT=$?
+          set -e
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("verify-output/artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          quality = json.loads(Path("verification-quality.json").read_text(encoding="utf-8"))
+          items = report.get("items", [])
+          summary = {
+              "date": report.get("date"),
+              "status": report.get("status"),
+              "ingestion_mode": report.get("source_audit", {}).get("ingestion_mode"),
+              "item_count": len(items),
+              "major_count": sum(item.get("report_lane") == "major" for item in items),
+              "potential_count": sum(item.get("report_lane") == "potential" for item in items),
+              "oldest_first_seen_at": min((item.get("first_seen_at") for item in items), default=None),
+              "newest_first_seen_at": max((item.get("first_seen_at") for item in items), default=None),
+              "quality_valid": quality["valid"],
+              "quality_reasons": quality["reasons"],
+              "sample_headlines": [item.get("headline") for item in items[:20]],
+          }
+          Path("verification-summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+          exit "$GATE_EXIT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-freshness-verification
+          path: |
+            verification-date.txt
+            verification-summary.json
+            verification-quality.json
+            verify-output/artifacts/web/v1/latest.json
+            report-stdout.json
+          if-no-files-found: ignore
