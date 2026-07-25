@@ -1,6 +1,6 @@
 name: verify-typed-competitor-live
 
-# Second pass includes the urllib redirect-handler fix from the feature base.
+# Third pass verifies both live baseline coverage and immediate no-change stability.
 on:
   pull_request:
     branches: [feat/typed-competitor-monitoring]
@@ -55,6 +55,45 @@ jobs:
             --database "$PWD/data/radar.db" \
             --legacy-reports-dir "$PWD/reports"
 
+      - name: Recheck official sources against the newly persisted baseline
+        run: |
+          PYTHONPATH=src python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          from radar.adapters.competitor_web import OfficialCompetitorMonitor
+          from radar.adapters.transport import UrllibHttpTransport
+          from radar.repositories.sqlite import SqliteRunRepository
+          from radar.schemas.competitor import CompetitorMonitoringRegistry
+
+          root = Path.cwd()
+          date = (root / "verification-date.txt").read_text(encoding="utf-8").strip()
+          repository = SqliteRunRepository(root / "data/radar.db", root / "migrations")
+          registry = CompetitorMonitoringRegistry.from_files(
+              root / "config/competitor_registry.json",
+              root / "config/competitor_sources.json",
+          )
+          result = OfficialCompetitorMonitor(
+              registry=registry,
+              transport=UrllibHttpTransport(),
+              state_store=repository,
+          ).run(date, datetime.now(timezone.utc).isoformat())
+          payload = result.audit.model_dump(mode="json")
+          (root / "competitor-second-pass.json").write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps({
+              "checked": payload["checked_target_count"],
+              "updated": payload["updated_target_count"],
+              "baseline": payload["baseline_target_count"],
+              "partial": payload["partial_target_count"],
+              "failed": payload["failed_target_count"],
+              "updated_ids": payload["updated_ids"],
+          }, ensure_ascii=False, indent=2))
+          PY
+
       - name: Evaluate report and summarize competitor audit
         run: |
           set +e
@@ -72,6 +111,7 @@ jobs:
 
           report = json.loads(Path("verify-output/artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
           quality = json.loads(Path("verification-quality.json").read_text(encoding="utf-8"))
+          second_pass = json.loads(Path("competitor-second-pass.json").read_text(encoding="utf-8"))
           audit = report["competitor_audit"]
           checks = audit["checks"]
           summary = {
@@ -87,6 +127,14 @@ jobs:
               "partial_target_count": audit["partial_target_count"],
               "failed_target_count": audit["failed_target_count"],
               "not_executed_target_count": audit["not_executed_target_count"],
+              "second_pass": {
+                  "checked_target_count": second_pass["checked_target_count"],
+                  "baseline_target_count": second_pass["baseline_target_count"],
+                  "updated_target_count": second_pass["updated_target_count"],
+                  "partial_target_count": second_pass["partial_target_count"],
+                  "failed_target_count": second_pass["failed_target_count"],
+                  "updated_ids": second_pass["updated_ids"],
+              },
               "targets": [
                   {
                       "id": check["competitor_id"],
@@ -124,6 +172,7 @@ jobs:
             verification-date.txt
             verification-quality.json
             competitor-verification-summary.json
+            competitor-second-pass.json
             verify-output/artifacts/web/v1/latest.json
             report-stdout.json
           if-no-files-found: ignore
