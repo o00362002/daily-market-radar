@@ -1,0 +1,128 @@
+name: verify-typed-competitor-live
+
+on:
+  pull_request:
+    branches: [feat/typed-competitor-monitoring]
+    paths:
+      - ".github/workflows/verify-typed-competitor-live.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev,ai]"
+
+      - name: Restore durable state
+        run: |
+          set -e
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore \
+              --state-root .state/state \
+              --database "$PWD/data/radar.db" || true
+          fi
+
+      - name: Run live typed competitor verification without deployment
+        env:
+          FRESHRSS_BASE_URL: ${{ secrets.FRESHRSS_BASE_URL }}
+          FRESHRSS_USERNAME: ${{ secrets.FRESHRSS_USERNAME }}
+          FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Taipei date +%F)
+          echo "$DATE" > verification-date.txt
+          PYTHONPATH=src python -m radar.cli run-daily \
+            --mode live \
+            --date "$DATE" \
+            --database "$PWD/data/radar.db" \
+            --evaluation-mode deterministic \
+            --timeout-seconds 12 \
+            --per-feed-limit 20 \
+            > report-stdout.json
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD/verify-output" \
+            --database "$PWD/data/radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Evaluate report and summarize competitor audit
+        run: |
+          set +e
+          DATE=$(cat verification-date.txt)
+          python tools/check_production_quality.py \
+            --report verify-output/artifacts/web/v1/latest.json \
+            --expected-date "$DATE" \
+            --report-only \
+            --output verification-quality.json
+          GATE_EXIT=$?
+          set -e
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("verify-output/artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          quality = json.loads(Path("verification-quality.json").read_text(encoding="utf-8"))
+          audit = report["competitor_audit"]
+          checks = audit["checks"]
+          summary = {
+              "date": report["date"],
+              "run_id": report["run_id"],
+              "report_status": report["status"],
+              "quality_valid": quality["valid"],
+              "quality_reasons": quality["reasons"],
+              "fixed_target_count": audit["fixed_target_count"],
+              "checked_target_count": audit["checked_target_count"],
+              "baseline_target_count": audit["baseline_target_count"],
+              "updated_target_count": audit["updated_target_count"],
+              "partial_target_count": audit["partial_target_count"],
+              "failed_target_count": audit["failed_target_count"],
+              "not_executed_target_count": audit["not_executed_target_count"],
+              "targets": [
+                  {
+                      "id": check["competitor_id"],
+                      "name": check["name"],
+                      "status": check["status"],
+                      "successful_sources": check["successful_source_count"],
+                      "failed_sources": check["failed_source_count"],
+                      "summary": check["summary"],
+                      "failed_source_details": [
+                          {
+                              "source_id": source["source_id"],
+                              "url": source["url"],
+                              "error": source["error"],
+                          }
+                          for source in check["source_checks"]
+                          if source["status"] == "failed"
+                      ],
+                  }
+                  for check in checks
+              ],
+          }
+          Path("competitor-verification-summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+          exit "$GATE_EXIT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: typed-competitor-live-verification
+          path: |
+            verification-date.txt
+            verification-quality.json
+            competitor-verification-summary.json
+            verify-output/artifacts/web/v1/latest.json
+            report-stdout.json
+          if-no-files-found: ignore
