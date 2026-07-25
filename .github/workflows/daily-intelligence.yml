@@ -1,9 +1,7 @@
 name: daily-intelligence
 
 # Daily pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
-# cron is UTC: '0 23 * * *' == 07:00 Asia/Taipei, leaving ample margin before 09:00 TW.
-# Indicative local timeline: 07:30 collection, 07:50 resolution, 08:10 evaluation,
-# 08:30 validation, 08:40 AI analysis, 08:50 Astro build, 09:00 deployment.
+# GitHub schedule delivery may be delayed; the workflow records the actual Taiwan date.
 
 on:
   schedule:
@@ -78,22 +76,23 @@ jobs:
       - name: Export web artifacts
         run: PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db" --legacy-reports-dir "$PWD/reports"
 
-      - name: Deploy gate (failed reports are not deployed; fixture is preview-only)
-        id: gate
+      - name: Report quality pre-gate
+        id: report_gate
         run: |
-          STATUS=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['status'])")
-          MODE=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['source_audit']['ingestion_mode'])")
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-          if [ "$STATUS" = "failed" ]; then
-            echo "deployable=false" >> "$GITHUB_OUTPUT"
-          elif [ "$MODE" = "fixture" ]; then
-            echo "fixture run — preview only, not deployed"; echo "deployable=false" >> "$GITHUB_OUTPUT"
+          DATE=$(TZ=Asia/Taipei date +%F)
+          if python tools/check_production_quality.py \
+            --report artifacts/web/v1/latest.json \
+            --expected-date "$DATE" \
+            --report-only \
+            --output artifacts/production-quality-report.json; then
+            echo "report_ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "deployable=true" >> "$GITHUB_OUTPUT"
+            echo "report_ok=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Report quality gate rejected this run; previous website remains live."
           fi
 
       - name: Generate AI interpretation and trend scenarios
-        if: steps.gate.outputs.deployable == 'true'
+        if: steps.report_gate.outputs.report_ok == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
@@ -106,13 +105,29 @@ jobs:
             --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
             --mode "$ANALYSIS_MODE"
 
-      - name: Persist durable state (atomic, checksummed, last-good backup)
+      - name: Production deployment gate
+        id: gate
+        run: |
+          DATE=$(TZ=Asia/Taipei date +%F)
+          if python tools/check_production_quality.py \
+            --report artifacts/web/v1/latest.json \
+            --analysis artifacts/web/v1/ai-analysis/latest.json \
+            --expected-date "$DATE" \
+            --output artifacts/production-quality-gate.json; then
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+            echo "status=valid" >> "$GITHUB_OUTPUT"
+          else
+            echo "deployable=false" >> "$GITHUB_OUTPUT"
+            echo "status=rejected" >> "$GITHUB_OUTPUT"
+            echo "::error::Production gate rejected report or AI analysis; previous website remains live."
+          fi
+
+      - name: Persist durable state (only accepted production runs)
+        if: steps.gate.outputs.deployable == 'true'
         run: |
           set -e
-          # Committer identity must be global so plumbing (commit-tree) + commit work.
           git config --global user.name "radar-bot"
           git config --global user.email "radar-bot@users.noreply.github.com"
-          # Use a worktree bound to this repo so it shares the checkout's authenticated origin.
           rm -rf .state
           git worktree prune
           if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
@@ -120,7 +135,6 @@ jobs:
             git worktree add -f .state origin/radar-state
             git -C .state checkout -B radar-state
           else
-            # First run: create an orphan radar-state branch via portable plumbing.
             root_commit=$(git commit-tree "$(git hash-object -t tree /dev/null)" -m "init radar-state")
             git branch -f radar-state "$root_commit"
             git worktree add -f .state radar-state
@@ -133,6 +147,7 @@ jobs:
             || echo "::warning::durable state push failed — enable Actions read/write permissions to persist state across runs"
 
       - name: Build static site
+        if: steps.gate.outputs.deployable == 'true'
         working-directory: web
         env:
           RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
@@ -142,8 +157,6 @@ jobs:
           npm ci
           npm run types:check
           npm run build
-          # Ship the immutable JSON artifacts with the site so report-download
-          # links and external consumers can fetch them from Pages.
           mkdir -p dist/data
           cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
 
@@ -152,6 +165,25 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
+
+      - name: Upload rejected-run diagnostics
+        if: always() && steps.gate.outputs.deployable != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rejected-production-run-${{ github.run_id }}
+          path: |
+            artifacts/production-quality-report.json
+            artifacts/production-quality-gate.json
+            artifacts/web/v1/latest.json
+            artifacts/web/v1/ai-analysis/latest.json
+          if-no-files-found: ignore
+
+      - name: Fail visibly when production is rejected
+        if: always() && steps.gate.outputs.deployable != 'true'
+        run: |
+          echo "Production deployment rejected. Previous GitHub Pages version was preserved." >&2
+          test -f artifacts/production-quality-gate.json && cat artifacts/production-quality-gate.json >&2 || true
+          exit 1
 
   deploy:
     needs: intelligence
