@@ -24,8 +24,8 @@ _EARLY_STAGE_TERMS = {
 }
 _APPLICATION_TERMS = {
     "agent", "agentic", "api", "runtime", "developer tool", "automation",
-    "robotics", "digital twin", "copilot", "assistant", "integration",
-    "新應用", "代理", "自動化", "機器人", "開發者工具", "整合",
+    "digital twin", "copilot", "assistant", "integration",
+    "新應用", "代理", "自動化", "開發者工具", "整合",
 }
 _BUSINESS_MODEL_TERMS = {
     "business model", "subscription", "marketplace", "retail media",
