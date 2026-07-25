@@ -216,6 +216,8 @@ def _run_daily_registry(
             state_store_backend="sqlite" if database_path is not None else "memory",
             database_path=database_path,
             migrations_dir=repo_root / "migrations" if database_path is not None else None,
+            competitor_registry_path=repo_root / "config/competitor_registry.json",
+            competitor_source_registry_path=repo_root / "config/competitor_sources.json",
             timeout_seconds=timeout_seconds,
             per_feed_limit=per_feed_limit,
             optional_integrations={
