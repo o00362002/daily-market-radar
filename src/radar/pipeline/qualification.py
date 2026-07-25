@@ -113,7 +113,7 @@ def assess_report_qualification(event: Event) -> ReportQualification:
 
     explicit_impact = bool(anchors and impacts and has_transmission)
     corroborated = len(source_ids) >= 2 and explicit_impact
-    structured = has_measurements and bool(domains) and (has_transmission or not macro_only)
+    structured = has_measurements and bool(domains)
     strong = explicit_impact and (len(anchors) >= 2 or len(impacts) >= 2 or corroborated or structured)
 
     if strong:
