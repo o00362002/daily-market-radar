@@ -8,19 +8,22 @@ from radar.domain.scoring import explain_event_scores
 from radar.pipeline.qualification import assess_report_qualification
 
 
-def qualified_report_events(events: list[Event]) -> list[Event]:
+def qualified_report_events(events: list[Event], *, apply_qualification: bool = True) -> list[Event]:
     """Keep every qualified event while rejecting generic feed fall-through.
 
     This is a semantic gate, not a count cap. Profiles remain minimum floors and
-    every event that passes qualification is retained.
+    every event that passes qualification is retained. Provider-neutral test
+    doubles may disable the gate explicitly when testing replacement behavior.
     """
 
+    if not apply_qualification:
+        return list(events)
     return [event for event in events if assess_report_qualification(event).qualified]
 
 
-def plan_daily_items(events: list[Event]) -> list[ReportItem]:
+def plan_daily_items(events: list[Event], *, apply_qualification: bool = True) -> list[ReportItem]:
     items: list[ReportItem] = []
-    for event in qualified_report_events(events):
+    for event in qualified_report_events(events, apply_qualification=apply_qualification):
         doc = event.documents[0]
         assessment = assess_event(event)
         report_lane = assessment.lane
