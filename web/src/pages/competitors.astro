@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getLatestReport } from '../lib/data';
+import { allReportEntries, getFullByPath, getLatestReport } from '../lib/data';
 import {
   competitorGroupMeta,
   competitorGroupOrder,
@@ -11,6 +11,9 @@ import {
 
 const report: any = getLatestReport();
 const items: any[] = report?.items ?? [];
+const audit: any = report?.competitor_audit ?? null;
+const auditChecks: any[] = audit?.checks ?? [];
+const auditById = new Map(auditChecks.map((check) => [check.competitor_id, check]));
 const { byGroup } = projectCompetitorItems(items);
 const groupConfigs = competitorGroupOrder.map((key) => ({
   key,
@@ -30,14 +33,19 @@ const matchesForGroup = (item: any, group: CompetitorGroupKey) =>
     .map((match: any) => match.name)
     .filter((name: string, index: number, names: string[]) => names.indexOf(name) === index);
 
-// RadarReportV2 does not yet own a typed competitor audit. This branch can
-// consume it later without pretending today's projection has completed checks.
-const checkedIds = new Set<string>(report?.competitor_audit?.checked_ids ?? []);
-const fixedChecksExecuted = checkedIds.size > 0;
+const statusMeta: Record<string, { label: string; className: string }> = {
+  updated: { label: '官方來源有更新', className: 'fact' },
+  baseline: { label: '已建立監測基準', className: 'deterministic' },
+  checked_no_major_update: { label: '已查無重大更新', className: 'complete' },
+  partial: { label: '部分來源失敗', className: 'counter' },
+  failed: { label: '官方來源檢查失敗', className: 'gap' },
+  not_executed: { label: '本次未執行', className: 'gap' },
+};
 const statusFor = (entry: any) => {
-  if (signalsFor(entry).length > 0) return { label: '有新增證據', className: 'fact' };
-  if (checkedIds.has(entry.id)) return { label: '已查無重大更新', className: 'complete' };
-  return { label: '固定來源待查', className: 'gap' };
+  const check: any = auditById.get(entry.id);
+  if (check) return statusMeta[check.status] ?? { label: check.status, className: 'gap' };
+  if (signalsFor(entry).length > 0) return { label: '有新聞證據', className: 'fact' };
+  return { label: '未納入固定官方監測', className: 'gap' };
 };
 const priorityLabel = (priority: string) => (priority === 'high' ? '高' : priority === 'medium' ? '中' : '低');
 const relationshipLabel = (relationship: string) => ({
@@ -46,29 +54,119 @@ const relationshipLabel = (relationship: string) => ({
   enabling: '基礎設施威脅',
   content: '內容競爭',
 }[relationship] ?? relationship);
+const sourceStatusLabel = (status: string) => ({
+  checked: '已取得',
+  not_modified: '304 未變更',
+  failed: '失敗',
+}[status] ?? status);
+const formatTimestamp = (value: string) => {
+  if (!value) return '未執行';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? value : parsed.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+};
+
+const history = allReportEntries()
+  .slice(0, 45)
+  .map((entry) => {
+    const full: any = getFullByPath(entry.full_path);
+    const row = full?.competitor_audit;
+    if (!row || Number(row.fixed_target_count ?? 0) === 0) return null;
+    return {
+      date: entry.date,
+      checkedAt: row.checked_at,
+      fixed: Number(row.fixed_target_count ?? 0),
+      checked: Number(row.checked_target_count ?? 0),
+      updated: Number(row.updated_target_count ?? 0),
+      partial: Number(row.partial_target_count ?? 0),
+      failed: Number(row.failed_target_count ?? 0),
+    };
+  })
+  .filter(Boolean)
+  .slice(0, 14);
 ---
-<Base title="競品分析｜Daily Market Radar">
-  <h1>競品分析 · {report?.date ?? '尚無報告'}</h1>
-  <p class="muted">聚焦零售營運 Action Layer：從營運訊號或自然交代，轉成 Action、追蹤、證據、Outcome 與下一輪改善。地理市場與競爭關係分開呈現，不再把台灣相鄰平台與海外直接競品混為同一層。</p>
-  {!fixedChecksExecuted && <p class="notice">目前 RadarReportV2 尚無 typed competitor audit。此頁只投影當日已驗證新聞事件；名單已納入追蹤規則，但「沒有訊號」只能解讀為固定來源待查，不能解讀為市場沒有更新。</p>}
+<Base title="競品監測｜Daily Market Radar">
+  <h1>競品監測 · {report?.date ?? '尚無報告'}</h1>
+  <p class="muted">聚焦零售營運 Action Layer。固定產品競品會逐家檢查官方產品頁、文件或公司頁，與前次內容基準比較；一般每日新聞則另作跨領域投影，兩者不再混為同一件事。</p>
 
   {!report && <p class="empty">尚無報告。請先執行 radar run-daily 與 radar export-web。</p>}
 
-  {report && (
+  {report && Number(audit?.fixed_target_count ?? 0) === 0 && (
+    <p class="notice">本份報告尚未執行 typed competitor audit。此頁只能顯示新聞投影，不能聲稱官方來源已查無更新。</p>
+  )}
+
+  {report && Number(audit?.fixed_target_count ?? 0) > 0 && (
     <>
+      <p class="notice">
+        固定官方監測於 <strong>{formatTimestamp(audit.checked_at)}</strong> 完成。
+        已配置 {audit.fixed_target_count} 個產品競品，成功或部分成功檢查 {audit.checked_target_count} 個；
+        首次基準 {audit.baseline_target_count}、材料更新 {audit.updated_target_count}、部分失敗 {audit.partial_target_count}、完全失敗 {audit.failed_target_count}。
+        社群與內容競品仍屬 discovery-only，未假裝成已逐帳號查核。
+      </p>
+
       <div class="grid">
-        <div class="kpi"><div class="n">{byGroup.global_direct_retail_action_systems.length}</div><div class="l">海外直接競品訊號</div></div>
-        <div class="kpi"><div class="n">{byGroup.global_adjacent_execution_platforms.length}</div><div class="l">海外相鄰平台訊號</div></div>
-        <div class="kpi"><div class="n">{byGroup.taiwan_adjacent_retail_platforms.length}</div><div class="l">台灣相鄰平台訊號</div></div>
-        <div class="kpi"><div class="n">{byGroup.global_enabling_platform_threats.length}</div><div class="l">基礎設施威脅訊號</div></div>
-        <div class="kpi"><div class="n">{groupConfigs.reduce((sum, group) => sum + group.entries.length, 0)}</div><div class="l">固定追蹤對象</div></div>
+        <div class="kpi"><div class="n">{audit.fixed_target_count}</div><div class="l">固定產品競品</div></div>
+        <div class="kpi"><div class="n">{audit.checked_target_count}</div><div class="l">已完成檢查</div></div>
+        <div class="kpi"><div class="n">{audit.updated_target_count}</div><div class="l">官方材料更新</div></div>
+        <div class="kpi"><div class="n">{Number(audit.partial_target_count ?? 0) + Number(audit.failed_target_count ?? 0)}</div><div class="l">需修復來源</div></div>
+        <div class="kpi"><div class="n">{projectedItems.length}</div><div class="l">當日新聞投影</div></div>
       </div>
 
       {productGroups.map((group) => (
         <section data-competitor-group={group.key}>
           <h2>{group.zh} {group.en}</h2>
           <p class="muted">{group.description}</p>
-          {group.signals.length === 0 && <p class="empty">本日沒有可投影的新證據；若固定官方渠道尚未完成，狀態仍是「固定來源待查」。</p>}
+
+          <div class="competitor-audit-grid">
+            {group.entries.map((entry) => {
+              const check: any = auditById.get(entry.id);
+              const status = statusFor(entry);
+              const sourceChecks: any[] = check?.source_checks ?? [];
+              const changedSources = sourceChecks.filter((source) => source.material_change);
+              return (
+                <article class="card competitor-audit-card" data-competitor-id={entry.id}>
+                  <div class="row">
+                    <span class={`badge ${status.className}`}>{status.label}</span>
+                    <span class={`badge ${entry.priority === 'high' ? 'counter' : 'deterministic'}`}>優先 {priorityLabel(entry.priority)}</span>
+                    <span class="badge domain">{relationshipLabel(entry.relationship)}</span>
+                  </div>
+                  <h3>{entry.name}</h3>
+                  <p class="muted">{entry.focus ?? entry.aliases.join('、')}</p>
+                  {check ? (
+                    <>
+                      <p>{check.summary}</p>
+                      <p class="muted">成功來源 {check.successful_source_count} · 失敗來源 {check.failed_source_count} · 檢查時間 {formatTimestamp(check.checked_at)}</p>
+                      {changedSources.map((source) => (
+                        <div class="change-evidence">
+                          <p><span class="badge fact">材料變化</span> <strong>{source.title || source.source_id}</strong></p>
+                          {source.excerpt && <p>{source.excerpt}</p>}
+                          <p class="muted">內容相似度：{source.similarity == null ? '首次基準' : `${Math.round(Number(source.similarity) * 100)}%`}</p>
+                        </div>
+                      ))}
+                      <details class="notes">
+                        <summary>官方來源檢查明細（{sourceChecks.length}）</summary>
+                        {sourceChecks.map((source) => (
+                          <div class="source-check">
+                            <p>
+                              <a href={source.url}>{source.source_id} ↗</a>
+                              {' · '}{sourceStatusLabel(source.status)}
+                              {source.http_status != null && ` · HTTP ${source.http_status}`}
+                              {source.material_change && ' · 材料變化'}
+                            </p>
+                            {source.error && <p class="counter-text">{source.error}</p>}
+                          </div>
+                        ))}
+                      </details>
+                    </>
+                  ) : (
+                    <p class="empty">本對象沒有 typed 官方監測紀錄。</p>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+
+          <h3>當日新聞投影</h3>
+          {group.signals.length === 0 && <p class="empty">今日通過品質篩選的新聞裡，沒有命中此組競品的新事件。這不影響上方官方來源查核結果。</p>}
           {group.signals.map((item) => (
             <article class="card">
               <div class="row">
@@ -89,10 +187,10 @@ const relationshipLabel = (relationship: string) => ({
       ))}
 
       {contentGroup && (
-        <details class="card" open={contentGroup.signals.length > 0}>
-          <summary><strong>{contentGroup.zh} {contentGroup.en}</strong> · {contentGroup.signals.length} 筆</summary>
-          <p class="muted">{contentGroup.description}</p>
-          {contentGroup.signals.length === 0 && <p class="empty">本日沒有可投影的新內容競品證據，固定社群渠道仍可能待查。</p>}
+        <section>
+          <h2>{contentGroup.zh} {contentGroup.en}</h2>
+          <p class="notice">此組目前沒有具名帳號與官方渠道清單，維持 discovery-only。只有當日新聞或社群來源實際命中時才顯示，不會標示「已查無更新」。</p>
+          {contentGroup.signals.length === 0 && <p class="empty">本日沒有可投影的新內容競品證據。</p>}
           {contentGroup.signals.map((item) => (
             <article class="card">
               <div class="row"><span class="badge inference">{contentGroup.badge}</span><span class="badge auto">潛力 {item.potential_score}</span></div>
@@ -103,46 +201,51 @@ const relationshipLabel = (relationship: string) => ({
               </div>
             </article>
           ))}
-        </details>
+        </section>
       )}
 
-      <h2>固定追蹤名單 Registry</h2>
-      <p class="muted">優先順序先看直接競品，再看相鄰執行平台、台灣在地擴張威脅與通用底座。一般電商、CRM、雲端或 AI 新聞若沒有零售營運執行關聯，不會進入競品訊號。</p>
-      {groupConfigs.map((group) => (
-        <section data-registry-group={group.key}>
-          <h3>{group.zh} {group.en}</h3>
+      <h2>最近監測歷史</h2>
+      {history.length === 0 ? (
+        <p class="empty">目前只有本次基準，下一次成功執行後會開始形成可比較歷史。</p>
+      ) : (
+        <div class="table-wrap">
           <table>
-            <thead><tr><th>對象</th><th>競爭關係</th><th>追蹤焦點</th><th>優先級</th><th>本日狀態</th><th>對應訊號</th></tr></thead>
+            <thead><tr><th>報告日</th><th>檢查時間</th><th>固定對象</th><th>已檢查</th><th>有更新</th><th>部分失敗</th><th>失敗</th></tr></thead>
             <tbody>
-              {group.entries.map((entry) => {
-                const status = statusFor(entry);
-                const signals = signalsFor(entry);
-                return (
-                  <tr data-competitor-id={entry.id}>
-                    <td>{entry.name}</td>
-                    <td>{relationshipLabel(entry.relationship)}</td>
-                    <td class="muted">{entry.focus ?? entry.aliases.join('、')}</td>
-                    <td><span class={`badge ${entry.priority === 'high' ? 'counter' : 'deterministic'}`}>{priorityLabel(entry.priority)}</span></td>
-                    <td><span class={`badge ${status.className}`}>{status.label}</span></td>
-                    <td>{signals.length > 0 ? signals.map((item) => <code>{item.item_id}</code>) : '—'}</td>
-                  </tr>
-                );
-              })}
+              {history.map((row: any) => (
+                <tr>
+                  <td>{row.date}</td>
+                  <td>{formatTimestamp(row.checkedAt)}</td>
+                  <td>{row.fixed}</td>
+                  <td>{row.checked}</td>
+                  <td>{row.updated}</td>
+                  <td>{row.partial}</td>
+                  <td>{row.failed}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
-        </section>
-      ))}
+        </div>
+      )}
 
-      <h2>聚焦判斷框架 Framework</h2>
+      <h2>監測規則與邊界</h2>
       <ul class="tight">
-        <li>是否把 POS／ERP／SOP／訊息／照片或現場事件轉成可執行 Action？</li>
-        <li>是否能自動指派、催辦、要求證據、覆核、升級與回報，而不只是產生建議？</li>
-        <li>是否把 Action 與業績、庫存、人力、稽核或其他 Outcome 連接，並從結果調整規則？</li>
-        <li>是否支援既有通訊工具、headless／embedded 使用方式，降低更換系統成本？</li>
-        <li>是否推出台灣 LINE／Google-native、3–50 店、自助客製、低價或可量化 ROI 的方案？</li>
+        <li>首次成功取得官方頁面只建立 baseline，不把既有產品內容冒充今日新消息。</li>
+        <li>後續以 ETag／Last-Modified、可見文字雜湊、內容相似度與長度變化判定材料更新。</li>
+        <li>單一來源失敗不會中止整份日報，但會明確標示 partial 或 failed，並列出錯誤。</li>
+        <li>官方頁面變化只代表材料變更，仍需結合新聞、客戶案例、定價、採用或產品行為判讀威脅程度。</li>
+        <li>競品監測是跨領域 audit，不新增第六個新聞領域，也不重複計算同一事件。</li>
       </ul>
-
-      <p class="muted">競品情報仍是跨領域投影，不是第六個新聞領域。同一事件只保留一個 canonical primary domain。</p>
     </>
   )}
+
+  <style>
+    .competitor-audit-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+    .competitor-audit-card h3 { margin-bottom: .4rem; }
+    .change-evidence { border-left: 3px solid var(--accent, currentColor); padding-left: .9rem; margin: 1rem 0; }
+    .source-check { border-top: 1px solid rgba(127, 127, 127, .24); padding-top: .55rem; margin-top: .55rem; }
+    .source-check p { margin: .25rem 0; }
+    .counter-text { font-size: .9rem; overflow-wrap: anywhere; }
+    .table-wrap { overflow-x: auto; }
+  </style>
 </Base>
