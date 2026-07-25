@@ -24,13 +24,15 @@ _EARLY_STAGE_TERMS = {
 }
 _APPLICATION_TERMS = {
     "agent", "agentic", "api", "runtime", "developer tool", "automation",
-    "robotics", "digital twin", "copilot", "assistant", "integration",
-    "新應用", "代理", "自動化", "機器人", "開發者工具", "整合",
+    "digital twin", "copilot", "assistant", "integration",
+    "新應用", "代理", "自動化", "開發者工具", "整合",
 }
 _BUSINESS_MODEL_TERMS = {
     "business model", "subscription", "marketplace", "retail media",
     "usage based", "pay per use", "revenue share", "agent payment",
+    "tokenized", "settlement", "tokenized settlement", "neighborhood format", "store format",
     "商業模式", "訂閱", "平台抽成", "零售媒體", "按量付費", "代理支付",
+    "代幣化", "結算", "代幣化結算", "鄰里店型", "店型測試", "新店型",
 }
 _COMBINATION_TERMS = {
     "cross-domain", "cross domain", "combined with", "powered by",

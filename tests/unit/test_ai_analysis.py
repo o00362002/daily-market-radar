@@ -59,8 +59,10 @@ class AIAnalysisTests(unittest.TestCase):
                 "science_technology_industry",
             },
         )
-        self.assertTrue(set(row.domain for row in typed.key_findings) <= canonical_domains)
-        self.assertTrue(canonical_domains.issubset({row.domain for row in typed.key_findings}))
+        finding_domains = {row.domain for row in typed.key_findings}
+        report_domains = {item.primary_domain for item in self.report.items}
+        self.assertTrue(finding_domains <= canonical_domains)
+        self.assertTrue(finding_domains <= report_domains)
         self.assertTrue(all(row.horizon == "three_to_six_months" for row in typed.future_trends))
         self.assertTrue(all(sorted(row.horizon_months) == [3, 6] for row in typed.future_trends))
         self.assertTrue(all(row.synthesis_scope == "global" for row in typed.future_trends))

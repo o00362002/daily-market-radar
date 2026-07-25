@@ -12,6 +12,7 @@ from radar.reporting.planner import plan_daily_items, qualified_report_events
 def event_for(
     title: str,
     *,
+    summary: str = "",
     domain: str = "global_markets_macro",
     action: str = "reports",
     obj: str = "update",
@@ -21,6 +22,7 @@ def event_for(
         source_id=source_id,
         url=f"https://example.com/{source_id}/{abs(hash(title))}",
         title=title,
+        summary=summary,
         action=action,
         object=obj,
         primary_domain=domain,
@@ -53,9 +55,20 @@ class ReportQualificationTests(unittest.TestCase):
         items = plan_daily_items([event])
 
         self.assertTrue(assessment.qualified)
-        self.assertEqual(assessment.reason, "major_has_explicit_subject_and_change")
+        self.assertEqual(assessment.reason, "major_has_explicit_transmission_and_change")
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].report_lane, "major")
+
+    def test_geopolitical_attack_without_market_transmission_is_rejected(self) -> None:
+        event = event_for("胡塞武裝聲稱對沙烏地南部發動飛彈攻擊")
+        assessment = assess_report_qualification(event)
+        self.assertFalse(assessment.qualified)
+
+    def test_geopolitical_attack_with_oil_and_supply_transmission_is_major(self) -> None:
+        event = event_for("中東攻擊推升油價並干擾能源供應鏈 成本上升")
+        assessment = assess_report_qualification(event)
+        self.assertTrue(assessment.qualified)
+        self.assertEqual(assessment.reason, "major_has_explicit_transmission_and_change")
 
     def test_content_qualified_potential_is_preserved(self) -> None:
         event = event_for(

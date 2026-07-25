@@ -48,19 +48,27 @@ REPORT_ANCHOR_TERMS: dict[str, tuple[str, ...]] = {
     ),
 }
 
-MATERIAL_CHANGE_TERMS: tuple[str, ...] = (
-    "launch", "release", "rollout", "deploy", "adopt", "adoption", "expand", "expansion", "funding",
-    "raise", "acquire", "acquisition", "merge", "merger", "approve", "ban", "regulation", "regulatory",
-    "law", "bill", "tariff", "sanction", "earnings", "revenue", "profit", "loss", "price", "cost",
-    "outage", "breach", "attack", "hack", "vulnerability", "partnership", "deal", "contract", "order",
-    "investment", "cuts", "layoff", "hiring", "production", "capacity", "supply", "demand", "sales",
-    "fall", "rise", "surge", "drop", "record", "open", "close", "closure", "shutdown", "pilot", "test",
-    "trial", "fine", "probe", "investigation",
-    "推出", "發布", "上線", "部署", "導入", "採用", "擴張", "募資", "收購", "併購", "核准", "禁止",
-    "監管", "法案", "關稅", "制裁", "財報", "營收", "獲利", "虧損", "價格", "成本", "中斷", "漏洞",
-    "攻擊", "駭客", "合作", "交易", "合約", "訂單", "投資", "裁員", "招聘", "產能", "供應", "需求",
-    "銷售", "上漲", "下跌", "飆", "降", "增", "減", "創新高", "開店", "關店", "停產", "試點", "測試",
-    "實驗", "罰款", "調查",
+HIGH_IMPACT_CHANGE_TERMS: tuple[str, ...] = (
+    "launch", "release", "rollout", "deploy", "adopt", "adoption", "funding", "acquire", "acquisition",
+    "merge", "merger", "regulation", "regulatory", "tariff", "sanction", "earnings", "revenue", "profit",
+    "loss", "price", "cost", "outage", "breach", "vulnerability", "contract", "order", "investment",
+    "layoff", "hiring", "production", "capacity", "supply", "demand", "sales", "shutdown", "fine",
+    "wage change", "wage changes",
+    "推出", "發布", "上線", "部署", "導入", "採用", "募資", "收購", "併購", "監管", "關稅", "制裁",
+    "財報", "營收", "獲利", "虧損", "價格", "成本", "中斷", "漏洞", "合約", "訂單", "投資", "裁員",
+    "招聘", "產能", "供應", "需求", "銷售", "停產", "罰款", "薪資變化", "薪資調整",
+)
+
+GLOBAL_MACRO_TRANSMISSION_TERMS: tuple[str, ...] = (
+    "oil", "crude", "energy", "tariff", "trade", "export", "import", "sanction", "supply chain",
+    "inflation", "interest rate", "yield", "bond", "currency", "dollar", "gold", "gdp", "economy",
+    "unemployment", "wage", "debt", "credit", "earnings", "revenue", "profit", "price", "market",
+    "stock", "fund", "investment", "manufacturing", "factory", "production", "capacity", "semiconductor",
+    "bitcoin", "crypto", "consumer", "retail",
+    "原油", "油價", "能源", "關稅", "貿易", "出口", "進口", "制裁", "供應鏈", "通膨", "利率",
+    "殖利率", "債券", "匯率", "美元", "黃金", "經濟", "景氣", "失業", "薪資", "債務", "信貸",
+    "財報", "營收", "獲利", "價格", "市場", "股市", "股票", "基金", "投資", "製造", "工廠",
+    "產能", "半導體", "比特幣", "加密", "消費", "零售",
 )
 
 
@@ -73,14 +81,6 @@ class ReportQualification:
 
 
 def assess_report_qualification(event: Event) -> ReportQualification:
-    """Decide whether a fresh material event belongs in the daily report.
-
-    Potential candidates keep their separate content-driven path. A Major item
-    must expose both a canonical radar subject and a concrete change in its
-    headline. At least one side needs two signals, preventing every generic feed
-    story from falling through to Major merely because it is new.
-    """
-
     if not event.documents:
         return ReportQualification(False, "event_has_no_documents")
 
@@ -89,24 +89,39 @@ def assess_report_qualification(event: Event) -> ReportQualification:
         return ReportQualification(True, "content_qualified_potential")
 
     anchor_hits: list[str] = []
-    change_hits: list[str] = []
+    impact_hits: list[str] = []
+    transmission_hits: list[str] = []
     has_measurements = False
+    source_ids: set[str] = set()
+    domains: set[str] = set()
+
     for document in event.documents:
-        title = normalize_for_matching(document.title)
-        anchor_hits.extend(matching_terms(title, REPORT_ANCHOR_TERMS.get(document.primary_domain, ())))
-        change_hits.extend(matching_terms(title, MATERIAL_CHANGE_TERMS))
+        text = normalize_for_matching(" ".join(part for part in (document.title, document.summary) if part))
+        domain = document.primary_domain
+        domains.add(domain)
+        source_ids.add(document.source_id)
+        anchor_hits.extend(matching_terms(text, REPORT_ANCHOR_TERMS.get(domain, ())))
+        impact_hits.extend(matching_terms(text, HIGH_IMPACT_CHANGE_TERMS))
+        if domain == "global_markets_macro":
+            transmission_hits.extend(matching_terms(text, GLOBAL_MACRO_TRANSMISSION_TERMS))
         has_measurements = has_measurements or bool(document.facts.measurements)
 
     anchors = tuple(dict.fromkeys(anchor_hits))
-    changes = tuple(dict.fromkeys(change_hits))
-    strong_headline = bool(anchors and changes and (len(anchors) >= 2 or len(changes) >= 2))
-    corroborated = len({document.source_id for document in event.documents}) >= 2 and bool(anchors and changes)
-    structured = has_measurements and bool(anchors)
+    impacts = tuple(dict.fromkeys(impact_hits))
+    transmissions = tuple(dict.fromkeys(transmission_hits))
+    macro_only = domains == {"global_markets_macro"}
+    has_transmission = bool(transmissions) if macro_only else True
 
-    if strong_headline:
-        return ReportQualification(True, "major_has_explicit_subject_and_change", anchors, changes)
+    explicit_impact = bool(anchors and impacts and has_transmission)
+    corroborated = len(source_ids) >= 2 and explicit_impact
+    structured = has_measurements and bool(domains)
+
+    if explicit_impact:
+        return ReportQualification(True, "major_has_explicit_transmission_and_change", anchors, impacts)
     if corroborated:
-        return ReportQualification(True, "major_is_independently_corroborated", anchors, changes)
+        return ReportQualification(True, "major_is_independently_corroborated", anchors, impacts)
     if structured:
-        return ReportQualification(True, "major_has_structured_measurement", anchors, changes)
-    return ReportQualification(False, "generic_or_low_materiality_feed_story", anchors, changes)
+        return ReportQualification(True, "major_has_structured_measurement", anchors, impacts)
+    if macro_only and anchors and impacts and not transmissions:
+        return ReportQualification(False, "macro_story_has_no_economic_transmission", anchors, impacts)
+    return ReportQualification(False, "generic_or_low_materiality_feed_story", anchors, impacts)
