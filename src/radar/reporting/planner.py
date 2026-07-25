@@ -5,11 +5,22 @@ from radar.domain.event_resolution import is_material_delta_type
 from radar.domain.models import Event, ReportItem, stable_id
 from radar.domain.potential import assess_event
 from radar.domain.scoring import explain_event_scores
+from radar.pipeline.qualification import assess_report_qualification
+
+
+def qualified_report_events(events: list[Event]) -> list[Event]:
+    """Keep every qualified event while rejecting generic feed fall-through.
+
+    This is a semantic gate, not a count cap. Profiles remain minimum floors and
+    every event that passes qualification is retained.
+    """
+
+    return [event for event in events if assess_report_qualification(event).qualified]
 
 
 def plan_daily_items(events: list[Event]) -> list[ReportItem]:
     items: list[ReportItem] = []
-    for event in events:
+    for event in qualified_report_events(events):
         doc = event.documents[0]
         assessment = assess_event(event)
         report_lane = assessment.lane
