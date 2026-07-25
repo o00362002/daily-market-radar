@@ -19,6 +19,9 @@ RADAR_ROOT = SRC_ROOT / "radar"
 # These signatures are the stable behavioral boundary. Concrete implementations
 # may expose more helpers, but application services must only require this surface.
 PORT_METHODS: dict[str, dict[str, tuple[str, ...]]] = {
+    "CompetitorMonitor": {
+        "run": ("self", "report_date", "checked_at"),
+    },
     "SourceAdapter": {
         "credentials_status": ("self",),
         "health_check": ("self",),
@@ -74,6 +77,7 @@ PORT_METHODS: dict[str, dict[str, tuple[str, ...]]] = {
 }
 
 PORT_ATTRIBUTES: dict[str, set[str]] = {
+    "CompetitorMonitor": set(),
     "SourceAdapter": {"adapter_id", "source_id", "retry_policy", "rate_limit_policy"},
     "IntelligenceEvaluator": {"evaluator_id"},
     "DocumentRepository": set(),
@@ -258,9 +262,9 @@ def _package_component(module_name: str) -> str:
 class PortContractTests(unittest.TestCase):
     def test_all_ports_are_runtime_checkable_protocols_with_stable_surfaces(self) -> None:
         self.assertEqual(set(PORT_METHODS), set(PORT_ATTRIBUTES))
-        # PR B extends the port set from nine to ten by adding the atomic UnitOfWork
-        # run-transaction boundary. Every port remains a runtime-checkable Protocol.
-        self.assertEqual(len(PORT_METHODS), 10)
+        # CompetitorMonitor extends the provider-neutral boundary while UnitOfWork
+        # remains the atomic run-transaction boundary.
+        self.assertEqual(len(PORT_METHODS), 11)
 
         for port_name, required_methods in PORT_METHODS.items():
             with self.subTest(port=port_name):
