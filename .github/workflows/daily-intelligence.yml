@@ -4,6 +4,7 @@ name: daily-intelligence
 # GitHub schedule delivery may be delayed; the workflow records the actual Taiwan date.
 # Relevant main-branch runtime, configuration and web changes also run the full accepted
 # production pipeline so merged code does not wait until the next morning to reach Pages.
+# A healthy report may deploy without AI analysis; stale or fallback analysis is removed.
 
 on:
   push:
@@ -42,6 +43,7 @@ jobs:
     outputs:
       deployable: ${{ steps.gate.outputs.deployable }}
       status: ${{ steps.gate.outputs.status }}
+      analysis_status: ${{ steps.gate.outputs.analysis_status }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -104,7 +106,9 @@ jobs:
           fi
 
       - name: Generate AI interpretation and trend scenarios
+        id: analysis
         if: steps.report_gate.outputs.report_ok == 'true'
+        continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
@@ -120,21 +124,54 @@ jobs:
       - name: Production deployment gate
         id: gate
         run: |
+          set -e
           DATE=$(TZ=Asia/Taipei date +%F)
-          if python tools/check_production_quality.py \
-            --report artifacts/web/v1/latest.json \
-            --analysis artifacts/web/v1/ai-analysis/latest.json \
-            --expected-date "$DATE" \
-            --output artifacts/production-quality-gate.json; then
-            echo "deployable=true" >> "$GITHUB_OUTPUT"
-            echo "status=valid" >> "$GITHUB_OUTPUT"
-          else
+          if [ "${{ steps.report_gate.outputs.report_ok }}" != "true" ]; then
             echo "deployable=false" >> "$GITHUB_OUTPUT"
             echo "status=rejected" >> "$GITHUB_OUTPUT"
-            echo "::error::Production gate rejected report or AI analysis; previous website remains live."
+            echo "analysis_status=not_evaluated" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Persist durable state (only accepted production runs)
+          if [ "${{ steps.analysis.outcome }}" = "success" ] && \
+             python tools/check_production_quality.py \
+               --report artifacts/web/v1/latest.json \
+               --analysis artifacts/web/v1/ai-analysis/latest.json \
+               --expected-date "$DATE" \
+               --output artifacts/production-quality-gate.json; then
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+            echo "status=valid" >> "$GITHUB_OUTPUT"
+            echo "analysis_status=valid" >> "$GITHUB_OUTPUT"
+          else
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+            echo "status=report_only" >> "$GITHUB_OUTPUT"
+            echo "analysis_status=unavailable" >> "$GITHUB_OUTPUT"
+            echo "::warning::AI analysis is unavailable or failed validation; deploying the healthy report and UI without AIAnalysisV1."
+            rm -rf artifacts/web/v1/ai-analysis
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          gate_path = Path("artifacts/production-quality-gate.json")
+          reasons = []
+          if gate_path.exists():
+              reasons = json.loads(gate_path.read_text(encoding="utf-8")).get("reasons", [])
+          payload = {
+              "status": "report_only",
+              "report_id": report.get("run_id"),
+              "date": report.get("date"),
+              "analysis_available": False,
+              "reasons": reasons or ["analysis generation failed or did not produce a production-valid artifact"],
+          }
+          Path("artifacts/web/v1/analysis-status.json").write_text(
+              json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          fi
+
+      - name: Persist durable state (accepted report runs)
         if: steps.gate.outputs.deployable == 'true'
         run: |
           set -e
@@ -178,6 +215,18 @@ jobs:
         with:
           path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
 
+      - name: Upload report-only analysis diagnostics
+        if: always() && steps.gate.outputs.status == 'report_only'
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-only-production-run-${{ github.run_id }}
+          path: |
+            artifacts/production-quality-report.json
+            artifacts/production-quality-gate.json
+            artifacts/web/v1/analysis-status.json
+            artifacts/web/v1/latest.json
+          if-no-files-found: ignore
+
       - name: Upload rejected-run diagnostics
         if: always() && steps.gate.outputs.deployable != 'true'
         uses: actions/upload-artifact@v4
@@ -190,11 +239,11 @@ jobs:
             artifacts/web/v1/ai-analysis/latest.json
           if-no-files-found: ignore
 
-      - name: Fail visibly when production is rejected
+      - name: Fail visibly when the report is rejected
         if: always() && steps.gate.outputs.deployable != 'true'
         run: |
-          echo "Production deployment rejected. Previous GitHub Pages version was preserved." >&2
-          test -f artifacts/production-quality-gate.json && cat artifacts/production-quality-gate.json >&2 || true
+          echo "Production report rejected. Previous GitHub Pages version was preserved." >&2
+          test -f artifacts/production-quality-report.json && cat artifacts/production-quality-report.json >&2 || true
           exit 1
 
   deploy:

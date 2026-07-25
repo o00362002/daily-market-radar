@@ -24,16 +24,16 @@ Profiles：定義最低地板而非上限；所有 qualified items 保留，首�
 
 ```text
 Collection：direct RSS/Atom＋optional FreshRSS composite live collection；來源 registry／OPML／health 可驗證，未接線的 web、API、social、external discovery 必須揭露為 gap。
-Durability：SQLite 保存 document/event/delta/report/indicator/state/match/source-health；UnitOfWork 原子提交，radar-state branch 保存壓縮、checksum 與 last-good state；只有 production gate 通過的 daily run 才能覆寫 durable state。
+Durability：SQLite 保存 document/event/delta/report/indicator/state/match/source-health；UnitOfWork 原子提交，radar-state branch 保存壓縮、checksum 與 last-good state；通過 report quality gate 的 daily run 可覆寫 durable report state，AI 是否可用不再阻塞事實層保存。
 Resolution：跨日事件以 deterministic 7-strategy matching 與 material-delta taxonomy 判定；同日 re-run 取當日聯集，跨日無新增不重播。
 Evaluation：deterministic／auto／api-assisted／chat-assisted 已接線；AI 只讀 bounded context，輸出需重驗證，invalid/provider failure 安全降級；降級結果可供診斷與預覽，但不得覆蓋正式 AI 解讀頁。
 Chat flow：prepare-chat 從 durable live state 產生 content-addressed 封包；import-chat 驗證成功後可寫回 state、建站與部署；fixture 預設不得覆蓋正式站。
 AI analysis：AIAnalysisV1 產生翻譯、五域重點判讀與跨事件全球情境；/analysis 的閱讀順序為今日統整→五域重點判讀→未來 3–6 個月趨勢→三個核心結構指標→六個輔助訊號。未來趨勢不得逐則新聞改寫，必須引用跨事件來源並固定標示 3／6 個月條件式可能性；核心指標先展開細分指標、新聞簡述、支持／反向方向，再呈現 deterministic 總分。AI 不得改寫 deterministic 指標；provider/model/time/run/hash/prompt/schema/fallback 全留痕。
-Production gate：正式部署要求 live ingestion、當日日期一致、event_id 唯一、總項目／Major 數量與 Major 比例不超過 config/production_quality_gate.json；AI 解讀必須是 api-assisted 或 chat-assisted，provider/model 必須存在、fallback=false，並且與同一 report_id/date 對齊。任一失敗時保留上一版 Pages、上傳診斷 artifact 並讓 Actions 顯示失敗。
+Production gate：事實層正式部署要求 live ingestion、當日日期一致、event_id 唯一、總項目／Major 數量與 Major 比例不超過 config/production_quality_gate.json。AI 解讀另行要求 api-assisted 或 chat-assisted、provider/model 存在、fallback=false，且與同一 report_id/date 對齊。報告失敗時保留上一版 Pages 並讓 Actions 失敗；只有 AI 失敗時仍部署健康報告與 UI、刪除不合格或不相符的 AI artifact，/analysis 明確顯示尚無 AIAnalysisV1。
 Domains：文章在 normalize 後進入 deterministic content classifier，以標題／摘要／實體與來源 domain prior 判定五個 canonical domains；labor 與 policy 舊 alias 只映射至 global_markets_macro。
 Competitor：registry 依海外直接 Action 系統、海外相鄰執行平台、台灣相鄰零售平台、通用執行底座與內容競品分組；身分只從 headline／today_delta 等事實欄位辨識，並以 requires_any 排除一般行銷、CRM、電商與通用 AI 噪音。若 RadarReportV2 沒有 typed competitor audit，頁面只能標示「固定來源待查」，不得把無匹配事件當成已查無更新。
-Web：Astro static、zero-JS-first、Pages-compatible；事實層與 /analysis 解讀層分開，JSON artifacts 同步發佈於 /data/。
-Automation：daily-intelligence 於 23:00 UTC 排程，目標在台灣 09:00 前完成，但 GitHub schedule 可延遲；daily 與 ai-analysis 都需通過 production gate 才能部署，共同使用 radar-daily concurrency lock。
+Web：Astro static、zero-JS-first、Pages-compatible；事實層與 /analysis 解讀層分開，JSON artifacts 同步發佈於 /data/。報告可獨立更新，AI 層缺失不再凍結整站。
+Automation：daily-intelligence 於 23:00 UTC 排程，亦在 production-relevant main push 後執行；健康報告即可部署，AI 解讀需通過獨立閘門才會一起發布。daily 與 ai-analysis 共用 radar-daily concurrency lock。
 Coverage：來源數量與輸出數量不是完整性證明；coverage gaps、failures、rejection counters、matrices、structural indicators 與 backtest 固定揭露。
 Legacy：reports/2026/ 人工報告投影至 /legacy/，明確標示非 validated RadarReportV2。
 尚未完成：逐來源 fresh/backfill 分層、真實 AI key 線上驗證、typed competitor audit/history、AI analysis 長期 repository/history、read-only「問雷達」MCP。
