@@ -2,8 +2,20 @@ name: daily-intelligence
 
 # Daily pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
 # GitHub schedule delivery may be delayed; the workflow records the actual Taiwan date.
+# Relevant main-branch runtime, configuration and web changes also run the full accepted
+# production pipeline so merged code does not wait until the next morning to reach Pages.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/daily-intelligence.yml"
+      - "src/radar/**"
+      - "config/**"
+      - "configs/**"
+      - "web/**"
+      - "tools/check_production_quality.py"
+      - "schemas/**"
   schedule:
     - cron: "0 23 * * *"
   workflow_dispatch:
