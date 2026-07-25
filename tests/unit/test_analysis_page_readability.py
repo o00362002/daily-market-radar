@@ -43,13 +43,16 @@ class AnalysisPageReadabilityTests(unittest.TestCase):
         self.assertIn("const canonicalDomains", self.text)
         self.assertIn("const findingsForDomain", self.text)
         self.assertIn("component.evidence", self.text)
-        self.assertIn("未完整查證", (ROOT / "web" / "src" / "pages" / "competitors.astro").read_text(encoding="utf-8"))
+        competitor_page = (ROOT / "web" / "src" / "pages" / "competitors.astro").read_text(encoding="utf-8")
+        self.assertIn("固定來源待查", competitor_page)
+        self.assertIn("typed competitor audit", competitor_page)
 
     def test_competitor_page_renders_registry_groups_and_matches(self) -> None:
         page = (ROOT / "web" / "src" / "pages" / "competitors.astro").read_text(encoding="utf-8")
-        self.assertIn("const registryGroups", page)
+        self.assertIn("const groupConfigs", page)
+        self.assertIn("competitorGroupOrder", page)
         self.assertIn("signalsFor(entry)", page)
-        self.assertIn("entry.aliases.join", page)
+        self.assertIn("entry.focus", page)
         self.assertIn("entry.priority", page)
 
 
