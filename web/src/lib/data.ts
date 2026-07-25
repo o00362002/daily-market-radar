@@ -27,6 +27,9 @@ export function getManifest(): WebManifestV1 | null {
   return readJson<WebManifestV1>('manifest.json');
 }
 
+// The immutable latest report now owns CompetitorAuditV1, including official-source
+// baselines, check outcomes and evidence. Pages must read that typed fact layer rather
+// than infer "no update" from an empty general-news projection.
 export function getLatestReport(): Record<string, unknown> | null {
   return readJson<Record<string, unknown>>('latest.json');
 }
