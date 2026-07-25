@@ -44,8 +44,9 @@ class AnalysisPageReadabilityTests(unittest.TestCase):
         self.assertIn("const findingsForDomain", self.text)
         self.assertIn("component.evidence", self.text)
         competitor_page = (ROOT / "web" / "src" / "pages" / "competitors.astro").read_text(encoding="utf-8")
-        self.assertIn("固定來源待查", competitor_page)
-        self.assertIn("typed competitor audit", competitor_page)
+        self.assertIn("report?.competitor_audit", competitor_page)
+        self.assertIn("已查無重大更新", competitor_page)
+        self.assertIn("官方來源檢查明細", competitor_page)
 
     def test_competitor_page_renders_registry_groups_and_matches(self) -> None:
         page = (ROOT / "web" / "src" / "pages" / "competitors.astro").read_text(encoding="utf-8")
@@ -54,6 +55,7 @@ class AnalysisPageReadabilityTests(unittest.TestCase):
         self.assertIn("signalsFor(entry)", page)
         self.assertIn("entry.focus", page)
         self.assertIn("entry.priority", page)
+        self.assertIn("最近監測歷史", page)
 
 
 if __name__ == "__main__":
