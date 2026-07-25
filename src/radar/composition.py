@@ -6,9 +6,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
+from radar.adapters.competitor_web import OfficialCompetitorMonitor
 from radar.adapters.fixture import FixtureSourceAdapter
 from radar.adapters.openai_provider import OpenAiEvaluationProvider
 from radar.adapters.rss import RegistryRssSourceAdapter
+from radar.adapters.transport import UrllibHttpTransport
 from radar.application import ApplicationDependencies, DailyRadarApplication
 from radar.evaluators.ai_assisted import AiAssistedEvaluator
 from radar.evaluators.cache import CostBudget
@@ -22,6 +24,7 @@ from radar.repositories.memory import (
     InMemoryUnitOfWork,
 )
 from radar.repositories.sqlite import SqliteRunRepository
+from radar.schemas.competitor import CompetitorMonitoringRegistry
 from radar.schemas.source import SourceRegistry
 from radar.stores.memory import InMemoryStateStore, InMemoryWebArtifactStore
 
@@ -46,6 +49,8 @@ class CompositionConfig:
     )
     database_path: Path | None = None
     migrations_dir: Path | None = None
+    competitor_registry_path: Path | None = None
+    competitor_source_registry_path: Path | None = None
     timeout_seconds: int = 12
     per_feed_limit: int = 20
     external_discovery_available: bool = True
@@ -103,7 +108,6 @@ def compose_application(
         ]
         if config.optional_integrations.get("collection_aggregator", False):
             from radar.adapters.freshrss_source import FreshRssRegistrySourceAdapter
-            from radar.adapters.transport import UrllibHttpTransport
 
             children.append(
                 FreshRssRegistrySourceAdapter(
@@ -191,6 +195,20 @@ def compose_application(
     else:
         raise ValueError(f"unknown state store backend: {config.state_store_backend}")
 
+    competitor_monitor = None
+    if config.competitor_registry_path is not None or config.competitor_source_registry_path is not None:
+        if config.competitor_registry_path is None or config.competitor_source_registry_path is None:
+            raise ValueError("both competitor registry paths are required")
+        competitor_registry = CompetitorMonitoringRegistry.from_files(
+            config.competitor_registry_path,
+            config.competitor_source_registry_path,
+        )
+        competitor_monitor = OfficialCompetitorMonitor(
+            registry=competitor_registry,
+            transport=UrllibHttpTransport(),
+            state_store=state_store,
+        )
+
     if config.web_artifact_store_backend != "memory":
         raise ValueError(f"unknown web artifact store backend: {config.web_artifact_store_backend}")
 
@@ -242,6 +260,7 @@ def compose_application(
         web_artifact_store=InMemoryWebArtifactStore(),
         unit_of_work=unit_of_work,
         publishers=tuple(publishers),
+        competitor_monitor=competitor_monitor,
     )
     return ComposedApplication(
         application=DailyRadarApplication(dependencies, clock=active_clock),
