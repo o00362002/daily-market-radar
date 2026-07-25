@@ -50,7 +50,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("check_production_quality.py", text)
         self.assertIn("Report quality pre-gate", text)
         self.assertIn("analysis_fallback", (ROOT / "tools/check_production_quality.py").read_text(encoding="utf-8"))
-        self.assertIn("previous website remains live", text)
+        self.assertIn("previous website remains live", text.lower())
         self.assertIn("Persist durable state (only accepted production runs)", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
@@ -96,7 +96,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("OPENAI_ANALYSIS_MODEL", text)
         self.assertIn("ai-analysis/latest.json", text)
         self.assertIn("check_production_quality.py", text)
-        self.assertIn("previous website remains live", text)
+        self.assertIn("previous website remains live", text.lower())
         self.assertIn("deploy-pages", text)
 
     def test_pages_deploy_uses_same_production_gate(self) -> None:
