@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from radar.domain.models import Document
+from radar.domain.potential import assess_event
 from radar.domain.text_matching import contains_term
 from radar.pipeline.cluster import cluster_documents
 from radar.pipeline.qualification import assess_report_qualification
@@ -70,6 +71,17 @@ class ReportQualificationTests(unittest.TestCase):
         self.assertTrue(assessment.qualified)
         self.assertEqual(assessment.reason, "major_has_explicit_transmission_and_change")
 
+    def test_global_macro_recruitment_agent_does_not_become_application_potential(self) -> None:
+        event = event_for(
+            "巴拿馬人成俄烏戰爭缺兵招募對象 當局展開調查",
+            action="investigates",
+            obj="recruitment agent",
+        )
+
+        self.assertEqual(assess_event(event).lane, "major")
+        self.assertFalse(assess_report_qualification(event).qualified)
+        self.assertEqual(plan_daily_items([event]), [])
+
     def test_content_qualified_potential_is_preserved(self) -> None:
         event = event_for(
             "Startup pilots agent payment API",
@@ -84,6 +96,16 @@ class ReportQualificationTests(unittest.TestCase):
         self.assertTrue(assessment.qualified)
         self.assertEqual(assessment.reason, "content_qualified_potential")
         self.assertEqual(items[0].report_lane, "potential")
+
+    def test_duplicate_normalized_headlines_emit_one_report_item(self) -> None:
+        title = "中東衝突推升油價並干擾能源供應鏈 成本上升"
+        first = event_for(title, source_id="source-a")
+        second = event_for(title, source_id="source-b")
+
+        items = plan_daily_items([first, second])
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].headline, title)
 
     def test_generic_market_update_is_not_major_without_a_concrete_change(self) -> None:
         event = event_for("Local outlet reports quarterly market update")
