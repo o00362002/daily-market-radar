@@ -30,7 +30,9 @@ _APPLICATION_TERMS = {
 _BUSINESS_MODEL_TERMS = {
     "business model", "subscription", "marketplace", "retail media",
     "usage based", "pay per use", "revenue share", "agent payment",
+    "tokenized settlement", "neighborhood format", "store format",
     "商業模式", "訂閱", "平台抽成", "零售媒體", "按量付費", "代理支付",
+    "代幣化結算", "鄰里店型", "店型測試", "新店型",
 }
 _COMBINATION_TERMS = {
     "cross-domain", "cross domain", "combined with", "powered by",
