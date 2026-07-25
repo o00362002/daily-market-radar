@@ -48,8 +48,6 @@ REPORT_ANCHOR_TERMS: dict[str, tuple[str, ...]] = {
     ),
 }
 
-# Generic verbs such as attack/open/pass/test are intentionally excluded. They describe motion,
-# not necessarily economic, industry or technology consequences.
 HIGH_IMPACT_CHANGE_TERMS: tuple[str, ...] = (
     "launch", "release", "rollout", "deploy", "adopt", "adoption", "funding", "acquire", "acquisition",
     "merge", "merger", "regulation", "regulatory", "tariff", "sanction", "earnings", "revenue", "profit",
@@ -60,8 +58,6 @@ HIGH_IMPACT_CHANGE_TERMS: tuple[str, ...] = (
     "招聘", "產能", "供應", "需求", "銷售", "停產", "罰款",
 )
 
-# Geopolitical reporting belongs in this radar only when the headline or summary exposes a market,
-# trade, energy, supply-chain, policy or financing transmission channel.
 GLOBAL_MACRO_TRANSMISSION_TERMS: tuple[str, ...] = (
     "oil", "crude", "energy", "tariff", "trade", "export", "import", "sanction", "supply chain",
     "inflation", "interest rate", "yield", "bond", "currency", "dollar", "gold", "gdp", "economy",
@@ -84,14 +80,6 @@ class ReportQualification:
 
 
 def assess_report_qualification(event: Event) -> ReportQualification:
-    """Decide whether a fresh material event belongs in the daily report.
-
-    Potential candidates keep their separate content-driven path. A Major item must expose a
-    canonical radar subject and a consequential economic, industry or technology change. Generic
-    politics, crime, culture and local-life feed stories are rejected even when the upstream domain
-    classifier placed them in ``global_markets_macro``.
-    """
-
     if not event.documents:
         return ReportQualification(False, "event_has_no_documents")
 
@@ -125,7 +113,7 @@ def assess_report_qualification(event: Event) -> ReportQualification:
 
     explicit_impact = bool(anchors and impacts and has_transmission)
     corroborated = len(source_ids) >= 2 and explicit_impact
-    structured = has_measurements and bool(anchors) and has_transmission
+    structured = has_measurements and bool(domains) and (has_transmission or not macro_only)
     strong = explicit_impact and (len(anchors) >= 2 or len(impacts) >= 2 or corroborated or structured)
 
     if strong:
