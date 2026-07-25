@@ -51,7 +51,9 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("Report quality pre-gate", text)
         self.assertIn("analysis_fallback", (ROOT / "tools/check_production_quality.py").read_text(encoding="utf-8"))
         self.assertIn("previous website remains live", text.lower())
-        self.assertIn("Persist durable state (only accepted production runs)", text)
+        self.assertIn("Persist durable state (accepted report runs)", text)
+        self.assertIn("status=report_only", text)
+        self.assertIn("rm -rf artifacts/web/v1/ai-analysis", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")
