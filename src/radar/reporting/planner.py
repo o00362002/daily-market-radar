@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
-from radar.domain.models import Event, ReportItem, stable_id
+from radar.domain.models import Event, ReportItem, normalize_text, stable_id
 from radar.domain.potential import assess_event
 from radar.domain.scoring import explain_event_scores
 from radar.pipeline.qualification import assess_report_qualification
@@ -65,7 +65,42 @@ def plan_daily_items(events: list[Event], *, apply_qualification: bool = True) -
                 score_explanation=scores.to_report_payload(),
             )
         )
-    return items
+    return _deduplicate_items_by_headline(items)
+
+
+def _deduplicate_items_by_headline(items: list[ReportItem]) -> list[ReportItem]:
+    """Keep one human-visible item when event resolution emits duplicate headlines.
+
+    Event identity remains the primary resolution layer. This final report guard prevents two
+    source-specific event records with the same normalized headline from occupying separate cards.
+    The strongest, best-evidenced item wins while the original first-seen ordering stays stable.
+    """
+
+    selected: list[ReportItem] = []
+    positions: dict[str, int] = {}
+    for item in items:
+        key = normalize_text(item.headline)
+        if not key:
+            selected.append(item)
+            continue
+        position = positions.get(key)
+        if position is None:
+            positions[key] = len(selected)
+            selected.append(item)
+            continue
+        current = selected[position]
+        if _item_quality(item) > _item_quality(current):
+            selected[position] = item
+    return selected
+
+
+def _item_quality(item: ReportItem) -> tuple[int, int, int, int]:
+    return (
+        item.confidence_score,
+        len(item.evidence_links),
+        item.importance_score,
+        item.potential_score,
+    )
 
 
 def _today_delta(event: Event, action: str, obj: str) -> str:
