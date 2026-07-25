@@ -164,71 +164,97 @@
 
 ---
 
-## 8. RetailOps 系統與社群競品雷達
+## 8. Retail Action Layer 系統與內容競品雷達
 
-### 8.1 台灣 RetailOps / 零售系統競品
+本區只追蹤與下列閉環有直接關係的產品變化：
 
-每日固定掃描：
+```text
+POS／ERP／SOP／訊息／照片／現場事件
+→ 營運訊號或自然交代
+→ 優先 Action
+→ 指派、催辦、證據與覆核
+→ Outcome
+→ 規則、流程或最佳做法改善
+```
 
-- CATCH / Claireye：AI 店長、AI 行銷顧問、AI 決策經理人、AI 營運長、需求與營運預測
-- FLAPS 輔翼科技：零售 ERP、POS、CRM、AI 對話查詢、AI Agent、營運決策
-- 91APP：OMO、POS、CRM、會員、AI 行銷與零售資料應用
-- SHOPLINE：電商、POS、OMO、AI 商務、AI 客服與 Agentic Commerce
-- CYBERBIZ：電商、POS、倉儲、ERP、會員與 AI 營運功能
-- WACA：電商、POS、會員、營運分析與 AI 功能
-- ACT 艾克特：服飾零售 POS / ERP、多尺寸多顏色、庫存與 OMO
-- Omnichat：LINE、CRM、會員、AI 對話商務與 OMO
-- 團薦科技 / Tangent Plus：商圈、展店、選址與地理數據分析
-- 宏誌科技 RSL：百貨、商場、POS、CRM 與零售管理系統
+地理市場與競爭關係分開判斷。台灣平台多數目前屬相鄰威脅；海外產品也只有真正進入營運執行層才算競品。
 
-### 8.2 國際通用平台與零售垂直平台
+### 8.1 海外直接 Retail Action 系統
 
 每日固定掃描：
 
-- Shopify：Sidekick、Shopify Magic、Agentic Commerce、POS、Functions、App ecosystem
-- Microsoft：Copilot Studio、Dynamics 365 Commerce、Fabric、Power Platform、Retail Cloud
-- Google Cloud：Vertex AI、Agentspace / Agent tooling、BigQuery、Looker、Retail Search、Shopping Graph
-- Salesforce：Agentforce、Data Cloud、Commerce Cloud、Retail Cloud、MuleSoft
-- SAP：Joule、SAP Business AI、S/4HANA、Retail、BTP、Agent / workflow 能力
-- Oracle：Retail、NetSuite、Fusion AI Agents、資料與供應鏈能力
-- AWS：Bedrock Agents、零售資料與供應鏈參考架構、Marketplace 生態
-- ServiceNow：AI Agents、Workflow、低程式碼與企業營運編排
-- Adobe：Experience Cloud、Commerce、GenStudio、內容供應鏈與個人化
-- 國際 fashion retail planning / inventory / merchandising SaaS：補貨、需求預測、商品生命週期、多店配置與 markdown optimization
+- STOREE：AI retail manager、跨 POS／ERP／訊息／照片、Action、自動聯絡門市、催辦、補件與回報
+- Quorso：營運資料轉 Mission、店長 Action、KPI impact、跨店學習與 coaching
+- WorkJam：frontline execution layer、Task Connect、Headless Task Engine、自主 AI、驗證與重排
+- Hubler：System of Execution、SOP enforcement、模組化零售流程、升級、證據與 Outcome
 
-### 8.3 社群媒體與內容競品
+### 8.2 海外相鄰前線執行平台
+
+每日固定掃描：
+
+- YOOBIC：任務、溝通、學習、現場證據、Store Manager Copilot
+- Zipline Retail：零售溝通、任務、巡檢、知識與 AI 營運改善
+- Retail Coach：中小零售 AI coaching、每日 Action、照片驗證、閉環報告與價格
+- Pipefy Retail：不取代 ERP 的 no-code／AI 流程編排、門市、庫存、加盟與 merchandising
+
+### 8.3 台灣相鄰零售平台與在地擴張威脅
+
+只在公開更新明確涉及門市營運、補貨、庫存、SOP、任務、巡檢、工作流、Agent 或 Outcome 時列入：
+
+- CATCH / Claireye
+- FLAPS 輔翼科技
+- 91APP
+- SHOPLINE
+- CYBERBIZ
+- WACA
+- ACT 艾克特
+- Omnichat
+- 團薦科技 / Tangent Plus
+- 宏誌科技 RSL
+
+一般 CRM、會員、行銷活動、電商促銷、客服或內容生成更新，不因品牌名出現就算 RetailOps 競品訊號。
+
+### 8.4 通用 Agent／執行基礎設施威脅
+
+只在特定產品明確進入零售營運 Action 或前線執行情境時列入：
+
+- Microsoft Copilot Studio / Dynamics 365：MCP、multi-agent、approval、retail workflow、store execution
+- Workato Enterprise MCP：企業工具治理、Agent execution、權限與稽核
+- Shopify Retail：POS、Sidekick、Flow 或 Functions 是否延伸到門市 Action、庫存、補貨與員工工作流
+
+Google Cloud、AWS、Adobe、SAP、Oracle、ServiceNow、Salesforce 等一般平台新聞，不再固定投影為 RetailOps 競品。只有日後出現明確零售營運執行產品或可量化替代能力時，才重新納入。
+
+### 8.5 內容與定位競品
 
 每日固定掃描：
 
 - 台灣零售、百貨、服飾營運顧問與第一線管理者帳號
-- 電商與 OMO 顧問型創作者
 - AI × 零售、AI × 商業管理創作者
-- 商業周刊、數位時代、經理人、天下、零售相關產業媒體
-- 91APP、SHOPLINE、CATCH、FLAPS、Omnichat、ACT 等官方內容與案例行銷
-- Threads / Instagram / YouTube / LinkedIn 上出現的「門市營運 × 數據 × AI」新帳號
-- 國際 Retail / Fashion / Merchandising / Store Operations 創作者與顧問
+- Threads / Instagram / YouTube / LinkedIn 上「門市營運 × 數據 × AI」新帳號
+- 國際 Retail Operations / Frontline Execution / Store Manager AI 創作者與顧問
 
-### 8.4 必須辨識的高風險訊號
+### 8.6 必須辨識的高風險訊號
 
-- 是否推出低價、自助式或 freemium 的 RetailOps / AI 營運入口？
-- 是否提供固定資料骨架、KPI 字典、模板生成、品牌問診或 OS Builder 類功能？
-- 是否從 CRM / 行銷延伸到補貨、庫存、商品角色、門市診斷、損益與展店？
-- 是否推出可安裝的 fashion retail operations pack、module marketplace 或產業模板？
-- 是否能由通用平台核心一次完成資料、Agent、Workflow、權限、Dashboard、API 與付款？
-- 是否開始服務 3–30 店的中小型服飾品牌，而不只大型企業？
-- 是否公開實際 ROI、導入成本、客戶數、價格、合作 POS / ERP 或台灣落地案例？
+- 是否從自然交代、訊息、照片或營運資料直接生成 Action？
+- 是否自動指派、催辦、補件、覆核、升級與回報，而不只是聊天或建議？
+- 是否把 Action 與業績、庫存、人力、稽核或其他 Outcome 連接並回測規則？
+- 是否支援 WhatsApp、Slack、Teams、Email、LINE、Google Workspace 或 headless／embedded 使用方式？
+- 是否讓非技術營運主管自助建立 SOP、工作流、模組或完整營運架構？
+- 是否推出 3–50 店、台灣中小品牌、低價、自助式或 freemium 方案？
+- 是否公開實際 ROI、導入週期、客戶數、價格、台灣案例或 LINE／Google 原生能力？
 - 是否出現與「零售不靠感覺啦」高度重疊的內容定位、系列、語言或產品導流模式？
 
-### 8.5 每次有重大更新時的輸出要求
+### 8.7 每次有重大更新時的輸出要求
 
 ```text
 競品 / 平台：
+群組：海外直接 / 海外相鄰 / 台灣相鄰 / 基礎設施 / 內容競品
 事件日期：
 更新內容：
-屬於：通用底座 / RetailOps 垂直模組 / 服飾專用能力 / 社群內容競爭
+Action 閉環重疊：訊號 / Action / 催辦 / 證據 / Outcome / 改善
 與 retailops-agent-system 重疊：低 / 中 / 高
 影響層：免費入口 / 模板訂閱 / 決策模組 / Agent / 私有整合
-威脅：功能替代 / 價格壓縮 / 通路控制 / 生態系優勢 / 內容注意力
+威脅：功能替代 / 價格壓縮 / 通路控制 / 生態系優勢 / 在地資料優勢 / 導入速度 / 內容注意力
 目前差異是否仍成立：
 需要採取的動作：觀察 / 驗證 / 調整定位 / 加速實作 / 不處理
 證據與來源：
@@ -236,10 +262,10 @@
 
 判斷重點：
 
-- 不只報導競品「用了 AI」，必須確認其實際功能、使用者流程、資料需求、定價與案例。
-- 必須區分已上線產品、公開測試、合作公告、概念展示與媒體推測。
-- 國際通用平台既可能是競爭者，也可能是未來基礎設施、模組宿主或銷售渠道。
-- 沒有重大更新時可標示「已查無重大更新」，不得用舊新聞填充。
+- 不只報導競品「用了 AI」，必須確認實際使用者流程、資料需求、執行權限、定價與案例。
+- 必須區分已上線產品、公開測試、合作公告、roadmap、概念展示與媒體推測。
+- 通用平台既可能是競爭者，也可能是未來基礎設施、模組宿主或銷售渠道，不能與直接產品競品混為同一層。
+- 沒有重大更新時，只有完成固定官方渠道檢查才可標示「已查無重大更新」；否則必須標示「固定來源待查」。
 
 ---
 

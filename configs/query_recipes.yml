@@ -1,5 +1,5 @@
-version: 0.2
-last_updated: 2026-07-11
+version: 0.3
+last_updated: 2026-07-25
 status: active
 purpose: >
   核心五個新聞領域與競品情報投影的固定查詢配方(query recipes)。目的:預設較弱的模型也能照抄執行、
@@ -8,7 +8,9 @@ purpose: >
 
 usage_rules:
   - 每個核心新聞領域每日至少執行 mainstream 配方 2 條 + edge 配方 2 條;命中不足才啟動 retry。
-  - 競品情報必須執行 product 與 social 配方，並依 config/competitor_registry.json 展開固定名稱與別名。
+  - 競品情報依 config/competitor_registry.json 的 group_order 執行直接競品、相鄰平台、台灣平台、基礎設施與內容配方。
+  - 競品身分只從 headline 與 today_delta 等事實欄位辨識；不得使用 taiwan_implication、uncertainties 或 next_watch 反推競品。
+  - 有 requires_any 的對象必須同時命中營運關聯詞；一般行銷、CRM、雲端或 AI 新聞不得因品牌名 alone 進入競品區。
   - 勞動與消費壓力配方只更新固定指標面板，不逐段生成完整新聞；事件若獨立符合其他主領域門檻，才在該主領域輸出一次。
   - 配方先於自由發想:模型自己想的查詢只能作為配方跑完後的補充,且需在 coverage audit 揭露。
   - 台灣缺口配方(taiwan_gap)只在該領域台灣新聞不足時執行,不可跳過直接標「台灣新聞不足」。
@@ -114,21 +116,36 @@ recipes:
         query: "台灣 半導體 OR 供應鏈 OR PCB 載板 site:technews.tw OR site:digitimes.com"
 
   competitor_intelligence:
-    product:
-      - id: competitor_product_release
-        query: "RetailOps OR retail AI agent product release pricing case study"
-      - id: competitor_platform_pack
-        query: "fashion retail operations pack OR retail agent marketplace OR retail copilot launch"
-      - id: competitor_low_cost_entry
-        query: "retail operations freemium OR self-service retail analytics OR OS builder"
-      - id: competitor_taiwan
-        query: "台灣 零售 AI 系統 補貨 門市診斷 POS ERP 新功能 案例"
+    global_direct_retail_action_systems:
+      - id: competitor_storee_quorso
+        query: '(STOREE OR Quorso) (retail operations OR AI retail manager OR mission) (action OR follow-up OR outcome OR pricing OR case study)'
+      - id: competitor_workjam_hubler
+        query: '(WorkJam OR Hubler) (retail OR frontline OR system of execution) (task orchestration OR autonomous AI OR SOP OR outcome OR pricing OR customer)'
+    global_adjacent_execution_platforms:
+      - id: competitor_yoobic_zipline
+        query: '(YOOBIC OR "Zipline Retail" OR getzipline.com) (store operations OR frontline OR task OR audit OR copilot) (release OR pricing OR case study)'
+      - id: competitor_retailcoach_pipefy
+        query: '(retailcoach.io OR "Retail Coach AI" OR "Pipefy Retail") (store operations OR daily action OR photo proof OR process orchestration OR AI agent)'
+    taiwan_adjacent_retail_platforms:
+      - id: competitor_taiwan_operations_expansion
+        query: '(91APP OR SHOPLINE OR FLAPS OR 輔翼科技 OR Claireye OR CYBERBIZ OR WACA OR 艾克特 OR Omnichat) (門市營運 OR 補貨 OR 庫存 OR SOP OR 任務 OR 巡檢 OR 工作流 OR AI Agent)'
+      - id: competitor_taiwan_local_proof
+        query: '台灣 零售 營運系統 (LINE OR Google Workspace OR POS OR ERP) (導入案例 OR 價格 OR ROI OR 3店 OR 50店)'
+    global_enabling_platform_threats:
+      - id: competitor_microsoft_workato_execution
+        query: '("Copilot Studio" OR "Dynamics 365" OR "Workato Enterprise MCP") (retail operations OR store operations OR frontline task OR approval workflow OR execution layer)'
+      - id: competitor_shopify_retail_execution
+        query: '(Shopify Sidekick OR Shopify Flow OR Shopify POS) (inventory action OR store operations OR staff task OR replenishment OR retail workflow)'
     social:
       - id: competitor_social_positioning
-        query: "門市營運 數據 AI Threads Instagram YouTube LinkedIn"
+        query: '門市營運 數據 AI Threads Instagram YouTube LinkedIn'
       - id: competitor_retail_creator
-        query: "retail operations creator consultant AI content trend"
+        query: 'retail operations creator consultant AI content trend'
     required_registry_expansion: config/competitor_registry.json
+    relevance_gate:
+      - 事件必須先命中 registry 的品牌或產品身分，再檢查 requires_any 的營運語境。
+      - 一般公司財報、廣告、CRM、電商促銷、雲端模型或消費者購物助手新聞，不因品牌名出現而列入。
+      - 競品事件至少需影響 Action 生成、派工追蹤、證據覆核、Outcome 回測、SOP 客製、headless 投影或台灣在地導入其中一項。
 
 indicator_only_recipes:
   labor_consumption_pressure:

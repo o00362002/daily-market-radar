@@ -3,7 +3,11 @@ import Base from '../layouts/Base.astro';
 import BadgeList from '../components/BadgeList.astro';
 import { getLatestReport, getManifest } from '../lib/data';
 import { evaluationBadge, statusBadge, fixtureBadge } from '../lib/format';
-import { projectCompetitorItems } from '../lib/competitors';
+import {
+  competitorGroupMeta,
+  projectCompetitorItems,
+  type CompetitorGroupKey,
+} from '../lib/competitors';
 import { domainLabel, matrixLabel } from '../lib/labels';
 
 const manifest = getManifest();
@@ -20,8 +24,15 @@ const retail = report?.retail_matrix ?? {};
 const crypto = report?.crypto_matrix ?? {};
 const structural: any[] = report?.structural_indicators ?? [];
 
-const { product: productCompetitors, social: socialCompetitors } = projectCompetitorItems(items);
-const productCompetitorPicks = productCompetitors.slice(0, 4);
+const { byGroup, social: socialCompetitors } = projectCompetitorItems(items);
+const competitorPriorityOrder: CompetitorGroupKey[] = [
+  'global_direct_retail_action_systems',
+  'global_adjacent_execution_platforms',
+  'taiwan_adjacent_retail_platforms',
+  'global_enabling_platform_threats',
+];
+const productCompetitors = competitorPriorityOrder.flatMap((group) => byGroup[group]);
+const productCompetitorPicks = competitorPriorityOrder.flatMap((group) => byGroup[group]).slice(0, 6);
 const socialCompetitorPicks = socialCompetitors.slice(0, 4);
 
 const sortedPotential = [...potential].sort((a, b) =>
@@ -170,30 +181,39 @@ const visibleUncertainties = (item: any) =>
       ))}
 
       <h2>競品重點 Competitor Watch</h2>
-      <p class="muted">產品與社群競品固定分區；名單統一由 <code>config/competitor_registry.json</code> 管理。完整判斷框架與全部訊號見
+      <p class="muted">聚焦零售營運 Action Layer，依「海外直接、海外相鄰、台灣相鄰、基礎設施」分層。一般行銷、CRM、電商或通用 AI 新聞若沒有營運執行關聯，不會進入本區。完整名單與判斷框架見
         <a href={`${base}${base.endsWith('/') ? '' : '/'}competitors`}>競品分析頁</a>。</p>
       <div class="grid">
-        <div class="kpi"><div class="n">{productCompetitors.length}</div><div class="l">產品競品</div></div>
-        <div class="kpi"><div class="n">{socialCompetitors.length}</div><div class="l">社群競品</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_direct_retail_action_systems.length}</div><div class="l">海外直接</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_adjacent_execution_platforms.length}</div><div class="l">海外相鄰</div></div>
+        <div class="kpi"><div class="n">{byGroup.taiwan_adjacent_retail_platforms.length}</div><div class="l">台灣相鄰</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_enabling_platform_threats.length}</div><div class="l">基礎設施</div></div>
       </div>
 
-      <h3>產品競品</h3>
-      {productCompetitorPicks.length === 0 && <p class="empty">今日已查無產品競品重大更新，或固定來源檢查尚未完整。</p>}
-      {productCompetitorPicks.map((item) => (
-        <article class="card">
-          <div class="row"><strong>{item.headline}</strong><span class="badge deterministic">產品競品</span></div>
-          <p>{item.today_delta}</p>
-        </article>
-      ))}
+      <h3>營運系統競品</h3>
+      {productCompetitorPicks.length === 0 && <p class="empty">本日沒有可投影的新競品證據；目前尚無 typed competitor audit，不能把此狀態解讀為已查無更新。</p>}
+      {productCompetitorPicks.map((item) => {
+        const group = item.competitor_group as CompetitorGroupKey;
+        const meta = competitorGroupMeta[group];
+        return (
+          <article class="card">
+            <div class="row"><strong>{item.headline}</strong><span class="badge deterministic">{meta.badge}</span></div>
+            <p>{item.today_delta}</p>
+          </article>
+        );
+      })}
+      {productCompetitors.length > productCompetitorPicks.length && <p class="muted">另有 {productCompetitors.length - productCompetitorPicks.length} 筆保留於競品分析頁。</p>}
 
-      <h3>社群競品</h3>
-      {socialCompetitorPicks.length === 0 && <p class="empty">今日已查無社群競品重大更新，或固定社群渠道尚未完整。</p>}
-      {socialCompetitorPicks.map((item) => (
-        <article class="card">
-          <div class="row"><strong>{item.headline}</strong><span class="badge inference">社群競品</span></div>
-          <p>{item.today_delta}</p>
-        </article>
-      ))}
+      <details class="card" open={socialCompetitorPicks.length > 0}>
+        <summary><strong>內容與定位競品</strong> · {socialCompetitors.length} 筆</summary>
+        {socialCompetitorPicks.length === 0 && <p class="empty">本日沒有可投影的新內容競品證據，固定社群渠道仍可能待查。</p>}
+        {socialCompetitorPicks.map((item) => (
+          <article class="card">
+            <div class="row"><strong>{item.headline}</strong><span class="badge inference">內容競品</span></div>
+            <p>{item.today_delta}</p>
+          </article>
+        ))}
+      </details>
 
       <h2>零售矩陣 Retail</h2>
       <table><tbody>

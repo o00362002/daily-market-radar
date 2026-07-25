@@ -1,131 +1,148 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getLatestReport } from '../lib/data';
-import { competitorRegistry, projectCompetitorItems, splitProductItems } from '../lib/competitors';
+import {
+  competitorGroupMeta,
+  competitorGroupOrder,
+  competitorRegistry,
+  projectCompetitorItems,
+  type CompetitorGroupKey,
+} from '../lib/competitors';
 
 const report: any = getLatestReport();
 const items: any[] = report?.items ?? [];
-const { product: productSorted, social: socialSorted } = projectCompetitorItems(items);
-const { taiwan: taiwanSignals, global: globalSignals } = splitProductItems(productSorted);
-const projectedItems = [...taiwanSignals, ...globalSignals, ...socialSorted];
+const { byGroup } = projectCompetitorItems(items);
+const groupConfigs = competitorGroupOrder.map((key) => ({
+  key,
+  ...competitorGroupMeta[key],
+  entries: competitorRegistry.groups[key],
+  signals: byGroup[key],
+}));
+const productGroups = groupConfigs.filter((group) => group.key !== 'social_and_content');
+const contentGroup = groupConfigs.find((group) => group.key === 'social_and_content');
+const projectedItems = groupConfigs.flatMap((group) => group.signals);
 const signalsFor = (entry: any) => projectedItems.filter((item) =>
   (item.competitor_matches ?? []).some((match: any) => match.id === entry.id),
 );
-const fixedChecksExecuted = Boolean(report?.competitor_audit?.checked_ids?.length);
+const matchesForGroup = (item: any, group: CompetitorGroupKey) =>
+  (item.competitor_matches ?? [])
+    .filter((match: any) => match.group === group)
+    .map((match: any) => match.name)
+    .filter((name: string, index: number, names: string[]) => names.indexOf(name) === index);
 
-const registryGroups = [
-  { key: 'taiwan_retailops_products', zh: '台灣 RetailOps 產品', en: 'Taiwan Products', entries: competitorRegistry.groups.taiwan_retailops_products },
-  { key: 'global_platforms', zh: '全球平台', en: 'Global Platforms', entries: competitorRegistry.groups.global_platforms },
-  { key: 'social_and_content', zh: '社群與內容', en: 'Social & Content', entries: competitorRegistry.groups.social_and_content },
-];
-const priorityLabel = (p: string) => (p === 'high' ? '高' : p === 'medium' ? '中' : '低');
+// RadarReportV2 does not yet own a typed competitor audit. This branch can
+// consume it later without pretending today's projection has completed checks.
+const checkedIds = new Set<string>(report?.competitor_audit?.checked_ids ?? []);
+const fixedChecksExecuted = checkedIds.size > 0;
+const statusFor = (entry: any) => {
+  if (signalsFor(entry).length > 0) return { label: '有新增證據', className: 'fact' };
+  if (checkedIds.has(entry.id)) return { label: '已查無重大更新', className: 'complete' };
+  return { label: '固定來源待查', className: 'gap' };
+};
+const priorityLabel = (priority: string) => (priority === 'high' ? '高' : priority === 'medium' ? '中' : '低');
+const relationshipLabel = (relationship: string) => ({
+  direct: '直接競品',
+  adjacent: '相鄰競爭',
+  enabling: '基礎設施威脅',
+  content: '內容競爭',
+}[relationship] ?? relationship);
 ---
 <Base title="競品分析｜Daily Market Radar">
   <h1>競品分析 · {report?.date ?? '尚無報告'}</h1>
-  <p class="muted">固定追蹤 RetailOps 產品競品與社群內容競品。名單由 <code>config/competitor_registry.json</code> 統一管理；只顯示當日報告中有新增證據的項目。</p>
-  {!fixedChecksExecuted && <p class="notice">本次 RadarReportV2 尚未帶入固定競品查核 audit；下列「無新增證據」不能解讀為市場沒有變化，狀態會標為未完整查證。</p>}
+  <p class="muted">聚焦零售營運 Action Layer：從營運訊號或自然交代，轉成 Action、追蹤、證據、Outcome 與下一輪改善。地理市場與競爭關係分開呈現，不再把台灣相鄰平台與海外直接競品混為同一層。</p>
+  {!fixedChecksExecuted && <p class="notice">目前 RadarReportV2 尚無 typed competitor audit。此頁只投影當日已驗證新聞事件；名單已納入追蹤規則，但「沒有訊號」只能解讀為固定來源待查，不能解讀為市場沒有更新。</p>}
 
   {!report && <p class="empty">尚無報告。請先執行 radar run-daily 與 radar export-web。</p>}
 
   {report && (
     <>
       <div class="grid">
-        <div class="kpi"><div class="n">{taiwanSignals.length}</div><div class="l">台灣產品訊號</div></div>
-        <div class="kpi"><div class="n">{globalSignals.length}</div><div class="l">全球平台訊號</div></div>
-        <div class="kpi"><div class="n">{socialSorted.length}</div><div class="l">社群內容訊號</div></div>
-        <div class="kpi"><div class="n">{registryGroups.reduce((sum, g) => sum + g.entries.length, 0)}</div><div class="l">固定追蹤對象</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_direct_retail_action_systems.length}</div><div class="l">海外直接競品訊號</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_adjacent_execution_platforms.length}</div><div class="l">海外相鄰平台訊號</div></div>
+        <div class="kpi"><div class="n">{byGroup.taiwan_adjacent_retail_platforms.length}</div><div class="l">台灣相鄰平台訊號</div></div>
+        <div class="kpi"><div class="n">{byGroup.global_enabling_platform_threats.length}</div><div class="l">基礎設施威脅訊號</div></div>
+        <div class="kpi"><div class="n">{groupConfigs.reduce((sum, group) => sum + group.entries.length, 0)}</div><div class="l">固定追蹤對象</div></div>
       </div>
 
-      <h2>台灣產品競品 Taiwan Products</h2>
-      {taiwanSignals.length === 0 && <p class="empty">今日已查無台灣產品競品重大更新，或固定來源檢查尚未產出可辨識訊號。未完成檢查時不得把本狀態解讀為市場沒有變化。</p>}
-      {taiwanSignals.map((item) => (
-        <article class="card">
-          <div class="row">
-            <span class="badge domain">台灣產品</span>
-            <span class="badge deterministic">重要 {item.importance_score}</span>
-            <span class="badge auto">信心 {item.confidence_score}</span>
-          </div>
-          <div class="row"><strong>{item.headline}</strong></div>
-          <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
-          {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
-          <div class="row muted">
-            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
-          </div>
-        </article>
+      {productGroups.map((group) => (
+        <section data-competitor-group={group.key}>
+          <h2>{group.zh} {group.en}</h2>
+          <p class="muted">{group.description}</p>
+          {group.signals.length === 0 && <p class="empty">本日沒有可投影的新證據；若固定官方渠道尚未完成，狀態仍是「固定來源待查」。</p>}
+          {group.signals.map((item) => (
+            <article class="card">
+              <div class="row">
+                <span class="badge domain">{group.badge}</span>
+                <span class="badge deterministic">重要 {item.importance_score}</span>
+                <span class="badge auto">信心 {item.confidence_score}</span>
+              </div>
+              <div class="row"><strong>{item.headline}</strong></div>
+              <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
+              <p><strong>對應競品：</strong>{matchesForGroup(item, group.key).join('、')}</p>
+              {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
+              <div class="row muted">
+                {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
+              </div>
+            </article>
+          ))}
+        </section>
       ))}
 
-      <h2>全球平台競品 Global Platforms</h2>
-      {globalSignals.length === 0 && <p class="empty">今日已查無全球平台競品重大更新，或固定來源檢查尚未產出可辨識訊號。</p>}
-      {globalSignals.map((item) => (
-        <article class="card">
-          <div class="row">
-            <span class="badge domain">全球平台</span>
-            <span class="badge deterministic">重要 {item.importance_score}</span>
-            <span class="badge auto">信心 {item.confidence_score}</span>
-          </div>
-          <div class="row"><strong>{item.headline}</strong></div>
-          <p><span class="badge fact"><span class="sym">◆</span> 今日新增</span> {item.today_delta}</p>
-          {item.taiwan_implication && <p><strong>台灣關聯：</strong>{item.taiwan_implication}</p>}
-          <div class="row muted">
-            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
-          </div>
-        </article>
-      ))}
-
-      <h2>社群內容競品 Social &amp; Content</h2>
-      {socialSorted.length === 0 && <p class="empty">今日已查無社群競品重大更新，或固定社群渠道尚未完整檢查。</p>}
-      {socialSorted.map((item) => (
-        <article class="card">
-          <div class="row">
-            <span class="badge domain">社群內容</span>
-            <span class="badge auto">潛力 {item.potential_score}</span>
-          </div>
-          <div class="row"><strong>{item.headline}</strong></div>
-          <p>{item.today_delta}</p>
-          <div class="row muted">
-            {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
-          </div>
-        </article>
-      ))}
+      {contentGroup && (
+        <details class="card" open={contentGroup.signals.length > 0}>
+          <summary><strong>{contentGroup.zh} {contentGroup.en}</strong> · {contentGroup.signals.length} 筆</summary>
+          <p class="muted">{contentGroup.description}</p>
+          {contentGroup.signals.length === 0 && <p class="empty">本日沒有可投影的新內容競品證據，固定社群渠道仍可能待查。</p>}
+          {contentGroup.signals.map((item) => (
+            <article class="card">
+              <div class="row"><span class="badge inference">{contentGroup.badge}</span><span class="badge auto">潛力 {item.potential_score}</span></div>
+              <div class="row"><strong>{item.headline}</strong></div>
+              <p>{item.today_delta}</p>
+              <div class="row muted">
+                {(item.evidence_links ?? []).map((link: any) => <a href={link.url}>{link.source_id} ↗</a>)}
+              </div>
+            </article>
+          ))}
+        </details>
+      )}
 
       <h2>固定追蹤名單 Registry</h2>
-      <p class="muted">依註冊表分三類；優先級決定檢查頻率與訊號門檻。</p>
-      {registryGroups.map((group) => (
-        <>
+      <p class="muted">優先順序先看直接競品，再看相鄰執行平台、台灣在地擴張威脅與通用底座。一般電商、CRM、雲端或 AI 新聞若沒有零售營運執行關聯，不會進入競品訊號。</p>
+      {groupConfigs.map((group) => (
+        <section data-registry-group={group.key}>
           <h3>{group.zh} {group.en}</h3>
           <table>
-            <thead><tr><th>對象</th><th>別名／關鍵詞</th><th>優先級</th><th>本日狀態</th><th>對應訊號</th></tr></thead>
+            <thead><tr><th>對象</th><th>競爭關係</th><th>追蹤焦點</th><th>優先級</th><th>本日狀態</th><th>對應訊號</th></tr></thead>
             <tbody>
-              {group.entries.map((entry) => (
-                <tr data-competitor-id={entry.id}>
-                  <td>{entry.name}</td>
-                  <td class="muted">{entry.aliases.join('、')}</td>
-                  <td>
-                    <span class={`badge ${entry.priority === 'high' ? 'counter' : 'deterministic'}`}>{priorityLabel(entry.priority)}</span>
-                  </td>
-                  <td>
-                    {signalsFor(entry).length > 0
-                      ? <span class="badge fact">有新增證據</span>
-                      : <span class="badge gap">未完整查證</span>}
-                  </td>
-                  <td>{signalsFor(entry).length > 0 ? signalsFor(entry).map((item) => <code>{item.item_id}</code>) : '—'}</td>
-                </tr>
-              ))}
+              {group.entries.map((entry) => {
+                const status = statusFor(entry);
+                const signals = signalsFor(entry);
+                return (
+                  <tr data-competitor-id={entry.id}>
+                    <td>{entry.name}</td>
+                    <td>{relationshipLabel(entry.relationship)}</td>
+                    <td class="muted">{entry.focus ?? entry.aliases.join('、')}</td>
+                    <td><span class={`badge ${entry.priority === 'high' ? 'counter' : 'deterministic'}`}>{priorityLabel(entry.priority)}</span></td>
+                    <td><span class={`badge ${status.className}`}>{status.label}</span></td>
+                    <td>{signals.length > 0 ? signals.map((item) => <code>{item.item_id}</code>) : '—'}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-        </>
+        </section>
       ))}
 
-      <h2>判斷框架 Framework</h2>
+      <h2>聚焦判斷框架 Framework</h2>
       <ul class="tight">
-        <li>是否推出低價、自助式或 freemium 的 RetailOps 入口？</li>
-        <li>是否從 CRM／行銷延伸到補貨、庫存、門市診斷、損益或展店？</li>
-        <li>是否推出 fashion retail operations pack、module marketplace 或產業模板？</li>
-        <li>是否開始服務 3–30 店的中小型服飾品牌？</li>
-        <li>是否出現與「門市營運 × 數據 × AI」高度重疊的社群定位與產品導流？</li>
+        <li>是否把 POS／ERP／SOP／訊息／照片或現場事件轉成可執行 Action？</li>
+        <li>是否能自動指派、催辦、要求證據、覆核、升級與回報，而不只是產生建議？</li>
+        <li>是否把 Action 與業績、庫存、人力、稽核或其他 Outcome 連接，並從結果調整規則？</li>
+        <li>是否支援既有通訊工具、headless／embedded 使用方式，降低更換系統成本？</li>
+        <li>是否推出台灣 LINE／Google-native、3–50 店、自助客製、低價或可量化 ROI 的方案？</li>
       </ul>
 
-      <p class="muted">競品情報是跨領域投影，不是第六個新聞領域。同一事件只保留一個 canonical primary domain。</p>
+      <p class="muted">競品情報仍是跨領域投影，不是第六個新聞領域。同一事件只保留一個 canonical primary domain。</p>
     </>
   )}
 </Base>
