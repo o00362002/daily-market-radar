@@ -1,19 +1,18 @@
 name: pages-deploy
 
-# Manual redeploy of the validated static site. It restores durable state, exports
-# report artifacts, regenerates AIAnalysisV1, and skips failed or fixture output.
+# Manual redeploy of the latest accepted durable state. Production deployment requires
+# a healthy report and a non-fallback AIAnalysisV1 tied to the same report.
 
 on:
   workflow_dispatch:
     inputs:
       analysis_mode:
-        description: "deterministic | auto | api-assisted"
+        description: "auto | api-assisted"
         required: false
         default: "auto"
         type: choice
         options:
           - auto
-          - deterministic
           - api-assisted
 
 concurrency:
@@ -54,19 +53,21 @@ jobs:
             echo "no durable state to deploy"; exit 1
           fi
 
-      - name: Deploy gate
-        id: gate
+      - name: Report quality pre-gate
+        id: report_gate
         run: |
-          STATUS=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['status'])")
-          MODE=$(python -c "import json;print(json.load(open('artifacts/web/v1/latest.json'))['source_audit']['ingestion_mode'])")
-          if [ "$STATUS" = "failed" ] || [ "$MODE" = "fixture" ]; then
-            echo "deployable=false" >> "$GITHUB_OUTPUT"
+          if python tools/check_production_quality.py \
+            --report artifacts/web/v1/latest.json \
+            --report-only \
+            --output artifacts/production-quality-report.json; then
+            echo "report_ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "deployable=true" >> "$GITHUB_OUTPUT"
+            echo "report_ok=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Stored report failed production quality checks."
           fi
 
       - name: Generate AI interpretation artifacts
-        if: steps.gate.outputs.deployable == 'true'
+        if: steps.report_gate.outputs.report_ok == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
@@ -78,6 +79,19 @@ jobs:
             --repo-root "$PWD" \
             --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
             --mode "$ANALYSIS_MODE"
+
+      - name: Production gate
+        id: gate
+        run: |
+          if python tools/check_production_quality.py \
+            --report artifacts/web/v1/latest.json \
+            --analysis artifacts/web/v1/ai-analysis/latest.json \
+            --output artifacts/production-quality-gate.json; then
+            echo "deployable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "deployable=false" >> "$GITHUB_OUTPUT"
+            echo "::error::Manual deployment rejected; previous website remains live."
+          fi
 
       - name: Build site
         if: steps.gate.outputs.deployable == 'true'
@@ -97,6 +111,24 @@ jobs:
         if: steps.gate.outputs.deployable == 'true'
         with:
           path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
+
+      - name: Upload rejected deployment diagnostics
+        if: always() && steps.gate.outputs.deployable != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rejected-pages-deploy-${{ github.run_id }}
+          path: |
+            artifacts/production-quality-report.json
+            artifacts/production-quality-gate.json
+            artifacts/web/v1/latest.json
+            artifacts/web/v1/ai-analysis/latest.json
+          if-no-files-found: ignore
+
+      - name: Fail visibly when deployment is rejected
+        if: always() && steps.gate.outputs.deployable != 'true'
+        run: |
+          test -f artifacts/production-quality-gate.json && cat artifacts/production-quality-gate.json >&2 || true
+          exit 1
 
   deploy:
     needs: build
