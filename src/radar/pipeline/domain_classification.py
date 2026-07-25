@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from radar.domain.models import Document, normalize_text
+from radar.domain.text_matching import contains_term
 
 
 CANONICAL_DOMAIN_RULES: dict[str, tuple[str, ...]] = {
@@ -72,8 +73,8 @@ def classify_document_domain(
     ranked: list[tuple[int, str, tuple[str, ...]]] = []
     for domain in allowed:
         terms = CANONICAL_DOMAIN_RULES.get(domain, ())
-        title_hits = tuple(term for term in terms if term in title)
-        body_hits = tuple(term for term in terms if term in body and term not in title_hits)
+        title_hits = tuple(term for term in terms if contains_term(title, term))
+        body_hits = tuple(term for term in terms if contains_term(body, term) and term not in title_hits)
         source_prior = 2 if source_domain == domain else 0
         score = len(title_hits) * 4 + len(body_hits) + source_prior
         ranked.append((score, domain, title_hits + body_hits))

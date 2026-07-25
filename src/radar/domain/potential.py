@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from radar.domain.models import Event, normalize_text
+from radar.domain.text_matching import contains_term
 
 
 @dataclass(frozen=True)
@@ -137,7 +138,7 @@ def next_check_at(event: Event) -> str:
 
 
 def _contains_any(text: str, terms: set[str]) -> bool:
-    return any(term in text for term in terms)
+    return any(contains_term(text, term) for term in terms)
 
 
 def _formation(delta_types: set[str], source_count: int, event: Event) -> tuple[str, str]:

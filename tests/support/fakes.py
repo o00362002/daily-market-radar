@@ -107,7 +107,7 @@ class FakeIntelligenceEvaluator:
     def evaluate(self, request: EvaluationRequest) -> EvaluationResult:
         self.requests.append(request)
         planned_items = []
-        for item in plan_daily_items(list(request.events)):
+        for item in plan_daily_items(list(request.events), apply_qualification=False):
             payload = item.to_dict()
             payload["headline"] = f"{self.headline_prefix}{payload['headline']}"
             for score_name in ("importance_score", "potential_score", "confidence_score"):

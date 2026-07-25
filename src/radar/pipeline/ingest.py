@@ -6,12 +6,12 @@ from radar.domain.models import Document
 def ingest_fixture_documents() -> list[Document]:
     rows = [
         ("openai_news", "https://openai.com/news/agent-runtime", "OpenAI launches agent runtime", "en", "North America", "ai_agents_applications", "OpenAI", "launches", "agent runtime", "US", "top_down"),
-        ("twse", "https://www.twse.com.tw/news/etf", "TWSE reports ETF flow update", "zh-Hant", "Taiwan", "global_markets_macro", "TWSE", "reports", "ETF flows", "Taiwan", "top_down"),
+        ("twse", "https://www.twse.com.tw/news/etf", "TWSE ETF fund flow rises as investment demand increases", "zh-Hant", "Taiwan", "global_markets_macro", "TWSE", "reports", "ETF fund flow increase", "Taiwan", "top_down"),
         ("nikkei", "https://example.jp/robots", "Japanese robot startup pilots retail assistant", "ja", "East Asia", "science_technology_industry", "RobotCo", "pilots", "retail assistant", "Japan", "bottom_up"),
         ("eu_policy", "https://example.eu/policy", "EU regulator opens AI procurement sandbox", "en", "Europe", "global_markets_macro", "EU regulator", "opens", "AI procurement sandbox", "Europe", "top_down"),
-        ("coindesk", "https://www.coindesk.com/rwa", "Bank pilots tokenized settlement", "en", "North America", "crypto_rwa_agent_payments", "Bank", "pilots", "tokenized settlement", "US", "bottom_up"),
-        ("retail_dive", "https://www.retaildive.com/news/store-format", "Retailer tests neighborhood store format", "en", "North America", "retail_consumer_fashion", "Retailer", "tests", "neighborhood store format", "US", "bottom_up"),
-        ("bls", "https://www.bls.gov/news", "Labor data shows wage pressure easing", "en", "North America", "global_markets_macro", "BLS", "reports", "wage pressure", "US", "top_down"),
+        ("coindesk", "https://www.coindesk.com/rwa", "Bank pilots blockchain token settlement trial", "en", "North America", "crypto_rwa_agent_payments", "Bank", "pilots", "blockchain token settlement", "US", "bottom_up"),
+        ("retail_dive", "https://www.retaildive.com/news/store-format", "Retail store launches neighborhood format trial", "en", "North America", "retail_consumer_fashion", "Retailer", "launches", "neighborhood store format", "US", "bottom_up"),
+        ("bls", "https://www.bls.gov/news", "Labor wage growth falls as unemployment rises", "en", "North America", "global_markets_macro", "BLS", "reports", "wage and unemployment change", "US", "top_down"),
     ]
     return [
         Document.fixture(
