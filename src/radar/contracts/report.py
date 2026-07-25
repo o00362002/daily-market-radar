@@ -97,6 +97,89 @@ class RejectionCountersV2(CanonicalModel):
     taiwan_direct_sources_checked: list[str]
 
 
+class CompetitorSourceCheckV1(CanonicalModel):
+    source_id: str
+    url: str
+    channel: str
+    status: Literal["checked", "not_modified", "failed"]
+    checked_at: str
+    http_status: Optional[int]
+    etag: str
+    last_modified: str
+    content_hash: str
+    previous_content_hash: str
+    material_change: bool
+    similarity: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    title: str
+    excerpt: str
+    error: str
+
+
+class CompetitorCheckV1(CanonicalModel):
+    competitor_id: str
+    group: str
+    name: str
+    market: str
+    relationship: str
+    priority: str
+    status: Literal[
+        "baseline",
+        "checked_no_major_update",
+        "updated",
+        "partial",
+        "failed",
+        "not_executed",
+    ]
+    checked_at: str
+    successful_source_count: int = Field(ge=0)
+    failed_source_count: int = Field(ge=0)
+    fresh_material_delta: bool
+    summary: str
+    source_checks: list[CompetitorSourceCheckV1]
+
+
+class CompetitorAuditV1(CanonicalModel):
+    registry_version: str
+    source_registry_version: str
+    checked_at: str
+    fixed_target_count: int = Field(ge=0)
+    checked_target_count: int = Field(ge=0)
+    updated_target_count: int = Field(ge=0)
+    baseline_target_count: int = Field(ge=0)
+    partial_target_count: int = Field(ge=0)
+    failed_target_count: int = Field(ge=0)
+    not_executed_target_count: int = Field(ge=0)
+    checked_ids: list[str]
+    updated_ids: list[str]
+    baseline_ids: list[str]
+    partial_ids: list[str]
+    failed_ids: list[str]
+    not_executed_ids: list[str]
+    checks: list[CompetitorCheckV1]
+
+
+def _default_competitor_audit() -> dict[str, Any]:
+    return {
+        "registry_version": "unavailable",
+        "source_registry_version": "unavailable",
+        "checked_at": "",
+        "fixed_target_count": 0,
+        "checked_target_count": 0,
+        "updated_target_count": 0,
+        "baseline_target_count": 0,
+        "partial_target_count": 0,
+        "failed_target_count": 0,
+        "not_executed_target_count": 0,
+        "checked_ids": [],
+        "updated_ids": [],
+        "baseline_ids": [],
+        "partial_ids": [],
+        "failed_ids": [],
+        "not_executed_ids": [],
+        "checks": [],
+    }
+
+
 class MatrixObservationV1(CanonicalModel):
     status: str
     signal_ids: list[str]
@@ -219,6 +302,9 @@ class RadarReportV2(CanonicalModel):
     signals: list[SignalV1]
     source_audit: SourceAuditV2
     rejection_counters: RejectionCountersV2
+    competitor_audit: CompetitorAuditV1 = Field(
+        default_factory=lambda: CompetitorAuditV1.model_validate(_default_competitor_audit())
+    )
     retail_matrix: dict[str, MatrixObservationV1]
     crypto_matrix: dict[str, MatrixObservationV1]
     structural_indicators: list[StructuralIndicatorObservationV1]
@@ -239,6 +325,7 @@ class RadarReportV2(CanonicalModel):
     def from_payload(cls, payload: dict[str, Any]) -> "RadarReportV2":
         payload = _with_item_score_explanations(payload)
         payload = _with_event_resolution_audit(payload)
+        payload = _with_competitor_audit(payload)
         source_audit = payload.get("source_audit", {})
         canonical_source_fields = {
             "ingestion_mode",
@@ -288,6 +375,7 @@ def _migrate_legacy_v2_payload(payload: dict[str, Any]) -> dict[str, Any]:
     migrated = copy.deepcopy(payload)
     migrated = _with_item_score_explanations(migrated)
     migrated = _with_event_resolution_audit(migrated)
+    migrated = _with_competitor_audit(migrated)
     migrated.setdefault("signals", [])
 
     old_audit = migrated.get("source_audit", {})
@@ -364,6 +452,14 @@ def _with_event_resolution_audit(payload: dict[str, Any]) -> dict[str, Any]:
         return payload
     migrated = copy.deepcopy(payload)
     migrated["event_resolution_audit"] = _default_event_resolution_audit()
+    return migrated
+
+
+def _with_competitor_audit(payload: dict[str, Any]) -> dict[str, Any]:
+    if "competitor_audit" in payload:
+        return payload
+    migrated = copy.deepcopy(payload)
+    migrated["competitor_audit"] = _default_competitor_audit()
     return migrated
 
 
