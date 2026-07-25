@@ -1,0 +1,163 @@
+name: deploy-typed-competitor-production
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-typed-competitor-production.yml"
+
+concurrency:
+  group: radar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  intelligence:
+    runs-on: ubuntu-latest
+    outputs:
+      deployable: ${{ steps.gate.outputs.deployable }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: python -m pip install -e ".[dev,ai]"
+
+      - name: Restore durable state
+        run: |
+          set -e
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
+            git fetch origin radar-state
+            git worktree add .state origin/radar-state
+            PYTHONPATH=src python -m radar.cli state restore \
+              --state-root .state/state \
+              --database "$PWD/data/radar.db" || true
+          fi
+
+      - name: Run accepted live report with typed competitor monitoring
+        env:
+          FRESHRSS_BASE_URL: ${{ secrets.FRESHRSS_BASE_URL }}
+          FRESHRSS_USERNAME: ${{ secrets.FRESHRSS_USERNAME }}
+          FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
+        run: |
+          set -euo pipefail
+          DATE=$(TZ=Asia/Taipei date +%F)
+          echo "$DATE" > production-date.txt
+          PYTHONPATH=src python -m radar.cli run-daily \
+            --mode live \
+            --date "$DATE" \
+            --database "$PWD/data/radar.db" \
+            --evaluation-mode deterministic \
+            --timeout-seconds 20 \
+            --per-feed-limit 50 \
+            > report-stdout.json
+          PYTHONPATH=src python -m radar.cli export-web \
+            --out-dir "$PWD" \
+            --database "$PWD/data/radar.db" \
+            --legacy-reports-dir "$PWD/reports"
+
+      - name: Report quality gate and competitor assertion
+        id: gate
+        run: |
+          set -e
+          DATE=$(cat production-date.txt)
+          python tools/check_production_quality.py \
+            --report artifacts/web/v1/latest.json \
+            --expected-date "$DATE" \
+            --report-only \
+            --output artifacts/production-quality-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          audit = report["competitor_audit"]
+          assert audit["fixed_target_count"] == 21, audit
+          assert audit["checked_target_count"] == 21, audit
+          assert audit["partial_target_count"] == 0, audit
+          assert audit["failed_target_count"] == 0, audit
+          Path("production-competitor-summary.json").write_text(
+              json.dumps({
+                  "date": report["date"],
+                  "run_id": report["run_id"],
+                  "fixed": audit["fixed_target_count"],
+                  "checked": audit["checked_target_count"],
+                  "baseline": audit["baseline_target_count"],
+                  "updated": audit["updated_target_count"],
+                  "partial": audit["partial_target_count"],
+                  "failed": audit["failed_target_count"],
+              }, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          rm -rf artifacts/web/v1/ai-analysis
+          echo "deployable=true" >> "$GITHUB_OUTPUT"
+
+      - name: Persist accepted durable state
+        if: steps.gate.outputs.deployable == 'true'
+        run: |
+          set -e
+          git config --global user.name "radar-bot"
+          git config --global user.email "radar-bot@users.noreply.github.com"
+          rm -rf .state
+          git worktree prune
+          git fetch -q origin radar-state
+          git worktree add -f .state origin/radar-state
+          git -C .state checkout -B radar-state
+          PYTHONPATH=src python -m radar.cli state pack \
+            --database "$PWD/data/radar.db" \
+            --state-root .state/state \
+            --run-id "${GITHUB_RUN_ID}"
+          git -C .state add state
+          git -C .state commit -q -m "state: run ${GITHUB_RUN_ID}" || echo "no state change"
+          git -C .state push origin HEAD:radar-state
+
+      - name: Build static site
+        if: steps.gate.outputs.deployable == 'true'
+        working-directory: web
+        env:
+          RADAR_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/web/v1
+          PAGES_SITE: https://${{ github.repository_owner }}.github.io
+          PAGES_BASE: /${{ github.event.repository.name }}
+        run: |
+          npm ci
+          npm run types:check
+          npm run build
+          mkdir -p dist/data
+          cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.gate.outputs.deployable == 'true'
+        with:
+          path: web/dist
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: typed-competitor-production-verification
+          path: |
+            production-date.txt
+            production-competitor-summary.json
+            artifacts/production-quality-report.json
+            artifacts/web/v1/latest.json
+          if-no-files-found: ignore
+
+  deploy:
+    needs: intelligence
+    if: needs.intelligence.outputs.deployable == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
