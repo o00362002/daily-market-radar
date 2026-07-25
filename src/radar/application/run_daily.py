@@ -10,6 +10,7 @@ from typing import Callable
 from radar.contracts.evaluation import EvaluationRequest, EvaluationResult
 from radar.contracts.report import (
     BacktestV1,
+    CompetitorAuditV1,
     CoverageCellV2,
     CoverageGapV2,
     EventResolutionAuditV1,
@@ -28,6 +29,7 @@ from radar.pipeline.deltas import material_events, resolve_events
 from radar.pipeline.enrich import enrich_documents
 from radar.reporting.contracts import validate_report_contract
 from radar.ports import (
+    CompetitorMonitor,
     DocumentRepository,
     EventRepository,
     IndicatorRepository,
@@ -64,6 +66,7 @@ class ApplicationDependencies:
     web_artifact_store: WebArtifactStore
     unit_of_work: UnitOfWork
     publishers: tuple[ReportPublisher, ...]
+    competitor_monitor: CompetitorMonitor | None = None
 
 
 @dataclass(frozen=True)
@@ -91,6 +94,15 @@ class DailyRadarApplication:
         contract.validate()
         contract.profile(request.profile)
         started_at = self._clock().isoformat()
+
+        competitor_result = (
+            self._dependencies.competitor_monitor.run(request.date, started_at)
+            if self._dependencies.competitor_monitor is not None
+            else None
+        )
+        competitor_audit = (
+            competitor_result.audit if competitor_result is not None else self._empty_competitor_audit()
+        )
 
         source_result = self._collect(request)
         normalized = self._dependencies.source_adapter.normalize(source_result)
@@ -120,7 +132,13 @@ class DailyRadarApplication:
         items = self._select_items(list(evaluation.items), contract)
         floor_gaps, floor_reasons = self._floor_shortfalls(items, contract, request.profile)
         coverage_cells = self._coverage_cells(documents, contract, request.ingestion_mode)
-        coverage_gaps = [*source_result.coverage_gaps, *self._coverage_gaps(coverage_cells), *floor_gaps]
+        competitor_gaps = self._competitor_gaps(competitor_audit)
+        coverage_gaps = [
+            *source_result.coverage_gaps,
+            *self._coverage_gaps(coverage_cells),
+            *floor_gaps,
+            *competitor_gaps,
+        ]
         source_health = self._dependencies.source_adapter.health_check()
         credentials = self._dependencies.source_adapter.credentials_status()
         if source_health.status in {"failing", "silent_zero", "empty", "stale", "policy_blocked"}:
@@ -138,7 +156,11 @@ class DailyRadarApplication:
             )
         degradation_reasons = self._degradation_reasons(
             source_result,
-            [*evaluation.audit.degradation_reasons, *floor_reasons],
+            [
+                *evaluation.audit.degradation_reasons,
+                *floor_reasons,
+                *self._competitor_degradation_reasons(competitor_audit),
+            ],
             source_health.status,
             credentials.available,
         )
@@ -154,10 +176,12 @@ class DailyRadarApplication:
             coverage_cells,
             coverage_gaps,
             degradation_reasons,
+            competitor_audit,
         )
 
         integration_status = dict(source_result.integration_status)
         integration_status[self._dependencies.source_adapter.adapter_id] = source_health.status
+        integration_status["competitor_monitor"] = self._competitor_integration_status(competitor_audit)
         if not credentials.available:
             integration_status["credentials"] = "unavailable"
 
@@ -190,6 +214,7 @@ class DailyRadarApplication:
                 taiwan_qualified_item_count_after_audit=direct_taiwan_count,
                 taiwan_direct_sources_checked=list(source_result.taiwan_direct_sources_checked),
             ),
+            competitor_audit=competitor_audit,
             retail_matrix=evaluation.retail_matrix,
             crypto_matrix=evaluation.crypto_matrix,
             structural_indicators=list(evaluation.structural_indicators),
@@ -207,12 +232,17 @@ class DailyRadarApplication:
         # Persist the whole run atomically only after typed and cross-field validation.
         # A failure here rolls the run back and never overwrites the last valid report.
         artifacts = self._project_web(report)
+        state_entries: list[tuple[str, bytes]] = [
+            (f"last-valid-report:{request.profile}", report.canonical_json_bytes())
+        ]
+        if competitor_result is not None:
+            state_entries.append((competitor_result.state_key, competitor_result.state_value))
         batch = RunPersistenceBatch(
             report=report,
             documents=tuple(documents),
             events=tuple(events),
             indicator_observations=tuple(evaluation.structural_indicators),
-            state_entries=((f"last-valid-report:{request.profile}", report.canonical_json_bytes()),),
+            state_entries=tuple(state_entries),
             match_records=tuple(resolution.match_records),
             observed_at=started_at,
         )
@@ -410,8 +440,14 @@ class DailyRadarApplication:
         coverage_cells: list[CoverageCellV2],
         coverage_gaps: list[CoverageGapV2],
         degradation_reasons: list[str],
+        competitor_audit: CompetitorAuditV1,
     ) -> str:
         audit = evaluation.audit.model_dump(mode="json", exclude={"started_at", "finished_at"})
+        competitor_payload = competitor_audit.model_dump(mode="json", exclude={"checked_at"})
+        for check in competitor_payload.get("checks", []):
+            check.pop("checked_at", None)
+            for source_check in check.get("source_checks", []):
+                source_check.pop("checked_at", None)
         fingerprint = {
             "request": {
                 "date": request.date,
@@ -458,6 +494,7 @@ class DailyRadarApplication:
                 ],
                 "audit": audit,
             },
+            "competitor_audit": competitor_payload,
             "coverage_cells": [cell.model_dump(mode="json") for cell in coverage_cells],
             "coverage_gaps": [gap.model_dump(mode="json") for gap in coverage_gaps],
             "degradation_reasons": degradation_reasons,
@@ -480,6 +517,69 @@ class DailyRadarApplication:
             title_only_changes_rejected=resolution.title_only_changes_rejected,
             background_only_rejected=resolution.background_only_rejected,
         )
+
+    @staticmethod
+    def _empty_competitor_audit() -> CompetitorAuditV1:
+        return CompetitorAuditV1(
+            registry_version="not_configured",
+            source_registry_version="not_configured",
+            checked_at="",
+            fixed_target_count=0,
+            checked_target_count=0,
+            updated_target_count=0,
+            baseline_target_count=0,
+            partial_target_count=0,
+            failed_target_count=0,
+            not_executed_target_count=0,
+            checked_ids=[],
+            updated_ids=[],
+            baseline_ids=[],
+            partial_ids=[],
+            failed_ids=[],
+            not_executed_ids=[],
+            checks=[],
+        )
+
+    @staticmethod
+    def _competitor_integration_status(audit: CompetitorAuditV1) -> str:
+        if audit.fixed_target_count == 0:
+            return "not_configured"
+        if audit.failed_target_count == audit.fixed_target_count:
+            return "failed"
+        if audit.failed_target_count or audit.partial_target_count or audit.not_executed_target_count:
+            return "partial"
+        return "healthy"
+
+    @staticmethod
+    def _competitor_degradation_reasons(audit: CompetitorAuditV1) -> list[str]:
+        reasons: list[str] = []
+        if audit.failed_target_count:
+            reasons.append("competitor_monitor_failed_targets")
+        if audit.partial_target_count:
+            reasons.append("competitor_monitor_partial_targets")
+        if audit.not_executed_target_count:
+            reasons.append("competitor_monitor_not_executed_targets")
+        return reasons
+
+    @staticmethod
+    def _competitor_gaps(audit: CompetitorAuditV1) -> list[CoverageGapV2]:
+        if not (audit.failed_target_count or audit.partial_target_count or audit.not_executed_target_count):
+            return []
+        return [
+            CoverageGapV2(
+                domain="all",
+                macro_region="global",
+                language="multi",
+                source_role="competitor_monitor",
+                channel="fixed_official_channels",
+                time_window="24h",
+                reason="competitor_monitor_incomplete",
+                message=(
+                    f"official competitor monitor incomplete: failed={audit.failed_target_count}, "
+                    f"partial={audit.partial_target_count}, not_executed={audit.not_executed_target_count}"
+                ),
+            )
+        ]
 
     @staticmethod
     def _event_history_since(report_date: str, lookback_days: int = 30) -> str:
