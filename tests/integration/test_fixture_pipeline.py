@@ -16,7 +16,13 @@ class FixturePipelineTests(unittest.TestCase):
         self.assertIn("freshrss_unavailable", result.degradation_reasons)
         self.assertGreaterEqual(len(result.languages_seen), 3)
         self.assertGreaterEqual(len(result.regions_seen), 3)
-        self.assertEqual(result.domains_seen, contract.report_domains)
+        collected_domains = {
+            row["domain"]
+            for row in result.report["coverage_cells"]
+            if row["domain"] != "all" and row["observed_count"] > 0
+        }
+        self.assertEqual(collected_domains, set(contract.report_domains))
+        self.assertTrue(set(result.domains_seen) <= set(contract.report_domains))
         self.assertTrue(result.report["coverage_gaps"])
 
     def test_replay_is_deterministic(self) -> None:
