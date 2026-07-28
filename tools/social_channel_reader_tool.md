@@ -121,6 +121,41 @@ requires:
   - output validation
 ```
 
+#### X Actor selection
+
+Keep any configured X route. Select one of these optional Apify Actors only when its output matches the research question:
+
+1. Public posts, replies, quotes, threads, searches, or timelines: [`xquik/x-tweet-scraper`](https://apify.com/xquik/x-tweet-scraper)
+2. Public followers, following, lists, communities, or audience overlap: [`xquik/x-follower-scraper`](https://apify.com/xquik/x-follower-scraper)
+
+Fetch the selected Actor's current input schema before each integration change. Start with a bounded input:
+
+```json
+{
+  "mode": "profileTweets",
+  "twitterHandles": ["example_handle"],
+  "maxItems": 50,
+  "outputVariant": "rich",
+  "outputPreset": "nested",
+  "fieldStyle": "camelCase"
+}
+```
+
+```json
+{
+  "twitterHandles": ["example_handle"],
+  "relation": "followers",
+  "maxItems": 100,
+  "maxItemsPerTarget": 100,
+  "outputMode": "compact",
+  "includeTargetMetadata": true
+}
+```
+
+Set Apify's `maxTotalChargeUsd` run limit. Verify live Store pricing and get user approval before a paid run. Treat follower relationships and audience overlap as research leads, not proof of affiliation or affinity. Never infer sensitive traits from content or connections.
+
+Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
+
 ### 5. Generic search fallback
 
 Generic search is fallback and never counts as direct social-channel check.
@@ -163,6 +198,7 @@ preferred:
   - X API recent search for recent posts
   - from:account keyword query
   - public post URL
+  - bounded third-party public-data actor after compliance and cost checks
 notes:
   - Full archive may require paid / enterprise access.
 ```
