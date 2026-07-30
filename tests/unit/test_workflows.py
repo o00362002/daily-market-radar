@@ -40,7 +40,8 @@ class WorkflowContractTests(unittest.TestCase):
         crons = [entry["cron"] for entry in on["schedule"]]
         self.assertIn("0 23 * * *", crons)
         self.assertEqual(doc["concurrency"]["group"], "radar-daily")
-        self.assertFalse(doc["concurrency"]["cancel-in-progress"])
+        # A stalled older run must not block newer Taiwan-date runs for days.
+        self.assertTrue(doc["concurrency"]["cancel-in-progress"])
         text = (WORKFLOWS / "daily-intelligence.yml").read_text(encoding="utf-8")
         self.assertIn("radar-state", text)
         self.assertNotIn("HEAD:main", text)
@@ -54,6 +55,7 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("Persist durable state (accepted report runs)", text)
         self.assertIn("status=report_only", text)
         self.assertIn("rm -rf artifacts/web/v1/ai-analysis", text)
+        self.assertIn("readiness-receipt.json", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")
