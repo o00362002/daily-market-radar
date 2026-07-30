@@ -28,9 +28,11 @@ on:
         description: "deterministic | auto | api-assisted"
         default: "auto"
 
+# Never let a stalled older run block later scheduled runs for days.
+# The newest run is the only one that can publish the current Taiwan date.
 concurrency:
   group: radar-daily
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -40,6 +42,7 @@ permissions:
 jobs:
   intelligence:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     outputs:
       deployable: ${{ steps.gate.outputs.deployable }}
       status: ${{ steps.gate.outputs.status }}
@@ -58,7 +61,7 @@ jobs:
 
       - name: Restore durable state (radar-state branch; never main)
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p data
           if git ls-remote --exit-code --heads origin radar-state >/dev/null 2>&1; then
             git fetch origin radar-state
@@ -81,6 +84,7 @@ jobs:
           FRESHRSS_USERNAME: ${{ secrets.FRESHRSS_USERNAME }}
           FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
         run: |
+          set -euo pipefail
           DATE=$(TZ=Asia/Taipei date +%F)
           echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
           PYTHONPATH=src python -m radar.cli run-daily --mode live --date "$DATE" \
@@ -93,6 +97,7 @@ jobs:
       - name: Report quality pre-gate
         id: report_gate
         run: |
+          set -euo pipefail
           DATE=$(TZ=Asia/Taipei date +%F)
           if python tools/check_production_quality.py \
             --report artifacts/web/v1/latest.json \
@@ -115,6 +120,7 @@ jobs:
           OPENAI_ANALYSIS_MODEL: ${{ vars.OPENAI_ANALYSIS_MODEL }}
           ANALYSIS_MODE: ${{ github.event.inputs.analysis_mode || vars.RADAR_AI_ANALYSIS_MODE || 'auto' }}
         run: |
+          set -euo pipefail
           PYTHONPATH=src python -m radar.analysis.cli \
             --database "$PWD/data/radar.db" \
             --repo-root "$PWD" \
@@ -124,7 +130,7 @@ jobs:
       - name: Production deployment gate
         id: gate
         run: |
-          set -e
+          set -euo pipefail
           DATE=$(TZ=Asia/Taipei date +%F)
           if [ "${{ steps.report_gate.outputs.report_ok }}" != "true" ]; then
             echo "deployable=false" >> "$GITHUB_OUTPUT"
@@ -174,7 +180,7 @@ jobs:
       - name: Persist durable state (accepted report runs)
         if: steps.gate.outputs.deployable == 'true'
         run: |
-          set -e
+          set -euo pipefail
           git config --global user.name "radar-bot"
           git config --global user.email "radar-bot@users.noreply.github.com"
           rm -rf .state
@@ -192,8 +198,39 @@ jobs:
             --state-root .state/state --run-id "${GITHUB_RUN_ID}"
           git -C .state add state
           git -C .state commit -q -m "state: run ${GITHUB_RUN_ID}" || echo "no state change"
-          git -C .state push origin HEAD:radar-state \
-            || echo "::warning::durable state push failed — enable Actions read/write permissions to persist state across runs"
+          # State persistence is required for tomorrow's report and chat-assisted imports.
+          # Do not hide a permission or non-fast-forward failure behind a successful workflow.
+          git -C .state push origin HEAD:radar-state
+
+      - name: Write readiness receipt
+        if: steps.gate.outputs.deployable == 'true'
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          report = json.loads(Path("artifacts/web/v1/latest.json").read_text(encoding="utf-8"))
+          analysis_path = Path("artifacts/web/v1/ai-analysis/latest.json")
+          receipt = {
+              "generated_at": datetime.now(timezone.utc).isoformat(),
+              "workflow_run_id": os.environ.get("GITHUB_RUN_ID"),
+              "workflow_sha": os.environ.get("GITHUB_SHA"),
+              "report_date": report.get("date"),
+              "report_run_id": report.get("run_id"),
+              "report_status": report.get("status"),
+              "ingestion_mode": report.get("source_audit", {}).get("ingestion_mode"),
+              "deployment_status": "accepted",
+              "analysis_available": analysis_path.exists(),
+              "analysis_status": "${{ steps.gate.outputs.analysis_status }}",
+          }
+          Path("artifacts/readiness-receipt.json").write_text(
+              json.dumps(receipt, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Build static site
         if: steps.gate.outputs.deployable == 'true'
@@ -208,12 +245,21 @@ jobs:
           npm run build
           mkdir -p dist/data
           cp -R "$RADAR_ARTIFACTS_DIR/." dist/data/
+          cp "$GITHUB_WORKSPACE/artifacts/readiness-receipt.json" dist/data/readiness-receipt.json
 
       - name: Upload Pages artifact
         if: steps.gate.outputs.deployable == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web/dist  # path-ok: built by the preceding astro build step (gitignored)
+          path: web/dist
+
+      - name: Upload readiness receipt
+        if: always() && steps.gate.outputs.deployable == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: readiness-receipt-${{ github.run_id }}
+          path: artifacts/readiness-receipt.json
+          if-no-files-found: error
 
       - name: Upload report-only analysis diagnostics
         if: always() && steps.gate.outputs.status == 'report_only'
@@ -250,6 +296,7 @@ jobs:
     needs: intelligence
     if: needs.intelligence.outputs.deployable == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
