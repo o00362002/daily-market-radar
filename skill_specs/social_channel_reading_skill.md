@@ -76,7 +76,7 @@ Use when API or direct channel access is unavailable.
 Allowed only for public content and compliance-reviewed use.
 
 ```text
-- Apify Actors / Apify MCP
+- Apify Actors / Apify MCP; use the concrete routes and bounded inputs in tools/social_channel_reader_tool.md
 - Bright Data / social listening tools
 - browser automation / scraping tools only after policy and usage check
 ```
