@@ -51,6 +51,8 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("radar.analysis.cli", text)
         self.assertIn("check_production_quality.py", text)
         self.assertIn("Report quality pre-gate", text)
+        self.assertIn("Production report observation", text)
+        self.assertIn("Production report rejected", text)
         self.assertIn("analysis_fallback", (ROOT / "tools/check_production_quality.py").read_text(encoding="utf-8"))
         self.assertIn("previous website remains live", text.lower())
         self.assertIn("Persist durable state (accepted report runs)", text)
@@ -61,6 +63,14 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("status=report_only", text)
         self.assertIn("rm -rf artifacts/web/v1/ai-analysis", text)
         self.assertIn("readiness-receipt.json", text)
+        self.assertIn("actions/checkout@v6", text)
+        self.assertIn("actions/setup-python@v6", text)
+        self.assertIn("actions/setup-node@v6", text)
+        self.assertIn("actions/upload-artifact@v7", text)
+        self.assertNotIn("actions/checkout@v4", text)
+        self.assertNotIn("actions/setup-python@v5", text)
+        self.assertNotIn("actions/setup-node@v4", text)
+        self.assertNotIn("actions/upload-artifact@v4", text)
 
     def test_monthly_competitor_watch_stays_under_existing_competitor_registry(self) -> None:
         doc = self._load("monthly-competitor-watch.yml")

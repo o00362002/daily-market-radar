@@ -11,12 +11,16 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def check_report(report: dict[str, Any], config: dict[str, Any], expected_date: str | None) -> list[str]:
+    """Return only conditions that make a report unsafe to deploy.
+
+    Report volume is deliberately not a blocker. The runtime keeps every qualified
+    item and the web layer performs its own readable curation, so a broad live-news
+    day must not be mistaken for a corrupt production artifact.
+    """
+
     rules = config["report"]
     reasons: list[str] = []
     items = report.get("items", [])
-    total = len(items)
-    major = sum(item.get("report_lane") == "major" for item in items)
-    major_ratio = major / total if total else 0.0
 
     if report.get("status") not in set(rules["allowed_statuses"]):
         reasons.append(f"report_status_not_deployable:{report.get('status')}")
@@ -26,12 +30,9 @@ def check_report(report: dict[str, Any], config: dict[str, Any], expected_date: 
         mode = report.get("source_audit", {}).get("ingestion_mode")
         if mode == "fixture" or not mode:
             reasons.append(f"ingestion_mode_not_live:{mode}")
-    if total > int(rules["max_total_items"]):
-        reasons.append(f"item_count_exceeds_limit:{total}>{rules['max_total_items']}")
-    if major > int(rules["max_major_items"]):
-        reasons.append(f"major_count_exceeds_limit:{major}>{rules['max_major_items']}")
-    if total >= int(rules["major_ratio_min_sample"]) and major_ratio > float(rules["max_major_ratio"]):
-        reasons.append(f"major_ratio_exceeds_limit:{major_ratio:.3f}>{rules['max_major_ratio']}")
+    minimum_total = int(rules.get("minimum_total_items", 0) or 0)
+    if len(items) < minimum_total:
+        reasons.append(f"item_count_below_minimum:{len(items)}<{minimum_total}")
     if rules.get("require_unique_event_ids", True):
         event_ids = [str(item.get("event_id", "")) for item in items]
         if len(event_ids) != len(set(event_ids)):
@@ -39,6 +40,37 @@ def check_report(report: dict[str, Any], config: dict[str, Any], expected_date: 
         if any(not event_id for event_id in event_ids):
             reasons.append("missing_event_id")
     return reasons
+
+
+def check_report_warnings(report: dict[str, Any], config: dict[str, Any]) -> list[str]:
+    """Return review observations that should be visible but must not block Pages."""
+
+    items = report.get("items", [])
+    total = len(items)
+    major = sum(item.get("report_lane") == "major" for item in items)
+    major_ratio = major / total if total else 0.0
+    thresholds = config["report"].get("review_thresholds", {})
+    warnings: list[str] = []
+
+    total_threshold = int(thresholds.get("total_items", 0) or 0)
+    if total_threshold and total > total_threshold:
+        warnings.append(f"item_count_above_review_threshold:{total}>{total_threshold}")
+
+    major_threshold = int(thresholds.get("major_items", 0) or 0)
+    if major_threshold and major > major_threshold:
+        warnings.append(f"major_count_above_review_threshold:{major}>{major_threshold}")
+
+    ratio_threshold = float(thresholds.get("major_ratio", 0) or 0)
+    ratio_minimum_sample = int(thresholds.get("major_ratio_min_sample", 0) or 0)
+    if (
+        ratio_threshold
+        and total >= ratio_minimum_sample
+        and major_ratio > ratio_threshold
+    ):
+        warnings.append(
+            f"major_ratio_above_review_threshold:{major_ratio:.3f}>{ratio_threshold}"
+        )
+    return warnings
 
 
 def check_analysis(
@@ -86,6 +118,7 @@ def main() -> int:
     analysis = load_json(args.analysis) if args.analysis and args.analysis.exists() else None
 
     reasons = check_report(report, config, args.expected_date)
+    warnings = check_report_warnings(report, config)
     if not args.report_only:
         reasons.extend(check_analysis(analysis, report, config))
 
@@ -94,6 +127,7 @@ def main() -> int:
     result = {
         "valid": not reasons,
         "reasons": reasons,
+        "warnings": warnings,
         "report": {
             "date": report.get("date"),
             "report_id": report.get("report_id"),
