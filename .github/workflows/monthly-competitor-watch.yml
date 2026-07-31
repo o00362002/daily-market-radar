@@ -1,0 +1,98 @@
+name: monthly-competitor-watch
+
+on:
+  schedule:
+    # 09:30 Asia/Taipei on the first day of every month.
+    - cron: "30 1 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: radar-competitor-monthly
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  benchmark-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run existing competitor intelligence monthly benchmark watch
+        run: |
+          set -euo pipefail
+          python tools/run_monthly_competitor_watch.py \
+            --config config/competitor_monthly_watch.json \
+            --registry config/competitor_registry.json \
+            --output artifacts/competitors/monthly/latest.json \
+            --markdown artifacts/competitors/monthly/latest.md
+
+      - name: Read watch result
+        id: result
+        run: |
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("artifacts/competitors/monthly/latest.json").read_text(encoding="utf-8"))
+          print(f"status={report['status']}")
+          print(f"candidate_count={report['candidate_count']}")
+          print(f"new_system_count={report['category_counts'].get('new_system_candidate', 0)}")
+          PY
+
+      - name: Upload monthly competitor evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-competitor-watch-${{ github.run_id }}
+          path: artifacts/competitors/monthly/
+          if-no-files-found: error
+          retention-days: 180
+
+      - name: Notify only when benchmark candidates exist
+        if: steps.result.outputs.candidate_count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MONTH: ${{ github.run_started_at }}
+        run: |
+          set -euo pipefail
+          PERIOD=$(TZ=Asia/Taipei date +%Y-%m)
+          TITLE="[每月競品對標] ${PERIOD}｜自主補貨、Agentic RetailOps、閉環營運"
+          MARKER='<!-- monthly-retailops-benchmark-watch -->'
+          BODY=$(mktemp)
+          {
+            echo "$MARKER"
+            echo
+            cat artifacts/competitors/monthly/latest.md
+            echo
+            echo "---"
+            echo "執行紀錄：${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "下一步：人工驗證候選後，值得長期追蹤者加入 config/competitor_registry.json 與 config/competitor_sources.json。"
+          } > "$BODY"
+
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state all \
+            --search "$TITLE in:title" --json number,title \
+            --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file "$BODY"
+            gh issue reopen "$EXISTING" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || true
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file "$BODY"
+          fi
+
+      - name: Notify when all discovery sources fail
+        if: steps.result.outputs.status == 'failed'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PERIOD=$(TZ=Asia/Taipei date +%Y-%m)
+          TITLE="[競品監控失敗] ${PERIOD}｜月度 RetailOps 對標來源全部失敗"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" \
+            --body-file artifacts/competitors/monthly/latest.md
