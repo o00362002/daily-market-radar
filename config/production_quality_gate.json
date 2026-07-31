@@ -1,10 +1,13 @@
 {
-  "schema_version": "production-quality-gate/v1",
+  "schema_version": "production-quality-gate/v2",
   "report": {
-    "max_total_items": 180,
-    "max_major_items": 90,
-    "max_major_ratio": 0.85,
-    "major_ratio_min_sample": 20,
+    "minimum_total_items": 1,
+    "review_thresholds": {
+      "total_items": 180,
+      "major_items": 90,
+      "major_ratio": 0.85,
+      "major_ratio_min_sample": 20
+    },
     "require_unique_event_ids": true,
     "require_live_ingestion": true,
     "allowed_statuses": ["complete", "partial"]
