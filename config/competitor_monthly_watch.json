@@ -1,0 +1,148 @@
+{
+  "schema_version": "competitor-monthly-watch/v1",
+  "status": "active",
+  "owner": "competitor_intelligence",
+  "purpose": "每月探索國際零售商與系統商在自主補貨、Agentic RetailOps、閉環營運的可驗證新系統與落地案例；值得對標時以 GitHub Issue 通知。",
+  "lookback_days": 40,
+  "max_candidates": 20,
+  "providers": [
+    {
+      "id": "google_news",
+      "query_suffix": " when:{lookback_days}d",
+      "url_template": "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+      "id": "gdelt_doc",
+      "query_suffix": "",
+      "url_template": "https://api.gdeltproject.org/api/v2/doc/doc?query={query}&mode=artlist&maxrecords=100&timespan={lookback_days}d&sort=datedesc&format=rssarchive"
+    }
+  ],
+  "queries": [
+    {
+      "id": "autonomous_replenishment_system",
+      "theme": "autonomous_replenishment",
+      "query": "autonomous replenishment retail system retailer deployment case study"
+    },
+    {
+      "id": "automated_ordering_inventory_agent",
+      "theme": "autonomous_replenishment",
+      "query": "AI inventory agent automated ordering replenishment retailer rollout"
+    },
+    {
+      "id": "agentic_retailops_platform",
+      "theme": "agentic_retailops",
+      "query": "agentic retail operations platform store operations agent deployment"
+    },
+    {
+      "id": "store_manager_action_agent",
+      "theme": "agentic_retailops",
+      "query": "AI store manager agent retail task execution case study"
+    },
+    {
+      "id": "closed_loop_retail_execution",
+      "theme": "closed_loop_operations",
+      "query": "closed-loop retail operations action outcome measurement case study"
+    },
+    {
+      "id": "evidence_outcome_retailops",
+      "theme": "closed_loop_operations",
+      "query": "retail execution platform task evidence outcome continuous improvement"
+    },
+    {
+      "id": "self_driving_supply_chain_retail",
+      "theme": "autonomous_replenishment",
+      "query": "self-driving supply chain retail replenishment live deployment"
+    },
+    {
+      "id": "retailops_agent_roi",
+      "theme": "agentic_retailops",
+      "query": "retail operations AI agent ROI customer stores rollout"
+    }
+  ],
+  "themes": {
+    "autonomous_replenishment": [
+      "autonomous replenishment",
+      "automated replenishment",
+      "ai replenishment",
+      "automated ordering",
+      "inventory agent",
+      "self-driving supply chain",
+      "demand-driven replenishment"
+    ],
+    "agentic_retailops": [
+      "agentic retail",
+      "retail operations agent",
+      "store operations agent",
+      "ai store manager",
+      "retailops agent",
+      "operations copilot",
+      "autonomous retail operations"
+    ],
+    "closed_loop_operations": [
+      "closed-loop operations",
+      "closed loop operations",
+      "action outcome",
+      "outcome measurement",
+      "evidence of execution",
+      "continuous improvement",
+      "task verification",
+      "impact measurement"
+    ]
+  },
+  "scoring": {
+    "minimum_score": 7,
+    "operation_keywords": [
+      "store operations",
+      "retail operations",
+      "replenishment",
+      "inventory",
+      "task execution",
+      "workflow",
+      "frontline",
+      "store manager",
+      "merchandising",
+      "supply chain"
+    ],
+    "proof_keywords": [
+      "case study",
+      "customer",
+      "deployed",
+      "deployment",
+      "rollout",
+      "rolled out",
+      "pilot",
+      "launched",
+      "implementation",
+      "roi",
+      "stores",
+      "retailer"
+    ],
+    "system_keywords": [
+      "platform",
+      "system",
+      "software",
+      "agent",
+      "engine",
+      "solution",
+      "suite",
+      "product"
+    ],
+    "hard_exclusions": [
+      "shopping assistant",
+      "personalized shopping",
+      "ad campaign",
+      "marketing campaign",
+      "customer service chatbot",
+      "product recommendation engine"
+    ]
+  },
+  "notification": {
+    "issue_marker": "<!-- monthly-retailops-benchmark-watch -->",
+    "issue_title_prefix": "[每月競品對標]",
+    "notify_when_categories": [
+      "new_system_candidate",
+      "retailer_case",
+      "known_competitor_material_case"
+    ]
+  }
+}
