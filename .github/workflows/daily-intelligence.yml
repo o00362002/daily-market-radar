@@ -48,11 +48,11 @@ jobs:
       status: ${{ steps.gate.outputs.status }}
       analysis_status: ${{ steps.gate.outputs.analysis_status }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: npm
@@ -99,11 +99,27 @@ jobs:
         run: |
           set -euo pipefail
           DATE=$(TZ=Asia/Taipei date +%F)
-          if python tools/check_production_quality.py \
+          set +e
+          python tools/check_production_quality.py \
             --report artifacts/web/v1/latest.json \
             --expected-date "$DATE" \
             --report-only \
-            --output artifacts/production-quality-report.json; then
+            --output artifacts/production-quality-report.json
+          gate_status=$?
+          set -e
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("artifacts/production-quality-report.json").read_text(encoding="utf-8"))
+          for warning in payload.get("warnings", []):
+              print(f"::warning title=Production report observation::{warning}")
+          for reason in payload.get("reasons", []):
+              print(f"::error title=Production report rejected::{reason}")
+          PY
+
+          if [ "$gate_status" -eq 0 ]; then
             echo "report_ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "report_ok=false" >> "$GITHUB_OUTPUT"
@@ -274,7 +290,7 @@ jobs:
 
       - name: Upload readiness receipt
         if: always() && steps.gate.outputs.deployable == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: readiness-receipt-${{ github.run_id }}
           path: artifacts/readiness-receipt.json
@@ -282,7 +298,7 @@ jobs:
 
       - name: Upload report-only analysis diagnostics
         if: always() && steps.gate.outputs.status == 'report_only'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: report-only-production-run-${{ github.run_id }}
           path: |
@@ -294,7 +310,7 @@ jobs:
 
       - name: Upload rejected-run diagnostics
         if: always() && steps.gate.outputs.deployable != 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rejected-production-run-${{ github.run_id }}
           path: |
