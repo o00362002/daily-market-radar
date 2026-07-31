@@ -17,10 +17,13 @@ SPEC.loader.exec_module(MODULE)
 
 CONFIG = {
     "report": {
-        "max_total_items": 180,
-        "max_major_items": 90,
-        "max_major_ratio": 0.85,
-        "major_ratio_min_sample": 20,
+        "minimum_total_items": 1,
+        "review_thresholds": {
+            "total_items": 180,
+            "major_items": 90,
+            "major_ratio": 0.85,
+            "major_ratio_min_sample": 20,
+        },
         "require_unique_event_ids": True,
         "require_live_ingestion": True,
         "allowed_statuses": ["complete", "partial"],
@@ -70,13 +73,30 @@ class ProductionQualityGateTests(unittest.TestCase):
     def test_healthy_report_and_real_ai_pass(self) -> None:
         current = report()
         self.assertEqual(MODULE.check_report(current, CONFIG, "2026-07-15"), [])
+        self.assertEqual(MODULE.check_report_warnings(current, CONFIG), [])
         self.assertEqual(MODULE.check_analysis(analysis(), current, CONFIG), [])
 
-    def test_736_item_report_is_rejected(self) -> None:
-        reasons = MODULE.check_report(report(count=736, major=629), CONFIG, "2026-07-15")
-        self.assertTrue(any(reason.startswith("item_count_exceeds_limit") for reason in reasons))
-        self.assertTrue(any(reason.startswith("major_count_exceeds_limit") for reason in reasons))
-        self.assertTrue(any(reason.startswith("major_ratio_exceeds_limit") for reason in reasons))
+    def test_976_item_report_warns_but_does_not_block(self) -> None:
+        current = report(count=976, major=745)
+        self.assertEqual(MODULE.check_report(current, CONFIG, "2026-07-15"), [])
+        warnings = MODULE.check_report_warnings(current, CONFIG)
+        self.assertIn("item_count_above_review_threshold:976>180", warnings)
+        self.assertIn("major_count_above_review_threshold:745>90", warnings)
+
+    def test_duplicate_empty_fixture_and_wrong_date_still_block(self) -> None:
+        current = report(count=2, major=1)
+        current["items"][1]["event_id"] = current["items"][0]["event_id"]
+        self.assertIn(
+            "duplicate_event_ids",
+            MODULE.check_report(current, CONFIG, "2026-07-15"),
+        )
+
+        empty = report(count=0, major=0)
+        empty["source_audit"]["ingestion_mode"] = "fixture"
+        reasons = MODULE.check_report(empty, CONFIG, "2026-07-16")
+        self.assertIn("report_date_mismatch:2026-07-15!=2026-07-16", reasons)
+        self.assertIn("ingestion_mode_not_live:fixture", reasons)
+        self.assertIn("item_count_below_minimum:0<1", reasons)
 
     def test_deterministic_fallback_is_not_production_ai(self) -> None:
         reasons = MODULE.check_analysis(analysis(fallback=True), report(), CONFIG)
