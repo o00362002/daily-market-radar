@@ -2,7 +2,8 @@ name: mount-check
 
 on:
   push:
-    branches: ["**"]
+    # radar-state stores compressed runtime state only; code checks do not apply there.
+    branches-ignore: ["radar-state"]
   pull_request:
   workflow_dispatch:
 

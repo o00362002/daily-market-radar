@@ -2,7 +2,9 @@ name: single-owner-check
 
 on:
   push:
-    branches: ["**"]
+    # radar-state is an orphan data-only branch written by the daily pipeline.
+    # It intentionally does not contain repository governance scripts.
+    branches-ignore: ["radar-state"]
   pull_request:
   workflow_dispatch:
 
