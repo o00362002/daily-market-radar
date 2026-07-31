@@ -19,6 +19,7 @@ REQUIRED = {
     "ai-analysis.yml",
     "pages-deploy.yml",
     "mount-check.yml",
+    "monthly-competitor-watch.yml",
 }
 
 
@@ -53,9 +54,25 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("analysis_fallback", (ROOT / "tools/check_production_quality.py").read_text(encoding="utf-8"))
         self.assertIn("previous website remains live", text.lower())
         self.assertIn("Persist durable state (accepted report runs)", text)
+        self.assertIn("continue-on-error: true", text)
+        self.assertIn("state persistence attempt", text)
+        self.assertIn("Healthy report will still deploy", text)
+        self.assertIn("state_persistence_status", text)
         self.assertIn("status=report_only", text)
         self.assertIn("rm -rf artifacts/web/v1/ai-analysis", text)
         self.assertIn("readiness-receipt.json", text)
+
+    def test_monthly_competitor_watch_stays_under_existing_competitor_registry(self) -> None:
+        doc = self._load("monthly-competitor-watch.yml")
+        on = doc.get("on", doc.get(True))
+        self.assertIn("30 1 1 * *", [entry["cron"] for entry in on["schedule"]])
+        self.assertEqual(doc["concurrency"]["group"], "radar-competitor-monthly")
+        text = (WORKFLOWS / "monthly-competitor-watch.yml").read_text(encoding="utf-8")
+        self.assertIn("config/competitor_registry.json", text)
+        self.assertIn("config/competitor_monthly_watch.json", text)
+        self.assertIn("run_monthly_competitor_watch.py", text)
+        self.assertIn("candidate_count", text)
+        self.assertIn("gh issue create", text)
 
     def test_runtime_check_runs_deterministic_no_secret_and_auto_fallback(self) -> None:
         text = (WORKFLOWS / "runtime-check.yml").read_text(encoding="utf-8")
