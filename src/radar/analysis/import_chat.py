@@ -4,11 +4,19 @@ import argparse
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 from radar.analysis.builder import build_deterministic_analysis, load_analysis_config
 from radar.contracts.analysis import AIAnalysisV1, ai_analysis_json_schema
 from radar.contracts.report import RadarReportV2
+
+
+_IMMUTABLE_BASELINE_FIELDS = (
+    "translations",
+    "structural_indicators",
+    "linked_indicators",
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -18,6 +26,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--output-dir", default="artifacts/web/v1/ai-analysis")
     parser.add_argument("--receipt", default="chat-analysis-import-receipt.json")
+    parser.add_argument(
+        "--materialize-analysis",
+        action="store_true",
+        help=(
+            "Fill empty immutable baseline arrays from the validated deterministic baseline and "
+            "rewrite the input as a complete canonical AIAnalysisV1 after validation."
+        ),
+    )
     return parser
 
 
@@ -70,19 +86,66 @@ def _validate_supplemental_evidence(analysis: AIAnalysisV1) -> None:
         fingerprints.add(fingerprint)
 
 
+def _deterministic_baseline(
+    *,
+    report: RadarReportV2,
+    repo_root: Path,
+    generated_at: str,
+) -> AIAnalysisV1:
+    config = load_analysis_config(repo_root)
+    return build_deterministic_analysis(
+        report,
+        None,
+        config,
+        generated_at=generated_at,
+        requested_mode="deterministic",
+    )
+
+
+def hydrate_immutable_baseline_fields(
+    *,
+    report: RadarReportV2,
+    payload: dict[str, Any],
+    repo_root: Path,
+) -> tuple[dict[str, Any], list[str]]:
+    """Hydrate only explicitly empty immutable arrays from the formal baseline.
+
+    This keeps the ChatGPT-authored file small enough for bounded connector writes while preserving
+    the exact deterministic translations, structural indicators and linked indicators. Non-empty
+    values are never overwritten: any attempted rewrite still reaches the normal equality checks and
+    is rejected.
+    """
+
+    provenance = payload.get("provenance")
+    generated_at = provenance.get("generated_at") if isinstance(provenance, dict) else None
+    if not isinstance(generated_at, str) or not generated_at:
+        raise ValueError("analysis provenance.generated_at is required before baseline hydration")
+
+    empty_fields = [field for field in _IMMUTABLE_BASELINE_FIELDS if payload.get(field) == []]
+    if not empty_fields:
+        return payload, []
+
+    baseline = _deterministic_baseline(
+        report=report,
+        repo_root=repo_root,
+        generated_at=generated_at,
+    ).model_dump(mode="json")
+    hydrated = dict(payload)
+    for field in empty_fields:
+        hydrated[field] = baseline[field]
+    return hydrated, empty_fields
+
+
 def validate_chat_analysis(
     *,
     report: RadarReportV2,
     analysis: AIAnalysisV1,
     repo_root: Path,
 ) -> dict[str, object]:
-    config = load_analysis_config(repo_root)
-    baseline = build_deterministic_analysis(
-        report,
-        None,
-        config,
+    baseline = _deterministic_baseline(
+        report=report,
+        repo_root=repo_root,
         generated_at=analysis.provenance.generated_at,
-        requested_mode="deterministic",
     )
 
     checks = {
@@ -133,12 +196,21 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
     receipt_path = Path(args.receipt).resolve()
+    analysis_path = Path(args.analysis).resolve()
     receipt: dict[str, object]
 
     try:
         report = RadarReportV2.from_payload(json.loads(Path(args.report).read_text(encoding="utf-8")))
-        analysis = AIAnalysisV1.model_validate_json(Path(args.analysis).read_text(encoding="utf-8"))
+        raw_payload = json.loads(analysis_path.read_text(encoding="utf-8"))
+        hydrated_payload, hydrated_fields = hydrate_immutable_baseline_fields(
+            report=report,
+            payload=raw_payload,
+            repo_root=repo_root,
+        )
+        analysis = AIAnalysisV1.model_validate(hydrated_payload)
         result = validate_chat_analysis(report=report, analysis=analysis, repo_root=repo_root)
+        if args.materialize_analysis and hydrated_fields:
+            analysis_path.write_bytes(analysis.canonical_json_bytes())
         written = _write_analysis(Path(args.output_dir).resolve(), analysis)
         receipt = {
             "valid": True,
@@ -149,6 +221,8 @@ def main(argv: list[str] | None = None) -> int:
             "effective_mode": analysis.provenance.effective_mode,
             "provider": analysis.provenance.provider,
             "model": analysis.provenance.model,
+            "hydrated_fields": hydrated_fields,
+            "materialized_input": bool(args.materialize_analysis and hydrated_fields),
             "written": written,
             **result,
         }
