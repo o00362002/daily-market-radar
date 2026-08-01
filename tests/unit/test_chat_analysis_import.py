@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from radar.analysis.builder import build_deterministic_analysis, load_analysis_config
-from radar.analysis.import_chat import validate_chat_analysis
+from radar.analysis.import_chat import hydrate_immutable_baseline_fields, validate_chat_analysis
 from radar.contracts.analysis import AIAnalysisV1
 from radar.contracts.report import RadarReportV2
 from radar.runtime.runs import run_daily_fixture
@@ -73,6 +73,46 @@ def test_valid_chat_analysis_preserves_deterministic_indicators() -> None:
 
     assert result["supplemental_evidence_count"] == 1
     assert all(result["checks"].values())
+
+
+def test_empty_immutable_arrays_hydrate_from_formal_baseline() -> None:
+    report = _report()
+    complete = _chat_analysis(report).model_dump(mode="json")
+    compact = dict(complete)
+    compact["translations"] = []
+    compact["structural_indicators"] = []
+    compact["linked_indicators"] = []
+
+    hydrated, fields = hydrate_immutable_baseline_fields(
+        report=report,
+        payload=compact,
+        repo_root=ROOT,
+    )
+    analysis = AIAnalysisV1.model_validate(hydrated)
+    result = validate_chat_analysis(report=report, analysis=analysis, repo_root=ROOT)
+
+    assert fields == ["translations", "structural_indicators", "linked_indicators"]
+    assert hydrated["translations"] == complete["translations"]
+    assert hydrated["structural_indicators"] == complete["structural_indicators"]
+    assert hydrated["linked_indicators"] == complete["linked_indicators"]
+    assert all(result["checks"].values())
+
+
+def test_non_empty_immutable_rewrite_is_not_hydrated_away() -> None:
+    report = _report()
+    payload = _chat_analysis(report).model_dump(mode="json")
+    payload["structural_indicators"][0]["support_score"] = 99
+
+    hydrated, fields = hydrate_immutable_baseline_fields(
+        report=report,
+        payload=payload,
+        repo_root=ROOT,
+    )
+    analysis = AIAnalysisV1.model_validate(hydrated)
+
+    assert fields == []
+    with pytest.raises(ValueError, match="structural_indicators_preserved"):
+        validate_chat_analysis(report=report, analysis=analysis, repo_root=ROOT)
 
 
 def test_chat_analysis_rejects_structural_indicator_rewrite() -> None:
