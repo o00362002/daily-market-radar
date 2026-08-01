@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -123,7 +123,25 @@ jobs:
             --analysis "${{ steps.paths.outputs.analysis_path }}" \
             --repo-root "$PWD" \
             --output-dir "$PWD/artifacts/web/v1/ai-analysis" \
-            --receipt "$PWD/chat-analysis-import-receipt.json"
+            --receipt "$PWD/chat-analysis-import-receipt.json" \
+            --materialize-analysis
+
+      - name: Persist complete canonical AIAnalysisV1
+        if: github.event_name == 'push' && steps.gate.outputs.deployable == 'true'
+        shell: bash
+        env:
+          ANALYSIS_PATH: ${{ steps.paths.outputs.analysis_path }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- "$ANALYSIS_PATH"; then
+            echo "analysis input was already complete"
+            exit 0
+          fi
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add "$ANALYSIS_PATH"
+          git commit -m "analysis: materialize immutable baseline for $(basename "$(dirname "$ANALYSIS_PATH")")"
+          git push origin HEAD:main
 
       - name: Upload validation receipt
         if: always()
