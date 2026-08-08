@@ -103,6 +103,10 @@ def _event_metrics(event: Event) -> set[str]:
     }
 
 
+def _event_domains(event: Event) -> set[str]:
+    return {document.primary_domain for document in event.documents if document.primary_domain}
+
+
 def _keyword_hit(text: str, keywords: set[str]) -> list[str]:
     """Return deterministic keyword matches without substring false positives.
 
@@ -196,7 +200,7 @@ def _evaluate_matrix(
             # generic keyword in an AI, macro or science story must not fill a
             # Retail/Crypto cell merely because it contains words such as
             # ``store``, ``market``, ``price`` or ``token``.
-            if event.primary_domain != domain:
+            if domain not in _event_domains(event):
                 continue
             text = _event_text(event)
             metric_hits = sorted(_event_metrics(event) & namespaces)
