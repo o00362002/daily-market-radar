@@ -8,6 +8,7 @@ trend is fabricated.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 
 from radar.contracts.report import (
@@ -102,8 +103,29 @@ def _event_metrics(event: Event) -> set[str]:
     }
 
 
+def _event_domains(event: Event) -> set[str]:
+    return {document.primary_domain for document in event.documents if document.primary_domain}
+
+
 def _keyword_hit(text: str, keywords: set[str]) -> list[str]:
-    return sorted(keyword for keyword in keywords if keyword in text)
+    """Return deterministic keyword matches without substring false positives.
+
+    ASCII/Latin keywords are matched on alphanumeric token boundaries so
+    ``layoff`` does not match ``playoff`` and ``sol`` does not match an
+    unrelated longer token. CJK keywords keep substring semantics because word
+    boundaries are not reliably represented by whitespace.
+    """
+
+    hits: list[str] = []
+    for keyword in keywords:
+        if any("\u3400" <= char <= "\u9fff" for char in keyword):
+            matched = keyword in text
+        else:
+            pattern = rf"(?<![a-z0-9]){re.escape(keyword)}(?![a-z0-9])"
+            matched = re.search(pattern, text, flags=re.IGNORECASE) is not None
+        if matched:
+            hits.append(keyword)
+    return sorted(hits)
 
 
 def _event_evidence(event: Event, *, direction: str, hits: list[str]) -> StructuralIndicatorEvidenceV1:
@@ -174,6 +196,12 @@ def _evaluate_matrix(
         signal_ids: list[str] = []
         data_checked: list[str] = []
         for event in events:
+            # Fixed matrices describe domain-specific operating evidence. A
+            # generic keyword in an AI, macro or science story must not fill a
+            # Retail/Crypto cell merely because it contains words such as
+            # ``store``, ``market``, ``price`` or ``token``.
+            if domain not in _event_domains(event):
+                continue
             text = _event_text(event)
             metric_hits = sorted(_event_metrics(event) & namespaces)
             keyword_hits = _keyword_hit(text, keywords)
@@ -311,6 +339,20 @@ def evaluate_structural_indicators(
         support_score = min(100, 20 * len(set(support_ids)))
         counter_score = min(100, 20 * len(set(counter_ids)))
         direction = "supporting" if support_score > counter_score else "counter" if counter_score > support_score else "mixed"
+        # Confidence measures confidence in a *direction*, not raw evidence
+        # volume. Symmetric evidence is therefore high-conflict and low-
+        # confidence instead of 100/100 -> confidence 100.
+        confidence = abs(support_score - counter_score)
+        read = (
+            "Deterministic evidence is high-conflict; no directional confidence should be inferred."
+            if direction == "mixed"
+            else f"Deterministic keyword evidence leans {direction} for this indicator."
+        )
+        next_verification = [
+            "resolve conflicting evidence with structured measurements and independent sources"
+            if direction == "mixed"
+            else "confirm with structured measurement facts and independent sources"
+        ]
         observations.append(
             StructuralIndicatorObservationV1(
                 indicator_id=indicator_id,
@@ -318,12 +360,12 @@ def evaluate_structural_indicators(
                 direction=direction,
                 support_score=support_score,
                 counter_score=counter_score,
-                confidence=min(100, support_score + counter_score),
+                confidence=confidence,
                 supporting_signal_ids=sorted(set(support_ids)),
                 counter_signal_ids=sorted(set(counter_ids)),
                 missing_data=[],
-                one_sentence_read=f"Deterministic keyword evidence leans {direction} for this indicator.",
-                next_verification=["confirm with structured measurement facts and independent sources"],
+                one_sentence_read=read,
+                next_verification=next_verification,
                 evaluation_mode="deterministic",
                 components=_component_observations(events, indicator_id),
             )

@@ -50,6 +50,15 @@ class RetailMatrixTests(unittest.TestCase):
         self.assertTrue(cell.signal_ids)
         self.assertTrue(any(trace.startswith("metric:") or trace.startswith("keyword:") for trace in cell.data_checked))
 
+    def test_cross_domain_keyword_does_not_fill_retail_cell(self) -> None:
+        event = _event(
+            title="AI data center store costs rise online",
+            primary_domain="ai_agents_applications",
+            facts={"cost_usd_m": 100},
+        )
+        matrix = evaluate_retail_matrix([event], RETAIL_KEYS)
+        self.assertTrue(all(cell.status == "insufficient" for cell in matrix.values()))
+
 
 class CryptoMatrixTests(unittest.TestCase):
     def test_insufficient_without_evidence(self) -> None:
@@ -61,6 +70,15 @@ class CryptoMatrixTests(unittest.TestCase):
         matrix = evaluate_crypto_matrix([event], CRYPTO_KEYS)
         self.assertEqual(matrix["etf_flows"].status, "observed")
         self.assertIn("metric:flow", matrix["etf_flows"].data_checked)
+
+    def test_cross_domain_market_terms_do_not_fill_crypto_cell(self) -> None:
+        event = _event(
+            title="ETF market revenue grows",
+            primary_domain="global_markets_macro",
+            facts={"flow_usd_m": 500, "revenue_usd_m": 10},
+        )
+        matrix = evaluate_crypto_matrix([event], CRYPTO_KEYS)
+        self.assertTrue(all(cell.status == "insufficient" for cell in matrix.values()))
 
 
 class StructuralIndicatorTests(unittest.TestCase):
@@ -80,6 +98,26 @@ class StructuralIndicatorTests(unittest.TestCase):
         self.assertTrue(obs.components)
         self.assertTrue(any(component.evidence for component in obs.components))
         self.assertNotEqual(obs.confidence, "insufficient")
+
+    def test_layoff_does_not_match_playoff(self) -> None:
+        observations = evaluate_structural_indicators(
+            [_event(title="NHL playoff race tightens")],
+            ["k_shaped_ai_productivity_economy"],
+            observation_date="2026-08-08",
+        )
+        self.assertEqual(observations[0].direction, "insufficient")
+
+    def test_balanced_conflict_reduces_directional_confidence(self) -> None:
+        events = [
+            _event(title="AI capex bubble valuation rises"),
+            _event(title="AI revenue adoption is profitable"),
+        ]
+        observations = evaluate_structural_indicators(events, INDICATORS, observation_date="2026-08-08")
+        obs = observations[0]
+        self.assertEqual(obs.direction, "mixed")
+        self.assertEqual(obs.support_score, obs.counter_score)
+        self.assertEqual(obs.confidence, 0)
+        self.assertIn("high-conflict", obs.one_sentence_read)
 
 
 class RollingWindowTests(unittest.TestCase):
