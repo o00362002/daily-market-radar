@@ -86,20 +86,49 @@ def _validate_supplemental_evidence(analysis: AIAnalysisV1) -> None:
         fingerprints.add(fingerprint)
 
 
+def _find_previous_report(*, report: RadarReportV2, repo_root: Path) -> RadarReportV2 | None:
+    """Find the latest prior same-profile report from the formal web export.
+
+    ``export-web`` runs before ChatGPT import and projects the durable report
+    history under ``artifacts/web/v1/reports``. Reusing that projection avoids a
+    parallel history store while restoring real day-over-day linked-indicator
+    deltas during immutable baseline hydration.
+    """
+
+    reports_root = repo_root / "artifacts" / "web" / "v1" / "reports"
+    if not reports_root.exists():
+        return None
+
+    candidates: list[RadarReportV2] = []
+    for path in reports_root.glob("*/*/full.*.json"):
+        try:
+            candidate = RadarReportV2.from_payload(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        if candidate.date >= report.date or candidate.profile != report.profile:
+            continue
+        candidates.append(candidate)
+    if not candidates:
+        return None
+    return max(candidates, key=lambda candidate: candidate.date)
+
+
 def _deterministic_baseline(
     *,
     report: RadarReportV2,
     repo_root: Path,
     generated_at: str,
-) -> AIAnalysisV1:
+) -> tuple[AIAnalysisV1, RadarReportV2 | None]:
     config = load_analysis_config(repo_root)
-    return build_deterministic_analysis(
+    previous_report = _find_previous_report(report=report, repo_root=repo_root)
+    baseline = build_deterministic_analysis(
         report,
-        None,
+        previous_report,
         config,
         generated_at=generated_at,
         requested_mode="deterministic",
     )
+    return baseline, previous_report
 
 
 def hydrate_immutable_baseline_fields(
@@ -125,14 +154,15 @@ def hydrate_immutable_baseline_fields(
     if not empty_fields:
         return payload, []
 
-    baseline = _deterministic_baseline(
+    baseline, _ = _deterministic_baseline(
         report=report,
         repo_root=repo_root,
         generated_at=generated_at,
-    ).model_dump(mode="json")
+    )
+    baseline_payload = baseline.model_dump(mode="json")
     hydrated = dict(payload)
     for field in empty_fields:
-        hydrated[field] = baseline[field]
+        hydrated[field] = baseline_payload[field]
     return hydrated, empty_fields
 
 
@@ -142,7 +172,7 @@ def validate_chat_analysis(
     analysis: AIAnalysisV1,
     repo_root: Path,
 ) -> dict[str, object]:
-    baseline = _deterministic_baseline(
+    baseline, previous_report = _deterministic_baseline(
         report=report,
         repo_root=repo_root,
         generated_at=analysis.provenance.generated_at,
@@ -171,6 +201,7 @@ def validate_chat_analysis(
 
     return {
         "checks": checks,
+        "previous_report_date": previous_report.date if previous_report is not None else None,
         "supplemental_evidence_count": len(analysis.supplemental_evidence),
         "finding_count": len(analysis.key_findings),
         "trend_count": len(analysis.future_trends),
