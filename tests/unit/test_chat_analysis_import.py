@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from radar.analysis.builder import build_deterministic_analysis, load_analysis_config
-from radar.analysis.import_chat import hydrate_immutable_baseline_fields, validate_chat_analysis
+from radar.analysis.import_chat import _find_previous_report, hydrate_immutable_baseline_fields, validate_chat_analysis
 from radar.contracts.analysis import AIAnalysisV1
 from radar.contracts.report import RadarReportV2
 from radar.runtime.runs import run_daily_fixture
@@ -15,15 +15,19 @@ from radar.runtime.runs import run_daily_fixture
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def _report() -> RadarReportV2:
+def _report_for(date: str) -> RadarReportV2:
     result = run_daily_fixture(
         ROOT,
-        date="2026-07-10",
+        date=date,
         freshrss_available=True,
         external_discovery_available=True,
         evaluation_mode="deterministic",
     )
     return RadarReportV2.from_payload(json.loads(json.dumps(result.report, ensure_ascii=False)))
+
+
+def _report() -> RadarReportV2:
+    return _report_for("2026-07-10")
 
 
 def _chat_analysis(report: RadarReportV2) -> AIAnalysisV1:
@@ -96,6 +100,23 @@ def test_empty_immutable_arrays_hydrate_from_formal_baseline() -> None:
     assert hydrated["structural_indicators"] == complete["structural_indicators"]
     assert hydrated["linked_indicators"] == complete["linked_indicators"]
     assert all(result["checks"].values())
+
+
+def test_find_previous_report_uses_latest_prior_durable_projection(tmp_path: Path) -> None:
+    previous = _report_for("2026-07-09")
+    current = _report_for("2026-07-10")
+    older = _report_for("2026-07-08")
+
+    for report in (older, previous):
+        path = tmp_path / "artifacts" / "web" / "v1" / "reports" / "2026" / report.date
+        path.mkdir(parents=True, exist_ok=True)
+        (path / f"full.{report.run_id}.json").write_bytes(report.canonical_json_bytes())
+
+    found = _find_previous_report(report=current, repo_root=tmp_path)
+
+    assert found is not None
+    assert found.date == "2026-07-09"
+    assert found.profile == current.profile
 
 
 def test_non_empty_immutable_rewrite_is_not_hydrated_away() -> None:
