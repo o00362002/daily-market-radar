@@ -1,0 +1,29 @@
+schema_version: perspective-consumer-adapter/v1
+consumer_id: daily-market-radar.perspective
+project_repo: o00362002/daily-market-radar
+objective_id: daily-market-radar.signal-selection
+objective_status: draft
+task_classes:
+  - signal_selection_review
+  - content_review
+  - architecture_review
+artifact_ref: task-local-artifact-or-request
+owner_pointers:
+  criteria:
+    - AGENTS.md
+    - CURRENT_DECISIONS.md
+    - SOURCE_LIBRARY_SPEC.md
+  output: reports/
+ground_truth:
+  type: delayed
+  validation_ref: reports/backtests/
+output_owner: child-project-owner
+decision_gate: human_or_project_gate
+governance_provider: brain-core
+local_extension_ref: brain.manifest.yaml
+risk_tier: standard
+panel_budget: declare-before-run
+available_purpose_modes: [critique, reaction, requirements, comprehension]
+execution: false
+promotion: false
+status: draft
