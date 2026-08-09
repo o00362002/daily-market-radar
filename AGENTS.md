@@ -22,6 +22,7 @@ Governance owner: o00362002/brain-core
 潛力項目放哪？      → memory/potential_pool.md（蒐集階段不篩選）
 改連動關係？        → schema/sync-matrix.json（唯一矩陣）
 治理與 checker 映射？→ brain.manifest.yaml
+Perspective review route → integrations/perspective/README.md
 其他一切：直接動手。commit 時關口會接住你。
 ```
 
