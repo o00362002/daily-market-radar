@@ -83,3 +83,8 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 One owner file per concept; others link, no copying.
 Projections repeat only for a real consumer, else link back.
 ```
+
+## Perspective quick trigger
+
+When the user says `顧問檢查`, route to `integrations/perspective/README.md` after the repository's normal context entry. Resolve the current task's Objective and Purpose Mode from the local Consumer Adapter; compose the panel for this question, not a project-fixed panel. Return an advisory ReviewPacket and wait for the project decision gate. If objective, owner, criteria, ground truth, or decision gate is missing, stop and report the missing field.
+
