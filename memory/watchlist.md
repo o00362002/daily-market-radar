@@ -199,7 +199,7 @@ POS／ERP／SOP／訊息／照片／現場事件
 
 ### 8.3 台灣相鄰零售平台與在地擴張威脅
 
-只在公開更新明確涉及門市營運、補貨、庫存、SOP、任務、巡檢、工作流、Agent 或 Outcome 時列入：
+每日固定掃描以下名單；只有公開更新明確涉及門市營運、補貨、庫存、SOP、任務、巡檢、工作流、Agent 或 Outcome 時，才列入當日 RetailOps 競品事件：
 
 - CATCH / Claireye
 - FLAPS 輔翼科技
@@ -211,8 +211,13 @@ POS／ERP／SOP／訊息／照片／現場事件
 - Omnichat
 - 團薦科技 / Tangent Plus
 - 宏誌科技 RSL
+- 矽羽 Sysfeather：服飾／美妝電商、進銷存、預購、追貨、配貨與多倉；特別觀察是否延伸到補貨、調轉、採購、POS、AI Action 與回測
+- BVSHOP：品牌官網、會員、LINE、POS 與顧問導入；特別觀察是否延伸到庫存決策、門市工作流、權限治理、Agent 與 API／MCP
+- 樂賣 LeMai（樂賣團購工具）：團購／代購／社群賣家、手機開單、LINE、揀貨與出貨；特別觀察是否由低價／freemium 向多倉、多門市、POS、任務與小型品牌市場上攻
 
 一般 CRM、會員、行銷活動、電商促銷、客服或內容生成更新，不因品牌名出現就算 RetailOps 競品訊號。
+
+對矽羽、BVSHOP、樂賣的價格／方案、客戶採用、POS／庫存／多倉、API、AI／Agent、權限與資料匯出變化，須保留為「相鄰競爭訊號」；只有進入 Action／Outcome 閉環時才升級為 Retail Action Layer 威脅。
 
 ### 8.4 通用 Agent／執行基礎設施威脅
 
