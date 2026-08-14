@@ -77,12 +77,83 @@ class StructuralIndicatorTests(unittest.TestCase):
         self.assertEqual(obs.support_score, 0)
 
     def test_supporting_evidence_yields_directional_read_with_trace(self) -> None:
-        event = _event(title="Massive AI capex fuels overinvestment and AI bubble fears")
+        event = _event(
+            title="AI capex reaches $50 billion as data center investment accelerates",
+            primary_domain="ai_agents_applications",
+            facts={"amount_capex_usd_b": 50},
+        )
         obs = evaluate_structural_indicators([event], INDICATORS, observation_date="2026-07-10")[0]
         self.assertEqual(obs.direction, "supporting")
         self.assertGreater(obs.support_score, 0)
         self.assertTrue(obs.supporting_signal_ids)
-        self.assertTrue(any(component.evidence for component in obs.components))
+        evidence = [item for component in obs.components for item in component.evidence]
+        self.assertTrue(evidence)
+        self.assertIn("domain→proposition→measurement", evidence[0].summary)
+
+    def test_qualitative_candidate_without_measurement_does_not_score(self) -> None:
+        event = _event(
+            title="AI capex strategy expands data center investment",
+            primary_domain="ai_agents_applications",
+        )
+        obs = evaluate_structural_indicators([event], INDICATORS, observation_date="2026-08-14")[0]
+        self.assertEqual(obs.direction, "insufficient")
+        capex = next(row for row in obs.components if row.component_id == "capex_revenue")
+        self.assertIn("measurement=1", capex.missing_data[0])
+
+    def test_generic_capex_does_not_entail_ai_overinvestment(self) -> None:
+        event = _event(
+            title="Telecom capital expenditure rises 30% for fiber rollout",
+            primary_domain="science_technology_industry",
+            facts={"amount_capex_usd_m": 800},
+        )
+        obs = evaluate_structural_indicators([event], INDICATORS, observation_date="2026-08-14")[0]
+        self.assertEqual(obs.direction, "insufficient")
+        capex = next(row for row in obs.components if row.component_id == "capex_revenue")
+        self.assertIn("entailment=1", capex.missing_data[0])
+
+    def test_cyberattack_automation_does_not_count_as_productivity_sharing(self) -> None:
+        event = _event(
+            title="AI cyberattack automation volume rises 40%",
+            primary_domain="science_technology_industry",
+            facts={"rate_growth_pct": 40},
+        )
+        obs = evaluate_structural_indicators(
+            [event],
+            ["k_shaped_ai_productivity_economy"],
+            observation_date="2026-08-14",
+        )[0]
+        self.assertEqual(obs.direction, "insufficient")
+        sharing = next(row for row in obs.components if row.component_id == "productivity_sharing")
+        self.assertEqual(sharing.direction, "insufficient")
+
+    def test_ai_automation_layoffs_with_measurement_can_support_k_shape(self) -> None:
+        event = _event(
+            title="AI automation drives layoffs of 1,000 employees",
+            primary_domain="ai_agents_applications",
+            facts={"count_layoffs": 1000},
+        )
+        obs = evaluate_structural_indicators(
+            [event],
+            ["k_shaped_ai_productivity_economy"],
+            observation_date="2026-08-14",
+        )[0]
+        self.assertEqual(obs.direction, "supporting")
+        self.assertEqual(len(obs.supporting_signal_ids), 1)
+
+    def test_nand_market_share_does_not_count_as_brand_polarization(self) -> None:
+        event = _event(
+            title="NAND market share gain reaches 15%",
+            primary_domain="science_technology_industry",
+            facts={"market_share_pct": 15},
+        )
+        obs = evaluate_structural_indicators(
+            [event],
+            ["brand_market_polarization_and_true_vs_fake_segmentation"],
+            observation_date="2026-08-14",
+        )[0]
+        self.assertEqual(obs.direction, "insufficient")
+        brand_tiers = next(row for row in obs.components if row.component_id == "brand_tiers")
+        self.assertEqual(brand_tiers.direction, "insufficient")
 
     def test_layoff_does_not_match_playoff(self) -> None:
         obs = evaluate_structural_indicators([_event(title="NHL playoff race tightens")], ["k_shaped_ai_productivity_economy"], observation_date="2026-08-08")[0]
@@ -104,7 +175,18 @@ class StructuralIndicatorTests(unittest.TestCase):
         self.assertTrue(all(row.direction == "insufficient" for row in obs.components))
 
     def test_balanced_conflict_reduces_directional_confidence(self) -> None:
-        events = [_event(title="AI capex overinvestment drives AI valuation bubble"), _event(title="Paid adoption drives AI revenue and profitable AI services")]
+        events = [
+            _event(
+                title="AI capex reaches $60 billion as data center capital expenditure rises",
+                primary_domain="ai_agents_applications",
+                facts={"amount_capex_usd_b": 60},
+            ),
+            _event(
+                title="AI revenue growth reaches 35% with paid adoption and profitable AI services",
+                primary_domain="ai_agents_applications",
+                facts={"revenue_ai_usd_m": 3500},
+            ),
+        ]
         obs = evaluate_structural_indicators(events, INDICATORS, observation_date="2026-08-08")[0]
         self.assertEqual(obs.direction, "mixed")
         self.assertEqual(obs.support_score, obs.counter_score)
@@ -114,8 +196,16 @@ class StructuralIndicatorTests(unittest.TestCase):
 
 class RollingWindowTests(unittest.TestCase):
     def test_rolling_windows_only_use_real_observations(self) -> None:
-        observations = evaluate_structural_indicators([_event(title="AI capex overinvestment drives AI bubble")], INDICATORS, observation_date="2026-07-08")
-        observations += evaluate_structural_indicators([_event(title="AI capex overinvestment lifts AI valuation")], INDICATORS, observation_date="2026-07-10")
+        observations = evaluate_structural_indicators(
+            [_event(title="AI capex reaches $30 billion for data centers", primary_domain="ai_agents_applications", facts={"amount_capex_usd_b": 30})],
+            INDICATORS,
+            observation_date="2026-07-08",
+        )
+        observations += evaluate_structural_indicators(
+            [_event(title="AI capex reaches $40 billion for data centers", primary_domain="ai_agents_applications", facts={"amount_capex_usd_b": 40})],
+            INDICATORS,
+            observation_date="2026-07-10",
+        )
         summary = rolling_summary(observations, as_of="2026-07-10")
         self.assertEqual(summary["current"]["status"], "observed")
         self.assertEqual(summary["rolling_7d"]["observations"], 2)

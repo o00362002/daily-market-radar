@@ -8,13 +8,37 @@
 config/runtime_contract.json               canonical IDs and required presence
 configs/structural_trend_indicators.yml    thesis, support/counter indicators and evidence to seek
 src/radar/contracts/report.py              RadarReportV2 structural observation contract
-src/radar/evaluators/matrices.py           deterministic evaluation implementation
+src/radar/evaluators/matrix_features.py    component candidates and deterministic gate definitions
+src/radar/evaluators/structural_gates.py   domain / entailment / measurement qualification
+src/radar/evaluators/matrices.py           deterministic scoring implementation
 config/ai_analysis.json                    labels and primary display order in AIAnalysisV1
 src/radar/contracts/analysis.py            AIAnalysisV1 labelled projection contract
 web/src/pages/analysis.astro               primary website panel
 ```
 
-每個指標都先拆成可觀察的細分指標。網站先顯示細分指標的新聞 evidence、摘要、支持／反向方向與 component score，最後才顯示整體指標分數。
+每個指標都先拆成可觀察的細分指標。網站先顯示細分指標的 evidence、摘要、支持／反向方向與 component score，最後才顯示整體指標分數。
+
+## Deterministic 評分管線
+
+結構指標不再把關鍵字命中直接等同於支持或反向證據。每一則事件必須依序通過：
+
+```text
+candidate
+→ domain relevance
+→ proposition entailment
+→ measurement evidence
+→ support / counter
+→ score
+```
+
+規則：
+
+1. `candidate` 只負責高召回找候選，不能直接加分。
+2. `domain relevance` 必須符合該 component 允許的 canonical domain，避免 NAND 市占、加密 markdown、資安 automation 等跨語境污染。
+3. `proposition entailment` 要同時命中該命題需要的語意群組。例：一般 capital expenditure 不代表 AI 過度投資；需同時存在 AI／資料中心語境。
+4. `measurement evidence` 必須有對應 canonical numeric fact，或候選命題附近有明確量化值。只有質化新聞敘事時保持候選，不進 support/counter 分數。
+5. component 通過上述 gate 後才進 `support` 或 `counter`；同一事件即使命中多個 components，在整體同一方向最多計一次，避免 fan-out 灌分。
+6. gate 後沒有證據就輸出 `insufficient`，並在 `missing_data` 指出卡在 domain、entailment 或 measurement 的候選數量。
 
 搜尋下列任一名稱或 ID，都應能找到本檔、runtime contract、詳細規格與網站輸出：
 
