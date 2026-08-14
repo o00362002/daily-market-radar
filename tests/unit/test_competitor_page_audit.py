@@ -47,6 +47,7 @@ class CompetitorPageAuditTests(unittest.TestCase):
         self.assertIn("entry?.focus", text)
         self.assertIn("check?.source_checks", text)
         self.assertIn("check?.fresh_material_delta", text)
+        self.assertNotIn("competitorSignals", text)
         self.assertNotIn("fetch(", text)
         self.assertNotIn("OpenAI", text)
 
