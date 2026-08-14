@@ -55,8 +55,6 @@ Evidence 不經核可不成為 Memory；凍結歷史不是現況。
 ```text
 抓到同步漂移 → 在 schema/sync-matrix.json 長一條邊（或升為生成/驗證級），
 修復紀錄註明長了哪條。可機械推導的事實（數量/狀態統計）禁止手抄進散文。
-Caught a sync drift → grow a matrix edge (or upgrade to generated/verified);
-name it in the fix record. Never hand-copy derivable facts into prose.
 ```
 
 ## 新規則准入
@@ -80,11 +78,8 @@ name it in the fix record. Never hand-copy derivable facts into prose.
 ```text
 一個概念一個 owner 檔；其他檔案連結或路由，不抄字句。
 機器投影只在 consumer 讀取時才重複資料，否則連回 owner。
-One owner file per concept; others link, no copying.
-Projections repeat only for a real consumer, else link back.
 ```
 
 ## Perspective quick trigger
 
 When the user says `顧問檢查`, route to `integrations/perspective/README.md` after the repository's normal context entry. Resolve the current task's Objective and Purpose Mode from the local Consumer Adapter; compose the panel for this question, not a project-fixed panel. Return an advisory ReviewPacket and wait for the project decision gate. If objective, owner, criteria, ground truth, or decision gate is missing, stop and report the missing field.
-
