@@ -82,4 +82,4 @@ Evidence 不經核可不成為 Memory；凍結歷史不是現況。
 
 ## Perspective quick trigger
 
-When the user says `顧問檢查`, route to `integrations/perspective/README.md` after the repository's normal context entry. Resolve the current task's Objective and Purpose Mode from the local Consumer Adapter; compose the panel for this question, not a project-fixed panel. Return an advisory ReviewPacket and wait for the project decision gate. If objective, owner, criteria, ground truth, or decision gate is missing, stop and report the missing field.
+When the user says `顧問檢查` or `顧問系統`, route to `integrations/perspective/README.md` after the repository's normal context entry. Resolve the current task's Objective and Purpose Mode from the local Consumer Adapter; compose the panel for this question, not a project-fixed panel. Return an advisory ReviewPacket and wait for the project decision gate. If objective, owner, criteria, ground truth, or decision gate is missing, stop and report the missing field.

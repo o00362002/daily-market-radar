@@ -15,7 +15,7 @@ Current access is a contract plus manual / AI-assisted bounded review. It is not
 ## Read order
 
 1. Read this entry and `consumer-adapter.yaml`.
-2. Read the [canonical architecture](https://github.com/o00362002/personal-project-brain/blob/main/notes/adversarial-perspective-board/ARCHITECTURE.md}) and [Objective Layer](https://github.com/o00362002/personal-project-brain/blob/main/notes/adversarial-perspective-board/OBJECTIVE_LAYER.md}).
+2. Read the [canonical architecture](https://github.com/o00362002/personal-project-brain/blob/main/notes/adversarial-perspective-board/ARCHITECTURE.md) and [Objective Layer](https://github.com/o00362002/personal-project-brain/blob/main/notes/adversarial-perspective-board/OBJECTIVE_LAYER.md).
 3. Read the [selected Objective Profile](https://github.com/o00362002/personal-project-brain/blob/main/notes/adversarial-perspective-board/objectives/daily-market-radar.signal-selection.yaml).
 4. Select one [Purpose Mode contract](https://github.com/o00362002/personal-project-brain/tree/main/notes/adversarial-perspective-board/purpose_modes/) before asking for opinions.
 5. Freeze the artifact, local context, objective and panel budget before the review.
