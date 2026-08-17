@@ -18,6 +18,7 @@ from radar.adapters.base import AdapterError, UrlPolicy, validate_response_size
 DEFAULT_MAX_BYTES = 5_000_000
 DEFAULT_MAX_REDIRECTS = 5
 DEFAULT_TIMEOUT_SECONDS = 12
+DEFAULT_MAX_REQUEST_BODY_BYTES = 64_000
 USER_AGENT = "daily-market-radar/0.2 (+https://github.com/o00362002/daily-market-radar)"
 
 
@@ -27,6 +28,7 @@ class HttpRequest:
     method: str = "GET"
     headers: Mapping[str, str] = field(default_factory=dict)
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
+    body: bytes | None = None
 
 
 @dataclass(frozen=True)
@@ -76,10 +78,12 @@ class UrllibHttpTransport:
         policy: UrlPolicy | None = None,
         max_bytes: int = DEFAULT_MAX_BYTES,
         max_redirects: int = DEFAULT_MAX_REDIRECTS,
+        max_request_body_bytes: int = DEFAULT_MAX_REQUEST_BODY_BYTES,
     ) -> None:
         self._policy = policy or UrlPolicy(allow_internal_hosts=set())
         self._max_bytes = max_bytes
         self._max_redirects = max_redirects
+        self._max_request_body_bytes = max_request_body_bytes
 
     def fetch(self, request: HttpRequest) -> HttpResponse:
         # Imported lazily so importing this module never pulls urllib into
@@ -97,13 +101,27 @@ class UrllibHttpTransport:
 
         if not self._policy.is_allowed(request.url):
             raise AdapterError(f"blocked by url policy: {request.url}")
+        if request.body is not None and len(request.body) > self._max_request_body_bytes:
+            raise AdapterError(
+                f"request body too large: {len(request.body)} > {self._max_request_body_bytes} bytes"
+            )
+        method = request.method.upper()
+        if method not in {"GET", "HEAD", "POST"}:
+            raise AdapterError(f"unsupported http method: {request.method}")
+        if request.body is not None and method != "POST":
+            raise AdapterError("request body is only supported for POST")
 
         redirect_chain = [request.url]
         opener = urllib.request.build_opener(NoRedirect())
         current = request.url
         headers = {"User-Agent": USER_AGENT, **dict(request.headers)}
         for _ in range(self._max_redirects + 1):
-            raw = urllib.request.Request(current, method=request.method, headers=headers)
+            raw = urllib.request.Request(
+                current,
+                data=request.body,
+                method=method,
+                headers=headers,
+            )
             try:
                 with opener.open(raw, timeout=request.timeout_seconds) as response:
                     body = response.read(self._max_bytes + 1)
