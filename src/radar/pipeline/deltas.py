@@ -48,12 +48,15 @@ def reconcile_cross_day_events(current_events: list[Event], prior_events: list[E
 
 
 def material_events(events: list[Event], *, report_date: str | None = None) -> list[Event]:
-    """Events worth reporting.
+    """Fresh daily-news events worth reporting.
 
     Without ``report_date``: pure delta materiality (legacy semantics). With
     ``report_date``: keep the same-day union behavior, but require at least one
     document published inside the bounded Taiwan report window. This prevents
     archive entries returned by RSS feeds from becoming fresh ``new_event`` rows.
+
+    Structured measurements intentionally do not use this function as their sole
+    evaluator gate; see ``indicator_events_for_date`` below.
     """
 
     if report_date is None:
@@ -63,4 +66,24 @@ def material_events(events: list[Event], *, report_date: str | None = None) -> l
         for event in events
         if event_is_reportable_for_date(event, report_date)
         and any(document_is_in_report_window(document, report_date) for document in event.documents)
+    ]
+
+
+def indicator_events_for_date(events: list[Event], *, report_date: str) -> list[Event]:
+    """Return indicator-only events with a material anchor in this Taiwan day.
+
+    Quarterly/monthly datasets describe an observation period and therefore may
+    legitimately have ``published_at`` outside the daily-news freshness window.
+    They should still reach matrices/structural indicators when the event is new,
+    materially changed, or retained by a same-day rerun. On later days an
+    unchanged measurement is excluded, so one quarterly release cannot cast a
+    fresh structural vote every morning.
+    """
+
+    return [
+        event
+        for event in events
+        if event.documents
+        and all(document.lane == "indicator_only" for document in event.documents)
+        and event_is_reportable_for_date(event, report_date)
     ]
