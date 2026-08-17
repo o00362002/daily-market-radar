@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from radar.domain.enums import DeltaType
 from radar.domain.event_resolution import is_material_delta_type
-from radar.domain.models import Event
+from radar.domain.models import Document, Event
 from radar.domain.potential import assess_event
 
 
@@ -57,11 +57,38 @@ class EventScoreExplanation:
         }
 
 
+# Legacy exact IDs remain for backward compatibility, but normal source-quality
+# scoring is role-driven so every registry source can carry an auditable tier.
 OFFICIAL_OR_PRIMARY_SOURCES = {
     "bls",
     "federal_reserve",
     "openai_news",
     "twse",
+}
+
+_PRIMARY_SOURCE_ROLES = {
+    "official",
+    "primary",
+    "company",
+    "government",
+    "regulator",
+    "central_bank",
+    "exchange",
+    "issuer",
+    "legislature",
+    "executive",
+}
+_HIGH_QUALITY_SECONDARY_ROLES = {
+    "news_agency",
+    "national",
+    "international_organization",
+    "research",
+}
+_SPECIALIST_SOURCE_ROLES = {
+    "specialist",
+    "trade",
+    "professional",
+    "data",
 }
 
 
@@ -104,6 +131,37 @@ def event_is_reportable_for_date(event: Event, report_date: str) -> bool:
         return False
 
 
+def _document_source_quality(document: Document) -> int:
+    roles = set(document.facts.get("source_roles") or ())
+    if document.source_id in OFFICIAL_OR_PRIMARY_SOURCES or roles & _PRIMARY_SOURCE_ROLES:
+        return 88
+    if roles & _HIGH_QUALITY_SECONDARY_ROLES:
+        return 82
+    if roles & _SPECIALIST_SOURCE_ROLES:
+        return 74
+    if roles:
+        return 66
+    return 58
+
+
+def _event_source_quality(event: Event) -> int:
+    """Use the strongest source role but cap unsupported single-source certainty.
+
+    Source quality and evidence depth are separate components. A company or
+    regulator can therefore be a strong primary source for its own fact while a
+    second independent publisher still raises evidence_depth rather than being
+    double-counted here.
+    """
+
+    return max((_document_source_quality(document) for document in event.documents), default=58)
+
+
+def _has_numeric_measurements(event: Event) -> bool:
+    # `source_roles` is metadata, not quantitative evidence. The old `tuple(facts)`
+    # check treated every RSS item as numeric because source_roles is present.
+    return any(bool(document.facts.measurements) for document in event.documents)
+
+
 def explain_event_scores(event: Event) -> EventScoreExplanation:
     if not event.documents:
         empty = ScoreBreakdown(0, {"evidence": 0}, "事件沒有附加文件。", [])
@@ -113,10 +171,10 @@ def explain_event_scores(event: Event) -> EventScoreExplanation:
     regions = {document.macro_region for document in event.documents}
     material_delta = event_has_material_delta(event)
     is_new_event = any(delta.delta_type == DeltaType.NEW_EVENT.value for delta in event.deltas) or not event.deltas
-    has_numeric_facts = any(tuple(document.facts) for document in event.documents)
+    has_numeric_facts = _has_numeric_measurements(event)
     assessment = assess_event(event)
 
-    source_quality = 88 if source_ids & OFFICIAL_OR_PRIMARY_SOURCES else 66
+    source_quality = _event_source_quality(event)
     evidence_depth = min(100, 45 + 15 * len(event.documents) + 10 * len(source_ids))
     novelty = 90 if is_new_event else 82 if material_delta else 30
     numeric_support = 82 if has_numeric_facts else 55
@@ -184,7 +242,7 @@ def explain_event_scores(event: Event) -> EventScoreExplanation:
             },
         ),
         confidence_components,
-        "信心反映來源品質、獨立證據深度與量化支持。",
+        "信心反映來源角色分級、獨立證據深度與真正的量化 measurement facts。",
         [],
     )
     for breakdown in (importance, potential, confidence):
