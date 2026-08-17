@@ -48,19 +48,30 @@ def reconcile_cross_day_events(current_events: list[Event], prior_events: list[E
 
 
 def material_events(events: list[Event], *, report_date: str | None = None) -> list[Event]:
-    """Events worth reporting.
+    """Events eligible for the deterministic evaluator.
 
-    Without ``report_date``: pure delta materiality (legacy semantics). With
-    ``report_date``: keep the same-day union behavior, but require at least one
-    document published inside the bounded Taiwan report window. This prevents
-    archive entries returned by RSS feeds from becoming fresh ``new_event`` rows.
+    News events must have a current material/same-day anchor *and* at least one
+    document inside the bounded Taiwan news window. That keeps archive entries
+    returned by RSS feeds from becoming fresh ``new_event`` rows.
+
+    ``indicator_only`` structured measurements use the same current material /
+    same-day anchor but intentionally do not require a fresh publication date.
+    A quarterly observation can therefore reach a structural indicator on the day
+    the measurement is first collected or materially changes. Downstream report
+    qualification still rejects indicator-only events from Major/Potential cards,
+    and an unchanged quarterly measurement does not cast a new vote on later days.
     """
 
     if report_date is None:
         return [event for event in events if event_has_material_delta(event)]
-    return [
-        event
-        for event in events
-        if event_is_reportable_for_date(event, report_date)
-        and any(document_is_in_report_window(document, report_date) for document in event.documents)
-    ]
+
+    selected: list[Event] = []
+    for event in events:
+        if not event_is_reportable_for_date(event, report_date):
+            continue
+        if event.documents and all(document.lane == "indicator_only" for document in event.documents):
+            selected.append(event)
+            continue
+        if any(document_is_in_report_window(document, report_date) for document in event.documents):
+            selected.append(event)
+    return selected
