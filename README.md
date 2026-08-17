@@ -5,23 +5,24 @@
 ## What is connected
 
 ```text
-Source registry + competitor registry
+Source registry + competitor registry + structured-measurement registry
 → direct RSS / Atom
 → optional FreshRSS Google Reader inbox
+→ fixed public measurements: BLS, DefiLlama, Hyperliquid, Farside and Taiwan FSC
 → registry-backed competitor projection with explicit audit gaps
 → normalization and document de-duplication
-→ cross-day event resolution
-→ material-delta filtering
+→ same-run sibling coalescing + cross-day event resolution
+→ material-delta and freshness filtering
 → deterministic / optional AI / chat-assisted evaluation
 → strict RadarReportV2
-→ competitor projection + fixed indicator panels
+→ competitor projection + fixed matrix / structural-indicator panels
 → SQLite durable state
 → versioned web projection
 → Astro static dashboard
 → scheduled GitHub Actions deployment
 ```
 
-The application depends on provider-neutral ports. Concrete RSS, FreshRSS, OpenAI, SQLite, filesystem and publishing implementations are selected only by the composition root.
+The application depends on provider-neutral ports. Concrete RSS, FreshRSS, structured-measurement, OpenAI, SQLite, filesystem and publishing implementations are selected only by the composition root.
 
 ## Runtime principles
 
@@ -35,6 +36,8 @@ importance, future potential and evidence confidence are independent
 Major/Potential is content-driven, not source-role routing
 competitor watch = projection, not a sixth domain or duplicate event
 labor / hiring / wages / consumption pressure = indicator-only by default
+structured measurements may fill matrices without becoming news cards
+unchanged indicator observations never cast a new daily vote
 Taiwan direct evidence != Taiwan implication
 item floors are minimums, never ceilings
 coverage gaps must be visible
@@ -135,7 +138,9 @@ radar run-daily \
   --database data/radar.db
 ```
 
-`live` executes direct RSS/Atom and the optional FreshRSS collection inbox. Missing FreshRSS credentials are reported as a coverage gap and never stop direct RSS. Duplicate URLs collected through both paths are removed before event resolution.
+`live` executes direct RSS/Atom, the optional FreshRSS collection inbox and the fixed public sources in `config/measurement_sources.json`. Missing FreshRSS credentials are reported as a coverage gap and never stop direct RSS or public measurements. A failed measurement source is isolated and disclosed without hiding successful siblings. Duplicate URLs collected through multiple news paths are removed before event resolution.
+
+Structured measurements use `indicator_only`: their observation period does not need to fall inside the daily-news publication window, but the event must still be new, materially changed or anchored to the current Taiwan reporting day. Stable endpoints are compared by typed facts, so a real measurement change is material while an unchanged quarterly value is not replayed on later days.
 
 ## Evaluation modes
 
@@ -194,7 +199,7 @@ DATABASE_URL
 RADAR_EVALUATION_MODE
 ```
 
-No secrets are required for deterministic RSS collection, report generation, website build or deployment.
+No secrets are required for deterministic RSS collection, public structured measurements, report generation, website build or deployment.
 
 ## Honest current boundary
 
@@ -203,7 +208,12 @@ Connected now:
 ```text
 RSS / Atom
 FreshRSS inbox when configured
-cross-day event history and material delta
+fixed BLS productivity / compensation / labor-share measurements
+fixed DefiLlama TVL / fees / revenue measurements
+official Hyperliquid perp volume / OI / funding measurements
+specialist Farside U.S. spot Bitcoin ETF flow measurements
+official Taiwan FSC VASP law status measurement
+same-run sibling coalescing, cross-day event history and material delta
 Retail / Crypto / three structural deterministic evaluators
 canonical competitor registry and registry-backed web projection
 labor/consumption indicator-only policy
