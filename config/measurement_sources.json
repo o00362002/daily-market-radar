@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "source_id": "bls_productivity",
+      "name": "U.S. Bureau of Labor Statistics Productivity",
+      "adapter": "bls_productivity",
+      "canonical_url": "https://www.bls.gov/productivity/",
+      "api_base": "https://api.bls.gov/publicAPI/v2/timeseries/data",
+      "primary_domain": "global_markets_macro",
+      "macro_region": "North America",
+      "language": "en",
+      "source_roles": ["official", "government", "data"],
+      "series": {
+        "rate_labor_productivity_yoy": "PRS85006091",
+        "rate_real_hourly_compensation_yoy": "PRS85006151",
+        "rate_labor_share_yoy": "PRS85006171"
+      }
+    },
+    {
+      "source_id": "defillama_hyperliquid",
+      "name": "DefiLlama Hyperliquid Protocol Metrics",
+      "adapter": "defillama_protocol",
+      "canonical_url": "https://defillama.com/protocol/hyperliquid",
+      "api_base": "https://api.llama.fi",
+      "primary_domain": "crypto_rwa_agent_payments",
+      "macro_region": "Global",
+      "language": "en",
+      "source_roles": ["specialist", "data"],
+      "protocol": "hyperliquid",
+      "endpoints": {
+        "tvl": "/tvl/hyperliquid",
+        "fees": "/summary/fees/hyperliquid?dataType=dailyFees&excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true",
+        "revenue": "/summary/fees/hyperliquid?dataType=dailyRevenue&excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true"
+      }
+    }
+  ]
+}
