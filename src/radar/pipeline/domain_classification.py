@@ -14,7 +14,9 @@ CANONICAL_DOMAIN_RULES: dict[str, tuple[str, ...]] = {
     ),
     "ai_agents_applications": (
         "artificial intelligence", "ai", "agent", "llm", "model", "generative", "copilot", "automation",
-        "saas", "enterprise ai", "cloud ai", "人工智慧", "生成式", "模型", "代理", "自動化", "企業導入", "聊天機器人",
+        "saas", "enterprise ai", "cloud ai", "openai", "chatgpt", "anthropic", "claude", "claude code",
+        "gemini", "deepseek", "qwen", "mistral", "llama", "人工智慧", "生成式", "模型", "代理", "自動化",
+        "企業導入", "聊天機器人",
     ),
     "crypto_rwa_agent_payments": (
         "bitcoin", "btc", "ethereum", "eth", "solana", "crypto", "blockchain", "token", "stablecoin", "rwa",
@@ -30,10 +32,6 @@ CANONICAL_DOMAIN_RULES: dict[str, tuple[str, ...]] = {
     ),
 }
 
-# A few words are valid signals in-domain but are too polysemous to carry the
-# same weight as an explicit domain anchor. They remain recall candidates; the
-# source prior or additional context must break ties before they can override a
-# different source domain.
 AMBIGUOUS_DOMAIN_TERMS: dict[str, frozenset[str]] = {
     "global_markets_macro": frozenset({"market", "policy"}),
     "ai_agents_applications": frozenset({"agent", "model", "automation", "saas"}),
@@ -42,47 +40,22 @@ AMBIGUOUS_DOMAIN_TERMS: dict[str, frozenset[str]] = {
     "science_technology_industry": frozenset({"technology", "materials", "industrial"}),
 }
 
-# Phrase-level exclusions prevent a valid word from becoming evidence for the
-# wrong proposition. This is intentionally narrow: each rule blocks only the
-# ambiguous term, not the whole document, so other explicit anchors still win.
 TERM_CONTEXT_EXCLUSIONS: dict[tuple[str, str], tuple[str, ...]] = {
     ("crypto_rwa_agent_payments", "token"): (
-        "access token",
-        "api token",
-        "context token",
-        "context window token",
-        "design token",
-        "session token",
-        "token budget",
-        "token count",
-        "token limit",
-        "token usage",
+        "access token", "api token", "context token", "context window token", "design token",
+        "session token", "token budget", "token count", "token limit", "token usage",
     ),
     ("retail_consumer_fashion", "retail"): (
-        "retail investor",
-        "retail investors",
-        "retail trader",
-        "retail traders",
+        "retail investor", "retail investors", "retail trader", "retail traders",
     ),
     ("retail_consumer_fashion", "store"): (
-        "app store",
-        "application store",
-        "data store",
-        "object store",
-        "play store",
-        "store of value",
+        "app store", "application store", "data store", "object store", "play store", "store of value",
     ),
     ("retail_consumer_fashion", "consumer"): (
-        "consumer confidence",
-        "consumer price",
-        "consumer prices",
-        "consumer price index",
+        "consumer confidence", "consumer price", "consumer prices", "consumer price index",
     ),
     ("retail_consumer_fashion", "brand"): ("brand new",),
-    ("retail_consumer_fashion", "commerce"): (
-        "commerce department",
-        "department of commerce",
-    ),
+    ("retail_consumer_fashion", "commerce"): ("commerce department", "department of commerce"),
 }
 
 DOMAIN_ALIASES = {
@@ -103,13 +76,7 @@ def _document_text(document: Document) -> tuple[str, str]:
     title = normalize_text(document.title)
     body = normalize_text(
         " ".join(
-            [
-                document.summary,
-                document.action,
-                document.object,
-                document.location,
-                " ".join(document.entities),
-            ]
+            [document.summary, document.action, document.object, document.location, " ".join(document.entities)]
         )
     )
     return title, body
@@ -121,11 +88,7 @@ def _term_allowed(domain: str, term: str, text: str) -> bool:
 
 
 def _matched_terms(domain: str, text: str, terms: tuple[str, ...]) -> tuple[str, ...]:
-    return tuple(
-        term
-        for term in terms
-        if contains_term(text, term) and _term_allowed(domain, term, text)
-    )
+    return tuple(term for term in terms if contains_term(text, term) and _term_allowed(domain, term, text))
 
 
 def _term_weight(domain: str, term: str, *, in_title: bool) -> int:
@@ -149,11 +112,7 @@ def classify_document_domain(
     for domain in allowed:
         terms = CANONICAL_DOMAIN_RULES.get(domain, ())
         title_hits = _matched_terms(domain, title, terms)
-        body_hits = tuple(
-            term
-            for term in _matched_terms(domain, body, terms)
-            if term not in title_hits
-        )
+        body_hits = tuple(term for term in _matched_terms(domain, body, terms) if term not in title_hits)
         source_prior = 2 if source_domain == domain else 0
         score = (
             sum(_term_weight(domain, term, in_title=True) for term in title_hits)
