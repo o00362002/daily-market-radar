@@ -61,13 +61,13 @@ class StructuredMeasurementSourceAdapter:
             checked.append(source.source_id)
             try:
                 if source.adapter == "bls_productivity":
-                    documents.extend(self._fetch_bls(source))
+                    documents.append(self._fetch_bls(source))
                 elif source.adapter == "defillama_protocol":
                     documents.append(self._fetch_defillama(source))
-                else:  # registry validation should make this unreachable
+                else:
                     raise ValueError(f"unsupported measurement adapter: {source.adapter}")
                 integration.append((source.source_id, "checked"))
-            except Exception as exc:  # adapter boundary: one dataset must not stop the daily run
+            except Exception as exc:
                 reason = f"{type(exc).__name__}: {exc}"
                 failures.append(
                     SourceFailureV1(
@@ -107,7 +107,7 @@ class StructuredMeasurementSourceAdapter:
     def normalize(result: SourceFetchResult) -> list[Document]:
         return list(result.documents)
 
-    def _fetch_bls(self, source: MeasurementSource) -> list[Document]:
+    def _fetch_bls(self, source: MeasurementSource) -> Document:
         fetched_at = datetime.now(timezone.utc).isoformat()
         observations: list[_BlsObservation] = []
         for metric_id, series_id in source.series:
@@ -123,37 +123,37 @@ class StructuredMeasurementSourceAdapter:
                 raise ValueError(f"BLS HTTP {response.status} for {series_id}")
             observations.append(_parse_bls_latest(metric_id, series_id, response.body))
 
-        documents: list[Document] = []
-        for observation in observations:
-            direction = _bls_direction_phrase(observation.metric_id, observation.value)
-            period_date = _bls_period_date(observation.year, observation.period)
-            series_url = f"{source.api_base.rstrip('/')}/{observation.series_id}"
-            documents.append(
-                Document.fixture(
-                    source_id=source.source_id,
-                    url=series_url,
-                    title=f"BLS nonfarm business {direction}",
-                    language=source.language,
-                    macro_region=source.macro_region,
-                    published_at=period_date,
-                    fetched_at=fetched_at,
-                    entities=["U.S. Bureau of Labor Statistics"],
-                    action="measures",
-                    object="nonfarm business productivity and distribution",
-                    location="United States",
-                    primary_domain=source.primary_domain,
-                    lane="indicator_only",
-                    facts={
-                        "source_roles": list(source.source_roles),
-                        observation.metric_id: observation.value,
-                    },
-                    summary=(
-                        f"{observation.period_name} {observation.year}: {direction}; "
-                        f"series {observation.series_id}, value {observation.value:.2f} percent."
-                    ),
-                )
-            )
-        return documents
+        periods = {(row.year, row.period) for row in observations}
+        if len(periods) != 1:
+            raise ValueError(f"BLS productivity series are not aligned to one latest quarter: {sorted(periods)}")
+        observation_year, observation_period = next(iter(periods))
+        period_name = observations[0].period_name
+        facts: dict[str, object] = {"source_roles": list(source.source_roles)}
+        facts.update({row.metric_id: row.value for row in observations})
+        directions = [_bls_direction_phrase(row.metric_id, row.value) for row in observations]
+        values = ", ".join(f"{row.metric_id}={row.value:.2f}%" for row in observations)
+        series_trace = ", ".join(f"{row.metric_id}={row.series_id}" for row in observations)
+
+        return Document.fixture(
+            source_id=source.source_id,
+            url=source.canonical_url,
+            title="BLS " + "; ".join(directions),
+            language=source.language,
+            macro_region=source.macro_region,
+            published_at=_bls_period_date(observation_year, observation_period),
+            fetched_at=fetched_at,
+            entities=["U.S. Bureau of Labor Statistics"],
+            action="measures",
+            object="nonfarm business productivity wages and labor share",
+            location="United States",
+            primary_domain=source.primary_domain,
+            lane="indicator_only",
+            facts=facts,
+            summary=(
+                f"{period_name} {observation_year} BLS nonfarm business measurements: "
+                f"{'; '.join(directions)}. Values: {values}. Series: {series_trace}."
+            ),
+        )
 
     def _fetch_defillama(self, source: MeasurementSource) -> Document:
         fetched_at = datetime.now(timezone.utc).isoformat()
@@ -235,7 +235,7 @@ def _bls_direction_phrase(metric_id: str, value: float) -> str:
     if metric_id == "rate_labor_productivity_yoy":
         return "productivity gain" if value >= 0 else "productivity decline"
     if metric_id == "rate_real_hourly_compensation_yoy":
-        return "real hourly compensation growth" if value >= 0 else "real hourly compensation decline"
+        return "real wage growth" if value >= 0 else "real wage decline"
     if metric_id == "rate_labor_share_yoy":
         return "labor share growth" if value >= 0 else "labor share decline"
     return f"{metric_id} {'growth' if value >= 0 else 'decline'}"
