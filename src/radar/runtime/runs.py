@@ -10,6 +10,7 @@ from radar.composition import CompositionConfig, compose_application
 from radar.contracts.runtime import RuntimeContract
 from radar.domain.models import RunResult
 from radar.evaluators.modes import resolve_evaluation_mode
+from radar.schemas.measurement import MeasurementRegistry
 from radar.schemas.source import SourceRegistry
 
 
@@ -169,11 +170,11 @@ def run_daily_live(
     database_path: Path | None = None,
     evaluation_mode: str = "deterministic",
 ) -> RunResult:
-    """Execute direct RSS/Atom plus the optional FreshRSS collection inbox.
+    """Execute direct RSS/Atom, structured measurements and optional FreshRSS.
 
-    Missing FreshRSS credentials degrade explicitly and never stop direct RSS.
-    Web/API/social/GDELT remain visible as unexecuted until their registry entries
-    carry executable, source-specific extraction configuration.
+    Missing FreshRSS credentials degrade explicitly and never stop direct RSS or
+    public measurement adapters. Structured measurements are indicator-only and
+    never occupy Major/Potential news slots.
     """
 
     return _run_daily_registry(
@@ -206,6 +207,11 @@ def _run_daily_registry(
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     registry = SourceRegistry.from_file(repo_root / "config/source_registry.json")
     registry.validate()
+    measurement_registry = None
+    measurement_path = repo_root / "config/measurement_sources.json"
+    if source_backend == "multi" and measurement_path.exists():
+        measurement_registry = MeasurementRegistry.from_file(measurement_path)
+
     composed = compose_application(
         CompositionConfig(
             source_backend=source_backend,
@@ -228,6 +234,7 @@ def _run_daily_registry(
             **_evaluator_config(evaluation_mode),  # type: ignore[arg-type]
         ),
         source_registry=registry,
+        measurement_registry=measurement_registry,
     )
     result = composed.application.run(
         DailyRunRequest(
