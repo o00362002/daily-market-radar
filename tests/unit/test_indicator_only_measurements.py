@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from radar.domain.models import Document, Event
+from radar.domain.models import Document, Event, EventDelta
 from radar.domain.potential import assess_event
 from radar.evaluators.matrices import evaluate_crypto_matrix, evaluate_structural_indicators
 from radar.pipeline.cluster import cluster_documents
@@ -91,19 +91,13 @@ class IndicatorOnlyMeasurementTests(unittest.TestCase):
             last_seen_at="2026-08-18T04:45:36+00:00",
             last_material_delta_at="2026-08-17T04:45:36+00:00",
             status="active",
-            deltas=[],
-        )
-        # No deltas on a manually constructed legacy event are treated as material,
-        # so model the resolver's duplicate-only output with a non-material delta.
-        from radar.domain.models import EventDelta
-        unchanged = Event(
-            event_id=unchanged.event_id,
-            documents=unchanged.documents,
-            first_seen_at=unchanged.first_seen_at,
-            last_seen_at=unchanged.last_seen_at,
-            last_material_delta_at=unchanged.last_material_delta_at,
-            status="active",
-            deltas=[EventDelta(delta_type="duplicate_only", changed_fields=[], reason="unchanged measurement")],
+            deltas=[
+                EventDelta(
+                    delta_type="same_event_same_facts",
+                    changed_fields=[],
+                    reason="unchanged measurement",
+                )
+            ],
         )
 
         self.assertEqual(indicator_events_for_date([unchanged], report_date="2026-08-18"), [])
