@@ -93,7 +93,7 @@ class IndicatorOnlyMeasurementTests(unittest.TestCase):
             status="active",
             deltas=[
                 EventDelta(
-                    delta_type="same_event_same_facts",
+                    delta_type="duplicate_confirmation_only",
                     changed_fields=[],
                     reason="unchanged measurement",
                 )
