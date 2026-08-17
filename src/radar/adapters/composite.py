@@ -128,6 +128,11 @@ class CompositeSourceAdapter:
             integration_status.update(dict(result.integration_status))
             integration_status.setdefault(adapter.adapter_id, adapter.health_check().status)
             taiwan_sources.extend(result.taiwan_direct_sources_checked)
+            taiwan_sources.extend(
+                document.source_id
+                for document in result.documents
+                if document.macro_region == "Taiwan"
+            )
             remaining_gaps.extend(result.remaining_gaps)
             registry_checked = registry_checked and result.registry_checked
 
