@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "sources": [
     {
       "source_id": "bls_productivity",
@@ -44,6 +44,28 @@
       "macro_region": "Global",
       "language": "en",
       "source_roles": ["official", "exchange", "data"]
+    },
+    {
+      "source_id": "farside_btc_etf",
+      "name": "Farside Bitcoin ETF Daily Flows",
+      "adapter": "farside_etf",
+      "canonical_url": "https://farside.co.uk/btc/",
+      "api_base": "https://farside.co.uk/btc/",
+      "primary_domain": "crypto_rwa_agent_payments",
+      "macro_region": "Global",
+      "language": "en",
+      "source_roles": ["specialist", "data"]
+    },
+    {
+      "source_id": "fsc_tw_vasp_law",
+      "name": "Taiwan FSC Virtual Asset Service Act",
+      "adapter": "fsc_vasp_law",
+      "canonical_url": "https://law.fsc.gov.tw/LawContent.aspx?id=GL004301",
+      "api_base": "https://law.fsc.gov.tw/",
+      "primary_domain": "crypto_rwa_agent_payments",
+      "macro_region": "Taiwan",
+      "language": "zh-Hant",
+      "source_roles": ["official", "regulator", "government", "data"]
     }
   ]
 }

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 
 @dataclass(frozen=True)
@@ -96,5 +96,19 @@ class MeasurementRegistry:
                     raise ValueError("Hyperliquid perp source must use the official /info endpoint")
                 if "official" not in source.source_roles or "exchange" not in source.source_roles:
                     raise ValueError("Hyperliquid perp source must retain official exchange source roles")
+            elif source.adapter == "farside_etf":
+                parts = urlsplit(source.canonical_url)
+                if parts.netloc != "farside.co.uk" or parts.path.rstrip("/") != "/btc":
+                    raise ValueError("Farside ETF source must use the fixed Bitcoin flow table")
+                if not {"specialist", "data"}.issubset(set(source.source_roles)):
+                    raise ValueError("Farside ETF source must retain specialist data roles")
+            elif source.adapter == "fsc_vasp_law":
+                parts = urlsplit(source.canonical_url)
+                query = parse_qs(parts.query)
+                if parts.netloc != "law.fsc.gov.tw" or query.get("id") != ["GL004301"]:
+                    raise ValueError("FSC VASP source must use the fixed official law record")
+                required_roles = {"official", "regulator", "government"}
+                if source.macro_region != "Taiwan" or not required_roles.issubset(source.source_roles):
+                    raise ValueError("FSC VASP source must retain Taiwan official regulator roles")
             else:
                 raise ValueError(f"unknown measurement adapter: {source.adapter}")

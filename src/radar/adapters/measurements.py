@@ -6,6 +6,10 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urljoin
 
+from radar.adapters.fixed_crypto_measurements import (
+    fetch_farside_etf_document,
+    fetch_fsc_vasp_document,
+)
 from radar.adapters.transport import HttpRequest, HttpTransport
 from radar.contracts.report import CoverageGapV2, SourceFailureV1
 from radar.domain.models import Document
@@ -66,6 +70,14 @@ class StructuredMeasurementSourceAdapter:
                     documents.append(self._fetch_defillama(source))
                 elif source.adapter == "hyperliquid_perp":
                     documents.append(self._fetch_hyperliquid_perp(source))
+                elif source.adapter == "farside_etf":
+                    documents.append(
+                        fetch_farside_etf_document(source, self.transport, self.timeout_seconds)
+                    )
+                elif source.adapter == "fsc_vasp_law":
+                    documents.append(
+                        fetch_fsc_vasp_document(source, self.transport, self.timeout_seconds)
+                    )
                 else:
                     raise ValueError(f"unsupported measurement adapter: {source.adapter}")
                 integration.append((source.source_id, "checked"))
