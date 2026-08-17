@@ -134,8 +134,8 @@ def fetch_fsc_vasp_document(
         lane="indicator_only",
         facts={
             "source_roles": list(source.source_roles),
-            "policy_publication_yyyymmdd": float(int(published.strftime("%Y%m%d"))),
-            "policy_effective_status_code": status_code,
+            "count_policy_publication_yyyymmdd": float(int(published.strftime("%Y%m%d"))),
+            "count_policy_effective_status_code": status_code,
             "count_policy_revision_fingerprint": revision_fingerprint,
         },
         summary=(
