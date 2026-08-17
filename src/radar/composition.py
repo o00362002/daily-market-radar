@@ -25,6 +25,7 @@ from radar.repositories.memory import (
 )
 from radar.repositories.sqlite import SqliteRunRepository
 from radar.schemas.competitor import CompetitorMonitoringRegistry
+from radar.schemas.measurement import MeasurementRegistry
 from radar.schemas.source import SourceRegistry
 from radar.stores.memory import InMemoryStateStore, InMemoryWebArtifactStore
 
@@ -74,6 +75,7 @@ def compose_application(
     config: CompositionConfig,
     *,
     source_registry: SourceRegistry | None = None,
+    measurement_registry: MeasurementRegistry | None = None,
     clock: Callable[[], datetime] | None = None,
 ) -> ComposedApplication:
     active_clock = clock or (lambda: datetime.now(timezone.utc))
@@ -106,6 +108,16 @@ def compose_application(
                 per_feed_limit=config.per_feed_limit,
             )
         ]
+        if measurement_registry is not None and measurement_registry.sources:
+            from radar.adapters.measurements import StructuredMeasurementSourceAdapter
+
+            children.append(
+                StructuredMeasurementSourceAdapter(
+                    registry=measurement_registry,
+                    transport=UrllibHttpTransport(),
+                    timeout_seconds=config.timeout_seconds,
+                )
+            )
         if config.optional_integrations.get("collection_aggregator", False):
             from radar.adapters.freshrss_source import FreshRssRegistrySourceAdapter
 
