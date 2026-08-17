@@ -57,10 +57,25 @@ _POTENTIAL_DELTA_TYPES = {
 
 
 def assess_event(event: Event) -> PotentialAssessment:
-    """Classify Major/Potential from content; source role is never decisive."""
+    """Classify Major/Potential from content; source role is never decisive.
+
+    Structured datasets can use ``Document.lane=indicator_only``. Those events
+    remain available to matrices and structural indicators, but never become a
+    Major/Potential news card or a potential signal merely because a measurement
+    changed.
+    """
 
     if not event.documents:
         return PotentialAssessment("major", None, None, None, 0, "事件沒有可判讀文件。")
+    if all(document.lane == "indicator_only" for document in event.documents):
+        return PotentialAssessment(
+            "indicator_only",
+            None,
+            None,
+            None,
+            0,
+            "結構化量測只供固定矩陣與結構指標使用，不占新聞槽位。",
+        )
 
     text = normalize_text(
         " ".join(
