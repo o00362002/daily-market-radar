@@ -131,8 +131,9 @@ class CryptoFixedMeasurementTests(unittest.TestCase):
         self.assertEqual(document.lane, "indicator_only")
         self.assertEqual(document.macro_region, "Taiwan")
         self.assertEqual(document.published_at, "2026-07-22T00:00:00+00:00")
-        self.assertEqual(document.facts.get("policy_publication_yyyymmdd"), 20260722.0)
-        self.assertEqual(document.facts.get("policy_effective_status_code"), 0.0)
+        self.assertEqual(document.facts.get("count_policy_publication_yyyymmdd"), 20260722.0)
+        self.assertEqual(document.facts.get("count_policy_effective_status_code"), 0.0)
+        self.assertIsInstance(document.facts.get("count_policy_revision_fingerprint"), int)
         self.assertIn("華總一經字第11500072401號", document.summary)
         self.assertIn("尚未施行", document.summary)
 
@@ -143,15 +144,10 @@ class CryptoFixedMeasurementTests(unittest.TestCase):
             ["regulation_policy", "taiwan_crypto_fixed_sources"],
         )
         self.assertEqual(matrix["regulation_policy"].status, "observed")
-        self.assertIn("metric:policy", matrix["regulation_policy"].data_checked)
+        self.assertIn("keyword:vasp", matrix["regulation_policy"].data_checked)
         self.assertEqual(matrix["taiwan_crypto_fixed_sources"].status, "observed")
         self.assertIn(event.event_id, matrix["taiwan_crypto_fixed_sources"].signal_ids)
-        self.assertTrue(
-            any(
-                value in matrix["taiwan_crypto_fixed_sources"].data_checked
-                for value in ("keyword:taiwan vasp", "keyword:金管會", "keyword:vasp")
-            )
-        )
+        self.assertIn("keyword:vasp", matrix["taiwan_crypto_fixed_sources"].data_checked)
 
     def test_one_fixed_source_failure_does_not_hide_the_other(self) -> None:
         transport = FakeTransport(
