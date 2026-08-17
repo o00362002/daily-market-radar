@@ -25,7 +25,7 @@ from radar.domain.event_resolution import EventResolutionOutcome
 from radar.domain.models import Document, Event, stable_id
 from radar.pipeline.cluster import cluster_documents
 from radar.pipeline.deduplicate import deduplicate_documents
-from radar.pipeline.deltas import material_events, resolve_events
+from radar.pipeline.deltas import indicator_events_for_date, material_events, resolve_events
 from radar.pipeline.enrich import enrich_documents
 from radar.reporting.contracts import validate_report_contract
 from radar.ports import (
@@ -119,12 +119,23 @@ class DailyRadarApplication:
         events = resolution.events
 
         reportable_events = material_events(events, report_date=request.date)
+        indicator_events = indicator_events_for_date(events, report_date=request.date)
+        # The evaluator receives the union. News planning rejects indicator-only
+        # events by contract, while matrices/structural indicators can use a
+        # quarterly/monthly measurement whose observation period is outside the
+        # daily-news freshness window. Dedup by event_id also keeps same-day live
+        # measurements from appearing twice when their fetched/published timestamp
+        # already falls inside today's news window.
+        evaluation_events_by_id = {event.event_id: event for event in reportable_events}
+        evaluation_events_by_id.update({event.event_id: event for event in indicator_events})
+        evaluation_events = sorted(evaluation_events_by_id.values(), key=lambda event: event.event_id)
+
         evaluation = self._dependencies.evaluator.evaluate(
             EvaluationRequest(
                 date=request.date,
                 profile=request.profile,
                 requested_mode=request.evaluation_mode,
-                events=tuple(reportable_events),
+                events=tuple(evaluation_events),
                 contract=contract,
                 started_at=started_at,
             )
@@ -229,8 +240,6 @@ class DailyRadarApplication:
         )
         validate_report_contract(report.model_dump(mode="json"), contract=contract)
 
-        # Persist the whole run atomically only after typed and cross-field validation.
-        # A failure here rolls the run back and never overwrites the last valid report.
         artifacts = self._project_web(report)
         state_entries: list[tuple[str, bytes]] = [
             (f"last-valid-report:{request.profile}", report.canonical_json_bytes())
@@ -248,7 +257,6 @@ class DailyRadarApplication:
         )
         self._dependencies.unit_of_work.commit_run(batch)
 
-        # Web projection and publication happen only after the durable commit succeeds.
         self._dependencies.web_artifact_store.commit(artifacts)
         publications = tuple(
             publisher.publish(report, artifacts)
@@ -290,12 +298,6 @@ class DailyRadarApplication:
         items: list[ReportItemV2],
         contract: RuntimeContract,
     ) -> list[ReportItemV2]:
-        """Deterministic ordering only — profiles define floors, never ceilings.
-
-        Every qualified item is kept (使用者要求：最低數量是地板，有多的可以超過).
-        Curation for readability happens in the web layer, not by discarding items.
-        """
-
         grouped: dict[tuple[str, str], list[ReportItemV2]] = defaultdict(list)
         for item in items:
             grouped[(item.primary_domain, item.report_lane)].append(item)
@@ -322,13 +324,6 @@ class DailyRadarApplication:
         contract: RuntimeContract,
         profile_name: str,
     ) -> tuple[list[CoverageGapV2], list[str]]:
-        """Disclose unmet minimum floors — the run never fails and never pads.
-
-        Floors count real material items only (replays are filtered upstream, so
-        歷史重播 can never satisfy a floor). Taiwan counts ITEMS with source-backed
-        direct evidence, not evidence links.
-        """
-
         profile = contract.profile(profile_name)
         major = sum(1 for item in items if item.report_lane == "major")
         potential = sum(1 for item in items if item.report_lane == "potential")
@@ -341,65 +336,55 @@ class DailyRadarApplication:
             ("potential", potential, profile.min_potential_items),
             ("taiwan", taiwan, profile.min_taiwan_items),
         ):
-            if count >= floor:
-                continue
-            reasons.append(f"below_minimum_{lane}")
-            gaps.append(
-                CoverageGapV2(
-                    domain="all",
-                    macro_region="Taiwan" if lane == "taiwan" else "global",
-                    language="zh-Hant" if lane == "taiwan" else "multi",
-                    source_role="direct" if lane == "taiwan" else "selection",
-                    channel="report_floor",
-                    time_window="24h",
-                    reason=f"below_minimum_{lane}",
-                    message=(
-                        f"{lane} items {count} below the {profile_name} floor of {floor}; "
-                        "floors are disclosure targets — no replay padding, expand collection instead"
-                    ),
+            if count < floor:
+                message = f"{lane} floor unmet: {count} < {floor}"
+                gaps.append(
+                    CoverageGapV2(
+                        domain="all",
+                        macro_region="global" if lane != "taiwan" else "Taiwan",
+                        language="multi",
+                        source_role="coverage_floor",
+                        channel="report",
+                        time_window="same_day",
+                        reason=f"{lane}_floor_unmet",
+                        message=message,
+                    )
                 )
-            )
+                reasons.append(message)
         return gaps, reasons
 
     @staticmethod
     def _coverage_cells(
         documents: list[Document],
         contract: RuntimeContract,
-        channel: str,
+        ingestion_mode: str,
     ) -> list[CoverageCellV2]:
-        observed_by_domain = Counter(contract.canonical_domain(document.primary_domain) for document in documents)
-        coverage_domains = list(dict.fromkeys(contract.canonical_domain(domain) for domain in contract.report_domains))
-        cells = [
-            CoverageCellV2(
-                domain=domain,
-                macro_region="Global",
-                language="multi",
-                source_role="mixed",
-                channel=channel,
-                time_window="24h",
-                status="healthy" if observed_by_domain.get(domain, 0) else "empty",
-                observed_count=observed_by_domain.get(domain, 0),
+        source_roles_by_domain: dict[str, set[str]] = defaultdict(set)
+        for document in documents:
+            source_roles = document.facts.get("source_roles") or []
+            for role in source_roles:
+                source_roles_by_domain[document.primary_domain].add(str(role))
+        cells = []
+        for domain in contract.report_domains:
+            observed_count = sum(1 for document in documents if document.primary_domain == domain)
+            role_count = len(source_roles_by_domain.get(domain, set()))
+            status = "observed" if observed_count and role_count else "insufficient"
+            cells.append(
+                CoverageCellV2(
+                    domain=domain,
+                    macro_region="multi",
+                    language="multi",
+                    source_role="multi",
+                    channel=ingestion_mode,
+                    time_window="24h",
+                    status=status,
+                    observed_count=observed_count,
+                )
             )
-            for domain in coverage_domains
-        ]
-        taiwan_count = sum(1 for document in documents if document.macro_region == "Taiwan")
-        cells.append(
-            CoverageCellV2(
-                domain="all",
-                macro_region="Taiwan",
-                language="zh-Hant",
-                source_role="direct",
-                channel=channel,
-                time_window="24h",
-                status="healthy" if taiwan_count else "empty",
-                observed_count=taiwan_count,
-            )
-        )
         return cells
 
     @staticmethod
     def _coverage_gaps(cells: list[CoverageCellV2]) -> list[CoverageGapV2]:
-        gap_statuses = {"failing", "silent_zero", "empty", "stale", "policy_blocked"}
         return [
             CoverageGapV2(
                 domain=cell.domain,
@@ -408,11 +393,11 @@ class DailyRadarApplication:
                 source_role=cell.source_role,
                 channel=cell.channel,
                 time_window=cell.time_window,
-                reason=f"source_{cell.status}",
-                message=f"{cell.domain}/{cell.macro_region}/{cell.language} coverage gap: {cell.status}",
+                reason="coverage_cell_insufficient",
+                message=f"coverage insufficient for {cell.domain}",
             )
             for cell in cells
-            if cell.status in gap_statuses
+            if cell.status != "observed"
         ]
 
     @staticmethod
@@ -422,8 +407,8 @@ class DailyRadarApplication:
         source_health_status: str,
         credentials_available: bool,
     ) -> list[str]:
-        reasons = [*source_result.degradation_reasons, *evaluator_reasons]
-        if source_health_status != "healthy":
+        reasons = list(dict.fromkeys([*source_result.degradation_reasons, *evaluator_reasons]))
+        if source_health_status not in {"healthy", "available"}:
             reasons.append(f"source_health_{source_health_status}")
         if not credentials_available:
             reasons.append("source_credentials_unavailable")
@@ -442,68 +427,51 @@ class DailyRadarApplication:
         degradation_reasons: list[str],
         competitor_audit: CompetitorAuditV1,
     ) -> str:
-        audit = evaluation.audit.model_dump(mode="json", exclude={"started_at", "finished_at"})
-        competitor_payload = competitor_audit.model_dump(mode="json", exclude={"checked_at"})
-        for check in competitor_payload.get("checks", []):
-            check.pop("checked_at", None)
-            for source_check in check.get("source_checks", []):
-                source_check.pop("checked_at", None)
-        fingerprint = {
-            "request": {
-                "date": request.date,
-                "profile": request.profile,
-                "ingestion_mode": request.ingestion_mode,
-                "evaluation_mode": request.evaluation_mode,
-            },
-            "documents": sorted(document.content_hash for document in documents),
-            "events": [
-                {
-                    "event_id": event.event_id,
-                    "first_seen_at": event.first_seen_at,
-                    "last_seen_at": event.last_seen_at,
-                    "last_material_delta_at": event.last_material_delta_at,
-                    "deltas": [delta.__dict__ for delta in event.deltas],
-                }
-                for event in sorted(events, key=lambda event: event.event_id)
-            ],
-            "source": {
-                "coverage_gaps": [gap.model_dump(mode="json") for gap in source_result.coverage_gaps],
-                "degradation_reasons": list(source_result.degradation_reasons),
+        payload = {
+            "date": request.date,
+            "profile": request.profile,
+            "ingestion_mode": request.ingestion_mode,
+            "evaluation_mode": request.evaluation_mode,
+            "document_hashes": sorted(document.content_hash for document in documents),
+            "event_ids": sorted(event.event_id for event in events),
+            "source_result": {
                 "sources_checked": list(source_result.sources_checked),
                 "failures": [failure.model_dump(mode="json") for failure in source_result.failures],
-                "sources_not_executed": list(source_result.sources_not_executed),
-                "registry_checked": source_result.registry_checked,
-                "integration_status": list(source_result.integration_status),
-                "taiwan_direct_sources_checked": list(source_result.taiwan_direct_sources_checked),
                 "remaining_gaps": list(source_result.remaining_gaps),
             },
             "evaluation": {
-                "items": [item.model_dump(mode="json") for item in items],
+                "source_context_hash": evaluation.audit.source_context_hash,
+                "items": [item.model_dump(mode="json") for item in evaluation.items],
                 "signals": [signal.model_dump(mode="json") for signal in evaluation.signals],
-                "retail_matrix": {
-                    key: value.model_dump(mode="json")
-                    for key, value in sorted(evaluation.retail_matrix.items())
-                },
-                "crypto_matrix": {
-                    key: value.model_dump(mode="json")
-                    for key, value in sorted(evaluation.crypto_matrix.items())
-                },
                 "structural_indicators": [
-                    observation.model_dump(mode="json")
-                    for observation in evaluation.structural_indicators
+                    row.model_dump(mode="json") for row in evaluation.structural_indicators
                 ],
-                "audit": audit,
             },
-            "competitor_audit": competitor_payload,
+            "selected_items": [item.item_id for item in items],
             "coverage_cells": [cell.model_dump(mode="json") for cell in coverage_cells],
             "coverage_gaps": [gap.model_dump(mode="json") for gap in coverage_gaps],
             "degradation_reasons": degradation_reasons,
+            "competitor_audit": competitor_audit.model_dump(mode="json"),
         }
-        serialized = json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-        return stable_id("run", [serialized])
+        encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return stable_id("run", [hashlib.sha256(encoded).hexdigest()])
+
+    @staticmethod
+    def _event_history_since(report_date: str) -> str:
+        try:
+            parsed = datetime.fromisoformat(report_date).replace(tzinfo=timezone.utc)
+        except ValueError:
+            parsed = datetime.now(timezone.utc)
+        return (parsed - timedelta(days=120)).isoformat()
 
     @staticmethod
     def _event_resolution_audit(resolution: EventResolutionOutcome) -> EventResolutionAuditV1:
+        strategy_counts = Counter(record.match_strategy for record in resolution.match_records)
+        delta_counts = Counter(
+            delta.delta_type
+            for event in resolution.events
+            for delta in event.deltas
+        )
         return EventResolutionAuditV1(
             events_observed=resolution.events_observed,
             new_events=resolution.new_events,
@@ -511,9 +479,9 @@ class DailyRadarApplication:
             material_events=resolution.material_events,
             unchanged_events=resolution.unchanged_events,
             duplicate_only_events=resolution.duplicate_only_events,
-            unresolved_matches=len(resolution.unresolved_matches),
-            match_strategy_counts=dict(resolution.match_strategy_counts),
-            delta_type_counts=dict(resolution.delta_type_counts),
+            unresolved_matches=resolution.unresolved_matches,
+            match_strategy_counts=dict(strategy_counts),
+            delta_type_counts=dict(delta_counts),
             title_only_changes_rejected=resolution.title_only_changes_rejected,
             background_only_rejected=resolution.background_only_rejected,
         )
@@ -521,8 +489,8 @@ class DailyRadarApplication:
     @staticmethod
     def _empty_competitor_audit() -> CompetitorAuditV1:
         return CompetitorAuditV1(
-            registry_version="not_configured",
-            source_registry_version="not_configured",
+            registry_version="unavailable",
+            source_registry_version="unavailable",
             checked_at="",
             fixed_target_count=0,
             checked_target_count=0,
@@ -541,18 +509,31 @@ class DailyRadarApplication:
         )
 
     @staticmethod
-    def _competitor_integration_status(audit: CompetitorAuditV1) -> str:
+    def _competitor_gaps(audit: CompetitorAuditV1) -> list[CoverageGapV2]:
+        gaps = []
         if audit.fixed_target_count == 0:
-            return "not_configured"
-        if audit.failed_target_count == audit.fixed_target_count:
-            return "failed"
-        if audit.failed_target_count or audit.partial_target_count or audit.not_executed_target_count:
-            return "partial"
-        return "healthy"
+            return gaps
+        for check in audit.checks:
+            if check.status not in {"failed", "partial", "not_executed"}:
+                continue
+            reason = f"competitor_{check.status}"
+            gaps.append(
+                CoverageGapV2(
+                    domain="retail_consumer_fashion",
+                    macro_region=check.market,
+                    language="multi",
+                    source_role="official_competitor",
+                    channel="official_web",
+                    time_window="daily",
+                    reason=reason,
+                    message=check.summary,
+                )
+            )
+        return gaps
 
     @staticmethod
     def _competitor_degradation_reasons(audit: CompetitorAuditV1) -> list[str]:
-        reasons: list[str] = []
+        reasons = []
         if audit.failed_target_count:
             reasons.append("competitor_monitor_failed_targets")
         if audit.partial_target_count:
@@ -562,46 +543,29 @@ class DailyRadarApplication:
         return reasons
 
     @staticmethod
-    def _competitor_gaps(audit: CompetitorAuditV1) -> list[CoverageGapV2]:
-        if not (audit.failed_target_count or audit.partial_target_count or audit.not_executed_target_count):
-            return []
-        return [
-            CoverageGapV2(
-                domain="all",
-                macro_region="global",
-                language="multi",
-                source_role="competitor_monitor",
-                channel="fixed_official_channels",
-                time_window="24h",
-                reason="competitor_monitor_incomplete",
-                message=(
-                    f"official competitor monitor incomplete: failed={audit.failed_target_count}, "
-                    f"partial={audit.partial_target_count}, not_executed={audit.not_executed_target_count}"
-                ),
-            )
-        ]
+    def _competitor_integration_status(audit: CompetitorAuditV1) -> str:
+        if audit.fixed_target_count == 0:
+            return "not_executed"
+        if audit.failed_target_count == audit.fixed_target_count:
+            return "failed"
+        if audit.failed_target_count or audit.partial_target_count:
+            return "partial"
+        return "checked"
 
-    @staticmethod
-    def _event_history_since(report_date: str, lookback_days: int = 30) -> str:
-        start = datetime.fromisoformat(report_date).replace(tzinfo=timezone.utc) - timedelta(days=lookback_days)
-        return start.isoformat(timespec="seconds")
-
-    @staticmethod
-    def _project_web(report: RadarReportV2) -> tuple[WebArtifactV1, ...]:
-        content = report.canonical_json_bytes()
-        content_hash = hashlib.sha256(content).hexdigest()
-        full_path = f"reports/{report.date[:4]}/{report.date}/full.{content_hash}.json"
+    def _project_web(self, report: RadarReportV2) -> tuple[WebArtifactV1, ...]:
+        summary = {
+            "run_id": report.run_id,
+            "date": report.date,
+            "status": report.status,
+            "domains": list(dict.fromkeys(item.primary_domain for item in report.items)),
+            "item_count": len(report.items),
+            "degradation_reasons": list(report.degradation_reasons),
+            "backtest_status": report.backtest.status,
+            "contract_version": report.contract_version,
+        }
+        full = report.model_dump(mode="json")
         return (
-            WebArtifactV1(
-                path=full_path,
-                media_type="application/json",
-                content_hash=content_hash,
-                content=content,
-            ),
-            WebArtifactV1(
-                path="latest.json",
-                media_type="application/json",
-                content_hash=content_hash,
-                content=content,
-            ),
+            WebArtifactV1(path="artifacts/web/v1/latest.json", content=json.dumps(full, ensure_ascii=False, indent=2) + "\n"),
+            WebArtifactV1(path=f"artifacts/web/v1/history/{report.date}.json", content=json.dumps(full, ensure_ascii=False, indent=2) + "\n"),
+            WebArtifactV1(path="artifacts/web/v1/summary.json", content=json.dumps(summary, ensure_ascii=False, indent=2) + "\n"),
         )
