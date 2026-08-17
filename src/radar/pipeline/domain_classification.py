@@ -18,7 +18,7 @@ CANONICAL_DOMAIN_RULES: dict[str, tuple[str, ...]] = {
     ),
     "crypto_rwa_agent_payments": (
         "bitcoin", "btc", "ethereum", "eth", "solana", "crypto", "blockchain", "token", "stablecoin", "rwa",
-        "defi", "dex", "代幣", "加密", "區塊鏈", "穩定幣", "代幣化", "鏈上", "虛擬資產",
+        "defi", "dex", "wallet", "defillama", "on-chain", "onchain", "代幣", "加密", "區塊鏈", "穩定幣", "代幣化", "鏈上", "虛擬資產",
     ),
     "retail_consumer_fashion": (
         "retail", "consumer", "fashion", "brand", "store", "mall", "department store", "ecommerce", "marketplace",
@@ -27,6 +27,61 @@ CANONICAL_DOMAIN_RULES: dict[str, tuple[str, ...]] = {
     "science_technology_industry": (
         "science", "technology", "robot", "robotics", "semiconductor", "chip", "biotech", "quantum", "space",
         "battery", "materials", "industrial", "科技", "機器人", "半導體", "晶片", "生技", "量子", "太空", "電池", "材料", "工業",
+    ),
+}
+
+# A few words are valid signals in-domain but are too polysemous to carry the
+# same weight as an explicit domain anchor. They remain recall candidates; the
+# source prior or additional context must break ties before they can override a
+# different source domain.
+AMBIGUOUS_DOMAIN_TERMS: dict[str, frozenset[str]] = {
+    "global_markets_macro": frozenset({"market", "policy"}),
+    "ai_agents_applications": frozenset({"agent", "model", "automation", "saas"}),
+    "crypto_rwa_agent_payments": frozenset({"token", "wallet"}),
+    "retail_consumer_fashion": frozenset({"consumer", "brand", "store", "shopping", "commerce"}),
+    "science_technology_industry": frozenset({"technology", "materials", "industrial"}),
+}
+
+# Phrase-level exclusions prevent a valid word from becoming evidence for the
+# wrong proposition. This is intentionally narrow: each rule blocks only the
+# ambiguous term, not the whole document, so other explicit anchors still win.
+TERM_CONTEXT_EXCLUSIONS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("crypto_rwa_agent_payments", "token"): (
+        "access token",
+        "api token",
+        "context token",
+        "context window token",
+        "design token",
+        "session token",
+        "token budget",
+        "token count",
+        "token limit",
+        "token usage",
+    ),
+    ("retail_consumer_fashion", "retail"): (
+        "retail investor",
+        "retail investors",
+        "retail trader",
+        "retail traders",
+    ),
+    ("retail_consumer_fashion", "store"): (
+        "app store",
+        "application store",
+        "data store",
+        "object store",
+        "play store",
+        "store of value",
+    ),
+    ("retail_consumer_fashion", "consumer"): (
+        "consumer confidence",
+        "consumer price",
+        "consumer prices",
+        "consumer price index",
+    ),
+    ("retail_consumer_fashion", "brand"): ("brand new",),
+    ("retail_consumer_fashion", "commerce"): (
+        "commerce department",
+        "department of commerce",
     ),
 }
 
@@ -60,6 +115,26 @@ def _document_text(document: Document) -> tuple[str, str]:
     return title, body
 
 
+def _term_allowed(domain: str, term: str, text: str) -> bool:
+    exclusions = TERM_CONTEXT_EXCLUSIONS.get((domain, term), ())
+    return not any(contains_term(text, phrase) for phrase in exclusions)
+
+
+def _matched_terms(domain: str, text: str, terms: tuple[str, ...]) -> tuple[str, ...]:
+    return tuple(
+        term
+        for term in terms
+        if contains_term(text, term) and _term_allowed(domain, term, text)
+    )
+
+
+def _term_weight(domain: str, term: str, *, in_title: bool) -> int:
+    ambiguous = term in AMBIGUOUS_DOMAIN_TERMS.get(domain, frozenset())
+    if in_title:
+        return 2 if ambiguous else 4
+    return 1
+
+
 def classify_document_domain(
     document: Document,
     *,
@@ -73,10 +148,18 @@ def classify_document_domain(
     ranked: list[tuple[int, str, tuple[str, ...]]] = []
     for domain in allowed:
         terms = CANONICAL_DOMAIN_RULES.get(domain, ())
-        title_hits = tuple(term for term in terms if contains_term(title, term))
-        body_hits = tuple(term for term in terms if contains_term(body, term) and term not in title_hits)
+        title_hits = _matched_terms(domain, title, terms)
+        body_hits = tuple(
+            term
+            for term in _matched_terms(domain, body, terms)
+            if term not in title_hits
+        )
         source_prior = 2 if source_domain == domain else 0
-        score = len(title_hits) * 4 + len(body_hits) + source_prior
+        score = (
+            sum(_term_weight(domain, term, in_title=True) for term in title_hits)
+            + sum(_term_weight(domain, term, in_title=False) for term in body_hits)
+            + source_prior
+        )
         ranked.append((score, domain, title_hits + body_hits))
     ranked.sort(key=lambda row: (-row[0], 0 if row[1] == source_domain else 1, row[1]))
     score, domain, hits = ranked[0]
