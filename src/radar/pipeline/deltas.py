@@ -17,6 +17,10 @@ from radar.domain.models import Document, Event, EventDelta
 from radar.domain.scoring import event_has_material_delta, event_is_reportable_for_date
 from radar.pipeline.coalesce import coalesce_same_run_events
 from radar.pipeline.freshness import document_is_in_report_window
+from radar.pipeline.indicator_deltas import (
+    indicator_measurement_delta,
+    promote_indicator_measurement_deltas,
+)
 
 _DEFAULT_SERVICE = EventResolutionService()
 
@@ -28,7 +32,8 @@ def classify_event_delta(prior: Document, current: Document) -> EventDelta:
 
 
 def classify_event_material_delta(prior: Event, current: Event) -> EventDelta:
-    return _classify_event_delta(prior, current)
+    promoted = indicator_measurement_delta(prior, current)
+    return promoted or _classify_event_delta(prior, current)
 
 
 def resolve_events(
@@ -38,13 +43,17 @@ def resolve_events(
     observed_at: str,
 ) -> EventResolutionOutcome:
     coalesced = coalesce_same_run_events(current_events)
-    return _DEFAULT_SERVICE.resolve(coalesced, prior_events, observed_at=observed_at)
+    outcome = _DEFAULT_SERVICE.resolve(coalesced, prior_events, observed_at=observed_at)
+    return promote_indicator_measurement_deltas(
+        outcome,
+        current_events=coalesced,
+        prior_events=prior_events,
+    )
 
 
 def reconcile_cross_day_events(current_events: list[Event], prior_events: list[Event]) -> list[Event]:
     observed_at = current_events[0].last_seen_at if current_events else ""
-    coalesced = coalesce_same_run_events(current_events)
-    return _DEFAULT_SERVICE.resolve(coalesced, prior_events, observed_at=observed_at).events
+    return resolve_events(current_events, prior_events, observed_at=observed_at).events
 
 
 def material_events(events: list[Event], *, report_date: str | None = None) -> list[Event]:
