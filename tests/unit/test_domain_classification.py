@@ -34,15 +34,26 @@ class DomainClassificationTests(unittest.TestCase):
         self.assertEqual(result.domain, "retail_consumer_fashion")
         self.assertTrue(result.source_prior_used)
 
-    def test_software_token_does_not_turn_claude_code_into_crypto(self) -> None:
+    def test_software_token_does_not_turn_claude_code_into_crypto_even_from_crypto_source(self) -> None:
         document = Document.fixture(
             title="Claude Code session token budget and context token usage guide",
             summary="Developers can inspect model context windows and API token counts.",
-            primary_domain="ai_agents_applications",
+            primary_domain="crypto_rwa_agent_payments",
         )
         result = classify_document_domain(document)
         self.assertEqual(result.domain, "ai_agents_applications")
+        self.assertIn("claude", result.matched_terms)
         self.assertNotIn("token", result.matched_terms)
+
+    def test_named_model_anchor_can_override_wrong_source_prior(self) -> None:
+        document = Document.fixture(
+            title="Anthropic releases new Claude model for developers",
+            summary="Claude Code gains new coding capabilities.",
+            primary_domain="crypto_rwa_agent_payments",
+        )
+        result = classify_document_domain(document)
+        self.assertEqual(result.domain, "ai_agents_applications")
+        self.assertIn("anthropic", result.matched_terms)
 
     def test_app_store_phishing_does_not_turn_crypto_wallet_story_into_retail(self) -> None:
         document = Document.fixture(

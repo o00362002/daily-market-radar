@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "state_key": "competitor-monitor:v1",
   "default_timeout_seconds": 12,
   "default_material_similarity_threshold": 0.96,
@@ -58,8 +58,8 @@
       {"id": "pos-docs", "channel": "official_docs", "url": "https://help.cyberbiz.io/pos/get-started/", "material_similarity_threshold": 0.985}
     ],
     "waca": [
-      {"id": "pos-pricing", "channel": "official_product", "url": "https://www.waca.net/pricing/pos"},
-      {"id": "pos-support-index", "channel": "official_docs", "url": "https://www.waca.net/support/pos", "material_similarity_threshold": 0.985}
+      {"id": "pos", "channel": "official_product", "url": "https://www.waca.net/pos"},
+      {"id": "pos-support", "channel": "official_docs", "url": "https://www.waca.net/support/id/500?sidebarActive=POS_APP", "material_similarity_threshold": 0.985}
     ],
     "act_retail": [
       {"id": "erp", "channel": "official_product", "url": "https://www.act.com.tw/erp-system/"},
