@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from typing import Any
 
-from radar.adapters.transport import HttpRequest, HttpTransport, conditional_headers
+from radar.adapters.transport import HttpRequest, HttpResponse, HttpTransport, conditional_headers
 from radar.contracts.report import CompetitorAuditV1, CompetitorCheckV1, CompetitorSourceCheckV1
 from radar.ports.competitors import CompetitorMonitorResult
 from radar.ports.publishing import StateStore
@@ -18,6 +18,14 @@ from radar.schemas.competitor import CompetitorMonitoringRegistry, CompetitorSou
 _STATE_VERSION = "competitor-monitor-state/v1"
 _MAX_EXCERPT_CHARS = 320
 _MAX_SHINGLES = 6000
+_BROWSER_COMPATIBLE_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.7",
+}
 
 
 @dataclass(frozen=True)
@@ -33,7 +41,10 @@ class OfficialCompetitorMonitor:
 
     The first successful run establishes a baseline. Later runs use conditional HTTP
     requests plus shingle similarity, so a rotating timestamp or tiny navigation edit
-    does not automatically become a competitive update.
+    does not automatically become a competitive update. Public official pages that
+    reject the radar user-agent with HTTP 405 receive one bounded browser-compatible
+    GET retry; the retry never bypasses authentication, paywalls, or the shared URL
+    policy.
     """
 
     def __init__(
@@ -104,6 +115,30 @@ class OfficialCompetitorMonitor:
             state_value=state_value,
         )
 
+    def _fetch_source(self, source: CompetitorSourceSpec, headers: dict[str, str]) -> HttpResponse:
+        request = HttpRequest(
+            url=source.url,
+            headers=headers,
+            timeout_seconds=self._registry.timeout_seconds,
+        )
+        try:
+            response = self._transport.fetch(request)
+        except Exception as exc:
+            if not _is_http_405(exc):
+                raise
+        else:
+            if response.status != 405:
+                return response
+
+        fallback_headers = {**headers, **_BROWSER_COMPATIBLE_HEADERS}
+        return self._transport.fetch(
+            HttpRequest(
+                url=source.url,
+                headers=fallback_headers,
+                timeout_seconds=self._registry.timeout_seconds,
+            )
+        )
+
     def _check_source(
         self,
         target: CompetitorTarget,
@@ -117,13 +152,7 @@ class OfficialCompetitorMonitor:
             str(previous.get("last_modified") or "") or None,
         )
         try:
-            response = self._transport.fetch(
-                HttpRequest(
-                    url=source.url,
-                    headers=headers,
-                    timeout_seconds=self._registry.timeout_seconds,
-                )
-            )
+            response = self._fetch_source(source, headers)
             if response.not_modified:
                 check = CompetitorSourceCheckV1(
                     source_id=source.source_id,
@@ -352,6 +381,11 @@ class _VisibleTextParser(HTMLParser):
         self.text_parts.append(value)
         if self._in_title:
             self.title_parts.append(value)
+
+
+def _is_http_405(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "405" in text and ("http" in text or "status" in text or "method" in text)
 
 
 def _parse_page(body: bytes) -> _ParsedPage:
