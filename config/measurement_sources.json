@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "sources": [
     {
       "source_id": "bls_productivity",
@@ -33,6 +33,17 @@
         "fees": "/summary/fees/hyperliquid?dataType=dailyFees&excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true",
         "revenue": "/summary/fees/hyperliquid?dataType=dailyRevenue&excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true"
       }
+    },
+    {
+      "source_id": "hyperliquid_perp",
+      "name": "Hyperliquid Perpetuals Asset Contexts",
+      "adapter": "hyperliquid_perp",
+      "canonical_url": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals",
+      "api_base": "https://api.hyperliquid.xyz/info",
+      "primary_domain": "crypto_rwa_agent_payments",
+      "macro_region": "Global",
+      "language": "en",
+      "source_roles": ["official", "exchange", "data"]
     }
   ]
 }

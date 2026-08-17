@@ -24,18 +24,8 @@ def bls_payload(series_id: str, value: float) -> bytes:
                     {
                         "seriesID": series_id,
                         "data": [
-                            {
-                                "year": "2026",
-                                "period": "Q02",
-                                "periodName": "2nd Quarter",
-                                "value": str(value),
-                            },
-                            {
-                                "year": "2026",
-                                "period": "Q01",
-                                "periodName": "1st Quarter",
-                                "value": "0.1",
-                            },
+                            {"year": "2026", "period": "Q02", "periodName": "2nd Quarter", "value": str(value)},
+                            {"year": "2026", "period": "Q01", "periodName": "1st Quarter", "value": "0.1"},
                         ],
                     }
                 ]
@@ -100,11 +90,28 @@ def llama_source() -> MeasurementSource:
     )
 
 
+def hyperliquid_source() -> MeasurementSource:
+    return MeasurementSource(
+        source_id="hyperliquid_perp",
+        name="Hyperliquid Perpetuals",
+        adapter="hyperliquid_perp",
+        canonical_url="https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/perpetuals",
+        api_base="https://api.hyperliquid.xyz/info",
+        primary_domain="crypto_rwa_agent_payments",
+        macro_region="Global",
+        language="en",
+        source_roles=("official", "exchange", "data"),
+    )
+
+
 class MeasurementRegistryTests(unittest.TestCase):
     def test_repository_measurement_registry_validates(self) -> None:
         registry = MeasurementRegistry.from_file(Path("config/measurement_sources.json"))
-        self.assertEqual(registry.version, "1.0")
-        self.assertEqual({source.source_id for source in registry.sources}, {"bls_productivity", "defillama_hyperliquid"})
+        self.assertEqual(registry.version, "1.1")
+        self.assertEqual(
+            {source.source_id for source in registry.sources},
+            {"bls_productivity", "defillama_hyperliquid", "hyperliquid_perp"},
+        )
 
     def test_unknown_adapter_is_rejected(self) -> None:
         payload = {
@@ -159,9 +166,7 @@ class StructuredMeasurementAdapterTests(unittest.TestCase):
         event = cluster_documents([document])[0]
         self.assertFalse(assess_report_qualification(event).qualified)
         observation = evaluate_structural_indicators(
-            [event],
-            ["k_shaped_ai_productivity_economy"],
-            observation_date="2026-08-17",
+            [event], ["k_shaped_ai_productivity_economy"], observation_date="2026-08-17"
         )[0]
         self.assertGreater(observation.support_score, 0)
         self.assertIn(event.event_id, observation.supporting_signal_ids)
@@ -178,18 +183,15 @@ class StructuredMeasurementAdapterTests(unittest.TestCase):
             }
         )
         adapter = StructuredMeasurementSourceAdapter(
-            registry=MeasurementRegistry(version="1.0", sources=(llama_source(),)),
-            transport=transport,
+            registry=MeasurementRegistry(version="1.0", sources=(llama_source(),)), transport=transport
         )
         result = adapter.fetch(SourceFetchRequest(date="2026-08-17", profile="daily_push"))
 
-        self.assertEqual(len(result.documents), 1)
         document = result.documents[0]
         self.assertEqual(document.lane, "indicator_only")
         self.assertEqual(document.facts.get("tvl_usd"), 2_500_000_000.0)
         self.assertEqual(document.facts.get("fees_usd_24h"), 3_000_000.0)
         self.assertEqual(document.facts.get("revenue_usd_24h"), 2_500_000.0)
-
         event = cluster_documents([document])[0]
         self.assertFalse(assess_report_qualification(event).qualified)
         cell = evaluate_crypto_matrix([event], ["tvl_fees_revenue"])["tvl_fees_revenue"]
@@ -197,6 +199,42 @@ class StructuredMeasurementAdapterTests(unittest.TestCase):
         self.assertIn("metric:tvl", cell.data_checked)
         self.assertIn("metric:fees", cell.data_checked)
         self.assertIn("metric:revenue", cell.data_checked)
+
+    def test_hyperliquid_official_snapshot_fills_perp_volume_oi_funding(self) -> None:
+        url = "https://api.hyperliquid.xyz/info"
+        body = json.dumps(
+            [
+                {"universe": [{"name": "BTC"}, {"name": "ETH"}]},
+                [
+                    {"markPx": "100000", "openInterest": "10", "funding": "0.00001", "dayNtlVlm": "1500000"},
+                    {"markPx": "5000", "openInterest": "100", "funding": "-0.00002", "dayNtlVlm": "500000"},
+                ],
+            ]
+        ).encode()
+        transport = FakeTransport({url: response(url, body)})
+        adapter = StructuredMeasurementSourceAdapter(
+            registry=MeasurementRegistry(version="1.1", sources=(hyperliquid_source(),)),
+            transport=transport,
+        )
+        result = adapter.fetch(SourceFetchRequest(date="2026-08-17", profile="daily_push"))
+
+        self.assertEqual(len(result.documents), 1)
+        document = result.documents[0]
+        self.assertEqual(document.lane, "indicator_only")
+        self.assertEqual(document.facts.get("volume_usd_24h"), 2_000_000.0)
+        self.assertEqual(document.facts.get("oi_usd"), 1_500_000.0)
+        self.assertAlmostEqual(document.facts.get("funding_rate_oi_weighted"), 0.0, places=10)
+        self.assertEqual(document.facts.get("count_perp_assets"), 2.0)
+        self.assertEqual(transport.requests[0].method, "POST")
+        self.assertEqual(json.loads(transport.requests[0].body or b"{}"), {"type": "metaAndAssetCtxs"})
+
+        event = cluster_documents([document])[0]
+        self.assertFalse(assess_report_qualification(event).qualified)
+        cell = evaluate_crypto_matrix([event], ["perp_dex_volume_oi_funding"])["perp_dex_volume_oi_funding"]
+        self.assertEqual(cell.status, "observed")
+        self.assertIn("metric:volume", cell.data_checked)
+        self.assertIn("metric:oi", cell.data_checked)
+        self.assertIn("metric:funding", cell.data_checked)
 
     def test_one_measurement_source_failure_does_not_hide_other_source(self) -> None:
         base_bls = "https://api.bls.gov/publicAPI/v2/timeseries/data"
@@ -212,8 +250,7 @@ class StructuredMeasurementAdapterTests(unittest.TestCase):
             }
         )
         adapter = StructuredMeasurementSourceAdapter(
-            registry=MeasurementRegistry(version="1.0", sources=(bls_source(), llama_source())),
-            transport=transport,
+            registry=MeasurementRegistry(version="1.0", sources=(bls_source(), llama_source())), transport=transport
         )
         result = adapter.fetch(SourceFetchRequest(date="2026-08-17", profile="daily_push"))
 

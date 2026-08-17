@@ -64,6 +64,8 @@ class StructuredMeasurementSourceAdapter:
                     documents.append(self._fetch_bls(source))
                 elif source.adapter == "defillama_protocol":
                     documents.append(self._fetch_defillama(source))
+                elif source.adapter == "hyperliquid_perp":
+                    documents.append(self._fetch_hyperliquid_perp(source))
                 else:
                     raise ValueError(f"unsupported measurement adapter: {source.adapter}")
                 integration.append((source.source_id, "checked"))
@@ -192,6 +194,44 @@ class StructuredMeasurementSourceAdapter:
             ),
         )
 
+    def _fetch_hyperliquid_perp(self, source: MeasurementSource) -> Document:
+        fetched_at = datetime.now(timezone.utc).isoformat()
+        payload = _fetch_post_json(
+            self.transport,
+            source.api_base,
+            {"type": "metaAndAssetCtxs"},
+            self.timeout_seconds,
+        )
+        volume_usd_24h, oi_usd, weighted_funding, asset_count = _hyperliquid_perp_totals(payload)
+        return Document.fixture(
+            source_id=source.source_id,
+            url=source.canonical_url,
+            title="Hyperliquid perpetual DEX 24h volume open interest and current funding snapshot",
+            language=source.language,
+            macro_region=source.macro_region,
+            published_at=fetched_at,
+            fetched_at=fetched_at,
+            entities=["Hyperliquid"],
+            action="measures",
+            object="perpetual dex volume open interest funding rate",
+            location="Global",
+            primary_domain=source.primary_domain,
+            lane="indicator_only",
+            facts={
+                "source_roles": list(source.source_roles),
+                "volume_usd_24h": volume_usd_24h,
+                "oi_usd": oi_usd,
+                "funding_rate_oi_weighted": weighted_funding,
+                "count_perp_assets": float(asset_count),
+            },
+            summary=(
+                "Official Hyperliquid metaAndAssetCtxs snapshot across "
+                f"{asset_count} perpetual assets: 24h notional volume ${volume_usd_24h:,.0f}; "
+                f"open interest notional ${oi_usd:,.0f}; OI-weighted current funding rate "
+                f"{weighted_funding:.8f}."
+            ),
+        )
+
 
 def _fetch_json(transport: HttpTransport, api_base: str, path: str, timeout_seconds: int) -> Any:
     response = transport.fetch(
@@ -203,6 +243,27 @@ def _fetch_json(transport: HttpTransport, api_base: str, path: str, timeout_seco
     )
     if not 200 <= response.status < 300:
         raise ValueError(f"measurement HTTP {response.status}: {path}")
+    return json.loads(response.body.decode("utf-8"))
+
+
+def _fetch_post_json(
+    transport: HttpTransport,
+    url: str,
+    payload: dict[str, object],
+    timeout_seconds: int,
+) -> Any:
+    body = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    response = transport.fetch(
+        HttpRequest(
+            url=url,
+            method="POST",
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            timeout_seconds=timeout_seconds,
+            body=body,
+        )
+    )
+    if not 200 <= response.status < 300:
+        raise ValueError(f"measurement HTTP {response.status}: {url}")
     return json.loads(response.body.decode("utf-8"))
 
 
@@ -273,3 +334,43 @@ def _dimension_total24h(payload: Any, protocol: str) -> float:
                 if isinstance(value, (int, float, str)) and not isinstance(value, bool):
                     return float(value)
     raise ValueError(f"cannot extract DefiLlama total24h for {protocol}")
+
+
+def _hyperliquid_perp_totals(payload: Any) -> tuple[float, float, float, int]:
+    if not isinstance(payload, list) or len(payload) != 2:
+        raise ValueError("Hyperliquid metaAndAssetCtxs response must be [meta, assetCtxs]")
+    meta, contexts = payload
+    universe = meta.get("universe", []) if isinstance(meta, dict) else []
+    if not isinstance(universe, list) or not isinstance(contexts, list) or len(universe) != len(contexts):
+        raise ValueError("Hyperliquid universe and asset contexts are not aligned")
+
+    volume_total = 0.0
+    oi_notional_total = 0.0
+    funding_weighted_sum = 0.0
+    measured_assets = 0
+    for asset, context in zip(universe, contexts):
+        if not isinstance(asset, dict) or not isinstance(context, dict):
+            continue
+        try:
+            mark_px = float(context.get("markPx") or 0)
+            open_interest = float(context.get("openInterest") or 0)
+            funding = float(context.get("funding") or 0)
+            day_notional_volume = float(context.get("dayNtlVlm") or 0)
+        except (TypeError, ValueError):
+            continue
+        if mark_px < 0 or open_interest < 0 or day_notional_volume < 0:
+            raise ValueError(f"negative Hyperliquid market measurement for {asset.get('name', '?')}")
+        oi_notional = mark_px * open_interest
+        volume_total += day_notional_volume
+        oi_notional_total += oi_notional
+        funding_weighted_sum += funding * oi_notional
+        measured_assets += 1
+
+    if measured_assets == 0 or oi_notional_total <= 0:
+        raise ValueError("Hyperliquid returned no usable perpetual asset measurements")
+    return (
+        volume_total,
+        oi_notional_total,
+        funding_weighted_sum / oi_notional_total,
+        measured_assets,
+    )

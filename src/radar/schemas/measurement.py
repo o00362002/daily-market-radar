@@ -90,5 +90,11 @@ class MeasurementRegistry:
                     raise ValueError("DefiLlama source requires tvl, fees and revenue endpoints")
                 if any(not path.startswith("/") for path in endpoints.values()):
                     raise ValueError("DefiLlama endpoint paths must be relative to api_base")
+            elif source.adapter == "hyperliquid_perp":
+                parts = urlsplit(source.api_base)
+                if parts.netloc != "api.hyperliquid.xyz" or parts.path.rstrip("/") != "/info":
+                    raise ValueError("Hyperliquid perp source must use the official /info endpoint")
+                if "official" not in source.source_roles or "exchange" not in source.source_roles:
+                    raise ValueError("Hyperliquid perp source must retain official exchange source roles")
             else:
                 raise ValueError(f"unknown measurement adapter: {source.adapter}")
