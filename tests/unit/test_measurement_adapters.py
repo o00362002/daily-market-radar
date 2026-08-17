@@ -107,10 +107,16 @@ def hyperliquid_source() -> MeasurementSource:
 class MeasurementRegistryTests(unittest.TestCase):
     def test_repository_measurement_registry_validates(self) -> None:
         registry = MeasurementRegistry.from_file(Path("config/measurement_sources.json"))
-        self.assertEqual(registry.version, "1.1")
+        self.assertEqual(registry.version, "1.2")
         self.assertEqual(
             {source.source_id for source in registry.sources},
-            {"bls_productivity", "defillama_hyperliquid", "hyperliquid_perp"},
+            {
+                "bls_productivity",
+                "defillama_hyperliquid",
+                "hyperliquid_perp",
+                "farside_btc_etf",
+                "fsc_tw_vasp_law",
+            },
         )
 
     def test_unknown_adapter_is_rejected(self) -> None:
