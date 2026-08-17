@@ -83,6 +83,8 @@ class ReportQualification:
 def assess_report_qualification(event: Event) -> ReportQualification:
     if not event.documents:
         return ReportQualification(False, "event_has_no_documents")
+    if all(document.lane == "indicator_only" for document in event.documents):
+        return ReportQualification(False, "indicator_only_measurement")
 
     potential = assess_event(event)
     if potential.lane == "potential":
