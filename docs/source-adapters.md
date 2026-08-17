@@ -18,7 +18,7 @@ Every network adapter depends on the `HttpTransport` seam (`radar/adapters/trans
 |---------|--------|----------------|
 | RSS 2.0 / RSS 1.0 RDF / Atom | `adapters/rss.py`, `adapters/rss_client.py` | Connected to `live-rss` and `live`; namespaced RDF fields and Taiwan naïve timestamps are normalized. |
 | FreshRSS | `adapters/freshrss.py`, `adapters/freshrss_source.py` | Connected to `live`; credential-gated. Items map from `origin.streamId` to canonical registry RSS URLs. Missing credentials, fetch failures and unknown streams become explicit gaps. |
-| Structured measurements | `adapters/measurements.py`, `schemas/measurement.py` | Connected to `live` through `config/measurement_sources.json`; every source emits `indicator_only` typed facts and is isolated from sibling failures. |
+| Structured measurements | `adapters/measurements.py`, `src/radar/schemas/measurement.py` | Connected to `live` through `config/measurement_sources.json`; every source emits `indicator_only` typed facts and is isolated from sibling failures. |
 | BLS productivity/distribution | `adapters/measurements.py` | Official public API. Aligns nonfarm-business productivity, real hourly compensation and labor-share series to one latest quarter and one event. |
 | DefiLlama protocol economics | `adapters/measurements.py` | Specialist public API. Collects fixed Hyperliquid TVL, 24h fees and 24h revenue. |
 | Hyperliquid perpetuals | `adapters/measurements.py`, `adapters/transport.py` | Official read-only `POST /info` `metaAndAssetCtxs`. Produces 24h notional volume, notional OI and OI-weighted current funding; no trading endpoint is used. |
