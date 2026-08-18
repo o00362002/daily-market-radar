@@ -100,6 +100,7 @@ def run_daily_fixture(
     profile_name: str = "daily_push",
     database_path: Path | None = None,
     evaluation_mode: str = "deterministic",
+    report_window_days: int = 2,
 ) -> RunResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     composed = compose_application(
@@ -128,6 +129,7 @@ def run_daily_fixture(
             profile=profile_name,
             ingestion_mode="fixture",
             evaluation_mode=evaluation_mode,
+            report_window_days=report_window_days,
         ),
         contract,
     )
@@ -143,6 +145,7 @@ def run_daily_live_rss(
     per_feed_limit: int = 20,
     database_path: Path | None = None,
     evaluation_mode: str = "deterministic",
+    report_window_days: int = 2,
 ) -> RunResult:
     """Compatibility entrypoint that executes only direct registry RSS/Atom feeds."""
 
@@ -157,6 +160,7 @@ def run_daily_live_rss(
         per_feed_limit=per_feed_limit,
         database_path=database_path,
         evaluation_mode=evaluation_mode,
+        report_window_days=report_window_days,
     )
 
 
@@ -169,6 +173,7 @@ def run_daily_live(
     per_feed_limit: int = 20,
     database_path: Path | None = None,
     evaluation_mode: str = "deterministic",
+    report_window_days: int = 2,
 ) -> RunResult:
     """Execute direct RSS/Atom, structured measurements and optional FreshRSS.
 
@@ -188,6 +193,7 @@ def run_daily_live(
         per_feed_limit=per_feed_limit,
         database_path=database_path,
         evaluation_mode=evaluation_mode,
+        report_window_days=report_window_days,
     )
 
 
@@ -203,6 +209,7 @@ def _run_daily_registry(
     per_feed_limit: int,
     database_path: Path | None,
     evaluation_mode: str,
+    report_window_days: int,
 ) -> RunResult:
     contract = RuntimeContract.from_file(repo_root / "config/runtime_contract.json")
     registry = SourceRegistry.from_file(repo_root / "config/source_registry.json")
@@ -242,6 +249,7 @@ def _run_daily_registry(
             profile=profile_name,
             ingestion_mode=ingestion_mode,
             evaluation_mode=evaluation_mode,
+            report_window_days=report_window_days,
         ),
         contract,
     )

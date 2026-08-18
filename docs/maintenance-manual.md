@@ -197,7 +197,7 @@ Pages base from env. See `docs/web-architecture.md`.
 |----------|----------|------|
 | `runtime-check.yml` | tests + make validate + no-secret deterministic + auto fallback | 執行期 CI |
 | `web-check.yml` | export → types:check → Astro build → bundle budgets | 網站 CI |
-| `daily-intelligence.yml` | scheduled pipeline (cron 23:00 UTC = 07:00 TW) + state + gated deploy | 每日排程 |
+| `daily-intelligence.yml` | weekly pipeline (Sunday 23:00 UTC = Monday 07:00 TW) + state + gated deploy | 每週排程 |
 | `prepare-chat.yml` / `import-chat.yml` | chat package build / validated import | 對話流程 |
 | `pages-deploy.yml` | manual redeploy of validated site | 手動重部署 |
 | `mount-check.yml` | brain-core structural check | 結構體檢 |

@@ -33,7 +33,7 @@ Production gate：事實層正式部署要求 live ingestion、當日日期一�
 Domains：文章在 normalize 後進入 deterministic content classifier，以標題／摘要／實體與來源 domain prior 判定五個 canonical domains；labor 與 policy 舊 alias 只映射至 global_markets_macro。
 Competitor：21 個具名產品競品由 config/competitor_sources.json 綁定固定官方產品頁、文件或公司頁；live run 以安全 HTTP transport、ETag／Last-Modified、可見文字雜湊、內容相似度與長度變化建立 durable baseline 並判斷材料更新。RadarReportV2 固定輸出 CompetitorAuditV1，逐家揭露 baseline／checked_no_major_update／updated／partial／failed 與每個來源證據；同時保留一般新聞的 cross-domain competitor projection。社群與內容競品因尚未具名到帳號層，明確維持 discovery-only。
 Web：Astro static、zero-JS-first、Pages-compatible；事實層與 /analysis 解讀層分開，JSON artifacts 同步發佈於 /data/。競品頁顯示固定查核狀態、官方來源明細、材料變化摘錄、當日新聞投影與最近監測歷史。
-Automation：daily-intelligence 於 23:00 UTC 排程，亦在 production-relevant main push 後執行；健康報告即可部署，AI 解讀需通過獨立閘門才會一起發布。daily 與 ai-analysis 共用 radar-daily concurrency lock。
+Automation：daily-intelligence 於每週一 07:00 Asia/Taipei（週日 23:00 UTC）排程，使用 `full` profile 與包含當日的 7 個台灣曆日資料窗；亦在 production-relevant main push 後執行相同 production pipeline。健康報告即可部署，AI 解讀需通過獨立閘門才會一起發布。daily-intelligence 與 ai-analysis 共用 radar-daily concurrency lock。
 Coverage：來源數量與輸出數量不是完整性證明；coverage gaps、failures、rejection counters、competitor audit、matrices、structural indicators 與 backtest 固定揭露。
 Legacy：reports/2026/ 人工報告投影至 /legacy/，明確標示非 validated RadarReportV2。
 尚未完成：逐來源 fresh/backfill 分層、真實 AI key 線上驗證、具名社群帳號與官方社群 adapter、AI analysis 長期 repository/history、read-only「問雷達」MCP。

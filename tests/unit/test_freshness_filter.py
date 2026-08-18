@@ -41,6 +41,36 @@ class FreshnessFilterTests(unittest.TestCase):
         self.assertFalse(document_is_in_report_window(row, REPORT_DATE))
         self.assertEqual(material_events(cluster_documents([row]), report_date=REPORT_DATE), [])
 
+    def test_seven_day_window_keeps_trailing_week_but_not_eighth_day(self) -> None:
+        trailing_week = document(published_at="2026-07-19T12:00:00+08:00", suffix="weekly")
+        eighth_day = document(published_at="2026-07-18T12:00:00+08:00", suffix="archive")
+
+        self.assertTrue(document_is_in_report_window(trailing_week, REPORT_DATE, lookback_days=6))
+        self.assertFalse(document_is_in_report_window(eighth_day, REPORT_DATE, lookback_days=6))
+        self.assertEqual(
+            len(
+                material_events(
+                    cluster_documents([trailing_week]),
+                    report_date=REPORT_DATE,
+                    report_window_days=7,
+                )
+            ),
+            1,
+        )
+        self.assertEqual(
+            material_events(
+                cluster_documents([eighth_day]),
+                report_date=REPORT_DATE,
+                report_window_days=7,
+            ),
+            [],
+        )
+
+    def test_report_window_requires_at_least_one_calendar_day(self) -> None:
+        row = document(published_at="2026-07-25T01:00:00+08:00")
+        with self.assertRaisesRegex(ValueError, "report_window_days"):
+            material_events(cluster_documents([row]), report_date=REPORT_DATE, report_window_days=0)
+
     def test_invalid_timestamp_is_not_treated_as_fetched_today(self) -> None:
         row = document(published_at="not-a-date")
         result = filter_documents_by_freshness([row], observed_at=OBSERVED_AT)

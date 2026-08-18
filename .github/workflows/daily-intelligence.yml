@@ -1,6 +1,6 @@
 name: daily-intelligence
 
-# Daily pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
+# Weekly production pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
 # GitHub schedule delivery may be delayed; the workflow records the actual Taiwan date.
 # Relevant main-branch runtime, configuration and web changes also run the full accepted
 # production pipeline so merged code does not wait until the next morning to reach Pages.
@@ -18,7 +18,8 @@ on:
       - "tools/check_production_quality.py"
       - "schemas/**"
   schedule:
-    - cron: "0 23 * * *"
+    # Monday 07:00 Asia/Taipei = Sunday 23:00 UTC.
+    - cron: "0 23 * * 0"
   workflow_dispatch:
     inputs:
       evaluation_mode:
@@ -72,7 +73,7 @@ jobs:
             mkdir -p .state/state
           fi
 
-      - name: Run daily intelligence
+      - name: Run weekly intelligence
         env:
           RADAR_EVALUATION_MODE: ${{ github.event.inputs.evaluation_mode || vars.RADAR_EVALUATION_MODE || 'auto' }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -88,8 +89,9 @@ jobs:
           DATE=$(TZ=Asia/Taipei date +%F)
           echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
           PYTHONPATH=src python -m radar.cli run-daily --mode live --date "$DATE" \
+            --profile full --report-window-days 7 \
             --database "$PWD/data/radar.db" --evaluation-mode "$RADAR_EVALUATION_MODE" \
-            --timeout-seconds 20 --per-feed-limit 50 > /tmp/report.json
+            --timeout-seconds 20 --per-feed-limit 100 > /tmp/report.json
 
       - name: Export web artifacts
         run: PYTHONPATH=src python -m radar.cli export-web --out-dir "$PWD" --database "$PWD/data/radar.db" --legacy-reports-dir "$PWD/reports"

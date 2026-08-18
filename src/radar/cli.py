@@ -45,6 +45,12 @@ def build_parser() -> argparse.ArgumentParser:
     run_daily = sub.add_parser("run-daily")
     run_daily.add_argument("--date", required=True)
     run_daily.add_argument("--profile", choices=["daily_push", "full"], default="daily_push")
+    run_daily.add_argument(
+        "--report-window-days",
+        type=int,
+        default=2,
+        help="inclusive Taiwan-calendar-day window ending on --date",
+    )
     run_daily.add_argument("--mode", choices=["fixture", "live", "live-rss"], default="fixture")
     run_daily.add_argument(
         "--evaluation-mode",
@@ -136,6 +142,7 @@ def main(argv: list[str] | None = None) -> int:
             "per_feed_limit": args.per_feed_limit,
             "database_path": database_path,
             "evaluation_mode": args.evaluation_mode,
+            "report_window_days": args.report_window_days,
         }
         if args.mode == "live":
             result = run_daily_live(repo_root, date=args.date, **common)
@@ -150,6 +157,7 @@ def main(argv: list[str] | None = None) -> int:
                 profile_name=args.profile,
                 database_path=database_path,
                 evaluation_mode=args.evaluation_mode,
+                report_window_days=args.report_window_days,
             )
         print(json.dumps(result.report, indent=2, ensure_ascii=False))
         return 0

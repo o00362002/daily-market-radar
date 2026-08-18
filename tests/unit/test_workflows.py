@@ -35,11 +35,11 @@ class WorkflowContractTests(unittest.TestCase):
         for name in REQUIRED:
             self.assertIsInstance(self._load(name), dict)
 
-    def test_daily_pipeline_has_utc_cron_concurrency_and_production_gates(self) -> None:
+    def test_weekly_pipeline_has_utc_cron_concurrency_and_production_gates(self) -> None:
         doc = self._load("daily-intelligence.yml")
         on = doc.get("on", doc.get(True))
         crons = [entry["cron"] for entry in on["schedule"]]
-        self.assertIn("0 23 * * *", crons)
+        self.assertIn("0 23 * * 0", crons)
         self.assertEqual(doc["concurrency"]["group"], "radar-daily")
         # A stalled older run must not block newer Taiwan-date runs for days.
         self.assertTrue(doc["concurrency"]["cancel-in-progress"])
@@ -47,6 +47,8 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("radar-state", text)
         self.assertNotIn("HEAD:main", text)
         self.assertIn("run-daily --mode live", text)
+        self.assertIn("--profile full --report-window-days 7", text)
+        self.assertIn("--per-feed-limit 100", text)
         self.assertIn("FRESHRSS_BASE_URL", text)
         self.assertIn("radar.analysis.cli", text)
         self.assertIn("check_production_quality.py", text)

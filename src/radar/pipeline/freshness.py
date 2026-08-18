@@ -66,11 +66,13 @@ def filter_documents_by_freshness(
 
 
 def document_is_in_report_window(document: Document, report_date: str, *, lookback_days: int = 1) -> bool:
-    """Accept the Taiwan report date and one bounded prior calendar day.
+    """Accept the Taiwan report date and a bounded number of prior calendar days.
 
-    The 07:00 Taiwan run needs the previous calendar day to cover US and European sessions, but
-    archive entries older than that must not become ``new_event`` merely because a feed returns
-    them again. Invalid publication timestamps are rejected.
+    The default keeps the daily run's current and prior Taiwan calendar day to
+    cover US and European sessions. Callers with a seven-day inclusive report
+    window pass ``lookback_days=6``. Archive entries older than the requested
+    window must not become ``new_event`` merely because a feed returns them
+    again. Invalid publication timestamps are rejected.
     """
 
     try:
