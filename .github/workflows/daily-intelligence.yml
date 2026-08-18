@@ -1,7 +1,8 @@
 name: daily-intelligence
 
 # Weekly production pipeline. Taiwan (UTC+8) target: deployed before 09:00 local.
-# GitHub schedule delivery may be delayed; the workflow records the actual Taiwan date.
+# GitHub schedule delivery may be delayed; the job captures its Taiwan report date
+# once so a long live run cannot cross midnight and fail its own quality gate.
 # Relevant main-branch runtime, configuration and web changes also run the full accepted
 # production pipeline so merged code does not wait until the next morning to reach Pages.
 # A healthy report may deploy without AI analysis; stale or fallback analysis is removed.
@@ -60,6 +61,10 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: python -m pip install --retries 5 -e ".[dev,ai]"
 
+      - name: Capture Taiwan report date
+        id: report_date
+        run: echo "value=$(TZ=Asia/Taipei date +%F)" >> "$GITHUB_OUTPUT"
+
       - name: Restore durable state (radar-state branch; never main)
         run: |
           set -euo pipefail
@@ -86,8 +91,8 @@ jobs:
           FRESHRSS_API_PASSWORD: ${{ secrets.FRESHRSS_API_PASSWORD }}
         run: |
           set -euo pipefail
-          DATE=$(TZ=Asia/Taipei date +%F)
-          echo "running for Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
+          DATE="${{ steps.report_date.outputs.value }}"
+          echo "running for captured Taiwan date $DATE in mode $RADAR_EVALUATION_MODE"
           PYTHONPATH=src python -m radar.cli run-daily --mode live --date "$DATE" \
             --profile full --report-window-days 7 \
             --database "$PWD/data/radar.db" --evaluation-mode "$RADAR_EVALUATION_MODE" \
@@ -100,7 +105,7 @@ jobs:
         id: report_gate
         run: |
           set -euo pipefail
-          DATE=$(TZ=Asia/Taipei date +%F)
+          DATE="${{ steps.report_date.outputs.value }}"
           set +e
           python tools/check_production_quality.py \
             --report artifacts/web/v1/latest.json \
@@ -149,7 +154,7 @@ jobs:
         id: gate
         run: |
           set -euo pipefail
-          DATE=$(TZ=Asia/Taipei date +%F)
+          DATE="${{ steps.report_date.outputs.value }}"
           if [ "${{ steps.report_gate.outputs.report_ok }}" != "true" ]; then
             echo "deployable=false" >> "$GITHUB_OUTPUT"
             echo "status=rejected" >> "$GITHUB_OUTPUT"
