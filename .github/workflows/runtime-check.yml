@@ -1,13 +1,14 @@
 name: runtime-check
 
-# Runtime CI: unit, integration, contract, architecture, migrations, schema drift,
-# a deterministic no-secret run and the auto-without-key fallback. No secrets are used.
+# Local-first runtime CI: run `make validate` plus the deterministic checks locally
+# during development. GitHub re-runs the full gate only for main PRs and main.
+# No secrets are used.
 
 on:
   push:
-    # radar-state is an orphan runtime-data branch, not an application source branch.
-    branches-ignore: ["radar-state"]
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -55,3 +56,6 @@ jobs:
           python -c "import json;a=json.load(open('/tmp/auto.json'))['evaluation_audit'];assert a['effective_mode']=='deterministic';assert 'ai_evaluation_unavailable' in a['degradation_reasons'],a"
       - name: Mount integrity
         run: bash check_mount_integrity.sh
+
+      - name: Deterministic single-owner check
+        run: node tools/brain/check-single-owner.js

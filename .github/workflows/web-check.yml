@@ -1,13 +1,15 @@
 name: web-check
 
-# Web CI: export fixture artifacts, verify generated TS is in sync, typecheck,
-# build the Astro static site and enforce bundle budgets. No secrets.
+# Local-first web CI: run the same web checks locally while iterating. GitHub
+# confirms relevant changes only on a main PR or after they reach main. No secrets.
 
 on:
   push:
-    branches: ["**"]
+    branches: [main]
     paths: ["web/**", "src/radar/web/**", "src/radar/contracts/web_projection.py", "schemas/web.schema.json", ".github/workflows/web-check.yml"]
   pull_request:
+    branches: [main]
+    paths: ["web/**", "src/radar/web/**", "src/radar/contracts/web_projection.py", "schemas/web.schema.json", ".github/workflows/web-check.yml"]
   workflow_dispatch:
 
 concurrency:
