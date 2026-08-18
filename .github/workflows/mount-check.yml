@@ -1,10 +1,9 @@
 name: mount-check
 
+# Local-first diagnostic. Run the project validation locally during development;
+# the full remote PR/main gate is runtime-check.yml. Keep this workflow for
+# an explicit GitHub-side mount investigation only.
 on:
-  push:
-    # radar-state stores compressed runtime state only; code checks do not apply there.
-    branches-ignore: ["radar-state"]
-  pull_request:
   workflow_dispatch:
 
 permissions:

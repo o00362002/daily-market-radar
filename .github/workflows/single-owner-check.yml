@@ -1,11 +1,8 @@
 name: single-owner-check
 
+# Local-first diagnostic. Run `node tools/brain/check-single-owner.js` locally;
+# runtime-check.yml performs the automatic PR/main confirmation.
 on:
-  push:
-    # radar-state is an orphan data-only branch written by the daily pipeline.
-    # It intentionally does not contain repository governance scripts.
-    branches-ignore: ["radar-state"]
-  pull_request:
   workflow_dispatch:
 
 permissions:
