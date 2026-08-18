@@ -167,12 +167,12 @@ fixture mode → partial
 unexecuted adapter family → degradation reason
 ```
 
-## Daily automation
+## Weekly automation
 
 ```text
 Workflow: daily-intelligence
-Schedule: cron '0 23 * * *' UTC == 07:00 Asia/Taipei
-Mode: run-daily --mode live
+Schedule: cron '0 23 * * 0' UTC == Monday 07:00 Asia/Taipei
+Mode: run-daily --mode live --profile full --report-window-days 7
 Evaluation: RADAR_EVALUATION_MODE, default auto
 Durable state: radar-state branch
 Deployment: validated non-fixture Astro artifact only

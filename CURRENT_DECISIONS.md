@@ -1,6 +1,36 @@
 # daily-market-radar｜CURRENT_DECISIONS
 
-最後更新：2026-07-11
+最後更新：2026-08-18
+
+---
+
+## 2026-08-18：weekly radar delivery and chat briefing boundary
+
+### Decision
+
+```text
+1. `daily-intelligence` retains its stable workflow name, durable-state path, quality gates and Pages
+   deployment boundary, but its automatic run is now Monday 07:00 Asia/Taipei
+   (`0 23 * * 0` UTC).
+2. The scheduled production command uses the existing `full` profile and an inclusive seven Taiwan
+   calendar-day report window (the run date plus the previous six dates). A manual/default run keeps
+   the previous current-plus-prior-day window unless it explicitly supplies another value.
+3. The separately configured ChatGPT weekly briefing is conversation-only: it summarizes the validated
+   public radar output and public topic research for the owner. It does not write `chat-imports`,
+   create `AIAnalysisV1`, dispatch Actions, or deploy Pages.
+```
+
+### Boundary
+
+```text
+Source registry, quality gates, radar-state persistence, Pages deployment and the optional AI-analysis
+validation boundary do not change. The change reduces recurring hosted execution without treating a
+ChatGPT conversation as a replacement for validated site artifacts.
+```
+
+### Evidence
+
+`reports/change-confirmations/2026-08-18-weekly-radar-chat-consolidation.md`
 
 ---
 

@@ -56,11 +56,18 @@ def reconcile_cross_day_events(current_events: list[Event], prior_events: list[E
     return resolve_events(current_events, prior_events, observed_at=observed_at).events
 
 
-def material_events(events: list[Event], *, report_date: str | None = None) -> list[Event]:
+def material_events(
+    events: list[Event],
+    *,
+    report_date: str | None = None,
+    report_window_days: int = 2,
+) -> list[Event]:
     """Events eligible for the deterministic evaluator.
 
     News events must have a current material/same-day anchor *and* at least one
-    document inside the bounded Taiwan news window. That keeps archive entries
+    document inside the bounded Taiwan news window. ``report_window_days`` is
+    inclusive of ``report_date`` and defaults to the current plus prior day.
+    That keeps archive entries
     returned by RSS feeds from becoming fresh ``new_event`` rows.
 
     ``indicator_only`` structured measurements use the same current material /
@@ -73,6 +80,8 @@ def material_events(events: list[Event], *, report_date: str | None = None) -> l
 
     if report_date is None:
         return [event for event in events if event_has_material_delta(event)]
+    if report_window_days < 1:
+        raise ValueError("report_window_days must be at least 1")
 
     selected: list[Event] = []
     for event in events:
@@ -81,6 +90,13 @@ def material_events(events: list[Event], *, report_date: str | None = None) -> l
         if event.documents and all(document.lane == "indicator_only" for document in event.documents):
             selected.append(event)
             continue
-        if any(document_is_in_report_window(document, report_date) for document in event.documents):
+        if any(
+            document_is_in_report_window(
+                document,
+                report_date,
+                lookback_days=report_window_days - 1,
+            )
+            for document in event.documents
+        ):
             selected.append(event)
     return selected

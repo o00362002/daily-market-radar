@@ -179,7 +179,7 @@ The local development site is normally available at `http://localhost:4321`.
 
 ## Automation
 
-`.github/workflows/daily-intelligence.yml` runs daily at `0 23 * * *` UTC, equivalent to 07:00 Asia/Taipei. It restores the `radar-state` branch, runs `--mode live`, exports web artifacts, builds Astro, deploys validated non-fixture output and persists compressed/checksummed SQLite state.
+`.github/workflows/daily-intelligence.yml` runs every Monday at `0 23 * * 0` UTC, equivalent to 07:00 Asia/Taipei. It restores the `radar-state` branch, runs `--mode live --profile full --report-window-days 7` (the run date plus the prior six Taiwan calendar dates), exports web artifacts, builds Astro, deploys validated non-fixture output and persists compressed/checksummed SQLite state.
 
 Owner-side GitHub settings:
 

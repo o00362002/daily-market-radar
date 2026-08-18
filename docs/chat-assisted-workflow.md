@@ -5,7 +5,7 @@ result. No secrets, no full articles, no model-invented conclusions ever enter t
 
 ## Prepare from validated durable state
 
-Production preparation reads the already validated daily report and its evidence-bearing events from the
+Production preparation reads the latest validated radar report and its evidence-bearing events from the
 SQLite state restored from the `radar-state` branch. It does not recollect news and does not call an AI
 provider.
 
@@ -47,7 +47,7 @@ site**. A **successful import** is `effective_mode=chat-assisted`, `evaluator=hu
 
 ### 1. Prepare
 
-Actions → `prepare-chat` → Run workflow. Choose a persisted date/profile. The workflow waits for the daily
+Actions → `prepare-chat` → Run workflow. Choose a persisted date/profile. The workflow waits for the production
 pipeline lock, restores `radar-state`, builds a bounded non-fixture package and uploads one
 `chat-package-<date>-<context-hash>` artifact.
 
@@ -81,7 +81,7 @@ restore radar-state
 - `status=failed` reports are never deployed.
 - `source_audit.ingestion_mode=fixture` is validation/preview-only by default.
 - A fixture report can replace production only through a manual run with
-  `allow_fixture_deploy=true`. Do not enable this for a real daily site.
+  `allow_fixture_deploy=true`. Do not enable this for a real production site.
 - `prepare-chat`, `import-chat` and `daily-intelligence` share the `radar-daily` concurrency lock,
   preventing state-read, state-write or Pages deployment races.
 

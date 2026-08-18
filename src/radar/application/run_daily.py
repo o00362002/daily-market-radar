@@ -52,6 +52,9 @@ class DailyRunRequest:
     profile: str = "daily_push"
     ingestion_mode: str = "fixture"
     evaluation_mode: str = "deterministic"
+    # Inclusive Taiwan-calendar-day window ending on ``date``.  The default
+    # preserves the existing daily behaviour: the current and prior day.
+    report_window_days: int = 2
 
 
 @dataclass(frozen=True)
@@ -93,6 +96,8 @@ class DailyRadarApplication:
     def run(self, request: DailyRunRequest, contract: RuntimeContract) -> ApplicationRunResult:
         contract.validate()
         contract.profile(request.profile)
+        if request.report_window_days < 1:
+            raise ValueError("report_window_days must be at least 1")
         started_at = self._clock().isoformat()
 
         competitor_result = (
@@ -118,7 +123,11 @@ class DailyRadarApplication:
         resolution = resolve_events(cluster_documents(documents), prior_events, observed_at=started_at)
         events = resolution.events
 
-        reportable_events = material_events(events, report_date=request.date)
+        reportable_events = material_events(
+            events,
+            report_date=request.date,
+            report_window_days=request.report_window_days,
+        )
         evaluation = self._dependencies.evaluator.evaluate(
             EvaluationRequest(
                 date=request.date,
@@ -454,6 +463,7 @@ class DailyRadarApplication:
                 "profile": request.profile,
                 "ingestion_mode": request.ingestion_mode,
                 "evaluation_mode": request.evaluation_mode,
+                "report_window_days": request.report_window_days,
             },
             "documents": sorted(document.content_hash for document in documents),
             "events": [
