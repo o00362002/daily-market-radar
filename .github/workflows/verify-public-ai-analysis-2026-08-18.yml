@@ -1,0 +1,219 @@
+name: verify-public-ai-analysis-2026-08-18
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-public-ai-analysis-2026-08-18.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-public:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch deployed AIAnalysisV1 and page with CDN retries
+        run: |
+          set -euo pipefail
+          JSON_URL="https://o00362002.github.io/daily-market-radar/data/ai-analysis/latest.json"
+          PAGE_URL="https://o00362002.github.io/daily-market-radar/analysis/"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error "$JSON_URL?verify=$GITHUB_RUN_ID-$attempt" -o /tmp/analysis.json \
+              && curl --fail --silent --show-error "$PAGE_URL?verify=$GITHUB_RUN_ID-$attempt" -o /tmp/analysis.html; then
+              if python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('/tmp/analysis.json').read_text(encoding='utf-8'))
+          p=a.get('provenance',{})
+          expected={
+              'date':'2026-08-18',
+              'source_report_date':'2026-08-18',
+              'source_run_id':'run_e0796af248b5',
+              'source_context_hash':'0d9181a01e45f6ec2bc37d1dacc03f098661ed5888ea3725836766686c3abe09',
+          }
+          ok=(
+              a.get('date')==expected['date']
+              and p.get('source_report_date')==expected['source_report_date']
+              and p.get('source_run_id')==expected['source_run_id']
+              and p.get('source_context_hash')==expected['source_context_hash']
+              and p.get('effective_mode')=='chat-assisted'
+              and p.get('provider')=='chatgpt'
+              and p.get('model')=='GPT-5.6 Thinking'
+              and p.get('fallback_used') is False
+              and p.get('validation_status')=='valid'
+              and len(a.get('structural_indicators',[]))==3
+              and len(a.get('linked_indicators',[]))==6
+              and len(a.get('supplemental_evidence',[]))==9
+          )
+          raise SystemExit(0 if ok else 1)
+          PY
+              then
+                break
+              fi
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "public AI analysis did not reach validated 2026-08-18 chat-assisted state" >&2
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Validate public JSON, page, immutable indicators, and supplemental evidence
+        run: |
+          set -euo pipefail
+          mkdir -p reports/execution_checks
+          python - <<'PY'
+          import hashlib
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          raw=Path('/tmp/analysis.json').read_bytes()
+          analysis=json.loads(raw)
+          provenance=analysis.get('provenance',{})
+          html=Path('/tmp/analysis.html').read_text(encoding='utf-8',errors='replace')
+
+          expected_date='2026-08-18'
+          expected_run='run_e0796af248b5'
+          expected_hash='0d9181a01e45f6ec2bc37d1dacc03f098661ed5888ea3725836766686c3abe09'
+          expected_source_report='report:run_e0796af248b5'
+          expected_structural=[
+              ('k_shaped_ai_productivity_economy','insufficient',0,0,'insufficient'),
+              ('ai_bubble_overinvestment','toward',20,0,20),
+              ('brand_market_polarization_and_true_vs_fake_segmentation','insufficient',0,0,'insufficient'),
+          ]
+          expected_linked=[
+              ('ai_application_momentum',74,65,9,'up'),
+              ('retail_change_momentum',67,54,13,'up'),
+              ('crypto_rwa_adoption_momentum',73,65,8,'up'),
+              ('taiwan_exposure_intensity',75,66,9,'up'),
+              ('cross_domain_convergence',68,71,-3,'flat'),
+              ('evidence_confidence',68,69,-1,'flat'),
+          ]
+
+          structural=analysis.get('structural_indicators',[])
+          linked=analysis.get('linked_indicators',[])
+          supplemental=analysis.get('supplemental_evidence',[])
+
+          structural_projection=[
+              (x.get('indicator_id'),x.get('direction'),x.get('support_score'),x.get('counter_score'),x.get('confidence'))
+              for x in structural
+          ]
+          linked_projection=[
+              (x.get('indicator_id'),x.get('score'),x.get('previous_score'),x.get('delta'),x.get('direction'))
+              for x in linked
+          ]
+
+          allowed_grades={'primary','high_quality_secondary','specialist','secondary'}
+          allowed_freshness={'same_day','weekend_72h','candidate','background'}
+          supplemental_valid=True
+          supplemental_errors=[]
+          seen_ids=set()
+          seen_fingerprints=set()
+          for row in supplemental:
+              eid=row.get('evidence_id')
+              url=row.get('url','')
+              parsed=urlparse(url)
+              if not eid or eid in seen_ids:
+                  supplemental_valid=False; supplemental_errors.append(f'duplicate_or_missing_id:{eid}')
+              seen_ids.add(eid)
+              fp=(url,(row.get('title') or '').casefold().strip())
+              if fp in seen_fingerprints:
+                  supplemental_valid=False; supplemental_errors.append(f'duplicate_fingerprint:{eid}')
+              seen_fingerprints.add(fp)
+              if parsed.scheme!='https' or not parsed.netloc:
+                  supplemental_valid=False; supplemental_errors.append(f'bad_url:{eid}')
+              if row.get('evidence_grade') not in allowed_grades:
+                  supplemental_valid=False; supplemental_errors.append(f'bad_grade:{eid}')
+              if row.get('freshness') not in allowed_freshness:
+                  supplemental_valid=False; supplemental_errors.append(f'bad_freshness:{eid}')
+              if not isinstance(row.get('direct_taiwan_evidence'),bool):
+                  supplemental_valid=False; supplemental_errors.append(f'bad_taiwan_flag:{eid}')
+              for field, allow_unknown in [('published_at',True),('fetched_at',False)]:
+                  value=row.get(field)
+                  if allow_unknown and value=='unknown':
+                      continue
+                  try:
+                      datetime.fromisoformat(str(value).replace('Z','+00:00'))
+                  except Exception:
+                      supplemental_valid=False; supplemental_errors.append(f'bad_{field}:{eid}')
+              if not (row.get('gap_ref') and row.get('title') and row.get('summary') and row.get('source_role')):
+                  supplemental_valid=False; supplemental_errors.append(f'missing_required_text:{eid}')
+
+          checks={
+              'analysis_date_today': analysis.get('date')==expected_date,
+              'source_report_id_matches': analysis.get('source_report_id')==expected_source_report,
+              'source_report_date_today': provenance.get('source_report_date')==expected_date,
+              'source_run_matches_daily_state': provenance.get('source_run_id')==expected_run,
+              'source_context_hash_matches': provenance.get('source_context_hash')==expected_hash,
+              'schema_version_matches': provenance.get('schema_version')=='ai-analysis/v1',
+              'provider_chatgpt': provenance.get('provider')=='chatgpt',
+              'model_gpt_5_6_thinking': provenance.get('model')=='GPT-5.6 Thinking',
+              'requested_mode_chat_assisted': provenance.get('requested_mode')=='chat-assisted',
+              'effective_mode_chat_assisted': provenance.get('effective_mode')=='chat-assisted',
+              'validation_status_valid': provenance.get('validation_status')=='valid',
+              'fallback_false': provenance.get('fallback_used') is False,
+              'prompt_version_matches': provenance.get('prompt_version')=='chatgpt-gap-fill-v1',
+              'structural_indicators_preserved': structural_projection==expected_structural,
+              'linked_indicators_preserved': linked_projection==expected_linked,
+              'translation_count_matches_report_items': len(analysis.get('translations',[]))==113,
+              'supplemental_evidence_count_is_9': len(supplemental)==9,
+              'supplemental_evidence_fields_valid': supplemental_valid,
+              'analysis_page_has_today_heading': ('AI 解讀' in html and expected_date in html),
+              'analysis_page_has_supplemental_section': '缺口補搜證據' in html,
+          }
+          if not all(checks.values()):
+              raise SystemExit('public AI analysis validation failed: '+json.dumps({'checks':checks,'supplemental_errors':supplemental_errors},ensure_ascii=False))
+
+          receipt={
+              'verification_schema':'public-ai-analysis-verification/v1',
+              'verified_at':datetime.now(timezone.utc).isoformat(),
+              'analysis_url':'https://o00362002.github.io/daily-market-radar/analysis/',
+              'analysis_json_url':'https://o00362002.github.io/daily-market-radar/data/ai-analysis/latest.json',
+              'analysis_date':analysis.get('date'),
+              'source_report_date':provenance.get('source_report_date'),
+              'source_run_id':provenance.get('source_run_id'),
+              'source_context_hash':provenance.get('source_context_hash'),
+              'source_report_id':analysis.get('source_report_id'),
+              'provider':provenance.get('provider'),
+              'model':provenance.get('model'),
+              'requested_mode':provenance.get('requested_mode'),
+              'effective_mode':provenance.get('effective_mode'),
+              'fallback_used':provenance.get('fallback_used'),
+              'validation_status':provenance.get('validation_status'),
+              'prompt_version':provenance.get('prompt_version'),
+              'schema_version':provenance.get('schema_version'),
+              'analysis_sha256':hashlib.sha256(raw).hexdigest(),
+              'executive_summary_count':len(analysis.get('executive_summary',[])),
+              'finding_count':len(analysis.get('key_findings',[])),
+              'future_trend_count':len(analysis.get('future_trends',[])),
+              'structural_indicator_count':len(structural),
+              'auxiliary_indicator_count':len(linked),
+              'supplemental_evidence_count':len(supplemental),
+              'checks':checks,
+              'result':'verified-public-deployment',
+          }
+          Path('reports/execution_checks/2026-08-18_public_ai_analysis_verification.json').write_text(
+              json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8'
+          )
+          print(json.dumps(receipt,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Commit public verification receipt and remove verifier
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/execution_checks/2026-08-18_public_ai_analysis_verification.json
+          git rm .github/workflows/verify-public-ai-analysis-2026-08-18.yml
+          git commit -m "chore: verify public 2026-08-18 AI analysis deployment"
+          git reset --hard HEAD
+          git clean -fd
+          git pull --rebase origin main
+          git push origin HEAD:main
