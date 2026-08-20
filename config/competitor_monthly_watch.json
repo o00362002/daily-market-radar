@@ -2,7 +2,7 @@
   "schema_version": "competitor-monthly-watch/v1",
   "status": "active",
   "owner": "competitor_intelligence",
-  "purpose": "每月探索國際零售商與系統商在自主補貨、Agentic RetailOps、閉環營運的可驗證新系統與落地案例；值得對標時以 GitHub Issue 通知。",
+  "purpose": "每月探索國際零售商、系統商與顧問公司在自主補貨、Agentic RetailOps、閉環營運與顧問方法論產品化的可驗證新系統與落地案例；值得對標時以 GitHub Issue 通知。",
   "lookback_days": 40,
   "max_candidates": 20,
   "providers": [
@@ -57,6 +57,16 @@
       "id": "retailops_agent_roi",
       "theme": "agentic_retailops",
       "query": "retail operations AI agent ROI customer stores rollout"
+    },
+    {
+      "id": "consulting_ai_operations_product",
+      "theme": "consulting_ai_operations",
+      "query": "management consulting agentic operations platform reusable industry agents client deployment retail"
+    },
+    {
+      "id": "consulting_as_software_midmarket",
+      "theme": "consulting_ai_operations",
+      "query": "consulting as software managed AI service digital workforce forward deployed mid-market operations"
     }
   ],
   "themes": {
@@ -87,6 +97,17 @@
       "continuous improvement",
       "task verification",
       "impact measurement"
+    ],
+    "consulting_ai_operations": [
+      "consulting as software",
+      "agentic operations platform",
+      "reusable industry agents",
+      "digital workforce",
+      "managed ai service",
+      "forward deployed",
+      "client operations runtime",
+      "commercial brain",
+      "intelligent operations"
     ]
   },
   "scoring": {
@@ -94,6 +115,7 @@
     "operation_keywords": [
       "store operations",
       "retail operations",
+      "commercial operations",
       "replenishment",
       "inventory",
       "task execution",
@@ -106,6 +128,7 @@
     "proof_keywords": [
       "case study",
       "customer",
+      "client deployment",
       "deployed",
       "deployment",
       "rollout",
@@ -113,6 +136,9 @@
       "pilot",
       "launched",
       "implementation",
+      "production",
+      "managed service",
+      "subscription",
       "roi",
       "stores",
       "retailer"
@@ -122,6 +148,9 @@
       "system",
       "software",
       "agent",
+      "industry agent",
+      "digital workforce",
+      "managed service",
       "engine",
       "solution",
       "suite",
@@ -133,7 +162,10 @@
       "ad campaign",
       "marketing campaign",
       "customer service chatbot",
-      "product recommendation engine"
+      "product recommendation engine",
+      "research survey without product",
+      "consulting forecast without deployment",
+      "consulting hiring announcement"
     ]
   },
   "notification": {
