@@ -1,90 +1,316 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "state_key": "competitor-monitor:v1",
   "default_timeout_seconds": 12,
   "default_material_similarity_threshold": 0.96,
   "max_workers": 8,
   "minimum_visible_characters": 160,
-  "excluded_registry_groups": ["social_and_content"],
+  "excluded_registry_groups": [
+    "social_and_content"
+  ],
   "sources": {
     "storee": [
-      {"id": "retail-operations-platform", "channel": "official_product", "url": "https://storee.ai/RetailOperationsPlatform"}
+      {
+        "id": "retail-operations-platform",
+        "channel": "official_product",
+        "url": "https://storee.ai/RetailOperationsPlatform"
+      }
     ],
     "quorso": [
-      {"id": "intelligent-management", "channel": "official_product", "url": "https://quorso.com/intelligent-management/"},
-      {"id": "product", "channel": "official_product", "url": "https://quorso.com/the-product/"}
+      {
+        "id": "intelligent-management",
+        "channel": "official_product",
+        "url": "https://quorso.com/intelligent-management/"
+      },
+      {
+        "id": "product",
+        "channel": "official_product",
+        "url": "https://quorso.com/the-product/"
+      }
     ],
     "workjam": [
-      {"id": "homepage", "channel": "official_product", "url": "https://www.workjam.com/"},
-      {"id": "ai-workflows", "channel": "official_product", "url": "https://www.workjam.com/products/ai-workflows/"},
-      {"id": "task-connect", "channel": "official_product", "url": "https://www.workjam.com/task-connect/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://www.workjam.com/"
+      },
+      {
+        "id": "ai-workflows",
+        "channel": "official_product",
+        "url": "https://www.workjam.com/products/ai-workflows/"
+      },
+      {
+        "id": "task-connect",
+        "channel": "official_product",
+        "url": "https://www.workjam.com/task-connect/"
+      }
     ],
     "hubler": [
-      {"id": "retail", "channel": "official_product", "url": "https://www.hubler.ai/retail"},
-      {"id": "retail-operations-suite", "channel": "official_product", "url": "https://www.hubler.ai/retail-operations-suite"}
+      {
+        "id": "retail",
+        "channel": "official_product",
+        "url": "https://www.hubler.ai/retail"
+      },
+      {
+        "id": "retail-operations-suite",
+        "channel": "official_product",
+        "url": "https://www.hubler.ai/retail-operations-suite"
+      }
+    ],
+    "mckinsey_lilli_retail_ai": [
+      {
+        "id": "lilli",
+        "channel": "official_product",
+        "url": "https://www.mckinsey.com/capabilities/tech-and-ai/how-we-help-clients/rewiring-the-way-mckinsey-works-with-lilli",
+        "material_similarity_threshold": 0.985
+      },
+      {
+        "id": "retail-agentic-merchandising",
+        "channel": "official_company",
+        "url": "https://www.mckinsey.com/industries/retail/our-insights/merchants-unleashed-how-agentic-ai-transforms-retail-merchandising",
+        "material_similarity_threshold": 0.985
+      }
+    ],
+    "bcg_x_frontline_ops_ai": [
+      {
+        "id": "frontline-ops-ai",
+        "channel": "official_product",
+        "url": "https://www.bcg.com/x/product-library/frontline-ops-ai",
+        "material_similarity_threshold": 0.98
+      }
+    ],
+    "pwc_commercial_brain": [
+      {
+        "id": "agentic-front-office",
+        "channel": "official_product",
+        "url": "https://www.pwc.com/us/en/services/consulting/commercial-excellence/library/agentic-front-office-commercial-transformation.html",
+        "material_similarity_threshold": 0.985
+      },
+      {
+        "id": "consumer-intelligent-enterprise",
+        "channel": "official_company",
+        "url": "https://www.pwc.com/us/en/industries/consumer-markets/library/modern-consumer-company-intelligent-enterprise.html",
+        "material_similarity_threshold": 0.985
+      }
+    ],
+    "ey_intelligent_operations": [
+      {
+        "id": "intelligent-operations",
+        "channel": "official_product",
+        "url": "https://www.ey.com/en_gl/services/consulting/intelligent-operations-solution",
+        "material_similarity_threshold": 0.98
+      }
+    ],
+    "deloitte_zora_ai": [
+      {
+        "id": "zora-ai",
+        "channel": "official_product",
+        "url": "https://www.deloitte.com/us/en/services/consulting/services/zora-generative-ai-agent.html",
+        "material_similarity_threshold": 0.98
+      },
+      {
+        "id": "industry-agents",
+        "channel": "official_company",
+        "url": "https://www.deloitte.com/us/en/about/press-room/deloitte-drives-agentic-industry-transformation.html",
+        "material_similarity_threshold": 0.985
+      }
+    ],
+    "accenture_edge_ai_refinery": [
+      {
+        "id": "ai-refinery",
+        "channel": "official_product",
+        "url": "https://www.accenture.com/us-en/services/ai-data/ai-refinery",
+        "material_similarity_threshold": 0.98
+      },
+      {
+        "id": "accenture-edge",
+        "channel": "official_company",
+        "url": "https://newsroom.accenture.com/news/2026/accenture-edge-and-google-cloud-bring-scalable-agentic-ai-solutions-to-mid-market-companies",
+        "material_similarity_threshold": 0.985
+      }
     ],
     "yoobic": [
-      {"id": "homepage", "channel": "official_product", "url": "https://yoobic.com/"},
-      {"id": "ai-performance", "channel": "official_product", "url": "https://yoobic.com/ai-powered-performance/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://yoobic.com/"
+      },
+      {
+        "id": "ai-performance",
+        "channel": "official_product",
+        "url": "https://yoobic.com/ai-powered-performance/"
+      }
     ],
     "zipline_retail": [
-      {"id": "retail-platform", "channel": "official_product", "url": "https://getzipline.com/platform/retail/"},
-      {"id": "ai", "channel": "official_product", "url": "https://getzipline.com/ai-at-zipline/"}
+      {
+        "id": "retail-platform",
+        "channel": "official_product",
+        "url": "https://getzipline.com/platform/retail/"
+      },
+      {
+        "id": "ai",
+        "channel": "official_product",
+        "url": "https://getzipline.com/ai-at-zipline/"
+      }
     ],
     "retail_coach_io": [
-      {"id": "homepage", "channel": "official_product", "url": "https://retailcoach.io/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://retailcoach.io/"
+      }
     ],
     "pipefy_retail": [
-      {"id": "retail-ai", "channel": "official_product", "url": "https://www.pipefy.com/lp/retail-with-ai/"},
-      {"id": "retail-industry", "channel": "official_product", "url": "https://www.pipefy.com/industry/retail/"}
+      {
+        "id": "retail-ai",
+        "channel": "official_product",
+        "url": "https://www.pipefy.com/lp/retail-with-ai/"
+      },
+      {
+        "id": "retail-industry",
+        "channel": "official_product",
+        "url": "https://www.pipefy.com/industry/retail/"
+      }
     ],
     "catch_claireye": [
-      {"id": "homepage", "channel": "official_product", "url": "https://catch.claireye.com.tw/"},
-      {"id": "about", "channel": "official_company", "url": "https://catch.claireye.com.tw/about.html"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://catch.claireye.com.tw/"
+      },
+      {
+        "id": "about",
+        "channel": "official_company",
+        "url": "https://catch.claireye.com.tw/about.html"
+      }
     ],
     "flaps": [
-      {"id": "retail-erp", "channel": "official_product", "url": "https://www.flaps.com.tw/products/erp/"},
-      {"id": "retail-solution", "channel": "official_product", "url": "https://www.flaps.com.tw/solutions/retail-erp/"}
+      {
+        "id": "retail-erp",
+        "channel": "official_product",
+        "url": "https://www.flaps.com.tw/products/erp/"
+      },
+      {
+        "id": "retail-solution",
+        "channel": "official_product",
+        "url": "https://www.flaps.com.tw/solutions/retail-erp/"
+      }
     ],
     "91app": [
-      {"id": "about", "channel": "official_company", "url": "https://91app.com/about-91app/"}
+      {
+        "id": "about",
+        "channel": "official_company",
+        "url": "https://91app.com/about-91app/"
+      }
     ],
     "shopline": [
-      {"id": "homepage", "channel": "official_product", "url": "https://shopline.tw/"},
-      {"id": "pos", "channel": "official_product", "url": "https://shopline.tw/faq/pos"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://shopline.tw/"
+      },
+      {
+        "id": "pos",
+        "channel": "official_product",
+        "url": "https://shopline.tw/faq/pos"
+      }
     ],
     "cyberbiz": [
-      {"id": "about", "channel": "official_company", "url": "https://www.cyberbiz.io/about-us/"},
-      {"id": "pos-docs", "channel": "official_docs", "url": "https://help.cyberbiz.io/pos/get-started/", "material_similarity_threshold": 0.985}
+      {
+        "id": "about",
+        "channel": "official_company",
+        "url": "https://www.cyberbiz.io/about-us/"
+      },
+      {
+        "id": "pos-docs",
+        "channel": "official_docs",
+        "url": "https://help.cyberbiz.io/pos/get-started/",
+        "material_similarity_threshold": 0.985
+      }
     ],
     "waca": [
-      {"id": "pos", "channel": "official_product", "url": "https://www.waca.net/pos"},
-      {"id": "pos-support", "channel": "official_docs", "url": "https://www.waca.net/support/id/500?sidebarActive=POS_APP", "material_similarity_threshold": 0.985}
+      {
+        "id": "pos",
+        "channel": "official_product",
+        "url": "https://www.waca.net/pos"
+      },
+      {
+        "id": "pos-support",
+        "channel": "official_docs",
+        "url": "https://www.waca.net/support/id/500?sidebarActive=POS_APP",
+        "material_similarity_threshold": 0.985
+      }
     ],
     "act_retail": [
-      {"id": "erp", "channel": "official_product", "url": "https://www.act.com.tw/erp-system/"},
-      {"id": "pos", "channel": "official_product", "url": "https://www.act.com.tw/possystem/"}
+      {
+        "id": "erp",
+        "channel": "official_product",
+        "url": "https://www.act.com.tw/erp-system/"
+      },
+      {
+        "id": "pos",
+        "channel": "official_product",
+        "url": "https://www.act.com.tw/possystem/"
+      }
     ],
     "omnichat": [
-      {"id": "homepage", "channel": "official_product", "url": "https://www.omnichat.ai/tw/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://www.omnichat.ai/tw/"
+      }
     ],
     "tangent_plus": [
-      {"id": "homepage", "channel": "official_product", "url": "https://home.tangent-plus.com/"},
-      {"id": "solutions", "channel": "official_product", "url": "https://home.tangent-plus.com/solutions/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://home.tangent-plus.com/"
+      },
+      {
+        "id": "solutions",
+        "channel": "official_product",
+        "url": "https://home.tangent-plus.com/solutions/"
+      }
     ],
     "rsl": [
-      {"id": "homepage", "channel": "official_product", "url": "https://www.rsl.com.tw/"},
-      {"id": "about", "channel": "official_company", "url": "https://www.rsl.com.tw/about/"}
+      {
+        "id": "homepage",
+        "channel": "official_product",
+        "url": "https://www.rsl.com.tw/"
+      },
+      {
+        "id": "about",
+        "channel": "official_company",
+        "url": "https://www.rsl.com.tw/about/"
+      }
     ],
     "microsoft_copilot_dynamics": [
-      {"id": "mcp-docs", "channel": "official_docs", "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp", "material_similarity_threshold": 0.985}
+      {
+        "id": "mcp-docs",
+        "channel": "official_docs",
+        "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp",
+        "material_similarity_threshold": 0.985
+      }
     ],
     "workato": [
-      {"id": "enterprise-mcp", "channel": "official_product", "url": "https://www.workato.com/agentic/mcp"},
-      {"id": "mcp-docs", "channel": "official_docs", "url": "https://docs.workato.com/mcp.html", "material_similarity_threshold": 0.985}
+      {
+        "id": "enterprise-mcp",
+        "channel": "official_product",
+        "url": "https://www.workato.com/agentic/mcp"
+      },
+      {
+        "id": "mcp-docs",
+        "channel": "official_docs",
+        "url": "https://docs.workato.com/mcp.html",
+        "material_similarity_threshold": 0.985
+      }
     ],
     "shopify_retail": [
-      {"id": "retail", "channel": "official_product", "url": "https://www.shopify.com/retail"}
+      {
+        "id": "retail",
+        "channel": "official_product",
+        "url": "https://www.shopify.com/retail"
+      }
     ]
   }
 }

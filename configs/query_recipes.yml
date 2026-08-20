@@ -1,16 +1,18 @@
-version: 0.3
-last_updated: 2026-07-25
+version: 0.4
+last_updated: 2026-08-21
 status: active
 purpose: >
   核心五個新聞領域與競品情報投影的固定查詢配方(query recipes)。目的:預設較弱的模型也能照抄執行、
-  穩定搜到高品質新聞,不依賴模型自行發明查詢。勞動與消費壓力只保留在 indicator_only_recipes，
-  不建立獨立新聞領域或新聞配額。
+  穩定搜到高品質新聞,不依賴模型自行發明查詢。競品情報新增顧問型 AI 營運產品線，
+  只追蹤方法論產品化、可重複部署 Agent／平台與客戶營運 runtime，不追一般觀點報告。
+  勞動與消費壓力只保留在 indicator_only_recipes，不建立獨立新聞領域或新聞配額。
 
 usage_rules:
   - 每個核心新聞領域每日至少執行 mainstream 配方 2 條 + edge 配方 2 條;命中不足才啟動 retry。
-  - 競品情報依 config/competitor_registry.json 的 group_order 執行直接競品、相鄰平台、台灣平台、基礎設施與內容配方。
+  - 競品情報依 config/competitor_registry.json 的 group_order 執行直接競品、顧問型 AI 營運產品、相鄰平台、台灣平台、基礎設施與內容配方。
   - 競品身分只從 headline 與 today_delta 等事實欄位辨識；不得使用 taiwan_implication、uncertainties 或 next_watch 反推競品。
-  - 有 requires_any 的對象必須同時命中營運關聯詞；一般行銷、CRM、雲端或 AI 新聞不得因品牌名 alone 進入競品區。
+  - 有 requires_any 的對象必須同時命中營運關聯詞；一般行銷、CRM、雲端、AI 或顧問公司新聞不得因品牌名 alone 進入競品區。
+  - 顧問公司必須同時命中固定產品別名與產品化／部署／營運語境；一般研究、調查、預測、人才消息與一次性專案不列入。
   - 勞動與消費壓力配方只更新固定指標面板，不逐段生成完整新聞；事件若獨立符合其他主領域門檻，才在該主領域輸出一次。
   - 配方先於自由發想:模型自己想的查詢只能作為配方跑完後的補充,且需在 coverage audit 揭露。
   - 台灣缺口配方(taiwan_gap)只在該領域台灣新聞不足時執行,不可跳過直接標「台灣新聞不足」。
@@ -121,6 +123,13 @@ recipes:
         query: '(STOREE OR Quorso) (retail operations OR AI retail manager OR mission) (action OR follow-up OR outcome OR pricing OR case study)'
       - id: competitor_workjam_hubler
         query: '(WorkJam OR Hubler) (retail OR frontline OR system of execution) (task orchestration OR autonomous AI OR SOP OR outcome OR pricing OR customer)'
+    global_consulting_ai_operations:
+      - id: competitor_mckinsey_bcg_consulting_ai
+        query: '("McKinsey Lilli" OR "McKinsey Retail Agentic AI" OR "BCG Frontline Ops AI" OR "BCG Agentic RGM") (retail OR merchandising OR frontline OR store operations OR pricing OR promotion) (product OR platform OR agent OR deployment OR client OR outcome)'
+      - id: competitor_big_four_accenture_operations_ai
+        query: '("PwC Commercial Brain" OR "PwC Agentic Front Office" OR "EY Intelligent Operations" OR "Deloitte Zora AI" OR "Accenture Edge" OR "Accenture AI Refinery") (operations OR retail OR supply chain OR frontline OR workflow) (product OR platform OR digital workforce OR deployment OR customer OR outcome)'
+      - id: competitor_consulting_productization_discovery
+        query: '(McKinsey OR BCG OR PwC OR Deloitte OR Accenture OR Bain OR KPMG) ("consulting as software" OR "agentic operations platform" OR "digital workforce" OR "managed AI service" OR "forward deployed") (retail OR store operations OR merchandising OR inventory OR supply chain) -survey -forecast -hiring'
     global_adjacent_execution_platforms:
       - id: competitor_yoobic_zipline
         query: '(YOOBIC OR "Zipline Retail" OR getzipline.com) (store operations OR frontline OR task OR audit OR copilot) (release OR pricing OR case study)'
@@ -144,6 +153,7 @@ recipes:
     required_registry_expansion: config/competitor_registry.json
     relevance_gate:
       - 事件必須先命中 registry 的品牌或產品身分，再檢查 requires_any 的營運語境。
+      - 顧問公司名稱、一般研究、調查、預測、人才消息或一次性專案不得單獨成立競品事件；需有固定產品、可重複部署或持續營運 runtime 證據。
       - 一般公司財報、廣告、CRM、電商促銷、雲端模型或消費者購物助手新聞，不因品牌名出現而列入。
       - 競品事件至少需影響 Action 生成、派工追蹤、證據覆核、Outcome 回測、SOP 客製、headless 投影或台灣在地導入其中一項。
 

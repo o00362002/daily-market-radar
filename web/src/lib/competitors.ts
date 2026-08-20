@@ -2,6 +2,7 @@ import registry from '../../../config/competitor_registry.json';
 
 export type CompetitorGroupKey =
   | 'global_direct_retail_action_systems'
+  | 'global_consulting_ai_operations'
   | 'global_adjacent_execution_platforms'
   | 'taiwan_adjacent_retail_platforms'
   | 'global_enabling_platform_threats'
@@ -43,6 +44,12 @@ export const competitorGroupMeta: Record<CompetitorGroupKey, {
     en: 'Direct Action Systems',
     badge: '直接競品',
     description: '以營運訊號或自然交代轉 Action、追蹤、證據、Outcome 與改善為產品中心。',
+  },
+  global_consulting_ai_operations: {
+    zh: '全球顧問型 AI 營運產品',
+    en: 'Consulting AI Operations',
+    badge: '顧問型競品',
+    description: '追蹤顧問公司把方法論與產業知識做成可重複部署的 Agent、平台或持續營運服務；一般研究與觀點報告不列入。',
   },
   global_adjacent_execution_platforms: {
     zh: '海外相鄰前線執行平台',
@@ -150,7 +157,7 @@ export const projectCompetitorItems = (items: any[]) => {
 };
 
 // Compatibility helper for older consumers. Geography is no longer the primary
-// taxonomy, so global contains direct, adjacent and enabling groups.
+// taxonomy, so global contains direct, consulting, adjacent and enabling groups.
 export const splitProductItems = (product: any[]) => ({
   taiwan: product.filter((item) => item.competitor_group === 'taiwan_adjacent_retail_platforms'),
   global: product.filter((item) => item.competitor_group !== 'taiwan_adjacent_retail_platforms'),

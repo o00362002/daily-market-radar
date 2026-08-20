@@ -21,6 +21,7 @@ class CompetitorRegistryTests(unittest.TestCase):
     def test_registry_has_focused_groups_in_explicit_order(self) -> None:
         expected = [
             "global_direct_retail_action_systems",
+            "global_consulting_ai_operations",
             "global_adjacent_execution_platforms",
             "taiwan_adjacent_retail_platforms",
             "global_enabling_platform_threats",
@@ -45,6 +46,24 @@ class CompetitorRegistryTests(unittest.TestCase):
         self.assertEqual(direct_ids, {"storee", "quorso", "workjam", "hubler"})
         self.assertTrue({"yoobic", "zipline_retail", "retail_coach_io", "pipefy_retail"}.issubset(adjacent_ids))
 
+    def test_consulting_ai_operations_lane_tracks_productized_offerings(self) -> None:
+        entries = self.payload["groups"]["global_consulting_ai_operations"]
+        by_id = {entry["id"]: entry for entry in entries}
+        self.assertEqual(
+            set(by_id),
+            {
+                "mckinsey_lilli_retail_ai",
+                "bcg_x_frontline_ops_ai",
+                "pwc_commercial_brain",
+                "ey_intelligent_operations",
+                "deloitte_zora_ai",
+                "accenture_edge_ai_refinery",
+            },
+        )
+        self.assertTrue(all(entry["relationship"] == "adjacent" for entry in entries))
+        self.assertTrue(all(entry.get("requires_any") for entry in entries))
+        self.assertTrue(all(entry.get("official_urls") for entry in entries))
+
     def test_broad_platforms_are_not_fixed_competitor_projection(self) -> None:
         entries = [entry for group in self.payload["groups"].values() for entry in group]
         ids = {entry["id"] for entry in entries}
@@ -54,7 +73,19 @@ class CompetitorRegistryTests(unittest.TestCase):
     def test_ambiguous_aliases_require_operational_context(self) -> None:
         entries = [entry for group in self.payload["groups"].values() for entry in group]
         by_id = {entry["id"]: entry for entry in entries}
-        for competitor_id in ("zipline_retail", "retail_coach_io", "pipefy_retail", "shopify_retail"):
+        ambiguous_ids = (
+            "zipline_retail",
+            "retail_coach_io",
+            "pipefy_retail",
+            "shopify_retail",
+            "mckinsey_lilli_retail_ai",
+            "bcg_x_frontline_ops_ai",
+            "pwc_commercial_brain",
+            "ey_intelligent_operations",
+            "deloitte_zora_ai",
+            "accenture_edge_ai_refinery",
+        )
+        for competitor_id in ambiguous_ids:
             self.assertTrue(by_id[competitor_id].get("requires_any"), competitor_id)
         self.assertNotIn("ACT", by_id["act_retail"]["aliases"])
 
@@ -89,7 +120,7 @@ class CompetitorRegistryTests(unittest.TestCase):
             ROOT / "config/competitor_registry.json",
             ROOT / "config/competitor_sources.json",
         )
-        self.assertEqual(len(registry.targets), 21)
+        self.assertEqual(len(registry.targets), 27)
         self.assertEqual(registry.state_key, "competitor-monitor:v1")
         self.assertTrue(all(target.sources for target in registry.targets))
 
