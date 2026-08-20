@@ -1,9 +1,10 @@
-version: 1.2
+version: 1.3
 status: active
 purpose: >
   將 RetailOps 競品情報聚焦在「營運訊號或自然交代如何轉成 Action、追蹤、證據、
-  Outcome 與下一輪改善」。競品情報仍是跨領域投影，不建立新的 canonical report domain，
-  也不讓同一事件重複占用新聞配額。
+  Outcome 與下一輪改善」，並追蹤顧問公司是否把方法論、產業知識與陪跑服務
+  產品化為可重複部署的 AI Agent、平台或持續營運服務。競品情報仍是跨領域投影，
+  不建立新的 canonical report domain，也不讓同一事件重複占用新聞配額。
 
 source_of_truth:
   registry: config/competitor_registry.json
@@ -11,9 +12,11 @@ source_of_truth:
   monthly_benchmark_watch: config/competitor_monthly_watch.json
   watchlist: memory/watchlist.md
   research_basis: reports/change-confirmations/2026-07-25-retail-action-competitor-focus.md
+  consulting_lane_confirmation: reports/change-confirmations/2026-08-21-consulting-ai-competitor-lane.md
 
 tracking_groups:
   - global_direct_retail_action_systems
+  - global_consulting_ai_operations
   - global_adjacent_execution_platforms
   - taiwan_adjacent_retail_platforms
   - global_enabling_platform_threats
@@ -36,12 +39,14 @@ monthly_benchmark_watch:
     - international_retailer_autonomous_replenishment
     - agentic_retailops_systems
     - closed_loop_operations_cases
+    - consulting_as_software_operations
   notification_rule: >
     只有通過營運關聯、系統性與可驗證落地證據門檻的候選才建立 GitHub Issue；
     沒有候選時只保留 workflow artifact，不用舊案例補位，也不發無內容通知。
   registry_expansion_rule: >
-    新系統先列為 candidate，人工驗證產品身分、官方來源與 Action 閉環重疊後，
-    才加入 config/competitor_registry.json 與 config/competitor_sources.json。
+    新系統或顧問型產品先列為 candidate，人工驗證產品身分、官方來源、
+    可重複部署方式與 Action 閉環重疊後，才加入 config/competitor_registry.json
+    與 config/competitor_sources.json。
   non_duplication_rule: >
     月度追蹤屬於原有 competitor intelligence 的 discovery 與 benchmark lane，
     不建立第六新聞領域、不複製 daily report item，也不改變 Major/Potential 分類。
@@ -51,6 +56,8 @@ collection_rules:
   - 優先檢查官方產品頁、release notes、案例、定價、文件、合作公告與可驗證客戶成果。
   - 媒體與社群只作發現來源；重大功能、價格、客戶數與 ROI 主張需回到官方或可驗證案例。
   - 海外直接競品與相鄰執行平台優先追蹤 Action、催辦、證據、覆核、Outcome、headless、external-channel 與 self-service configuration。
+  - 顧問公司只有在事件明確涉及可重複使用的 Agent、產品、平台、數位勞動力、managed service、客戶端持續 runtime 或可驗證 deployment 時才進競品投影；一般研究報告、預測、調查、觀點文章、人才消息與一次性顧問專案不得因公司名稱出現而列入。
+  - 顧問型產品需另外比較方法論產品化程度、企業資料接入、主動監測、診斷建議、Action 執行、Outcome 回測、商業模式、客戶自助程度與是否往中型企業下沉。
   - 台灣相鄰平台只有在事件明確涉及門市營運、庫存、補貨、SOP、任務、巡檢、Agent 或工作流時才進競品投影；一般行銷、CRM、電商活動與會員功能不得自動列入。
   - 通用平台只有在特定產品與零售營運執行情境同時成立時才投影；一般 AI、雲端、廣告或辦公軟體新聞不列入。
   - 沒有 fresh material delta 時，只有完成固定官方渠道檢查的對象才能輸出「已查無重大更新」。
@@ -62,15 +69,17 @@ matching_rules:
   - taiwan_implication、uncertainties、next_watch、primary_domain 與模型推論不得作為競品身分證據。
   - 英文短別名使用 token boundary；不得以任意 substring 命中一般英文單字。
   - 有 requires_any 的對象必須同時命中至少一個營運關聯詞，避免品牌一般新聞進入競品區。
+  - 顧問公司名稱本身不是產品證據；必須同時命中 registry 定義的產品別名與營運／部署語境。
   - 一則事件只指定一個 primary competitor group；優先採標題直接命中的最高關聯群組。
 
 projection_rules:
   - 每個事件仍保留一個 canonical primary domain。
-  - 直接競品、相鄰執行平台、台灣相鄰平台與基礎設施威脅可從 AI、零售、科技或全球市場事件投影到 competitor watch。
+  - 直接競品、顧問型 AI 營運產品、相鄰執行平台、台灣相鄰平台與基礎設施威脅可從 AI、零售、科技或全球市場事件投影到 competitor watch。
   - 社群競品可從零售、AI 或平台政策事件投影到 competitor watch。
   - 競品投影不得複製事件、改變 Major/Potential lane 或提高證據等級。
   - 網頁首頁與 competitors 頁使用同一份 competitor registry，不得各自維護關鍵詞清單。
   - 地理市場與競爭關係分開顯示；「台灣品牌」不等於直接競品，「海外品牌」也不等於通用平台。
+  - 顧問型產品預設為 adjacent；只有出現可自助採購、持續部署與完整 Action→Outcome 閉環的證據，才評估是否升為 direct。
 
 required_analysis:
   - competitor_id
