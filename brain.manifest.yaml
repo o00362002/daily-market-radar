@@ -19,6 +19,27 @@ pointers:
   potential_pool: memory/potential_pool.md
   sync_review_edges: schema/sync-matrix.json
 
+portfolio_reporting:
+  current_state_ref: CURRENT_STATE.md
+  decisions_ref: CURRENT_DECISIONS.md
+  priorities_ref: null
+  roadmap_ref: null
+  spec_roots: []
+  execution_evidence_roots: []
+  backtest_roots:
+    - reports/backtests/
+  deployment_evidence_roots: []
+  outcome_evidence_roots: []
+  latest_spec_strategy: unavailable
+  default_branch: main
+  consultant_usage:
+    provider_refs: []
+    usage_backtest_roots: []
+  component_effectiveness:
+    canonical_method_ref: o00362002/Human-AI-Collaboration-Brain:specs/component_effectiveness_governance.md # path-ok: external Mother canonical method
+    local_summary_roots:
+      - reports/backtests/
+
 machine_checks:
   core:
     structural: tools/brain/check-core.js
